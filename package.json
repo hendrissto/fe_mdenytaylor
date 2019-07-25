@@ -1,7 +1,7 @@
 {
-  "name": "gogo-react",
-  "version": "4.0.2",
-  "description": "Gogo - React Bootstrap 4 Admin Dashboard Template",
+  "name": "clodeo-admin-cod-web",
+  "version": "0.0.1",
+  "description": "Clodeo Admin COD Web - using React Bootstrap 4 Admin Dashboard Template",
   "private": true,
   "dependencies": {
     "@glidejs/glide": "^3.3.0",
