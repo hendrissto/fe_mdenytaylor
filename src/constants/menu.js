@@ -1,5 +1,17 @@
 const data = [
   {
+    id: "dasbor",
+    icon: "",
+    label: "menu.dashboards",
+    to: "/app/dashboard",
+  }, 
+  {
+    id: "cod-receipt-number",
+    icon: "",
+    label: "menu.cod-receipt-number",
+    to: "/app/cod-receipt-number",
+  }, 
+  {
     id: "dashboards",
     icon: "iconsminds-shop-4",
     label: "menu.dashboards",

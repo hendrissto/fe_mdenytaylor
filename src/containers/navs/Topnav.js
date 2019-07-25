@@ -6,13 +6,13 @@ import {
   DropdownItem,
   DropdownToggle,
   DropdownMenu,
-  Input
+  // Input
 } from "reactstrap";
 
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 
-import IntlMessages from "../../helpers/IntlMessages";
+// import IntlMessages from "../../helpers/IntlMessages";
 import {
   setContainerClassnames,
   clickOnMobileMenu,
@@ -24,13 +24,13 @@ import {
   menuHiddenBreakpoint,
   searchPath,
   localeOptions,
-  isDarkSwitchActive
+  // isDarkSwitchActive
 } from "../../constants/defaultValues";
 
 import { MobileMenuIcon, MenuIcon } from "../../components/svg";
-import TopnavEasyAccess from "./Topnav.EasyAccess";
-import TopnavNotifications from "./Topnav.Notifications";
-import TopnavDarkSwitch from "./Topnav.DarkSwitch";
+// import TopnavEasyAccess from "./Topnav.EasyAccess";
+// import TopnavNotifications from "./Topnav.Notifications";
+// import TopnavDarkSwitch from "./Topnav.DarkSwitch";
 
 import { getDirection, setDirection } from "../../helpers/Utils";
 class TopNav extends Component {
@@ -198,7 +198,7 @@ class TopNav extends Component {
 
   render() {
     const { containerClassnames, menuClickCount, locale } = this.props;
-    const { messages } = this.props.intl;
+    // const { messages } = this.props.intl;
     return (
       <nav className="navbar fixed-top">
         <div className="d-flex align-items-center navbar-left">
@@ -219,7 +219,7 @@ class TopNav extends Component {
             <MobileMenuIcon />
           </NavLink>
 
-          <div className="search" data-search-path="/app/pages/search">
+          {/* <div className="search" data-search-path="/app/pages/search">
             <Input
               name="searchKeyword"
               id="searchKeyword"
@@ -234,7 +234,7 @@ class TopNav extends Component {
             >
               <i className="simple-icon-magnifier" />
             </span>
-          </div>
+          </div> */}
 
           <div className="d-inline-block">
             <UncontrolledDropdown className="ml-2">
@@ -260,7 +260,7 @@ class TopNav extends Component {
               </DropdownMenu>
             </UncontrolledDropdown>
           </div>
-          <div className="position-relative d-none d-none d-lg-inline-block">
+          {/* <div className="position-relative d-none d-none d-lg-inline-block">
             <a
               className="btn btn-outline-primary btn-sm ml-2"
               target="_top"
@@ -268,7 +268,7 @@ class TopNav extends Component {
             >
               <IntlMessages id="user.buy" />
             </a>
-          </div>
+          </div> */}
         </div>
         <a className="navbar-logo" href="/">
           <span className="logo d-none d-xs-block" />
@@ -276,8 +276,8 @@ class TopNav extends Component {
         </a>
 
         <div className="navbar-right">
-          {isDarkSwitchActive && <TopnavDarkSwitch/>}
-          <div className="header-icons d-inline-block align-middle">
+          {/* {isDarkSwitchActive && <TopnavDarkSwitch/>} */}
+          {/* <div className="header-icons d-inline-block align-middle">
             <TopnavEasyAccess />
             <TopnavNotifications />
             <button
@@ -292,20 +292,20 @@ class TopNav extends Component {
                 <i className="simple-icon-size-fullscreen d-block" />
               )}
             </button>
-          </div>
+          </div> */}
           <div className="user d-inline-block">
             <UncontrolledDropdown className="dropdown-menu-right">
               <DropdownToggle className="p-0" color="empty">
-                <span className="name mr-1">Sarah Kortney</span>
+                <span className="name mr-1">Admin Name</span>
                 <span>
-                  <img alt="Profile" src="/assets/img/profile-pic-l.jpg" />
+                  <img alt="Profile" src="/assets/img/profile.jpg" />
                 </span>
               </DropdownToggle>
               <DropdownMenu className="mt-3" right>
                 <DropdownItem>Account</DropdownItem>
-                <DropdownItem>Features</DropdownItem>
-                <DropdownItem>History</DropdownItem>
-                <DropdownItem>Support</DropdownItem>
+                {/* <DropdownItem>Features</DropdownItem> */}
+                {/* <DropdownItem>History</DropdownItem> */}
+                {/* <DropdownItem>Support</DropdownItem> */}
                 <DropdownItem divider />
                 <DropdownItem onClick={() => this.handleLogout()}>
                   Sign out
