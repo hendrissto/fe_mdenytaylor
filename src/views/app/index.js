@@ -3,6 +3,8 @@ import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 import AppLayout from "../../layout/AppLayout";
+import dashboard from "./dashboard";
+import CODReceiptNumber from "./cod-receipt-number";
 import dashboards from "./dashboards";
 import pages from "./pages";
 import applications from "./applications";
@@ -17,7 +19,9 @@ class App extends Component {
     return (
       <AppLayout>
         <Switch>
-          <Redirect exact from={`${match.url}/`} to={`${match.url}/dashboards`} />
+          <Redirect exact from={`${match.url}/`} to={`${match.url}/dashboard`} />
+          <Route path={`${match.url}/dashboard`} component={dashboard} />
+          <Route path={`${match.url}/cod-receipt-number`} component={CODReceiptNumber} />
           <Route path={`${match.url}/dashboards`} component={dashboards} />
           <Route path={`${match.url}/applications`} component={applications} />
           <Route path={`${match.url}/pages`} component={pages} />
