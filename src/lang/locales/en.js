@@ -52,9 +52,13 @@ module.exports = {
   "user.buy": "BUY",
   "user.username": "Username",
 
+  "title.total-balance": "Total Saldo",
+
   /* 03.Menu */
   "menu.app": "Home",
-  "menu.dashboards": "Dashboards",
+  "menu.dashboard": "Dashboard",
+  "menu.dashboards": "Dashboard",
+  "menu.cod-receipt-number": "COD Receipt Number",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
@@ -125,6 +129,11 @@ module.exports = {
   "menu.third-level-3": "Third Level 3",
 
   /* 04.Dashboards */
+  "dashboards.cards.credit-issued": "Total Credit Issued",
+  "dashboards.cards.cod-fee": "Total COD Fee",
+  "dashboards.cards.fund-reimbursement": "Total Fund Reimbursement",
+  "dashboards.cards.credit-balance": "Total Credit Balance",
+  
   "dashboards.pending-orders": "Pending Orders",
   "dashboards.completed-orders": "Completed Orders",
   "dashboards.refund-requests": "Refund Requests",
