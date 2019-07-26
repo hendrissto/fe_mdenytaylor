@@ -10,7 +10,13 @@ const data = [
     icon: "",
     label: "menu.cod-receipt-number",
     to: "/app/cod-receipt-number",
-  }, 
+  },
+  {
+    id: "request-withdraw-funds",
+    icon: "",
+    label: "menu.request-withdraw-funds",
+    to: "/app/request-withdraw-funds/",
+  },
   {
     id: "dashboards",
     icon: "iconsminds-shop-4",

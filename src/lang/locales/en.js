@@ -59,6 +59,7 @@ module.exports = {
   "menu.dashboard": "Dashboard",
   "menu.dashboards": "Dashboard",
   "menu.cod-receipt-number": "COD Receipt Number",
+  "menu.request-withdraw-funds": "Request Withdraw Funds",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
