@@ -59,6 +59,7 @@ module.exports = {
     "menu.dashboard": "Dasbor",
     "menu.dashboards": "Dasbor",
     "menu.cod-receipt-number": "Resi COD",
+    "menu.expenditure": "Riwayat Pengeluaran dana",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
     "menu.ecommerce": "Ecommerce",

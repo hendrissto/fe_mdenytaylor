@@ -58,6 +58,7 @@ module.exports = {
   "menu.app": "Home",
   "menu.dashboard": "Dashboard",
   "menu.dashboards": "Dashboard",
+  "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.default": "Default",
   "menu.analytics": "Analytics",

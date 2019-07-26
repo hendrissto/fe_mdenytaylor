@@ -12,6 +12,12 @@ const data = [
     to: "/app/cod-receipt-number",
   }, 
   {
+    id: "expenditurepage",
+    icon: "iconsminds-receipt-4",
+    label:"menu.expenditure",
+    to: "/app/expenditure",
+  },
+  {
     id: "dashboards",
     icon: "iconsminds-shop-4",
     label: "menu.dashboards",
@@ -257,6 +263,6 @@ const data = [
     label: "menu.docs",
     to: "https://gogo-react-docs.coloredstrategies.com/",
     newWindow:true
-  }
+  },
 ];
 export default data;
