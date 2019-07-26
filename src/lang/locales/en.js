@@ -594,4 +594,14 @@ module.exports = {
   "modal.bank": "Bank",
   "modal.creditNumber": "Card Number",
   "modal.total": "Total",
+  // expenditure
+  
+  "expenditure.title"               : "Riwayat Pengeluaran Dana",
+  "expenditure.totalbalace"         : "Saldo Total",
+  "expenditure.table.header.seller"             : "Penjual",
+  "expenditure.table.header.amountBalanceSent" : "Jumlah Saldo Dikirim",
+  "expenditure.table.header.sentToAccount" : "Dikirim ke Rekening",
+  "expenditure.table.header.status" : "Status",
+  "expenditure.table.header.proof"  : "Bukti"
+
 };
