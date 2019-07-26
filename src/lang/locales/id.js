@@ -60,6 +60,7 @@ module.exports = {
     "menu.dashboards": "Dasbor",
     "menu.cod-receipt-number": "Resi COD",
     "menu.request-withdraw-funds": "Permintaan Penarikan Dana",
+    "menu.expenditure": "Riwayat Pengeluaran dana",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
     "menu.ecommerce": "Ecommerce",

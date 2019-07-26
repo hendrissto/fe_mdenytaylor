@@ -66,7 +66,7 @@ class WithdrawFunds extends Component {
       {
         Header: "Upload Bukti",
         Cell: props => {
-          if (props.original.status == "Paid") {
+          if (props.original.status === "Paid") {
             return (
               <div>
                 <Button
@@ -393,7 +393,7 @@ class WithdrawFunds extends Component {
   }
 
   render() {
-    const { match } = this.props;
+    // const { match } = this.props;
     return (
       <Fragment>
         <Row>

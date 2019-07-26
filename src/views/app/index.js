@@ -6,6 +6,7 @@ import AppLayout from "../../layout/AppLayout";
 import dashboard from "./dashboard";
 import CODReceiptNumber from "./cod-receipt-number";
 import WithdrawFunds from "./request-withdraw-funds";
+import expenditureListPage from "./app-expenditure-list/expenditure-list-page"
 import dashboards from "./dashboards";
 import pages from "./pages";
 import applications from "./applications";
@@ -30,6 +31,7 @@ class App extends Component {
           <Route path={`${match.url}/ui`} component={ui} />
           <Route path={`${match.url}/menu`} component={menu} />
           <Route path={`${match.url}/blank-page`} component={blankPage} />
+          <Route path={`${match.url}/expenditure`} component={expenditureListPage} />
           <Redirect to="/error" />
         </Switch>
       </AppLayout>
