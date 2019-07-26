@@ -10,7 +10,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Table
+  Table,
+  Input
 } from "reactstrap";
 
 import IntlMessages from "../../../helpers/IntlMessages";
@@ -471,6 +472,7 @@ class WithdrawFunds extends Component {
                 <td>{this.state.oneData.amountWithdraw}</td>  
               </tr>
             </Table>
+            {this.state.oneData.status == "Paid" ? <div>Disini Bukti Transfer.</div> : <div><Input type="file" /></div>}
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.toggle}>

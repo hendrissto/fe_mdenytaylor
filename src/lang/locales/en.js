@@ -587,4 +587,11 @@ module.exports = {
   "table.react-scrollable": "Scrollable",
   "table.react-advanced": "Filter, Length and Jump",
 
+  /* Modal Content */
+  "modal.modalTitle": "Upload Bukti Transfer",
+  "modal.seller": "Seller Name",
+  "modal.cardName": "Name (Card)",
+  "modal.bank": "Bank",
+  "modal.creditNumber": "Card Number",
+  "modal.total": "Total",
 };
