@@ -307,6 +307,7 @@ class ReceiptOfFunds extends Component {
                     className="float-right"
                     onClick={() => this.toggle("modal")}
                   >
+                    <i className="iconsminds-upload mr-2" />
                     Upload Laporan Resi
                   </Button>
                 </CardTitle>
