@@ -163,10 +163,10 @@ class ColorSwitcher extends Component {
             </a>
           </div>
         </div>
-        <a href="#section" className="theme-button" onClick={this.toggle}>
+        {/* <a href="#section" className="theme-button" onClick={this.toggle}>
           {" "}
           <i className="simple-icon-magic-wand" />{" "}
-        </a>
+        </a> */}
       </div>
     );
   }
