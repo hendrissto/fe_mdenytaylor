@@ -418,6 +418,7 @@ class WithdrawFunds extends Component {
                   data={this.dataTable()}
                   defaultPageSize={5}
                   filterable={true}
+                  minRows={0}
                   showPageJump={true}
                   PaginationComponent={DataTablePagination}
                   showPageSizeOptions={true}
