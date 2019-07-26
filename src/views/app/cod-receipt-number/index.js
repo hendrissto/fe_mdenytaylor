@@ -12,32 +12,32 @@ import DataTablePagination from "../../../components/DatatablePagination";
 
 const totalBalance = 'Rp 580.000.000';
 const dataTableColumns = [
-    {
-      Header: "Resi",
-      accessor: "receiptNumber",
-      Cell: props => <p className="list-item-heading">{props.value}</p>
-    },
-    {
-      Header: "Pengirim",
-      accessor: "sender",
-      Cell: props => <p className="text-muted">{props.value}</p>
-    },
-    {
-      Header: "Penerima",
-      accessor: "receiver",
-      Cell: props => <p className="text-muted">{props.value}</p>
-    },
-    {
-      Header: "Total",
-      accessor: "amount",
-      Cell: props => <p className="text-muted">{props.value}</p>
-    },
-    {
-      Header: "Status",
-      accessor: "status",
-      Cell: props => <p className="text-muted">{props.value}</p>
-    }
-  ];
+  {
+    Header: "Resi",
+    accessor: "receiptNumber",
+    Cell: props => <p>{props.value}</p>
+  },
+  {
+    Header: "Pengirim",
+    accessor: "sender",
+    Cell: props => <p>{props.value}</p>
+  },
+  {
+    Header: "Penerima",
+    accessor: "receiver",
+    Cell: props => <p>{props.value}</p>
+  },
+  {
+    Header: "Total",
+    accessor: "amount",
+    Cell: props => <p>{props.value}</p>
+  },
+  {
+    Header: "Status",
+    accessor: "status",
+    Cell: props => <p>{props.value}</p>
+  }
+];
 const data = [
   {
     id: 1,
@@ -302,37 +302,38 @@ const data = [
     stock: 14
   }
 ]
-  
+
 export default class CODReceiptNumber extends Component {
   render() {
     return (
       <Fragment>
         <Row>
-            <Colxx xxs="12">
-                <Breadcrumb heading="menu.cod-receipt-number" match={this.props.match} />
-                <Separator className="mb-5" />
-            </Colxx>
-            </Row>
+          <Colxx xxs="12">
+            <Breadcrumb heading="menu.cod-receipt-number" match={this.props.match} />
+            <Separator className="mb-5" />
+          </Colxx>
+        </Row>
         <Row>
-        <Colxx xxs="12">
-        <Card className="mb-12 lg-12">
-            <CardBody>
+          <Colxx xxs="12">
+            <Card className="mb-12 lg-12">
+              <CardBody>
                 <CardTitle>
-                <h3><IntlMessages id="title.total-balance" /></h3>
-                <h1>{totalBalance}</h1>
+                  <h3><IntlMessages id="title.total-balance" /></h3>
+                  <h1>{totalBalance}</h1>
                 </CardTitle>
                 <ReactTable
-                data={data}
-                columns={dataTableColumns}
-                defaultPageSize={5}
-                filterable={true}
-                showPageJump={true}
-                PaginationComponent={DataTablePagination}
-                showPageSizeOptions={true}
+                  className="-striped -highlight"
+                  data={data}
+                  columns={dataTableColumns}
+                  defaultPageSize={5}
+                  filterable={true}
+                  showPageJump={true}
+                  PaginationComponent={DataTablePagination}
+                  showPageSizeOptions={true}
                 />
-            </CardBody>
+              </CardBody>
             </Card>
-        </Colxx>
+          </Colxx>
         </Row>
       </Fragment>
     )

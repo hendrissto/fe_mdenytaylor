@@ -13,19 +13,19 @@ export default class Dashboard extends Component {
 		return (
 			<Fragment>
 				<Row>
-						<Colxx xxs="12">
-								<Breadcrumb heading="menu.dashboards" match={this.props.match} />
-								<Separator className="mb-5" />
-						</Colxx>
+					<Colxx xxs="12">
+						<Breadcrumb heading="menu.dashboards" match={this.props.match} />
+						<Separator className="mb-5" />
+					</Colxx>
 				</Row>
 				<Row>
 					<Colxx lg="12" xl="6">
-							<CreditIssued />
-							<BalanceCredit />
+						<CreditIssued />
+						<BalanceCredit />
 					</Colxx>
 					<Colxx lg="12" xl="6">
-							<CODFee />
-							<FundReimbursement />
+						<CODFee />
+						<FundReimbursement />
 					</Colxx>
 				</Row>
 			</Fragment>

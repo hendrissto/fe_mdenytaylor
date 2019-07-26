@@ -36,32 +36,32 @@ class WithdrawFunds extends Component {
       {
         Header: "Permintaan Penarikan",
         accessor: "requestWithdraw",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Seller",
         accessor: "seller",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Jumlah Saldo Ditarik",
         accessor: "amountWithdraw",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Ditarik ke Rekening",
         accessor: "withdrawToAccount",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Cabang Bank",
         accessor: "bankBranch",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload Bukti",
@@ -70,11 +70,13 @@ class WithdrawFunds extends Component {
             return (
               <div>
                 <Button
+                  outline color="info"
                   onClick={() => {
                     this.toggle();
                     this.setState({ oneData: props.original });
                   }}
                 >
+                  <i className="simple-icon-paper-clip mr-2" />
                   Bukti Transfer
                 </Button>
               </div>
@@ -83,11 +85,14 @@ class WithdrawFunds extends Component {
             return (
               <div>
                 <Button
+                  outline
+                  color="success"
                   onClick={() => {
                     this.toggle();
                     this.setState({ oneData: props.original });
                   }}
                 >
+                  <i className="iconsminds-upload mr-2 " />
                   Upload Bukti
                 </Button>
               </div>
@@ -389,7 +394,7 @@ class WithdrawFunds extends Component {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
-    
+
   }
 
   render() {
@@ -414,6 +419,7 @@ class WithdrawFunds extends Component {
                   <h1>{totalBalance}</h1>
                 </CardTitle>
                 <ReactTable
+                  className="-striped -highlight"
                   columns={this.dataTableColumns()}
                   data={this.dataTable()}
                   defaultPageSize={5}
@@ -467,7 +473,7 @@ class WithdrawFunds extends Component {
                   <IntlMessages id="modal.total" />
                 </td>
                 <td>:</td>
-                <td>{this.state.oneData.amountWithdraw}</td>  
+                <td>{this.state.oneData.amountWithdraw}</td>
               </tr>
             </Table>
           </ModalBody>

@@ -81,11 +81,11 @@ export default class expenditureListPage extends Component {
             <Card className="mb-12 lg-12">
               <CardBody>
                 <CardTitle>
-                  <h3><IntlMessages id="expenditure.totalbalace" /></h3>
+                  <h3><IntlMessages id="title.total-balance" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
                 <ReactTable
-                  className="-striped -highlight -bordered"
+                  className="-striped -highlight"
                   data={data}
                   columns={dataTableColumns}
                   defaultPageSize={5}
