@@ -62,6 +62,7 @@ module.exports = {
   "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
+  "menu.receipt-of-funds": "Receipt Funds History",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
@@ -586,6 +587,16 @@ module.exports = {
   "table.react-pagination": "Pagination",
   "table.react-scrollable": "Scrollable",
   "table.react-advanced": "Filter, Length and Jump",
+
+  /* Modal Content */
+  "modal.modalTitle": "Upload Bukti Transfer",
+  "modal.seller": "Seller Name",
+  "modal.cardName": "Name (Card)",
+  "modal.bank": "Bank",
+  "modal.creditNumber": "Card Number",
+  "modal.total": "Total",
+  "modal.uploadReceiptTitle": "Upload Report Receipt",
+  "modal.receiptDataCOD": "COD Receipt Data",
 
   // expenditure
   

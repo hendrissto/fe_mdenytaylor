@@ -6,6 +6,7 @@ import AppLayout from "../../layout/AppLayout";
 import dashboard from "./dashboard";
 import CODReceiptNumber from "./cod-receipt-number";
 import WithdrawFunds from "./request-withdraw-funds";
+import ReceiptOfFunds from "./receipt-of-funds";
 import expenditureListPage from "./app-expenditure-list/expenditure-list-page"
 import dashboards from "./dashboards";
 import pages from "./pages";
@@ -25,6 +26,7 @@ class App extends Component {
           <Route path={`${match.url}/dashboard`} component={dashboard} />
           <Route path={`${match.url}/cod-receipt-number`} component={CODReceiptNumber} />
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
+          <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
           <Route path={`${match.url}/dashboards`} component={dashboards} />
           <Route path={`${match.url}/applications`} component={applications} />
           <Route path={`${match.url}/pages`} component={pages} />
