@@ -83,6 +83,7 @@ export default class expenditureListPage extends Component {
                   className="text-center"
                   data={data}
                   columns={dataTableColumns}
+                  minRows={0}
                   defaultPageSize={5}
                   filterable={true}
                   showPageJump={true}

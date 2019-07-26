@@ -324,6 +324,7 @@ export default class CODReceiptNumber extends Component {
                 <ReactTable
                 data={data}
                 columns={dataTableColumns}
+                minRows={0}
                 defaultPageSize={5}
                 filterable={true}
                 showPageJump={true}
