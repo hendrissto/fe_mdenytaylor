@@ -52,7 +52,7 @@ module.exports = {
   "user.buy": "BUY",
   "user.username": "Username",
 
-  "title.total-balance": "Total Saldo",
+  "title.total-balance": "Total Balance",
   "title.modal-title": "[Inggris]Upload Bukti Transfer",
 
   /* 03.Menu */

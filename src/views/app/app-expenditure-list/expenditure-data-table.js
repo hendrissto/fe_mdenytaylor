@@ -1,62 +1,29 @@
 export const data = [
     {
       id: 2,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
+      dateSender: '15-07-2019',
+      seller: 'A Shop',
+      ballanceAmountSent: 'Rp. 10.000.000',
+      sentToAccount : 'Mandiri *123',
+      status: 'Berhasil',
       proof: '-'
     },
     {
       id: 3,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
+      dateSender: '10-07-2019',
+      seller: 'B Shop',
+      ballanceAmountSent: 'Rp. 5.500.000',
+      sentToAccount : 'BCA *6887',
+      status: 'Berhasil',
       proof: '-'
     },
     {
       id: 4,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
-      proof: '-'
-    },
-    {
-      id: 5,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
-      proof: '-'
-    },
-    {
-      id: 6,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
-      proof: '-'
-    },
-    {
-      id: 7,
-      receiptNumber: 908989,
-      dateSender: '20-20-2020',
-      seller: 'Mas Fahmi',
-      ballanceAmountSent: 'Rp. 12000',
-      sentToAccount : 'Bank JBJ',
-      status: 'Paid',
+      dateSender: '30-06-2019',
+      seller: 'C Shop',
+      ballanceAmountSent: 'Rp. 2.000.000',
+      sentToAccount : 'Mandiri *1234',
+      status: 'Berhasil',
       proof: '-'
     }
   ];

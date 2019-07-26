@@ -52,7 +52,7 @@ module.exports = {
     "user.buy": "BUY",
     "user.username": "Username",
 
-    "title.total-balance": "Total Balance",
+    "title.total-balance": "Total Saldo",
   
     /* 03.Menu */
     "menu.app": "Home",
