@@ -24,6 +24,12 @@ const data = [
     to: "/app/expenditure",
   },
   {
+    id: "receipt-of-funds",
+    icon: "",
+    label: "menu.receipt-of-funds",
+    to: "/app/receipt-of-funds",
+  },
+  {
     id: "dashboards",
     icon: "iconsminds-shop-4",
     label: "menu.dashboards",

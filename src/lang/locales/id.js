@@ -61,6 +61,7 @@ module.exports = {
     "menu.cod-receipt-number": "Resi COD",
     "menu.request-withdraw-funds": "Permintaan Penarikan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",
+    "menu.receipt-of-funds": "Riwayat Penerimaan Dana",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
     "menu.ecommerce": "Ecommerce",
@@ -594,6 +595,8 @@ module.exports = {
     "modal.bank": "Bank",
     "modal.creditNumber": "No Rekening",
     "modal.total": "Total",
+    "modal.uploadReceiptTitle": "Upload Laporan Resi",
+    "modal.receiptDataCOD": "Data Resi COD",
 
     /* Expenditure */
     "expenditure.title"               : "Riwayat Pengeluaran Dana",

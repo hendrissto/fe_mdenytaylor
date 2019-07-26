@@ -62,6 +62,7 @@ module.exports = {
   "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
+  "menu.receipt-of-funds": "Receipt Funds History",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
@@ -594,6 +595,9 @@ module.exports = {
   "modal.bank": "Bank",
   "modal.creditNumber": "Card Number",
   "modal.total": "Total",
+  "modal.uploadReceiptTitle": "Upload Report Receipt",
+  "modal.receiptDataCOD": "COD Receipt Data",
+
   // expenditure
   
   "expenditure.title"               : "Riwayat Pengeluaran Dana",
