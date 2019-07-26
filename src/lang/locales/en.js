@@ -53,6 +53,7 @@ module.exports = {
   "user.username": "Username",
 
   "title.total-balance": "Total Saldo",
+  "title.modal-title": "[Inggris]Upload Bukti Transfer",
 
   /* 03.Menu */
   "menu.app": "Home",

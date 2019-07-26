@@ -1,7 +1,7 @@
 const data = [
   {
     id: "dasbor",
-    icon: "",
+    icon: "simple-icon-home",
     label: "menu.dashboards",
     to: "/app/dashboard",
   }, 
