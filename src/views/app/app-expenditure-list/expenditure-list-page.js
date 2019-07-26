@@ -30,7 +30,7 @@ export default class expenditureListPage extends Component {
     const totalBalance = 'Rp 580.000.000';
     const dataTableColumns = [
       {
-        Header: "Tanggal Pengirim",
+        Header: "Tanggal Pengiriman",
         accessor: "dateSender",
         Cell: props => <p>{props.value}</p>
       },
@@ -42,6 +42,11 @@ export default class expenditureListPage extends Component {
       {
         Header: "Jumlah Saldo dikirim",
         accessor: "ballanceAmountSent",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Dikirim ke rekening",
+        accessor: "sentToAccount",
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -67,7 +72,7 @@ export default class expenditureListPage extends Component {
       <Fragment>
         <Row>
           <Colxx xxs="12">
-            <Breadcrumb heading="menu.expenditure" match={this.props.match} />
+            <Breadcrumb heading="expenditure.title" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
         </Row>
@@ -76,11 +81,11 @@ export default class expenditureListPage extends Component {
             <Card className="mb-12 lg-12">
               <CardBody>
                 <CardTitle>
-                  <h3><IntlMessages id="title.total-balance" /></h3>
+                  <h3><IntlMessages id="expenditure.totalbalace" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
                 <ReactTable
-                  className="text-center"
+                  className="-striped -highlight -bordered"
                   data={data}
                   columns={dataTableColumns}
                   defaultPageSize={5}
@@ -96,9 +101,9 @@ export default class expenditureListPage extends Component {
 
         {/* modal-bukti-transfer */}
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-          <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+          <ModalHeader toggle={this.toggle}>Bukti Transfer</ModalHeader>
           <ModalBody>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.toggle}>Do Something</Button>{' '}

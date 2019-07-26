@@ -5,6 +5,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     },
@@ -14,6 +15,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     },
@@ -23,6 +25,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     },
@@ -32,6 +35,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     },
@@ -41,6 +45,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     },
@@ -50,6 +55,7 @@ export const data = [
       dateSender: '20-20-2020',
       seller: 'Mas Fahmi',
       ballanceAmountSent: 'Rp. 12000',
+      sentToAccount : 'Bank JBJ',
       status: 'Paid',
       proof: '-'
     }

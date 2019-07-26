@@ -587,4 +587,14 @@ module.exports = {
   "table.react-scrollable": "Scrollable",
   "table.react-advanced": "Filter, Length and Jump",
 
+  // expenditure
+  
+  "expenditure.title"               : "Riwayat Pengeluaran Dana",
+  "expenditure.totalbalace"         : "Saldo Total",
+  "expenditure.table.header.seller"             : "Penjual",
+  "expenditure.table.header.amountBalanceSent" : "Jumlah Saldo Dikirim",
+  "expenditure.table.header.sentToAccount" : "Dikirim ke Rekening",
+  "expenditure.table.header.status" : "Status",
+  "expenditure.table.header.proof"  : "Bukti"
+
 };
