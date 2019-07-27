@@ -478,7 +478,7 @@ class WithdrawFunds extends Component {
                 <td>{this.state.oneData.amountWithdraw}</td>
               </tr>
             </Table>
-            {this.state.oneData.status == "Berhasil" ? <div>Disini Bukti Transfer.</div> : <div><Input type="file" /></div>}
+            {this.state.oneData.status === "Berhasil" ? <div>Disini Bukti Transfer.</div> : <div><Input type="file" /></div>}
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.toggle}>
