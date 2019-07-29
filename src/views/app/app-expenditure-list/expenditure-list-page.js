@@ -120,10 +120,11 @@ export default class expenditureListPage extends Component {
                   <h3><IntlMessages id="title.total-balance" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
-                <div className="mb-3 col-md-5">
+                <div className="row">
+                  <div className="mb-3 col-md-5">
                   <InputGroup>
                     <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                      <DropdownToggle className="default">
+                      <DropdownToggle color="primary" className="default">
                         <i className="simple-icon-menu" />
                       </DropdownToggle>
                       <DropdownMenu>
@@ -136,9 +137,9 @@ export default class expenditureListPage extends Component {
                     </Button>
                     <Input placeholder="Search.." />
                     <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                      <DropdownToggle className="default">
-                        Filter
-                    </DropdownToggle>
+                      <DropdownToggle color="primary" className="default">
+                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                      </DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem>1</DropdownItem>
                         <DropdownItem>2</DropdownItem>
@@ -146,6 +147,8 @@ export default class expenditureListPage extends Component {
                     </InputGroupButtonDropdown>
                   </InputGroup>
                 </div>
+            </div>
+
                 <ReactTable
                   className="-striped"
                   data={data}
