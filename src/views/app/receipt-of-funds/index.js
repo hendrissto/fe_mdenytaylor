@@ -9,7 +9,13 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter
+  ModalFooter,
+  InputGroup,
+  InputGroupButtonDropdown,
+  Input,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import * as numeral from "numeral";
 import CsvParse from "@vtex/react-csv-parse";
@@ -19,9 +25,6 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import DataTablePagination from "../../../components/DatatablePagination";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
-
-const totalBalance = "Rp 580.000.000";
-
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
@@ -34,6 +37,10 @@ class ReceiptOfFunds extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
+    this.toggleDropDown = this.toggleDropDown.bind(this);
+    this.toggleSplit = this.toggleSplit.bind(this);
+    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
   toggle(modalName) {
@@ -64,20 +71,42 @@ class ReceiptOfFunds extends Component {
         break;
     }
   }
+  toggleDropDown() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleSplit() {
+    this.setState({
+      splitButtonOpen: !this.state.splitButtonOpen
+    });
+  }
+  toggleDropDown1() {
+    this.setState({
+      dropdownOpen1: !this.state.dropdownOpen1
+    });
+  }
+
+  toggleSplit1() {
+    this.setState({
+      splitButtonOpen1: !this.state.splitButtonOpen1
+    });
+  }
 
   dataTableColumns() {
     return [
       {
         Header: "Tanggal Unggah",
         accessor: "uploadDate",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "ID File",
         accessor: "idFile",
         Cell: props => (
           <Button color="link" onClick={() => this.toggle("resiModal")}>
-            <p className="list-item-heading">{props.value}</p>
+            <p>{props.value}</p>
           </Button>
         )
       },
@@ -86,14 +115,14 @@ class ReceiptOfFunds extends Component {
         accessor: "fileName",
         Cell: props => (
           <a href={props.value}>
-            <p className="list-item-heading">{props.value}</p>
+            <p>{props.value}</p>
           </a>
         )
       },
       {
         Header: "Diupload Oleh",
         accessor: "uploadedBy",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       }
     ];
   }
@@ -178,10 +207,10 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Nama Seller",
         accessor: "sellerName",
-        Footer: <p className="list-item-heading">Total</p>,
+        Footer: <p>Total</p>,
         Cell: props => (
-          <p className="list-item-heading">
-            <Button color="link" onClick={() => this.toggle("resiModalSeller")}>
+          <p>
+            <Button color="link" className="text-primary" onClick={() => this.toggle("resiModalSeller")}>
               {props.value}
             </Button>
           </p>
@@ -190,18 +219,18 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Jumlah Paket",
         accessor: "packageAmount",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total",
         accessor: "total",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Fee COD",
         accessor: "feeCOD",
         Footer: (
-          <p className="list-item-heading">
+          <p>
             Rp{" "}
             {numeral(
               this.state.data.reduce(
@@ -212,7 +241,7 @@ class ReceiptOfFunds extends Component {
           </p>
         ),
         Cell: props => (
-          <p className="list-item-heading">
+          <p>
             Rp {numeral(props.value).format("0,0")}
           </p>
         )
@@ -251,10 +280,10 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Resi",
         accessor: "receipt",
-        Footer: <p className="list-item-heading">Total</p>,
+        Footer: <p>Total</p>,
         Cell: props => (
-          <p className="list-item-heading">
-            <Button color="link" onClick={() => console.log(props.value)}>
+          <p>
+            <Button color="link" className="text-primary" onClick={() => console.log(props.value)}>
               {props.value}
             </Button>
           </p>
@@ -263,13 +292,13 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Penerima Paket",
         accessor: "receive",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total",
         accessor: "total",
         Footer: (
-          <p className="list-item-heading">
+          <p>
             Rp{" "}
             {numeral(
               this.dataTableCODSeller().reduce(
@@ -280,7 +309,7 @@ class ReceiptOfFunds extends Component {
           </p>
         ),
         Cell: props => (
-          <p className="list-item-heading">
+          <p>
             Rp {numeral(props.value).format("0,0")}
           </p>
         )
@@ -334,10 +363,6 @@ class ReceiptOfFunds extends Component {
             <Card className="mb-12 lg-12">
               <CardBody>
                 <CardTitle>
-                  <h3>
-                    <IntlMessages id="title.total-balance" />
-                  </h3>
-                  <h1>{totalBalance}</h1>
                   <Button
                     className="float-right"
                     onClick={() => this.toggle("modal")}
@@ -346,12 +371,38 @@ class ReceiptOfFunds extends Component {
                     Upload Laporan Resi
                   </Button>
                 </CardTitle>
+                <div className="mb-3 col-md-5">
+                  <InputGroup>
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <DropdownToggle className="default">
+                        <i className="simple-icon-menu" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <Button className="default disabled" outline color="ligth">
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    <Input placeholder="Search.." />
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <DropdownToggle className="default">
+                        Filter
+                    </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                  </InputGroup>
+                </div>
                 <ReactTable
+                  className="-striped"
                   data={this.dataTable()}
                   columns={this.dataTableColumns()}
                   defaultPageSize={5}
                   minRows={0}
-                  filterable={true}
                   showPageJump={true}
                   showPageSizeOptions={true}
                   PaginationComponent={DataTablePagination}

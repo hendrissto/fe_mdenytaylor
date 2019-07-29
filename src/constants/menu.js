@@ -23,12 +23,12 @@ const data = [
     label: "menu.request-withdraw-funds",
     to: "/app/request-withdraw-funds/",
   },
-  {
-    id: "expenditurepage",
-    icon: "iconsminds-receipt-4",
-    label:"menu.expenditure",
-    to: "/app/expenditure",
-  },
+  // {
+  //   id: "expenditurepage",
+  //   icon: "iconsminds-receipt-4",
+  //   label:"menu.expenditure",
+  //   to: "/app/expenditure",
+  // },
   // {
   //   id: "dashboards",
   //   icon: "iconsminds-shop-4",
