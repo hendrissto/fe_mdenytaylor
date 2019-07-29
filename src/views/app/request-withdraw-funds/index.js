@@ -4,7 +4,6 @@ import {
   Row,
   Card,
   CardBody,
-  CardTitle,
   Button,
   Modal,
   ModalHeader,
@@ -24,8 +23,6 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
-
-const totalBalance = "Rp 580.000.000";
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
@@ -449,12 +446,6 @@ class WithdrawFunds extends Component {
           <Colxx xxs={12}>
             <Card className="mb-12 lg-12">
               <CardBody>
-                <CardTitle>
-                  <h3>
-                    <IntlMessages id="title.total-balance" />
-                  </h3>
-                  <h1>{totalBalance}</h1>
-                </CardTitle>
                 <div className="mb-3 col-md-5">
                   <InputGroup>
                     <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>

@@ -25,9 +25,6 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import DataTablePagination from "../../../components/DatatablePagination";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
-
-const totalBalance = "Rp 580.000.000";
-
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
@@ -366,10 +363,6 @@ class ReceiptOfFunds extends Component {
             <Card className="mb-12 lg-12">
               <CardBody>
                 <CardTitle>
-                  <h3>
-                    <IntlMessages id="title.total-balance" />
-                  </h3>
-                  <h1>{totalBalance}</h1>
                   <Button
                     className="float-right"
                     onClick={() => this.toggle("modal")}

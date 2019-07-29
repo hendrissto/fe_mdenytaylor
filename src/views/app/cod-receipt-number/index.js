@@ -1,14 +1,12 @@
 import React, { Component, Fragment } from "react";
-import { Card, CardBody, CardTitle } from "reactstrap";
+import { Card, CardBody, } from "reactstrap";
 import ReactTable from "react-table";
-import IntlMessages from "../../../helpers/IntlMessages";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 
-const totalBalance = 'Rp 580.000.000';
 const data = [
   {
     id: 1,
@@ -403,10 +401,6 @@ export default class CODReceiptNumber extends Component {
           <Colxx xxs="12">
             <Card className="mb-12 lg-12">
               <CardBody>
-                <CardTitle>
-                  <h3><IntlMessages id="title.total-balance" /></h3>
-                  <h1>{totalBalance}</h1>
-                </CardTitle>
                 <div className="mb-3 col-md-5">
                   <InputGroup>
                     <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
@@ -414,7 +408,7 @@ export default class CODReceiptNumber extends Component {
                         <i className="simple-icon-menu" />
                       </DropdownToggle>
                       <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>1</DropdownItem>  
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown>
