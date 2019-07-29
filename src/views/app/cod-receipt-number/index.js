@@ -1,23 +1,12 @@
 import React, { Component, Fragment } from "react";
 import { Card, CardBody, CardTitle } from "reactstrap";
 import ReactTable from "react-table";
-import { Row } from "reactstrap";
-
 import IntlMessages from "../../../helpers/IntlMessages";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
-import {
-  InputGroup,
-  Button,
-  InputGroupButtonDropdown,
-  Input,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  Modal, ModalHeader, ModalBody, ModalFooter
-} from 'reactstrap';
+import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 
 const totalBalance = 'Rp 580.000.000';
 const data = [
@@ -300,6 +289,7 @@ export default class CODReceiptNumber extends Component {
       dropdownOpen1: false,
       splitButtonOpen1: false,
       modal: false,
+      oneData: ""
     };
   }
 
@@ -331,14 +321,17 @@ export default class CODReceiptNumber extends Component {
       splitButtonOpen1: !this.state.splitButtonOpen1
     });
   }
-  dataTable(){
-    return(
+  dataTable() {
+    return (
       [
         {
           Header: "Resi",
           accessor: "receiptNumber",
           Cell: props =>
-            <Button color="link" className="text-primary" onClick={this.toggle}>
+            <Button color="link" className="text-primary" onClick={() => {
+              this.toggle();
+              this.setState({ oneData: props.original });
+            }}>
               <p>{props.value}</p>
             </Button>
         },
@@ -363,6 +356,37 @@ export default class CODReceiptNumber extends Component {
           Cell: props => <p>{props.value}</p>
         }
       ]
+    )
+  }
+  oneData() {
+    return (
+      <div>
+        <Row>
+          <Col xs="3"> No. Receipt </Col>
+          <Col xs="1">:</Col>
+          <Col> {this.state.oneData.receiptNumber} </Col>
+        </Row>
+        <Row>
+          <Col xs="3"> Sender </Col>
+          <Col xs="1">:</Col>
+          <Col> {this.state.oneData.sender} </Col>
+        </Row>
+        <Row>
+          <Col xs="3"> Receiver </Col>
+          <Col xs="1">:</Col>
+          <Col> {this.state.oneData.receiver} </Col>
+        </Row>
+        <Row>
+          <Col xs="3"> Total </Col>
+          <Col xs="1">:</Col>
+          <Col> {this.state.oneData.amount} </Col>
+        </Row>
+        <Row>
+          <Col xs="3"> Status </Col>
+          <Col xs="1">:</Col>
+          <Col> {this.state.oneData.status} </Col>
+        </Row>
+      </div>
     )
   }
   render() {
@@ -426,14 +450,14 @@ export default class CODReceiptNumber extends Component {
 
         // Modal detail
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-        <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-        <ModalBody>
-          
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" outline onClick={this.toggle}>Close</Button>
-        </ModalFooter>
-      </Modal>
+          <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+          <ModalBody>
+            {this.oneData()}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" outline onClick={this.toggle}>Close</Button>
+          </ModalFooter>
+        </Modal>
       </Fragment>
     )
   }
