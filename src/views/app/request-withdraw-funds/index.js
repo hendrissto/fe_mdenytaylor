@@ -482,7 +482,7 @@ class WithdrawFunds extends Component {
                   </InputGroup>
                 </div>
                 <ReactTable
-                  className="-striped -highlight"
+                  className="-striped"
                   columns={this.dataTableColumns()}
                   data={this.dataTable()}
                   defaultPageSize={5}

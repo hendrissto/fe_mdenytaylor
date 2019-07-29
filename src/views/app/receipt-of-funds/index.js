@@ -70,14 +70,14 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Tanggal Unggah",
         accessor: "uploadDate",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "ID File",
         accessor: "idFile",
         Cell: props => (
           <Button color="link" onClick={() => this.toggle("resiModal")}>
-            <p className="list-item-heading">{props.value}</p>
+            <p>{props.value}</p>
           </Button>
         )
       },
@@ -86,14 +86,14 @@ class ReceiptOfFunds extends Component {
         accessor: "fileName",
         Cell: props => (
           <a href={props.value}>
-            <p className="list-item-heading">{props.value}</p>
+            <p>{props.value}</p>
           </a>
         )
       },
       {
         Header: "Diupload Oleh",
         accessor: "uploadedBy",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       }
     ];
   }
@@ -178,10 +178,10 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Nama Seller",
         accessor: "sellerName",
-        Footer: <p className="list-item-heading">Total</p>,
+        Footer: <p>Total</p>,
         Cell: props => (
-          <p className="list-item-heading">
-            <Button color="link" onClick={() => this.toggle("resiModalSeller")}>
+          <p>
+            <Button color="link" className="text-primary" onClick={() => this.toggle("resiModalSeller")}>
               {props.value}
             </Button>
           </p>
@@ -190,18 +190,18 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Jumlah Paket",
         accessor: "packageAmount",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total",
         accessor: "total",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Fee COD",
         accessor: "feeCOD",
         Footer: (
-          <p className="list-item-heading">
+          <p>
             Rp{" "}
             {numeral(
               this.state.data.reduce(
@@ -212,7 +212,7 @@ class ReceiptOfFunds extends Component {
           </p>
         ),
         Cell: props => (
-          <p className="list-item-heading">
+          <p>
             Rp {numeral(props.value).format("0,0")}
           </p>
         )
@@ -251,10 +251,10 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Resi",
         accessor: "receipt",
-        Footer: <p className="list-item-heading">Total</p>,
+        Footer: <p>Total</p>,
         Cell: props => (
-          <p className="list-item-heading">
-            <Button color="link" onClick={() => console.log(props.value)}>
+          <p>
+            <Button color="link" className="text-primary" onClick={() => console.log(props.value)}>
               {props.value}
             </Button>
           </p>
@@ -263,13 +263,13 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Penerima Paket",
         accessor: "receive",
-        Cell: props => <p className="list-item-heading">{props.value}</p>
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total",
         accessor: "total",
         Footer: (
-          <p className="list-item-heading">
+          <p>
             Rp{" "}
             {numeral(
               this.dataTableCODSeller().reduce(
@@ -280,7 +280,7 @@ class ReceiptOfFunds extends Component {
           </p>
         ),
         Cell: props => (
-          <p className="list-item-heading">
+          <p>
             Rp {numeral(props.value).format("0,0")}
           </p>
         )

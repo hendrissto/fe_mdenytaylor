@@ -15,37 +15,11 @@ import {
   Input,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
+  Modal, ModalHeader, ModalBody, ModalFooter
 } from 'reactstrap';
 
 const totalBalance = 'Rp 580.000.000';
-const dataTableColumns = [
-  {
-    Header: "Resi",
-    accessor: "receiptNumber",
-    Cell: props => <p>{props.value}</p>
-  },
-  {
-    Header: "Pengirim",
-    accessor: "sender",
-    Cell: props => <p>{props.value}</p>
-  },
-  {
-    Header: "Penerima",
-    accessor: "receiver",
-    Cell: props => <p>{props.value}</p>
-  },
-  {
-    Header: "Total",
-    accessor: "amount",
-    Cell: props => <p>{props.value}</p>
-  },
-  {
-    Header: "Status",
-    accessor: "status",
-    Cell: props => <p>{props.value}</p>
-  }
-];
 const data = [
   {
     id: 1,
@@ -319,12 +293,20 @@ export default class CODReceiptNumber extends Component {
     this.toggleSplit = this.toggleSplit.bind(this);
     this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     this.toggleSplit1 = this.toggleSplit1.bind(this);
+    this.toggle = this.toggle.bind(this);
     this.state = {
       dropdownOpen: false,
       splitButtonOpen: false,
       dropdownOpen1: false,
-      splitButtonOpen1: false
+      splitButtonOpen1: false,
+      modal: false,
     };
+  }
+
+  toggle() {
+    this.setState(prevState => ({
+      modal: !prevState.modal
+    }));
   }
 
   toggleDropDown() {
@@ -349,7 +331,42 @@ export default class CODReceiptNumber extends Component {
       splitButtonOpen1: !this.state.splitButtonOpen1
     });
   }
+  dataTable(){
+    return(
+      [
+        {
+          Header: "Resi",
+          accessor: "receiptNumber",
+          Cell: props =>
+            <Button color="link" className="text-primary" onClick={this.toggle}>
+              <p>{props.value}</p>
+            </Button>
+        },
+        {
+          Header: "Pengirim",
+          accessor: "sender",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Penerima",
+          accessor: "receiver",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total",
+          accessor: "amount",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Status",
+          accessor: "status",
+          Cell: props => <p>{props.value}</p>
+        }
+      ]
+    )
+  }
   render() {
+
     return (
       <Fragment>
         <Row>
@@ -366,36 +383,36 @@ export default class CODReceiptNumber extends Component {
                   <h3><IntlMessages id="title.total-balance" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
-                  <div className="mb-3 col-md-5">
-                    <InputGroup>
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                        <DropdownToggle className="default">
-                          <i className="simple-icon-menu" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                      <Button className="default disabled" outline color="ligth">
-                        <i className="simple-icon-magnifier" />
-                      </Button>
-                      <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                        <DropdownToggle className="default">
-                          Filter
+                <div className="mb-3 col-md-5">
+                  <InputGroup>
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <DropdownToggle className="default">
+                        <i className="simple-icon-menu" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <Button className="default disabled" outline color="ligth">
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    <Input placeholder="Search.." />
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <DropdownToggle className="default">
+                        Filter
                     </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                    </InputGroup>
-                  </div>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                  </InputGroup>
+                </div>
                 <ReactTable
                   className="-striped"
                   data={data}
-                  columns={dataTableColumns}
+                  columns={this.dataTable()}
                   minRows={0}
                   defaultPageSize={5}
                   showPageJump={true}
@@ -406,7 +423,18 @@ export default class CODReceiptNumber extends Component {
             </Card>
           </Colxx>
         </Row>
-      </Fragment >
+
+        // Modal detail
+        <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
+        <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+        <ModalBody>
+          
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" outline onClick={this.toggle}>Close</Button>
+        </ModalFooter>
+      </Modal>
+      </Fragment>
     )
   }
 }

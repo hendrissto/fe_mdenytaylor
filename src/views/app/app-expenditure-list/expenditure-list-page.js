@@ -8,7 +8,17 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import {
+  InputGroup,
+  Button,
+  InputGroupButtonDropdown,
+  Input,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  Modal, ModalHeader, ModalBody, ModalFooter
+}
+  from 'reactstrap';
 import { data } from "./expenditure-data-table";
 
 
@@ -19,12 +29,38 @@ export default class expenditureListPage extends Component {
       modal: false,
     };
     this.toggle = this.toggle.bind(this);
+    this.toggleDropDown = this.toggleDropDown.bind(this);
+    this.toggleSplit = this.toggleSplit.bind(this);
+    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
   toggle() {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
+  }
+  toggleDropDown() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleSplit() {
+    this.setState({
+      splitButtonOpen: !this.state.splitButtonOpen
+    });
+  }
+  toggleDropDown1() {
+    this.setState({
+      dropdownOpen1: !this.state.dropdownOpen1
+    });
+  }
+
+  toggleSplit1() {
+    this.setState({
+      splitButtonOpen1: !this.state.splitButtonOpen1
+    });
   }
   render() {
     const totalBalance = 'Rp 580.000.000';
@@ -84,13 +120,38 @@ export default class expenditureListPage extends Component {
                   <h3><IntlMessages id="title.total-balance" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
+                <div className="mb-3 col-md-5">
+                  <InputGroup>
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <DropdownToggle className="default">
+                        <i className="simple-icon-menu" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <Button className="default disabled" outline color="ligth">
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    <Input placeholder="Search.." />
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <DropdownToggle className="default">
+                        Filter
+                    </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                  </InputGroup>
+                </div>
                 <ReactTable
-                  className="-striped -highlight"
+                  className="-striped"
                   data={data}
                   columns={dataTableColumns}
                   minRows={0}
                   defaultPageSize={5}
-                  filterable={true}
                   showPageJump={true}
                   PaginationComponent={DataTablePagination}
                   showPageSizeOptions={true}
@@ -104,7 +165,7 @@ export default class expenditureListPage extends Component {
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
           <ModalHeader toggle={this.toggle}>Bukti Transfer</ModalHeader>
           <ModalBody>
-            
+
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.toggle}>Do Something</Button>{' '}
