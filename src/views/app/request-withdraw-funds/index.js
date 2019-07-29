@@ -476,12 +476,12 @@ class WithdrawFunds extends Component {
                 </div>
                 <ReactTable
                   className="-striped"
-                columns={this.dataTableColumns()}
-                data={this.dataTable()}
-                defaultPageSize={5}
-                minRows={0}
-                showPageJump={true}
-                PaginationComponent={DataTablePagination}
+                  columns={this.dataTableColumns()}
+                  data={this.dataTable()}
+                  defaultPageSize={5}
+                  minRows={0}
+                  showPageJump={true}
+                  PaginationComponent={DataTablePagination}
                   showPageSizeOptions={true}
                 />
               </CardBody>
@@ -535,9 +535,11 @@ class WithdrawFunds extends Component {
             {this.state.oneData.status === "Berhasil" ? <div>Disini Bukti Transfer.</div> : <div><Input type="file" /></div>}
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={this.toggle}>
-              Submit
-            </Button>
+            {this.state.oneData.status === "Berhasil" ? <Button color="danger" onClick={this.toggle}>
+              Close
+            </Button> : <Button color="primary" onClick={this.toggle}>
+              Upload
+            </Button>}
           </ModalFooter>
         </Modal>
       </Fragment>
