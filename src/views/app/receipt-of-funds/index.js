@@ -9,7 +9,13 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter
+  ModalFooter,
+  InputGroup,
+  InputGroupButtonDropdown,
+  Input,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import * as numeral from "numeral";
 import CsvParse from "@vtex/react-csv-parse";
@@ -34,6 +40,10 @@ class ReceiptOfFunds extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
+    this.toggleDropDown = this.toggleDropDown.bind(this);
+    this.toggleSplit = this.toggleSplit.bind(this);
+    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
   toggle(modalName) {
@@ -63,6 +73,28 @@ class ReceiptOfFunds extends Component {
         });
         break;
     }
+  }
+  toggleDropDown() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleSplit() {
+    this.setState({
+      splitButtonOpen: !this.state.splitButtonOpen
+    });
+  }
+  toggleDropDown1() {
+    this.setState({
+      dropdownOpen1: !this.state.dropdownOpen1
+    });
+  }
+
+  toggleSplit1() {
+    this.setState({
+      splitButtonOpen1: !this.state.splitButtonOpen1
+    });
   }
 
   dataTableColumns() {
@@ -346,12 +378,38 @@ class ReceiptOfFunds extends Component {
                     Upload Laporan Resi
                   </Button>
                 </CardTitle>
+                <div className="mb-3 col-md-5">
+                  <InputGroup>
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <DropdownToggle className="default">
+                        <i className="simple-icon-menu" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <Button className="default disabled" outline color="ligth">
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    <Input placeholder="Search.." />
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <DropdownToggle className="default">
+                        Filter
+                    </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                  </InputGroup>
+                </div>
                 <ReactTable
+                  className="-striped"
                   data={this.dataTable()}
                   columns={this.dataTableColumns()}
                   defaultPageSize={5}
                   minRows={0}
-                  filterable={true}
                   showPageJump={true}
                   showPageSizeOptions={true}
                   PaginationComponent={DataTablePagination}
