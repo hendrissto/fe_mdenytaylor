@@ -446,40 +446,42 @@ class WithdrawFunds extends Component {
           <Colxx xxs={12}>
             <Card className="mb-12 lg-12">
               <CardBody>
-                <div className="mb-3 col-md-5">
-                  <InputGroup>
-                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                      <DropdownToggle className="default">
-                        <i className="simple-icon-menu" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                    <Button className="default disabled" outline color="ligth">
-                      <i className="simple-icon-magnifier" />
-                    </Button>
-                    <Input placeholder="Search.." />
-                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                      <DropdownToggle className="default">
-                        Filter
-                    </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                  </InputGroup>
+                <div className="row">
+                  <div className="mb-3 col-md-5">
+                    <InputGroup>
+                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                        <DropdownToggle color="primary" className="default">
+                          <i className="simple-icon-menu" />
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem>1</DropdownItem>
+                          <DropdownItem>2</DropdownItem>
+                        </DropdownMenu>
+                      </InputGroupButtonDropdown>
+                      <Button className="default disabled" outline color="ligth">
+                        <i className="simple-icon-magnifier" />
+                      </Button>
+                      <Input placeholder="Search.." />
+                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                        <DropdownToggle color="primary" className="default">
+                          <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem>1</DropdownItem>
+                          <DropdownItem>2</DropdownItem>
+                        </DropdownMenu>
+                      </InputGroupButtonDropdown>
+                    </InputGroup>
+                  </div>
                 </div>
                 <ReactTable
                   className="-striped"
-                  columns={this.dataTableColumns()}
-                  data={this.dataTable()}
-                  defaultPageSize={5}
-                  minRows={0}
-                  showPageJump={true}
-                  PaginationComponent={DataTablePagination}
+                columns={this.dataTableColumns()}
+                data={this.dataTable()}
+                defaultPageSize={5}
+                minRows={0}
+                showPageJump={true}
+                PaginationComponent={DataTablePagination}
                   showPageSizeOptions={true}
                 />
               </CardBody>
