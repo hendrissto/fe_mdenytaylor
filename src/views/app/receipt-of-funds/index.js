@@ -14,7 +14,7 @@ import {
   Input,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem,
+  DropdownItem
 } from "reactstrap";
 import * as numeral from "numeral";
 import CsvParse from "@vtex/react-csv-parse";
@@ -24,6 +24,10 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import DataTablePagination from "../../../components/DatatablePagination";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
+
+import { ExcelRenderer } from "react-excel-renderer";
+import * as _ from "lodash";
+
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +35,8 @@ class ReceiptOfFunds extends Component {
       modal: false,
       resiModal: false,
       resiModalSeller: false,
-      data: []
+      data: [],
+      oneData: []
     };
 
     this.toggle = this.toggle.bind(this);
@@ -40,6 +45,7 @@ class ReceiptOfFunds extends Component {
     this.toggleSplit = this.toggleSplit.bind(this);
     this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     this.toggleSplit1 = this.toggleSplit1.bind(this);
+    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
   }
 
   toggle(modalName) {
@@ -113,9 +119,9 @@ class ReceiptOfFunds extends Component {
         Header: "Nama File",
         accessor: "fileName",
         Cell: props => (
-          <a href={props.value}>
-            <p>{props.value}</p>
-          </a>
+          <Button color="link" onClick={() => this.toggle("resiModal")}>
+            <p className="list-item-heading">{props.value}</p>
+          </Button>
         )
       },
       {
@@ -202,14 +208,24 @@ class ReceiptOfFunds extends Component {
   }
 
   dataTableColumsCOD() {
+    // _.map(this.state.data, (v, i) => {
+    //   _.map(v.sumData, (v, i) => {
+    //     console.log(v.osName)
+    //   })
+    // })'
+    console.log(this.state.data);
     return [
       {
         Header: "Nama Seller",
-        accessor: "sellerName",
-        Footer: <p>Total</p>,
+        accessor: "osName",
+        Footer: <p className="list-item-heading">Total</p>,
         Cell: props => (
           <p>
-            <Button color="link" className="text-primary" onClick={() => this.toggle("resiModalSeller")}>
+            <Button
+              color="link"
+              className="text-primary"
+              onClick={() => this.dataTableCODSeller(props.value)}
+            >
               {props.value}
             </Button>
           </p>
@@ -217,34 +233,61 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Jumlah Paket",
-        accessor: "packageAmount",
-        Cell: props => <p>{props.value}</p>
+        accessor: "package",
+        Cell: props => <p>{props.value} Paket</p>
       },
       {
         Header: "Total",
-        accessor: "total",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Fee COD",
-        accessor: "feeCOD",
-        Footer: (
+        accessor: "totalAmount",
+        Cell: props => <p>{props.value}</p>,
+        Footer: props => (
           <p>
             Rp{" "}
             {numeral(
               this.state.data.reduce(
-                (total, { feeCOD }) => (total += parseInt(feeCOD)),
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
                 0
               )
             ).format("0,0")}
           </p>
-        ),
-        Cell: props => (
+        )
+      },
+      {
+        Header: "Fee COD",
+        accessor: "codFeeRp",
+        Cell: props => <p>{props.value}</p>,
+        Footer: props => (
           <p>
-            Rp {numeral(props.value).format("0,0")}
+            Rp{" "}
+            {numeral(
+              this.state.data.reduce(
+                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            ).format("0,0")}
           </p>
         )
       }
+      // {
+      //   Header: "Fee COD",
+      //   accessor: "feeCOD",
+      //   Footer: (
+      //     <p>
+      //       Rp{" "}
+      //       {numeral(
+      //         this.state.data.reduce(
+      //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
+      //           0
+      //         )
+      //       ).format("0,0")}
+      //     </p>
+      //   ),
+      //   Cell: props => (
+      //     <p>
+      //       Rp {numeral(props.value).format("0,0")}
+      //     </p>
+      //   )
+      // }
     ];
   }
 
@@ -275,14 +318,19 @@ class ReceiptOfFunds extends Component {
   }
 
   dataTableColumsCODSeller() {
+    console.log(this.state.oneData);
     return [
       {
         Header: "Resi",
-        accessor: "receipt",
+        accessor: "airwaybill",
         Footer: <p>Total</p>,
         Cell: props => (
           <p>
-            <Button color="link" className="text-primary" onClick={() => console.log(props.value)}>
+            <Button
+              color="link"
+              className="text-primary"
+              onClick={() => console.log(props.value)}
+            >
               {props.value}
             </Button>
           </p>
@@ -290,66 +338,174 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Penerima Paket",
-        accessor: "receive",
+        accessor: "penerima",
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total",
-        accessor: "total",
-        Footer: (
+        accessor: "totalAmount",
+        Cell: props => <p>{props.value}</p>,
+        Footer: props => (
           <p>
             Rp{" "}
             {numeral(
-              this.dataTableCODSeller().reduce(
-                (sum, { total }) => (sum += total),
+              this.state.oneData.reduce(
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
                 0
               )
             ).format("0,0")}
           </p>
-        ),
-        Cell: props => (
-          <p>
-            Rp {numeral(props.value).format("0,0")}
-          </p>
         )
       }
+      // {
+      //   Header: "Total",
+      //   accessor: "total",
+      //   Footer: (
+      //     <p>
+      //       Rp{" "}
+      //       {numeral(
+      //         this.dataTableCODSeller().reduce(
+      //           (sum, { total }) => (sum += total),
+      //           0
+      //         )
+      //       ).format("0,0")}
+      //     </p>
+      //   ),
+      //   Cell: props => (
+      //     <p>
+      //       Rp {numeral(props.value).format("0,0")}
+      //     </p>
+      //   )
+      // }
     ];
   }
 
-  dataTableCODSeller() {
-    return [
-      {
-        id: 1,
-        sellerName: "A Shop",
-        receipt: "2340823941",
-        receive: "Mas Ucok",
-        total: 1000000
-      },
-      {
-        id: 2,
-        sellerName: "B Shop",
-        receipt: "2340823942",
-        receive: "Mas Ucok",
-        total: 1000000
-      },
-      {
-        id: 3,
-        sellerName: "C Shop",
-        receipt: "2340823943",
-        receive: "Mas Ucok",
-        total: 1000000
-      }
-    ];
+  dataTableCODSeller(osName) {
+    let i = _.findKey(this.state.data, ["osName", osName]);
+    let data = this.state.data[i];
+    // let arr = ...this.state.oneData;
+    // arr.push(data.v)
+    let finish = data.v;
+    this.setState({ oneData: finish });
+    this.toggle("resiModalSeller");
+  }
+
+  // dataTableCODSeller() {
+  //   return [
+  //     {
+  //       id: 1,
+  //       sellerName: "A Shop",
+  //       receipt: "2340823941",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     },
+  //     {
+  //       id: 2,
+  //       sellerName: "B Shop",
+  //       receipt: "2340823942",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     },
+  //     {
+  //       id: 3,
+  //       sellerName: "C Shop",
+  //       receipt: "2340823943",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     }
+  //   ];
+  // }
+
+  toggleDropDown() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleSplit() {
+    this.setState({
+      splitButtonOpen: !this.state.splitButtonOpen
+    });
+  }
+  toggleDropDown1() {
+    this.setState({
+      dropdownOpen1: !this.state.dropdownOpen1
+    });
+  }
+
+  toggleSplit1() {
+    this.setState({
+      splitButtonOpen1: !this.state.splitButtonOpen1
+    });
   }
 
   handleData = data => {
     this.setState({ data: data });
   };
 
+  cekdata(data) {
+    return data;
+  }
+
+  handleError = error => {
+    console.log(error);
+  };
+
+  fileHandler = event => {
+    let fileObj = event.target.files[0];
+    //just pass the fileObj as parameter
+    ExcelRenderer(fileObj, (err, resp) => {
+      if (err) {
+        console.log(err);
+      } else {
+        let data = resp.rows;
+        data.splice(0, 2);
+        data.shift();
+
+        let gabung = [];
+        for (let i = 1; i < data.length - 1; i++) {
+          let obj = _.zipObject(
+            _.map(data[0], (v, i) => _.camelCase(v)),
+            data[i]
+          );
+          gabung.push(obj);
+        }
+
+        let filter = _(gabung)
+          .groupBy("osName")
+          .map((v, i) => ({
+            osName: i,
+            v,
+            package: v.length,
+            totalAmount: _.sumBy(v, "totalAmount"),
+            codFeeRp: _.sumBy(v, "codFeeRp")
+          }))
+          .value();
+        console.log(filter);
+        this.setState({ data: filter });
+
+        let sumData = _(gabung)
+          .groupBy("osName")
+          .map((objs, key) => ({
+            osName: key,
+            totalAmount: _.sumBy(objs, "totalAmount"),
+            codFeeRp: _.sumBy(objs, "codFeeRp")
+          }))
+          .value();
+        //console.log(sumData);
+        // let finish = { sumData }
+        //let summary = Object.assign({}, totalamount)
+        // gabung.push(finish);
+        // console.log(gabung);
+        // this.setState({data: gabung})
+      }
+    });
+  };
+
   render() {
-    const keys = ["sellerName", "packageAmount", "total", "feeCOD"];
     return (
       <Fragment>
+        {/*console.log(this.state.oneData)*/}
         <Row>
           <Colxx xxs={12}>
             <Breadcrumb
@@ -420,14 +576,19 @@ class ReceiptOfFunds extends Component {
             <IntlMessages id="modal.uploadReceiptTitle" />
           </ModalHeader>
           <ModalBody>
-            <CsvParse
+            {/* <CsvParse
               keys={keys}
               onDataUploaded={this.handleData}
               render={onChange => (
-                <input accept=".csv" type="file" onChange={onChange} />
+                <input
+                  accept=".csv"
+                  type="file"
+                  onChange={this.cekdata(onChange)}
+                />
               )}
-              onError={() => alert("galgal")}
-            />
+              onError={this.handleError}
+              /> */}
+            <input type="file" onChange={this.fileHandler.bind(this)} />
           </ModalBody>
           <ModalFooter>
             <Button
@@ -446,7 +607,11 @@ class ReceiptOfFunds extends Component {
             </ModalHeader>
             <ModalBody>
               <ReactTable
-                data={this.state.data.length === 0 ? this.dataTableCOD() : this.state.data}
+                data={
+                  this.state.data.length === 0
+                    ? this.dataTableCOD()
+                    : this.state.data
+                }
                 columns={this.dataTableColumsCOD()}
                 minRows={0}
                 showPagination={false}
@@ -460,23 +625,26 @@ class ReceiptOfFunds extends Component {
         )}
 
         {/* MODAL DATA RESI SELLER */}
-        <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
-          <ModalHeader>
-            <IntlMessages id="modal.receiptDataCOD" />
-          </ModalHeader>
-          <ModalBody>
-            <ReactTable
-              data={this.dataTableCODSeller()}
-              columns={this.dataTableColumsCODSeller()}
-              minRows={0}
-              showPagination={false}
-              showPageSizeOptions={true}
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.toggle()}>OK</Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.resiModalSeller && (
+          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody>
+              <ReactTable
+                data={this.state.oneData}
+                columns={this.dataTableColumsCODSeller()}
+                minRows={0}
+                showPagination={false}
+                showPageSizeOptions={true}
+              />
+            </ModalBody>
+            <ModalFooter>
+            <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
+              <Button onClick={() => this.toggle()}>OK</Button>
+            </ModalFooter>
+          </Modal>
+        )}
       </Fragment>
     );
   }
