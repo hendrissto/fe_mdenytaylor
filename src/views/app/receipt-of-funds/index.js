@@ -9,11 +9,10 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter,
-  Table,
-  Input
+  ModalFooter
 } from "reactstrap";
 import * as numeral from "numeral";
+import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 
@@ -30,9 +29,11 @@ class ReceiptOfFunds extends Component {
       modal: false,
       resiModal: false,
       resiModalSeller: false,
+      data: []
     };
 
     this.toggle = this.toggle.bind(this);
+    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
   }
 
   toggle(modalName) {
@@ -47,17 +48,18 @@ class ReceiptOfFunds extends Component {
           resiModal: !prevState.resiModal
         }));
         break;
-        case "resiModalSeller":
-          this.setState(prevState => ({
-            resiModal: false,
-            resiModalSeller: true,
-          }));
-          break;
+      case "resiModalSeller":
+        this.setState(prevState => ({
+          resiModal: false,
+          resiModalSeller: true
+        }));
+        break;
       default:
         this.setState({
           modal: false,
           resiModal: false,
           resiModalSeller: false,
+          data: []
         });
         break;
     }
@@ -74,9 +76,9 @@ class ReceiptOfFunds extends Component {
         Header: "ID File",
         accessor: "idFile",
         Cell: props => (
-          <a onClick={() => this.toggle("resiModal")}>
+          <Button color="link" onClick={() => this.toggle("resiModal")}>
             <p className="list-item-heading">{props.value}</p>
-          </a>
+          </Button>
         )
       },
       {
@@ -177,7 +179,13 @@ class ReceiptOfFunds extends Component {
         Header: "Nama Seller",
         accessor: "sellerName",
         Footer: <p className="list-item-heading">Total</p>,
-        Cell: props => <p className="list-item-heading"><a onClick={() => this.toggle("resiModalSeller")}>{props.value}</a></p>
+        Cell: props => (
+          <p className="list-item-heading">
+            <Button color="link" onClick={() => this.toggle("resiModalSeller")}>
+              {props.value}
+            </Button>
+          </p>
+        )
       },
       {
         Header: "Jumlah Paket",
@@ -192,9 +200,17 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD",
         accessor: "feeCOD",
-        Footer: <p className="list-item-heading">Rp {
-            numeral(this.dataTableCOD().reduce((total, {feeCOD}) => total += feeCOD, 0)).format("0,0")
-        }</p>,
+        Footer: (
+          <p className="list-item-heading">
+            Rp{" "}
+            {numeral(
+              this.state.data.reduce(
+                (total, { feeCOD }) => (total += parseInt(feeCOD)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        ),
         Cell: props => (
           <p className="list-item-heading">
             Rp {numeral(props.value).format("0,0")}
@@ -236,7 +252,13 @@ class ReceiptOfFunds extends Component {
         Header: "Resi",
         accessor: "receipt",
         Footer: <p className="list-item-heading">Total</p>,
-        Cell: props => <p className="list-item-heading"><a onClick={() => console.log(props.value)}>{props.value}</a></p>
+        Cell: props => (
+          <p className="list-item-heading">
+            <Button color="link" onClick={() => console.log(props.value)}>
+              {props.value}
+            </Button>
+          </p>
+        )
       },
       {
         Header: "Penerima Paket",
@@ -246,9 +268,17 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Total",
         accessor: "total",
-        Footer: <p className="list-item-heading">Rp {
-            numeral(this.dataTableCODSeller().reduce((sum, {total}) => sum += total, 0)).format("0,0")
-        }</p>,
+        Footer: (
+          <p className="list-item-heading">
+            Rp{" "}
+            {numeral(
+              this.dataTableCODSeller().reduce(
+                (sum, { total }) => (sum += total),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        ),
         Cell: props => (
           <p className="list-item-heading">
             Rp {numeral(props.value).format("0,0")}
@@ -284,7 +314,12 @@ class ReceiptOfFunds extends Component {
     ];
   }
 
+  handleData = data => {
+    this.setState({ data: data });
+  };
+
   render() {
+    const keys = ["sellerName", "packageAmount", "total", "feeCOD"];
     return (
       <Fragment>
         <Row>
@@ -332,31 +367,44 @@ class ReceiptOfFunds extends Component {
             <IntlMessages id="modal.uploadReceiptTitle" />
           </ModalHeader>
           <ModalBody>
-            <Input type="file" />
+            <CsvParse
+              keys={keys}
+              onDataUploaded={this.handleData}
+              render={onChange => (
+                <input accept=".csv" type="file" onChange={onChange} />
+              )}
+              onError={() => alert("galgal")}
+            />
           </ModalBody>
           <ModalFooter>
-            <Button onClick={() => this.toggle()}>Next</Button>
+            <Button
+              onClick={() => this.setState({ resiModal: true, modal: false })}
+            >
+              Next
+            </Button>
           </ModalFooter>
         </Modal>
 
         {/* MODAL DATA RESI */}
-        <Modal isOpen={this.state.resiModal} toggle={this.toggle}>
-          <ModalHeader>
-            <IntlMessages id="modal.receiptDataCOD" />
-          </ModalHeader>
-          <ModalBody>
-            <ReactTable
-              data={this.dataTableCOD()}
-              columns={this.dataTableColumsCOD()}
-              minRows={0}
-              showPagination={false}
-              showPageSizeOptions={true}
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.toggle()}>OK</Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.resiModal && (
+          <Modal isOpen={this.state.resiModal} toggle={this.toggle}>
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody>
+              <ReactTable
+                data={this.state.data.length === 0 ? this.dataTableCOD() : this.state.data}
+                columns={this.dataTableColumsCOD()}
+                minRows={0}
+                showPagination={false}
+                showPageSizeOptions={true}
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.toggle()}>OK</Button>
+            </ModalFooter>
+          </Modal>
+        )}
 
         {/* MODAL DATA RESI SELLER */}
         <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
