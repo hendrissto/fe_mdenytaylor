@@ -366,42 +366,42 @@ export default class CODReceiptNumber extends Component {
                   <h3><IntlMessages id="title.total-balance" /></h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
-                <CardTitle className="col-md-6">
-                  <InputGroup>
-                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                      <DropdownToggle className="default">
-                        <i className="simple-icon-menu" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                    <Button className="default disabled" outline color="ligth">
-                    <i className="simple-icon-magnifier" />
-                    </Button>
-                    <Input placeholder="Search.." />
-                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                      <DropdownToggle className="default">
-                      Filter
+                  <div className="mb-3 col-md-5">
+                    <InputGroup>
+                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                        <DropdownToggle className="default">
+                          <i className="simple-icon-menu" />
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem>1</DropdownItem>
+                          <DropdownItem>2</DropdownItem>
+                        </DropdownMenu>
+                      </InputGroupButtonDropdown>
+                      <Button className="default disabled" outline color="ligth">
+                        <i className="simple-icon-magnifier" />
+                      </Button>
+                      <Input placeholder="Search.." />
+                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                        <DropdownToggle className="default">
+                          Filter
                     </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem>1</DropdownItem>
-                      <DropdownItem>2</DropdownItem>
-                    </DropdownMenu>
-                    </InputGroupButtonDropdown>
-                  </InputGroup>
-                </CardTitle>
-              <ReactTable
-                className="-striped"
-                data={data}
-                columns={dataTableColumns}
-                minRows={0}
-                defaultPageSize={5}
-                showPageJump={true}
-                PaginationComponent={DataTablePagination}
-                showPageSizeOptions={true}
-              />
+                        <DropdownMenu>
+                          <DropdownItem>1</DropdownItem>
+                          <DropdownItem>2</DropdownItem>
+                        </DropdownMenu>
+                      </InputGroupButtonDropdown>
+                    </InputGroup>
+                  </div>
+                <ReactTable
+                  className="-striped"
+                  data={data}
+                  columns={dataTableColumns}
+                  minRows={0}
+                  defaultPageSize={5}
+                  showPageJump={true}
+                  PaginationComponent={DataTablePagination}
+                  showPageSizeOptions={true}
+                />
               </CardBody>
             </Card>
           </Colxx>
