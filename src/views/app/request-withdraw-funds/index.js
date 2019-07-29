@@ -11,7 +11,12 @@ import {
   ModalBody,
   ModalFooter,
   Table,
-  Input
+  Input,
+  InputGroup,
+  InputGroupButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem
 } from "reactstrap";
 
 import IntlMessages from "../../../helpers/IntlMessages";
@@ -26,10 +31,18 @@ class WithdrawFunds extends Component {
     super(props);
     this.state = {
       oneData: "",
-      modal: false
+      modal: false,
+      dropdownOpen: false,
+      splitButtonOpen: false,
+      dropdownOpen1: false,
+      splitButtonOpen1: false
     };
 
     this.toggle = this.toggle.bind(this);
+    this.toggleDropDown = this.toggleDropDown.bind(this);
+    this.toggleSplit = this.toggleSplit.bind(this);
+    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
   dataTableColumns() {
@@ -398,6 +411,29 @@ class WithdrawFunds extends Component {
 
   }
 
+  toggleDropDown() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleSplit() {
+    this.setState({
+      splitButtonOpen: !this.state.splitButtonOpen
+    });
+  }
+  toggleDropDown1() {
+    this.setState({
+      dropdownOpen1: !this.state.dropdownOpen1
+    });
+  }
+
+  toggleSplit1() {
+    this.setState({
+      splitButtonOpen1: !this.state.splitButtonOpen1
+    });
+  }
+
   render() {
     // const { match } = this.props;
     return (
@@ -419,12 +455,37 @@ class WithdrawFunds extends Component {
                   </h3>
                   <h1>{totalBalance}</h1>
                 </CardTitle>
+                <div className="mb-3 col-md-5">
+                  <InputGroup>
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <DropdownToggle className="default">
+                        <i className="simple-icon-menu" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                    <Button className="default disabled" outline color="ligth">
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    <Input placeholder="Search.." />
+                    <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <DropdownToggle className="default">
+                        Filter
+                    </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown>
+                  </InputGroup>
+                </div>
                 <ReactTable
                   className="-striped -highlight"
                   columns={this.dataTableColumns()}
                   data={this.dataTable()}
                   defaultPageSize={5}
-                  filterable={true}
                   minRows={0}
                   showPageJump={true}
                   PaginationComponent={DataTablePagination}
