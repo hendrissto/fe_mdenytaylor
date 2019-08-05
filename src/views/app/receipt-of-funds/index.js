@@ -210,11 +210,11 @@ class ReceiptOfFunds extends Component {
   dataTableColumsCOD() {
     return [
       {
-        Header: "Nama Seller",
+        Header: <p style={{textAlign: 'center'}}>Nama Seller</p>,
         accessor: "osName",
         Footer: <p className="list-item-heading">Total</p>,
         Cell: props => (
-          <p>
+          <p style={{textAlign: 'center'}}>
             <Button
               color="link"
               className="text-primary"
@@ -226,14 +226,14 @@ class ReceiptOfFunds extends Component {
         )
       },
       {
-        Header: "Jumlah Paket",
+        Header: <p style={{textAlign: 'center'}}>Jumlah Paket</p>,
         accessor: "package",
-        Cell: props => <p>{props.value} Paket</p>
+        Cell: props => <p style={{textAlign: 'center'}}>{props.value}</p>
       },
       {
-        Header: "Total",
+        Header: "Nilai Paket",
         accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -249,7 +249,7 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD",
         accessor: "codFeeRp",
-        Cell: props => <p>{props.value}</p>,
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -259,6 +259,22 @@ class ReceiptOfFunds extends Component {
                 0
               )
             ).format("0,0")}
+          </p>
+        )
+      },
+      {
+        Header: "Total Diterima",
+        accessor: "totalReceive",
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Footer: props => (
+          <p>
+            Rp{" "}
+            {numeral(
+              this.state.data.reduce(
+                (total, { totalReceive }) => (total += parseInt(totalReceive)),
+                0
+              )
+            ).format("0,0")} 
           </p>
         )
       }
@@ -315,9 +331,9 @@ class ReceiptOfFunds extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Total",
+        Header: "Nilai Paket",
         accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -329,7 +345,40 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         )
-      }
+      },
+      {
+        Header: "Fee COD",
+        accessor: "codFeeRp",
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Footer: props => (
+          <p>
+            Rp{" "}
+            {numeral(
+              this.state.oneData.reduce(
+                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        )
+      },
+      {
+        Header: "Total Diterima",
+        accessor: "totAmountCodFee",
+        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Footer: props => (
+          <p>
+            Rp{" "}
+            {numeral(
+              this.state.oneData.reduce(
+                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        )
+
+      },
     ];
   }
 
@@ -400,12 +449,13 @@ class ReceiptOfFunds extends Component {
             v,
             package: v.length,
             totalAmount: _.sumBy(v, "totalAmount"),
-            codFeeRp: _.sumBy(v, "codFeeRp")
+            codFeeRp: _.sumBy(v, "codFeeRp"),
+            totalReceive: _.sumBy(v, "totAmountCodFee"),
           }))
           .value();
           
         this.setState({ data: filter });
-
+        console.log(this.state.data)
       }
     });
   };
@@ -508,7 +558,7 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} toggle={this.toggle}>
+          <Modal isOpen={this.state.resiModal} toggle={this.toggle} style={{maxWidth: '1000px'}}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -533,7 +583,7 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
+          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle} style={{maxWidth: '1000px'}}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
