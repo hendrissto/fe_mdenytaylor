@@ -62,7 +62,7 @@ module.exports = {
   "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
-  "menu.receipt-of-funds": "Receipt Funds History",
+  "menu.receipt-of-funds": "Transfer COD Credit",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
