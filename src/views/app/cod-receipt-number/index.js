@@ -452,7 +452,7 @@ export default class CODReceiptNumber extends Component {
             {this.oneData()}
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" outline onClick={this.toggle}>Close</Button>
+            <Button color="danger" outline onClick={this.toggle}>Close</Button>
           </ModalFooter>
         </Modal>
       </Fragment>

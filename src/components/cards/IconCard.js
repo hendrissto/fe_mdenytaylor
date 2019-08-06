@@ -5,7 +5,7 @@ import IntlMessages from "../../helpers/IntlMessages";
 const IconCard = ({ className = "mb-4", icon, title, value }) => {
   return (
     <div className={`icon-row-item ${className}`}>
-      <Card className="bg-primary text-white">
+      <Card className="bg-primary text-white" style={{"background":"linear-gradient(90deg, rgba(24,67,143,1) 32%, rgba(31,102,175,1) 61%)"}}>
         <CardBody className="text-center">
           <Row>
             <Col xs="2"> <h1 style={{ fontSize: '-webkit-xxx-large ' }}><i className={icon} /></h1> </Col>
