@@ -28,6 +28,9 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { ExcelRenderer } from "react-excel-renderer";
 import * as _ from "lodash";
 
+import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import "./receipt-of-funds.scss";
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
@@ -36,17 +39,125 @@ class ReceiptOfFunds extends Component {
       resiModal: false,
       resiModalSeller: false,
       data: [],
-      oneData: []
+      oneData: [],
+      footerData: [
+        [
+          {
+            label: "Total",
+            columnIndex: 0
+          },
+          {
+            label: "Nilai Paket",
+            columnIndex: 2,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalAmount")
+          },
+          {
+            label: "Fee COD",
+            columnIndex: 3,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "codFeeRp")
+          },
+          {
+            label: "Total Diterima",
+            columnIndex: 4,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalReceive")
+          }
+        ]
+      ],
+      footerData2: [
+        [
+          {
+            label: "Total",
+            columnIndex: 0
+          },
+          {
+            label: "Nilai Paket",
+            columnIndex: 2,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalAmount")
+          },
+          {
+            label: "Fee COD",
+            columnIndex: 3,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "codFeeRp")
+          },
+          {
+            label: "Total Diterima",
+            columnIndex: 4,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totAmountCodFee")
+          }
+        ]
+      ]
     };
 
     this.toggle = this.toggle.bind(this);
-    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
     this.toggleDropDown = this.toggleDropDown.bind(this);
     this.toggleSplit = this.toggleSplit.bind(this);
     this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     this.toggleSplit1 = this.toggleSplit1.bind(this);
     this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
   }
+
+  sumData = (tableData, type) => {
+    switch (type) {
+      case "totalAmount":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "codFeeRp":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "totalReceive":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totalReceive }) => (total += parseInt(totalReceive)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "totAmountCodFee":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+    }
+  };
 
   toggle(modalName) {
     switch (modalName) {
@@ -97,39 +208,6 @@ class ReceiptOfFunds extends Component {
     this.setState({
       splitButtonOpen1: !this.state.splitButtonOpen1
     });
-  }
-
-  dataTableColumns() {
-    return [
-      {
-        Header: "Tanggal Unggah",
-        accessor: "uploadDate",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "ID File",
-        accessor: "idFile",
-        Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
-            <p>{props.value}</p>
-          </Button>
-        )
-      },
-      {
-        Header: "Nama File",
-        accessor: "fileName",
-        Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
-            <p className="list-item-heading">{props.value}</p>
-          </Button>
-        )
-      },
-      {
-        Header: "Diupload Oleh",
-        accessor: "uploadedBy",
-        Cell: props => <p>{props.value}</p>
-      }
-    ];
   }
 
   dataTable() {
@@ -207,214 +285,14 @@ class ReceiptOfFunds extends Component {
     ];
   }
 
-  dataTableColumsCOD() {
-    // _.map(this.state.data, (v, i) => {
-    //   _.map(v.sumData, (v, i) => {
-    //     console.log(v.osName)
-    //   })
-    // })'
-    console.log(this.state.data);
-    return [
-      {
-        Header: "Nama Seller",
-        accessor: "osName",
-        Footer: <p className="list-item-heading">Total</p>,
-        Cell: props => (
-          <p>
-            <Button
-              color="link"
-              className="text-primary"
-              onClick={() => this.dataTableCODSeller(props.value)}
-            >
-              {props.value}
-            </Button>
-          </p>
-        )
-      },
-      {
-        Header: "Jumlah Paket",
-        accessor: "package",
-        Cell: props => <p>{props.value} Paket</p>
-      },
-      {
-        Header: "Total",
-        accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.data.reduce(
-                (total, { totalAmount }) => (total += parseInt(totalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      },
-      {
-        Header: "Fee COD",
-        accessor: "codFeeRp",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.data.reduce(
-                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      }
-      // {
-      //   Header: "Fee COD",
-      //   accessor: "feeCOD",
-      //   Footer: (
-      //     <p>
-      //       Rp{" "}
-      //       {numeral(
-      //         this.state.data.reduce(
-      //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
-      //           0
-      //         )
-      //       ).format("0,0")}
-      //     </p>
-      //   ),
-      //   Cell: props => (
-      //     <p>
-      //       Rp {numeral(props.value).format("0,0")}
-      //     </p>
-      //   )
-      // }
-    ];
-  }
-
-  dataTableCOD() {
-    return [
-      {
-        id: 1,
-        sellerName: "A Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      },
-      {
-        id: 2,
-        sellerName: "B Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      },
-      {
-        id: 3,
-        sellerName: "C Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      }
-    ];
-  }
-
-  dataTableColumsCODSeller() {
-    console.log(this.state.oneData);
-    return [
-      {
-        Header: "Resi",
-        accessor: "airwaybill",
-        Footer: <p>Total</p>,
-        Cell: props => (
-          <p>
-            <Button
-              color="link"
-              className="text-primary"
-              onClick={() => console.log(props.value)}
-            >
-              {props.value}
-            </Button>
-          </p>
-        )
-      },
-      {
-        Header: "Penerima Paket",
-        accessor: "penerima",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Total",
-        accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.oneData.reduce(
-                (total, { totalAmount }) => (total += parseInt(totalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      }
-      // {
-      //   Header: "Total",
-      //   accessor: "total",
-      //   Footer: (
-      //     <p>
-      //       Rp{" "}
-      //       {numeral(
-      //         this.dataTableCODSeller().reduce(
-      //           (sum, { total }) => (sum += total),
-      //           0
-      //         )
-      //       ).format("0,0")}
-      //     </p>
-      //   ),
-      //   Cell: props => (
-      //     <p>
-      //       Rp {numeral(props.value).format("0,0")}
-      //     </p>
-      //   )
-      // }
-    ];
-  }
-
   dataTableCODSeller(osName) {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
-    // let arr = ...this.state.oneData;
-    // arr.push(data.v)
+
     let finish = data.v;
     this.setState({ oneData: finish });
     this.toggle("resiModalSeller");
   }
-
-  // dataTableCODSeller() {
-  //   return [
-  //     {
-  //       id: 1,
-  //       sellerName: "A Shop",
-  //       receipt: "2340823941",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     },
-  //     {
-  //       id: 2,
-  //       sellerName: "B Shop",
-  //       receipt: "2340823942",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     },
-  //     {
-  //       id: 3,
-  //       sellerName: "C Shop",
-  //       receipt: "2340823943",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     }
-  //   ];
-  // }
 
   toggleDropDown() {
     this.setState({
@@ -447,10 +325,6 @@ class ReceiptOfFunds extends Component {
     return data;
   }
 
-  handleError = error => {
-    console.log(error);
-  };
-
   fileHandler = event => {
     let fileObj = event.target.files[0];
     //just pass the fileObj as parameter
@@ -478,34 +352,54 @@ class ReceiptOfFunds extends Component {
             v,
             package: v.length,
             totalAmount: _.sumBy(v, "totalAmount"),
-            codFeeRp: _.sumBy(v, "codFeeRp")
+            codFeeRp: _.sumBy(v, "codFeeRp"),
+            totalReceive: _.sumBy(v, "totAmountCodFee")
           }))
           .value();
-        console.log(filter);
-        this.setState({ data: filter });
 
-        let sumData = _(gabung)
-          .groupBy("osName")
-          .map((objs, key) => ({
-            osName: key,
-            totalAmount: _.sumBy(objs, "totalAmount"),
-            codFeeRp: _.sumBy(objs, "codFeeRp")
-          }))
-          .value();
-        //console.log(sumData);
-        // let finish = { sumData }
-        //let summary = Object.assign({}, totalamount)
-        // gabung.push(finish);
-        // console.log(gabung);
-        // this.setState({data: gabung})
+        this.setState({ data: filter });
       }
     });
   };
 
+  currencyFormat(cell, row) {
+    return `Rp. ${numeral(cell).format("0,0")}`;
+  }
+
+  button(cell, row) {
+    return (
+    <a
+      href="#"
+      // onClick={() => this.dataTableCODSeller(cell)}
+      className="button"
+    >{cell}
+    </a>
+    );
+  }
+
+  buttonResiCod(cell, row) {
+    return (
+      <a
+        href="#"
+        onClick={() => this.dataTableCODSeller(cell)}
+        className="button"
+      >
+        {cell}
+      </a>
+    );
+  }
+
   render() {
+    const option = {
+      sizePerPage: 5,
+      sizePerPageList: [ {
+        text: '5', value: 5
+      }, {
+        text: '10', value: 10
+      }],
+    }
     return (
       <Fragment>
-        {/*console.log(this.state.oneData)*/}
         <Row>
           <Colxx xxs={12}>
             <Breadcrumb
@@ -520,7 +414,11 @@ class ReceiptOfFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <InputGroupButtonDropdown
+                        addonType="prepend"
+                        isOpen={this.state.splitButtonOpen}
+                        toggle={this.toggleSplit}
+                      >
                         <DropdownToggle color="primary" className="default">
                           <i className="simple-icon-menu" />
                         </DropdownToggle>
@@ -529,14 +427,23 @@ class ReceiptOfFunds extends Component {
                           <DropdownItem>2</DropdownItem>
                         </DropdownMenu>
                       </InputGroupButtonDropdown>
-                      <Button className="default disabled" outline color="ligth">
+                      <Button
+                        className="default disabled"
+                        outline
+                        color="ligth"
+                      >
                         <i className="simple-icon-magnifier" />
                       </Button>
                       <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <InputGroupButtonDropdown
+                        addonType="prepend"
+                        isOpen={this.state.splitButtonOpen1}
+                        toggle={this.toggleSplit1}
+                      >
                         <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
-                      </DropdownToggle>
+                          <span className="mr-2">Filter</span>{" "}
+                          <i className="iconsminds-arrow-down-2" />
+                        </DropdownToggle>
                         <DropdownMenu>
                           <DropdownItem>1</DropdownItem>
                           <DropdownItem>2</DropdownItem>
@@ -552,19 +459,27 @@ class ReceiptOfFunds extends Component {
                     >
                       <i className="iconsminds-upload mr-2" />
                       Upload Laporan Resi
-                  </Button>
+                    </Button>
                   </div>
                 </div>
-                <ReactTable
-                  className="-striped"
-                  data={this.dataTable()}
-                  columns={this.dataTableColumns()}
-                  defaultPageSize={5}
-                  minRows={0}
-                  showPageJump={true}
-                  showPageSizeOptions={true}
-                  PaginationComponent={DataTablePagination}
-                />
+                <BootstrapTable data={this.dataTable()} pagination={true} options={option}>
+                  <TableHeaderColumn dataField="uploadDate">
+                    Tanggal Unggah
+                  </TableHeaderColumn>
+                  <TableHeaderColumn
+                    dataField="idFile"
+                    isKey
+                    dataFormat={this.button.bind(this)}
+                  >
+                    ID File
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="fileName">
+                    Nama File
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="uploadedBy">
+                    Diupload Oleh
+                  </TableHeaderColumn>
+                </BootstrapTable>
               </CardBody>
             </Card>
           </Colxx>
@@ -576,18 +491,6 @@ class ReceiptOfFunds extends Component {
             <IntlMessages id="modal.uploadReceiptTitle" />
           </ModalHeader>
           <ModalBody>
-            {/* <CsvParse
-              keys={keys}
-              onDataUploaded={this.handleData}
-              render={onChange => (
-                <input
-                  accept=".csv"
-                  type="file"
-                  onChange={this.cekdata(onChange)}
-                />
-              )}
-              onError={this.handleError}
-              /> */}
             <input type="file" onChange={this.fileHandler.bind(this)} />
           </ModalBody>
           <ModalFooter>
@@ -601,46 +504,106 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} toggle={this.toggle}>
+          <Modal
+            isOpen={this.state.resiModal}
+            toggle={this.toggle}
+            style={{ maxWidth: "800px" }}
+          >
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <ReactTable
-                data={
-                  this.state.data.length === 0
-                    ? this.dataTableCOD()
-                    : this.state.data
-                }
-                columns={this.dataTableColumsCOD()}
-                minRows={0}
-                showPagination={false}
-                showPageSizeOptions={true}
-              />
+              <BootstrapTable
+                data={this.state.data}
+                footerData={this.state.footerData}
+                footer
+              >
+                <TableHeaderColumn
+                  dataField="osName"
+                  isKey
+                  dataFormat={this.buttonResiCod.bind(this)}
+                >
+                  Nama Seller
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="package">
+                  Jumlah Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalReceive"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.toggle()}>OK</Button>
+              <Button onClick={() => this.toggle()}>Konfirmasi</Button>
             </ModalFooter>
           </Modal>
         )}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
+          <Modal
+            isOpen={this.state.resiModalSeller}
+            toggle={this.toggle}
+            style={{ maxWidth: "800px" }}
+          >
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <ReactTable
+              <BootstrapTable
                 data={this.state.oneData}
-                columns={this.dataTableColumsCODSeller()}
-                minRows={0}
-                showPagination={false}
-                showPageSizeOptions={true}
-              />
+                footerData={this.state.footerData2}
+                footer
+              >
+                <TableHeaderColumn dataField="airwaybill" isKey>
+                  Resi
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="penerima">
+                  Penerima Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totAmountCodFee"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
             </ModalBody>
             <ModalFooter>
-            <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
+              <Button
+                onClick={() =>
+                  this.setState({ resiModalSeller: false, resiModal: true })
+                }
+              >
+                Back
+              </Button>
               <Button onClick={() => this.toggle()}>OK</Button>
             </ModalFooter>
           </Modal>

@@ -21,6 +21,7 @@
     "react": "^16.8.6",
     "react-autosuggest": "^9.3.4",
     "react-big-calendar": "^0.20.3",
+    "react-bootstrap-table": "^4.3.1",
     "react-chartjs-2": "^2.7.4",
     "react-circular-progressbar": "^1.0.0",
     "react-contextmenu": "^2.9.4",
