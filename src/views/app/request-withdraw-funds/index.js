@@ -23,6 +23,9 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
+
+import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
@@ -81,7 +84,8 @@ class WithdrawFunds extends Component {
             return (
               <div>
                 <Button
-                  outline color="info"
+                  outline
+                  color="info"
                   onClick={() => {
                     this.toggle();
                     this.setState({ oneData: props.original });
@@ -405,7 +409,6 @@ class WithdrawFunds extends Component {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
-
   }
 
   toggleDropDown() {
@@ -431,8 +434,56 @@ class WithdrawFunds extends Component {
     });
   }
 
+  button(cell, row) {
+    if (row.status === "Berhasil") {
+      return (
+        <div>
+          <Button
+            outline
+            color="info"
+            onClick={() => {
+              this.toggle();
+              this.setState({ oneData: row });
+            }}
+          >
+            <i className="simple-icon-paper-clip mr-2" />
+            Bukti Transfer
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Button
+            outline
+            color="success"
+            onClick={() => {
+              this.toggle();
+              this.setState({ oneData: row });
+            }}
+          >
+            <i className="iconsminds-upload mr-2 " />
+            Upload Bukti
+          </Button>
+        </div>
+      );
+    }
+  }
+
   render() {
-    // const { match } = this.props;
+    const option = {
+      sizePerPage: 5,
+      sizePerPageList: [
+        {
+          text: "5",
+          value: 5
+        },
+        {
+          text: "10",
+          value: 10
+        }
+      ]
+    };
     return (
       <Fragment>
         <Row>
@@ -449,7 +500,11 @@ class WithdrawFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                      <InputGroupButtonDropdown
+                        addonType="prepend"
+                        isOpen={this.state.splitButtonOpen}
+                        toggle={this.toggleSplit}
+                      >
                         <DropdownToggle color="primary" className="default">
                           <i className="simple-icon-menu" />
                         </DropdownToggle>
@@ -458,13 +513,22 @@ class WithdrawFunds extends Component {
                           <DropdownItem>2</DropdownItem>
                         </DropdownMenu>
                       </InputGroupButtonDropdown>
-                      <Button className="default disabled" outline color="ligth">
+                      <Button
+                        className="default disabled"
+                        outline
+                        color="ligth"
+                      >
                         <i className="simple-icon-magnifier" />
                       </Button>
                       <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <InputGroupButtonDropdown
+                        addonType="prepend"
+                        isOpen={this.state.splitButtonOpen1}
+                        toggle={this.toggleSplit1}
+                      >
                         <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                          <span className="mr-2">Filter</span>{" "}
+                          <i className="iconsminds-arrow-down-2" />
                         </DropdownToggle>
                         <DropdownMenu>
                           <DropdownItem>1</DropdownItem>
@@ -474,16 +538,33 @@ class WithdrawFunds extends Component {
                     </InputGroup>
                   </div>
                 </div>
-                <ReactTable
-                  className="-striped"
-                  columns={this.dataTableColumns()}
+                <BootstrapTable
                   data={this.dataTable()}
-                  defaultPageSize={5}
-                  minRows={0}
-                  showPageJump={true}
-                  PaginationComponent={DataTablePagination}
-                  showPageSizeOptions={true}
-                />
+                  pagination={true}
+                  options={option}
+                >
+                  <TableHeaderColumn dataField="requestWithdraw" isKey>
+                    Permintaan Penarikan
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="seller">
+                    Seller
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="amountWithdraw">
+                    Jumlah Saldo Ditarik
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="withdrawToAccount">
+                    Ditarik ke Rekening
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="bankBranch">
+                    Cabang Bank
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="status">
+                    Status
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataFormat={this.button.bind(this)}>
+                    Upload Bukti
+                  </TableHeaderColumn>
+                </BootstrapTable>
               </CardBody>
             </Card>
           </Colxx>
@@ -532,14 +613,24 @@ class WithdrawFunds extends Component {
                 <td>{this.state.oneData.amountWithdraw}</td>
               </tr>
             </Table>
-            {this.state.oneData.status === "Berhasil" ? <div>Disini Bukti Transfer.</div> : <div><Input type="file" /></div>}
+            {this.state.oneData.status === "Berhasil" ? (
+              <div>Disini Bukti Transfer.</div>
+            ) : (
+              <div>
+                <Input type="file" />
+              </div>
+            )}
           </ModalBody>
           <ModalFooter>
-            {this.state.oneData.status === "Berhasil" ? <Button color="danger" onClick={this.toggle}>
-              Close
-            </Button> : <Button color="primary" onClick={this.toggle}>
-              Upload
-            </Button>}
+            {this.state.oneData.status === "Berhasil" ? (
+              <Button color="danger" onClick={this.toggle}>
+                Close
+              </Button>
+            ) : (
+              <Button color="primary" onClick={this.toggle}>
+                Upload
+              </Button>
+            )}
           </ModalFooter>
         </Modal>
       </Fragment>

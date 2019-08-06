@@ -408,6 +408,14 @@ export default class CODReceiptNumber extends Component {
     );
   }
   render() {
+    const option = {
+      sizePerPage: 5,
+      sizePerPageList: [ {
+        text: '5', value: 5
+      }, {
+        text: '10', value: 10
+      }],
+    }
     return (
       <Fragment>
         <Row>
@@ -465,19 +473,7 @@ export default class CODReceiptNumber extends Component {
                   </div>
                 </div>
 
-                {/*} <div style={{ padding: "0px" }}>
-                  <ReactTable
-                    className="-striped"
-                    data={data}
-                    columns={this.dataTable()}
-                    minRows={0}
-                    defaultPageSize={5}
-                    showPageJump={true}
-                    PaginationComponent={DataTablePagination}
-                    showPageSizeOptions={true}
-                  />
-                   </div> */}
-                <BootstrapTable data={data} striped bordered pagination>
+                <BootstrapTable data={data} striped bordered pagination={true} options={option}>
                   <TableHeaderColumn dataField="receiptNumber" isKey>
                     Resi
                   </TableHeaderColumn>
