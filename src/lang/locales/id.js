@@ -61,7 +61,8 @@ module.exports = {
     "menu.cod-receipt-number": "Resi COD",
     "menu.request-withdraw-funds": "Permintaan Penarikan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",
-    "menu.receipt-of-funds": "Transfer Kredit COD",
+    "menu.receipt-of-funds": "Riwayat Penerimaan Dana",
+    "menu.subscription": "Berlangganan",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
     "menu.ecommerce": "Ecommerce",
@@ -188,6 +189,9 @@ module.exports = {
     "dashboards.keyword": "Keyword",
     "dashboards.search": "Search",
     "dashboards.top-rated-items": "Top Rated Items",
+
+    /* 05.Receipt Funds History */
+    "ui.menu.receipt-of-funds.list.button.uploadAWB": "Upload No Resi",
   
     /* 05.Pages */
     "pages.add-new": "ADD NEW",

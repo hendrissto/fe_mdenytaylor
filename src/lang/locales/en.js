@@ -62,7 +62,8 @@ module.exports = {
   "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
-  "menu.receipt-of-funds": "Transfer COD Credit",
+  "menu.receipt-of-funds": "Receipt Funds History",
+  "menu.subscription": "Subscription",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
@@ -189,6 +190,9 @@ module.exports = {
   "dashboards.keyword": "Keyword",
   "dashboards.search": "Search",
   "dashboards.top-rated-items": "Top Rated Items",
+
+  /* Receipt Funds History */
+  "ui.menu.receipt-of-funds.list.button.uploadAWB": "Upload AWB Number",
 
   /* 05.Pages */
   "pages.add-new": "ADD NEW",
