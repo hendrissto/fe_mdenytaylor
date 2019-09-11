@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from "react";
-import ReactTable from "react-table";
+import * as numeral from "numeral";
+import * as _ from "lodash";
 import {
   Row,
   Card,
@@ -10,28 +10,38 @@ import {
   ModalBody,
   ModalFooter,
   InputGroup,
-  InputGroupButtonDropdown,
-  Input,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
+  Input
 } from "reactstrap";
-import * as numeral from "numeral";
-import CsvParse from "@vtex/react-csv-parse";
+import { ExcelRenderer } from "react-excel-renderer";
+
+import React, { Component, Fragment } from "react";
+import ReactTable from "react-table";
+// import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
-
-import DataTablePagination from "../../../components/DatatablePagination";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
+import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
-import { ExcelRenderer } from "react-excel-renderer";
-import * as _ from "lodash";
+import CODRestService from "../../../core/codRestService";
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
+    this.codRest =  new CODRestService();
+
+    this.showModal = this.showModal.bind(this);
+    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
+    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
     this.state = {
+      table: {
+        data: [],
+        pagination: {
+          currentPage: null,
+          totalPages: 0,
+          pageSize: 10
+        }
+      },
       modal: false,
       resiModal: false,
       resiModalSeller: false,
@@ -39,16 +49,18 @@ class ReceiptOfFunds extends Component {
       oneData: []
     };
 
-    this.toggle = this.toggle.bind(this);
-    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
-    this.toggleDropDown = this.toggleDropDown.bind(this);
-    this.toggleSplit = this.toggleSplit.bind(this);
-    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
-    this.toggleSplit1 = this.toggleSplit1.bind(this);
-    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
+    // this.toggleDropDown = this.toggleDropDown.bind(this);
+    // this.toggleSplit = this.toggleSplit.bind(this);
+    // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    // this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
-  toggle(modalName) {
+  componentDidMount() {
+    this.codRest.getReceiptFunds().subscribe((response) => {
+    })
+  }
+
+  showModal(modalName) {
     switch (modalName) {
       case "modal":
         this.setState(prevState => ({
@@ -76,30 +88,31 @@ class ReceiptOfFunds extends Component {
         break;
     }
   }
-  toggleDropDown() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen
-    });
-  }
 
-  toggleSplit() {
-    this.setState({
-      splitButtonOpen: !this.state.splitButtonOpen
-    });
-  }
-  toggleDropDown1() {
-    this.setState({
-      dropdownOpen1: !this.state.dropdownOpen1
-    });
-  }
+  // toggleDropDown() {
+  //   this.setState({
+  //     dropdownOpen: !this.state.dropdownOpen
+  //   });
+  // }
 
-  toggleSplit1() {
-    this.setState({
-      splitButtonOpen1: !this.state.splitButtonOpen1
-    });
-  }
+  // toggleSplit() {
+  //   this.setState({
+  //     splitButtonOpen: !this.state.splitButtonOpen
+  //   });
+  // }
+  // toggleDropDown1() {
+  //   this.setState({
+  //     dropdownOpen1: !this.state.dropdownOpen1
+  //   });
+  // }
 
-  dataTableColumns() {
+  // toggleSplit1() {
+  //   this.setState({
+  //     splitButtonOpen1: !this.state.splitButtonOpen1
+  //   });
+  // }
+
+  tableColumns() {
     return [
       {
         Header: "Tanggal Unggah",
@@ -110,7 +123,7 @@ class ReceiptOfFunds extends Component {
         Header: "ID File",
         accessor: "idFile",
         Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
+          <Button color="link" onClick={() => this.showModal("resiModal")}>
             <p>{props.value}</p>
           </Button>
         )
@@ -119,7 +132,7 @@ class ReceiptOfFunds extends Component {
         Header: "Nama File",
         accessor: "fileName",
         Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
+          <Button color="link" onClick={() => this.showModal("resiModal")}>
             <p className="list-item-heading">{props.value}</p>
           </Button>
         )
@@ -213,7 +226,6 @@ class ReceiptOfFunds extends Component {
     //     console.log(v.osName)
     //   })
     // })'
-    console.log(this.state.data);
     return [
       {
         Header: "Nama Seller",
@@ -318,7 +330,6 @@ class ReceiptOfFunds extends Component {
   }
 
   dataTableColumsCODSeller() {
-    console.log(this.state.oneData);
     return [
       {
         Header: "Resi",
@@ -387,7 +398,7 @@ class ReceiptOfFunds extends Component {
     // arr.push(data.v)
     let finish = data.v;
     this.setState({ oneData: finish });
-    this.toggle("resiModalSeller");
+    this.showModal("resiModalSeller");
   }
 
   // dataTableCODSeller() {
@@ -416,28 +427,28 @@ class ReceiptOfFunds extends Component {
   //   ];
   // }
 
-  toggleDropDown() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen
-    });
-  }
+  // toggleDropDown() {
+  //   this.setState({
+  //     dropdownOpen: !this.state.dropdownOpen
+  //   });
+  // }
 
-  toggleSplit() {
-    this.setState({
-      splitButtonOpen: !this.state.splitButtonOpen
-    });
-  }
-  toggleDropDown1() {
-    this.setState({
-      dropdownOpen1: !this.state.dropdownOpen1
-    });
-  }
+  // toggleSplit() {
+  //   this.setState({
+  //     splitButtonOpen: !this.state.splitButtonOpen
+  //   });
+  // }
+  // toggleDropDown1() {
+  //   this.setState({
+  //     dropdownOpen1: !this.state.dropdownOpen1
+  //   });
+  // }
 
-  toggleSplit1() {
-    this.setState({
-      splitButtonOpen1: !this.state.splitButtonOpen1
-    });
-  }
+  // toggleSplit1() {
+  //   this.setState({
+  //     splitButtonOpen1: !this.state.splitButtonOpen1
+  //   });
+  // }
 
   handleData = data => {
     this.setState({ data: data });
@@ -461,6 +472,7 @@ class ReceiptOfFunds extends Component {
         let data = resp.rows;
         data.splice(0, 2);
         data.shift();
+        console.log(data);
 
         let gabung = [];
         for (let i = 1; i < data.length - 1; i++) {
@@ -481,7 +493,6 @@ class ReceiptOfFunds extends Component {
             codFeeRp: _.sumBy(v, "codFeeRp")
           }))
           .value();
-        console.log(filter);
         this.setState({ data: filter });
 
         let sumData = _(gabung)
@@ -519,50 +530,65 @@ class ReceiptOfFunds extends Component {
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
-                    <InputGroup>
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                        <DropdownToggle color="primary" className="default">
-                          <i className="simple-icon-menu" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                      <Button className="default disabled" outline color="ligth">
-                        <i className="simple-icon-magnifier" />
-                      </Button>
-                      <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                        <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                  <InputGroup>
+                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
+                      <DropdownToggle color="primary" className="default">
+                        <i className="simple-icon-menu" />
                       </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                    </InputGroup>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown> */}
+                    <Input placeholder="Search.." name="search" value={this.state.search} onChange={this.handleInputChange} 
+                      onKeyPress={event => {
+                        if (event.key === 'Enter') {
+                          this.loadData();
+                        }
+                      }}/>
+                    <Button className="default"  color="primary" onClick={() => this.loadData()}>
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
+                      <DropdownToggle color="primary" className="default">
+                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown> */}
+                  </InputGroup>
                   </div>
+
                   <div className="col-md-7">
                     <Button
                       className="float-right default"
                       color="secondary"
-                      onClick={() => this.toggle("modal")}
+                      onClick={() => this.showModal("modal")}
                     >
                       <i className="iconsminds-upload mr-2" />
-                      Upload Laporan Resi
+                      <IntlMessages id={"ui.menu.receipt-of-funds.list.button.uploadAWB"} />
                   </Button>
                   </div>
                 </div>
+
                 <ReactTable
                   className="-striped"
-                  data={this.dataTable()}
-                  columns={this.dataTableColumns()}
-                  defaultPageSize={5}
-                  minRows={0}
-                  showPageJump={true}
+                  columns={this.dataTable()}
+                  data={this.state.data}
+                  // loading={}
+                  // pageSize={100}
+                  onSortedChange={this.handleSortedChange}
+                  onPageChange={this.handleOnPageChange}
+                  onPageSizeChange={this.handleOnPageSizeChange}
+                  
+                  showPageJump={false}
                   showPageSizeOptions={true}
+                  minRows={2}
+                  page={1}
+                  pages={5}
+                  // defaultPageSize={this.state.table.pagination.pageSize}
                   PaginationComponent={DataTablePagination}
                 />
               </CardBody>
@@ -571,7 +597,7 @@ class ReceiptOfFunds extends Component {
         </Row>
 
         {/* MODAL UPLOAD RESI */}
-        <Modal isOpen={this.state.modal} toggle={this.toggle}>
+        <Modal isOpen={this.state.modal} toggle={this.showModal}>
           <ModalHeader>
             <IntlMessages id="modal.uploadReceiptTitle" />
           </ModalHeader>
@@ -601,7 +627,7 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} toggle={this.toggle}>
+          <Modal isOpen={this.state.resiModal} toggle={this.showModal}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -619,14 +645,14 @@ class ReceiptOfFunds extends Component {
               />
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.toggle()}>OK</Button>
+              <Button onClick={() => this.showModal()}>OK</Button>
             </ModalFooter>
           </Modal>
         )}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle}>
+          <Modal isOpen={this.state.resiModalSeller} toggle={this.showModal}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -641,7 +667,7 @@ class ReceiptOfFunds extends Component {
             </ModalBody>
             <ModalFooter>
             <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
-              <Button onClick={() => this.toggle()}>OK</Button>
+              <Button onClick={() => this.showModal()}>OK</Button>
             </ModalFooter>
           </Modal>
         )}
