@@ -495,14 +495,14 @@ class ReceiptOfFunds extends Component {
           .value();
         this.setState({ data: filter });
 
-        let sumData = _(gabung)
-          .groupBy("osName")
-          .map((objs, key) => ({
-            osName: key,
-            totalAmount: _.sumBy(objs, "totalAmount"),
-            codFeeRp: _.sumBy(objs, "codFeeRp")
-          }))
-          .value();
+        // let sumData = _(gabung)
+        //   .groupBy("osName")
+        //   .map((objs, key) => ({
+        //     osName: key,
+        //     totalAmount: _.sumBy(objs, "totalAmount"),
+        //     codFeeRp: _.sumBy(objs, "codFeeRp")
+        //   }))
+        //   .value();
         //console.log(sumData);
         // let finish = { sumData }
         //let summary = Object.assign({}, totalamount)

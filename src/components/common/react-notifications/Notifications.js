@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CSSTransitionGroup } from 'react-transition-group';
+import { TransitionGroup } from 'react-transition-group';
 import classnames from 'classnames';
 import Notification from './Notification';
 
@@ -34,7 +34,7 @@ class Notifications extends React.Component {
     });
     return (
       <div className={className}>
-        <CSSTransitionGroup
+        <TransitionGroup
           transitionName="notification"
           transitionEnterTimeout={enterTimeout}
           transitionLeaveTimeout={leaveTimeout}
@@ -54,7 +54,7 @@ class Notifications extends React.Component {
               />
             );
           })}
-        </CSSTransitionGroup>
+        </TransitionGroup>
       </div>
     );
   }
