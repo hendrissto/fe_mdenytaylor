@@ -12,7 +12,7 @@ import SubscriptionRestService from "../../../core/subscriptionRestService";
 export default class Subscription extends Component {
   constructor(props) {
     super(props);
-    this.subscriptionRest =  new SubscriptionRestService();
+    this.subscriptionRest = new SubscriptionRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
 
     this.toggle = this.toggle.bind(this);
@@ -22,7 +22,7 @@ export default class Subscription extends Component {
         loading: true,
         data: [],
         pagination: {
-          currentPage: null,
+          currentPage: 0,
           totalPages: 0,
           skipSize: 0,
           pageSize: 10
@@ -46,20 +46,23 @@ export default class Subscription extends Component {
     });
   }
 
-  handleOnPageChange(skipSize) {
-    const table = {...this.state.table}
+  handleOnPageChange(pageIndex) {
+    const table = { ...this.state.table }
     table.loading = true;
-    table.pagination.skipSize = (skipSize * table.pagination.pageSize)
+    table.pagination.skipSize = (pageIndex * table.pagination.pageSize);
+    table.pagination.currentPage = pageIndex;
 
-    this.setState({table});
+    console.log(table);
+
+    this.setState({ table });
     this.loadData();
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
-    const table = {...this.state.table}
+    const table = { ...this.state.table }
     table.loading = true;
     table.pagination.pageSize = newPageSize
-    this.setState({table});
+    this.setState({ table });
     this.loadData();
   }
 
@@ -70,33 +73,26 @@ export default class Subscription extends Component {
   }
 
   loadData() {
-    const table = {...this.state.table}
+    const table = { ...this.state.table }
     table.loading = true;
-    this.setState({table});
+    this.setState({ table });
 
     const params = {
       keyword: this.state.search || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
-      // "options.sort": this.state.table.pagination.pageSize,
-      // "options.filter": this.state.table.pagination.pageSize,
-      // lowJoinDate: "",
-      // highJoinDate: "",
-      // lowLastLoginDate: "",
-      // highLastLoginDate: "",
-      // includeTotalCount: false
+      "options.includeTotalCount": true,
     }
 
-    
-    this.subscriptionRest.getTenants({params}).subscribe((response) => {
-      const table = {...this.state.table}
-      // console.log(table)
-      table.data = response.data;
-      table.loading = false;
-      // console.log({table}))
-      this.setState({table});
-      // console.log(this.state)
-    })
+
+    this.subscriptionRest.getTenants({ params })
+      .subscribe((response) => {
+        const table = { ...this.state.table }
+        table.data = response.data;
+        table.pagination.totalPages = response.total / table.pagination.pageSize;
+        table.loading = false;
+        this.setState({ table });
+      })
   }
 
   componentDidMount() {
@@ -189,8 +185,8 @@ export default class Subscription extends Component {
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
-                  <InputGroup>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                    <InputGroup>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
                       <DropdownToggle color="primary" className="default">
                         <i className="simple-icon-menu" />
                       </DropdownToggle>
@@ -199,16 +195,16 @@ export default class Subscription extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                    <Input placeholder="Search Owner" name="search" value={this.state.search} onChange={this.handleInputChange} 
-                      onKeyPress={event => {
-                        if (event.key === 'Enter') {
-                          this.loadData();
-                        }
-                      }}/>
-                    <Button className="default"  color="primary" onClick={() => this.loadData()}>
-                      <i className="simple-icon-magnifier" />
-                    </Button>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <Input placeholder="Search Owner" name="search" value={this.state.search} onChange={this.handleInputChange}
+                        onKeyPress={event => {
+                          if (event.key === 'Enter') {
+                            this.loadData();
+                          }
+                        }} />
+                      <Button className="default" color="primary" onClick={() => this.loadData()}>
+                        <i className="simple-icon-magnifier" />
+                      </Button>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
                       <DropdownToggle color="primary" className="default">
                         <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
                       </DropdownToggle>
@@ -217,27 +213,34 @@ export default class Subscription extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                  </InputGroup>
+                    </InputGroup>
+                  </div>
                 </div>
-              </div>
 
                 <ReactTable
-                  className="-striped"
-                  data={this.state.table.data}
-                  columns={this.dataTable()}
-                  onSortedChange={this.handleSortedChange}
-                  minRows={2}
-                  loading={this.state.table.loading}
-                  // pageSize={100}
-                  // page={1}
-                  pages={5}
-                  defaultPageSize={this.state.table.pagination.pageSize}
-                  onPageChange={(skipSize) => this.handleOnPageChange(skipSize)}
-                  onPageSizeChange={(newPageSize, newPage) => this.handleOnPageSizeChange(newPageSize, newPage)}
-                  showPageJump={false}
+                  page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
-                  showPageSizeOptions={true}
-                  noDataText={"Data not yet available"}
+                  data={this.state.table.data}
+                  pages={this.state.table.pagination.totalPages}
+                  columns={this.dataTable()}
+                  defaultPageSize={this.state.table.pagination.pageSize}
+                  className='-striped'
+                  loading={this.state.table.loading}
+                  showPagination={true}
+                  showPaginationTop={false}
+                  showPaginationBottom={true}
+                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  manual // this would indicate that server side pagination has been enabled 
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
+
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
                 />
               </CardBody>
             </Card>
