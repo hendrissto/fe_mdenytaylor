@@ -129,7 +129,7 @@ class ChatApp extends Component {
                   this._scrollBarRef = ref;
                 }}
                 containerRef={ref => {}}
-                option={{ suppressScrollX: true, wheelPropagation: false }}
+                options={{ suppressScrollX: true, wheelPropagation: false }}
               >
                 {selectedConversation.messages.map((item, index) => {
                   const sender = allContacts.find(x => x.id === item.sender);

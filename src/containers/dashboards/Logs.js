@@ -15,7 +15,7 @@ const Logs = () => {
           </CardTitle>
           <div className="dashboard-logs">
             <PerfectScrollbar
-              option={{ suppressScrollX: true, wheelPropagation: false }}
+              options={{ suppressScrollX: true, wheelPropagation: false }}
             >
               <table className="table table-sm table-borderless">
                 <tbody>

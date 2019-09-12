@@ -41,7 +41,7 @@ const TopnavNotifications = () => {
           id="notificationDropdown"
         >
           <PerfectScrollbar
-            option={{ suppressScrollX: true, wheelPropagation: false }}
+            options={{ suppressScrollX: true, wheelPropagation: false }}
           >
             {notifications.map((notification, index) => {
               return <NotificationItem key={index} {...notification} />;
