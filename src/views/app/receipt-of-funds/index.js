@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from "react";
-import ReactTable from "react-table";
+import * as numeral from "numeral";
+import * as _ from "lodash";
 import {
   Row,
   Card,
@@ -10,45 +10,112 @@ import {
   ModalBody,
   ModalFooter,
   InputGroup,
-  InputGroupButtonDropdown,
-  Input,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
+  Input
 } from "reactstrap";
-import * as numeral from "numeral";
-import CsvParse from "@vtex/react-csv-parse";
+import { ExcelRenderer } from "react-excel-renderer";
+
+import React, { Component, Fragment } from "react";
+import ReactTable from "react-table";
+// import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
-
-import DataTablePagination from "../../../components/DatatablePagination";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
+import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
-import { ExcelRenderer } from "react-excel-renderer";
-import * as _ from "lodash";
+import CODRestService from "../../../core/codRestService";
 
+import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import "./receipt-of-funds.scss";
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
+    this.codRest =  new CODRestService();
+
+    this.showModal = this.showModal.bind(this);
+    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
+    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
     this.state = {
+      table: {
+        data: [],
+        pagination: {
+          currentPage: null,
+          totalPages: 0,
+          pageSize: 10
+        }
+      },
       modal: false,
       resiModal: false,
       resiModalSeller: false,
       data: [],
-      oneData: []
+      oneData: [],
+      footerData: [
+        [
+          {
+            label: "Total",
+            columnIndex: 0
+          },
+          {
+            label: "Nilai Paket",
+            columnIndex: 2,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalAmount")
+          },
+          {
+            label: "Fee COD",
+            columnIndex: 3,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "codFeeRp")
+          },
+          {
+            label: "Total Diterima",
+            columnIndex: 4,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalReceive")
+          }
+        ]
+      ],
+      footerData2: [
+        [
+          {
+            label: "Total",
+            columnIndex: 0
+          },
+          {
+            label: "Nilai Paket",
+            columnIndex: 2,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalAmount")
+          },
+          {
+            label: "Fee COD",
+            columnIndex: 3,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "codFeeRp")
+          },
+          {
+            label: "Total Diterima",
+            columnIndex: 4,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totAmountCodFee")
+          }
+        ]
+      ]
     };
 
-    this.toggle = this.toggle.bind(this);
-    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
-    this.toggleDropDown = this.toggleDropDown.bind(this);
-    this.toggleSplit = this.toggleSplit.bind(this);
-    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
-    this.toggleSplit1 = this.toggleSplit1.bind(this);
-    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
+    // this.toggleDropDown = this.toggleDropDown.bind(this);
+    // this.toggleSplit = this.toggleSplit.bind(this);
+    // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
+    // this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
-  toggle(modalName) {
+  componentDidMount() {
+    this.codRest.getReceiptFunds().subscribe((response) => {
+    })
+  }
+
+  showModal(modalName) {
     switch (modalName) {
       case "modal":
         this.setState(prevState => ({
@@ -76,30 +143,31 @@ class ReceiptOfFunds extends Component {
         break;
     }
   }
-  toggleDropDown() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen
-    });
-  }
 
-  toggleSplit() {
-    this.setState({
-      splitButtonOpen: !this.state.splitButtonOpen
-    });
-  }
-  toggleDropDown1() {
-    this.setState({
-      dropdownOpen1: !this.state.dropdownOpen1
-    });
-  }
+  // toggleDropDown() {
+  //   this.setState({
+  //     dropdownOpen: !this.state.dropdownOpen
+  //   });
+  // }
 
-  toggleSplit1() {
-    this.setState({
-      splitButtonOpen1: !this.state.splitButtonOpen1
-    });
-  }
+  // toggleSplit() {
+  //   this.setState({
+  //     splitButtonOpen: !this.state.splitButtonOpen
+  //   });
+  // }
+  // toggleDropDown1() {
+  //   this.setState({
+  //     dropdownOpen1: !this.state.dropdownOpen1
+  //   });
+  // }
 
-  dataTableColumns() {
+  // toggleSplit1() {
+  //   this.setState({
+  //     splitButtonOpen1: !this.state.splitButtonOpen1
+  //   });
+  // }
+
+  tableColumns() {
     return [
       {
         Header: "Tanggal Unggah",
@@ -110,7 +178,7 @@ class ReceiptOfFunds extends Component {
         Header: "ID File",
         accessor: "idFile",
         Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
+          <Button color="link" onClick={() => this.showModal("resiModal")}>
             <p>{props.value}</p>
           </Button>
         )
@@ -119,7 +187,7 @@ class ReceiptOfFunds extends Component {
         Header: "Nama File",
         accessor: "fileName",
         Cell: props => (
-          <Button color="link" onClick={() => this.toggle("resiModal")}>
+          <Button color="link" onClick={() => this.showModal("resiModal")}>
             <p className="list-item-heading">{props.value}</p>
           </Button>
         )
@@ -208,13 +276,18 @@ class ReceiptOfFunds extends Component {
   }
 
   dataTableColumsCOD() {
+    // _.map(this.state.data, (v, i) => {
+    //   _.map(v.sumData, (v, i) => {
+    //     console.log(v.osName)
+    //   })
+    // })'
     return [
       {
-        Header: <p style={{textAlign: 'center'}}>Nama Seller</p>,
+        Header: "Nama Seller",
         accessor: "osName",
         Footer: <p className="list-item-heading">Total</p>,
         Cell: props => (
-          <p style={{textAlign: 'center'}}>
+          <p>
             <Button
               color="link"
               className="text-primary"
@@ -226,14 +299,14 @@ class ReceiptOfFunds extends Component {
         )
       },
       {
-        Header: <p style={{textAlign: 'center'}}>Jumlah Paket</p>,
+        Header: "Jumlah Paket",
         accessor: "package",
-        Cell: props => <p style={{textAlign: 'center'}}>{props.value}</p>
+        Cell: props => <p>{props.value} Paket</p>
       },
       {
-        Header: "Nilai Paket",
+        Header: "Total",
         accessor: "totalAmount",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Cell: props => <p>{props.value}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -249,7 +322,7 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD",
         accessor: "codFeeRp",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Cell: props => <p>{props.value}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -261,23 +334,27 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         )
-      },
-      {
-        Header: "Total Diterima",
-        accessor: "totalReceive",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.data.reduce(
-                (total, { totalReceive }) => (total += parseInt(totalReceive)),
-                0
-              )
-            ).format("0,0")} 
-          </p>
-        )
       }
+      // {
+      //   Header: "Fee COD",
+      //   accessor: "feeCOD",
+      //   Footer: (
+      //     <p>
+      //       Rp{" "}
+      //       {numeral(
+      //         this.state.data.reduce(
+      //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
+      //           0
+      //         )
+      //       ).format("0,0")}
+      //     </p>
+      //   ),
+      //   Cell: props => (
+      //     <p>
+      //       Rp {numeral(props.value).format("0,0")}
+      //     </p>
+      //   )
+      // }
     ];
   }
 
@@ -331,9 +408,9 @@ class ReceiptOfFunds extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Nilai Paket",
+        Header: "Total",
         accessor: "totalAmount",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
+        Cell: props => <p>{props.value}</p>,
         Footer: props => (
           <p>
             Rp{" "}
@@ -345,74 +422,87 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         )
-      },
-      {
-        Header: "Fee COD",
-        accessor: "codFeeRp",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.oneData.reduce(
-                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      },
-      {
-        Header: "Total Diterima",
-        accessor: "totAmountCodFee",
-        Cell: props => <p>Rp. {numeral(props.value).format("0,0")}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.oneData.reduce(
-                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-
-      },
+      }
+      // {
+      //   Header: "Total",
+      //   accessor: "total",
+      //   Footer: (
+      //     <p>
+      //       Rp{" "}
+      //       {numeral(
+      //         this.dataTableCODSeller().reduce(
+      //           (sum, { total }) => (sum += total),
+      //           0
+      //         )
+      //       ).format("0,0")}
+      //     </p>
+      //   ),
+      //   Cell: props => (
+      //     <p>
+      //       Rp {numeral(props.value).format("0,0")}
+      //     </p>
+      //   )
+      // }
     ];
   }
 
   dataTableCODSeller(osName) {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
-    
+
     let finish = data.v;
     this.setState({ oneData: finish });
-    this.toggle("resiModalSeller");
+    this.showModal("resiModalSeller");
   }
 
-  toggleDropDown() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen
-    });
-  }
+  // dataTableCODSeller() {
+  //   return [
+  //     {
+  //       id: 1,
+  //       sellerName: "A Shop",
+  //       receipt: "2340823941",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     },
+  //     {
+  //       id: 2,
+  //       sellerName: "B Shop",
+  //       receipt: "2340823942",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     },
+  //     {
+  //       id: 3,
+  //       sellerName: "C Shop",
+  //       receipt: "2340823943",
+  //       receive: "Mas Ucok",
+  //       total: 1000000
+  //     }
+  //   ];
+  // }
 
-  toggleSplit() {
-    this.setState({
-      splitButtonOpen: !this.state.splitButtonOpen
-    });
-  }
-  toggleDropDown1() {
-    this.setState({
-      dropdownOpen1: !this.state.dropdownOpen1
-    });
-  }
+  // toggleDropDown() {
+  //   this.setState({
+  //     dropdownOpen: !this.state.dropdownOpen
+  //   });
+  // }
 
-  toggleSplit1() {
-    this.setState({
-      splitButtonOpen1: !this.state.splitButtonOpen1
-    });
-  }
+  // toggleSplit() {
+  //   this.setState({
+  //     splitButtonOpen: !this.state.splitButtonOpen
+  //   });
+  // }
+  // toggleDropDown1() {
+  //   this.setState({
+  //     dropdownOpen1: !this.state.dropdownOpen1
+  //   });
+  // }
+
+  // toggleSplit1() {
+  //   this.setState({
+  //     splitButtonOpen1: !this.state.splitButtonOpen1
+  //   });
+  // }
 
   handleData = data => {
     this.setState({ data: data });
@@ -432,6 +522,7 @@ class ReceiptOfFunds extends Component {
         let data = resp.rows;
         data.splice(0, 2);
         data.shift();
+        console.log(data);
 
         let gabung = [];
         for (let i = 1; i < data.length - 1; i++) {
@@ -450,17 +541,65 @@ class ReceiptOfFunds extends Component {
             package: v.length,
             totalAmount: _.sumBy(v, "totalAmount"),
             codFeeRp: _.sumBy(v, "codFeeRp"),
-            totalReceive: _.sumBy(v, "totAmountCodFee"),
+            totalReceive: _.sumBy(v, "totAmountCodFee")
           }))
           .value();
-          
         this.setState({ data: filter });
-        console.log(this.state.data)
+
+        // let sumData = _(gabung)
+        //   .groupBy("osName")
+        //   .map((objs, key) => ({
+        //     osName: key,
+        //     totalAmount: _.sumBy(objs, "totalAmount"),
+        //     codFeeRp: _.sumBy(objs, "codFeeRp")
+        //   }))
+        //   .value();
+        //console.log(sumData);
+        // let finish = { sumData }
+        //let summary = Object.assign({}, totalamount)
+        // gabung.push(finish);
+        // console.log(gabung);
+        // this.setState({data: gabung})
       }
     });
   };
 
+  currencyFormat(cell, row) {
+    return `Rp. ${numeral(cell).format("0,0")}`;
+  }
+
+  button(cell, row) {
+    return (
+    <a
+      href="#"
+      // onClick={() => this.dataTableCODSeller(cell)}
+      className="button"
+    >{cell}
+    </a>
+    );
+  }
+
+  buttonResiCod(cell, row) {
+    return (
+      <a
+        href="#"
+        onClick={() => this.dataTableCODSeller(cell)}
+        className="button"
+      >
+        {cell}
+      </a>
+    );
+  }
+
   render() {
+    const option = {
+      sizePerPage: 5,
+      sizePerPageList: [ {
+        text: '5', value: 5
+      }, {
+        text: '10', value: 10
+      }],
+    }
     return (
       <Fragment>
         <Row>
@@ -476,50 +615,65 @@ class ReceiptOfFunds extends Component {
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
-                    <InputGroup>
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                        <DropdownToggle color="primary" className="default">
-                          <i className="simple-icon-menu" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                      <Button className="default disabled" outline color="ligth">
-                        <i className="simple-icon-magnifier" />
-                      </Button>
-                      <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                        <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                  <InputGroup>
+                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
+                      <DropdownToggle color="primary" className="default">
+                        <i className="simple-icon-menu" />
                       </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
-                    </InputGroup>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown> */}
+                    <Input placeholder="Search.." name="search" value={this.state.search} onChange={this.handleInputChange} 
+                      onKeyPress={event => {
+                        if (event.key === 'Enter') {
+                          this.loadData();
+                        }
+                      }}/>
+                    <Button className="default"  color="primary" onClick={() => this.loadData()}>
+                      <i className="simple-icon-magnifier" />
+                    </Button>
+                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
+                      <DropdownToggle color="primary" className="default">
+                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem>1</DropdownItem>
+                        <DropdownItem>2</DropdownItem>
+                      </DropdownMenu>
+                    </InputGroupButtonDropdown> */}
+                  </InputGroup>
                   </div>
+
                   <div className="col-md-7">
                     <Button
                       className="float-right default"
                       color="secondary"
-                      onClick={() => this.toggle("modal")}
+                      onClick={() => this.showModal("modal")}
                     >
                       <i className="iconsminds-upload mr-2" />
-                      Upload Laporan Resi
+                      <IntlMessages id={"ui.menu.receipt-of-funds.list.button.uploadAWB"} />
                   </Button>
                   </div>
                 </div>
+
                 <ReactTable
                   className="-striped"
-                  data={this.dataTable()}
-                  columns={this.dataTableColumns()}
-                  defaultPageSize={5}
-                  minRows={0}
-                  showPageJump={true}
+                  columns={this.dataTable()}
+                  data={this.state.data}
+                  // loading={}
+                  // pageSize={100}
+                  onSortedChange={this.handleSortedChange}
+                  onPageChange={this.handleOnPageChange}
+                  onPageSizeChange={this.handleOnPageSizeChange}
+                  
+                  showPageJump={false}
                   showPageSizeOptions={true}
+                  minRows={2}
+                  page={1}
+                  pages={5}
+                  // defaultPageSize={this.state.table.pagination.pageSize}
                   PaginationComponent={DataTablePagination}
                 />
               </CardBody>
@@ -528,23 +682,11 @@ class ReceiptOfFunds extends Component {
         </Row>
 
         {/* MODAL UPLOAD RESI */}
-        <Modal isOpen={this.state.modal} toggle={this.toggle}>
+        <Modal isOpen={this.state.modal} toggle={this.showModal}>
           <ModalHeader>
             <IntlMessages id="modal.uploadReceiptTitle" />
           </ModalHeader>
           <ModalBody>
-            {/* <CsvParse
-              keys={keys}
-              onDataUploaded={this.handleData}
-              render={onChange => (
-                <input
-                  accept=".csv"
-                  type="file"
-                  onChange={onChange}
-                />
-              )}
-              onError={this.handleError}
-              /> */}
             <input type="file" onChange={this.fileHandler.bind(this)} />
           </ModalBody>
           <ModalFooter>
@@ -558,47 +700,93 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} toggle={this.toggle} style={{maxWidth: '1000px'}}>
+          <Modal isOpen={this.state.resiModal} toggle={this.showModal}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <ReactTable
-                data={
-                  this.state.data.length === 0
-                    ? this.dataTableCOD()
-                    : this.state.data
-                }
-                columns={this.dataTableColumsCOD()}
-                minRows={0}
-                showPagination={false}
-                showPageSizeOptions={true}
-              />
+              <BootstrapTable
+                data={this.state.data}
+                footerData={this.state.footerData}
+                footer
+              >
+                <TableHeaderColumn
+                  dataField="osName"
+                  isKey
+                  dataFormat={this.buttonResiCod.bind(this)}
+                >
+                  Nama Seller
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="package">
+                  Jumlah Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalReceive"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.toggle()}>OK</Button>
+              <Button onClick={() => this.showModal()}>OK</Button>
             </ModalFooter>
           </Modal>
         )}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} toggle={this.toggle} style={{maxWidth: '1000px'}}>
+          <Modal isOpen={this.state.resiModalSeller} toggle={this.showModal}>
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <ReactTable
+              <BootstrapTable
                 data={this.state.oneData}
-                columns={this.dataTableColumsCODSeller()}
-                minRows={0}
-                showPagination={false}
-                showPageSizeOptions={true}
-              />
+                footerData={this.state.footerData2}
+                footer
+              >
+                <TableHeaderColumn dataField="airwaybill" isKey>
+                  Resi
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="penerima">
+                  Penerima Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totAmountCodFee"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
             </ModalBody>
             <ModalFooter>
             <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
-              <Button onClick={() => this.toggle()}>OK</Button>
+              <Button onClick={() => this.showModal()}>OK</Button>
             </ModalFooter>
           </Modal>
         )}

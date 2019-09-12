@@ -9,7 +9,7 @@ const SurveyDetailApplicationMenu = () => {
   return (
     <ApplicationMenu>
       <PerfectScrollbar
-        option={{ suppressScrollX: true, wheelPropagation: false }}
+        options={{ suppressScrollX: true, wheelPropagation: false }}
       >
         <div className="p-4">
           <p className="text-muted text-small">Status</p>

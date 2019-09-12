@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardBody } from "reactstrap";
-import CircularProgressbar from "react-circular-progressbar";
+import { CircularProgressbar } from "react-circular-progressbar";
 
 const GradientWithRadialProgressCard = ({
   icon = "iconsminds-bell",

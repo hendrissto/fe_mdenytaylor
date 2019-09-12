@@ -133,7 +133,20 @@ export default class DataTablePagination extends Component {
               </PaginationLink>
             </PaginationItem>
 
+            <PaginationItem>
+              <PaginationLink
+                // onClick={() => this.pageClick(i)}
+              >{"..."}</PaginationLink>
+            </PaginationItem>
+
             {this.renderPages()}
+
+            <PaginationItem>
+              <PaginationLink
+                // onClick={() => this.pageClick(i)}
+              >{"..."}</PaginationLink>
+            </PaginationItem>
+
             <PaginationItem className={`${!canNext && "disabled"}`}>
               <PaginationLink
                 className="next"
