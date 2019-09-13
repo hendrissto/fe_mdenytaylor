@@ -15,4 +15,8 @@ export default class CODRestService extends React.Component {
   getCODReceipts(qParams) {
     return this.request.get('/cod-list', qParams);
   }
+
+  postCOD(qParams) {
+    return this.request.post('/cod', qParams);
+  }
 }

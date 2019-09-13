@@ -24,8 +24,11 @@ import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
+import * as moment from 'moment';
 
 import "./receipt-of-funds.scss";
+
+const user = JSON.parse(localStorage.getItem('user'))
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
@@ -35,6 +38,7 @@ class ReceiptOfFunds extends Component {
     this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
     this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
     this.state = {
+      dataExcel: null,
       table: {
         data: [],
         pagination: {
@@ -524,28 +528,74 @@ class ReceiptOfFunds extends Component {
 
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
-        
+
+        this.normalizeLines(newExcelData)
+
         let data = _(newExcelData)
           .groupBy("osName")
           .map((newDataExcel, sellerName) => ({
             osName: sellerName,
-            lines: newDataExcel,
+            lines: newDataExcel,  
             package: newDataExcel.length,
             totalAmount: _.sumBy(newDataExcel, "totalAmount"),
             codFeeRp: _.sumBy(newDataExcel, "codFeeRp"),
             totalReceive: _.sumBy(newDataExcel, "totAmountCodFee")
           }))
           .value();
-          console.log(data)
         this.setState({ data });
       }
     });
   };
 
+  normalizeLines(array) {
+    let lineAmount = 0;
+    let lineCodValue = 0;
+    let lineTotal = 0;
+    for(let i = 0; i < array.length; i++){
+      lineAmount += Math.round(array[i].totalAmount);
+      lineCodValue += Math.round(array[i].codFeeRp);
+      lineTotal += Math.round(array[i].totAmountCodFee);
+    }
+    
+    let lines = [];
+    for(let i = 0; i < array.length; i++){
+      lines.push({
+          sellerName: array[i].osName,
+          receiverName: array[i].penerima,
+          trackingNumber: array[i].airwaybill.toString(),
+          courierChannelId: 'sicepat',
+          amount: array[i].totalAmount,
+          codValue: array[i].codFeeRp,
+          total: array[i].totAmountCodFee,
+      })
+    }
+    let data = {
+      lines: lines,
+      documentNumber: '',
+      uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
+      lineCount: array.length,
+      lineAmount: lineAmount,
+      lineCODValue: lineCodValue,
+      lineTotal: lineTotal,
+      uploadBy: user.user_name,
+      file: {
+        id: '',
+        fileName: ''
+      }
+    }
+    this.setState({dataExcel: data})
+  }
+
+  submitData() {
+    this.codRest.postCOD(this.state.dataExcel).subscribe(response => {
+      console.log(response);
+    });
+  }
+
   extractExcelData(data) {
     let excelData = [];
     data = _.pull(data, []);
-    for (let i = 1; i < data.length - 1; i++) {
+    for (let i = 0; i < data.length - 1; i++) {
       // we should getting true data
       if (data[i].length > 10) {
         excelData.push(data[i]);
@@ -556,7 +606,7 @@ class ReceiptOfFunds extends Component {
 
   createObjectExcel(data) {
     let dataWithObject = [];
-    for (let i = 1; i < data.length - 1; i++) {
+    for (let i = 1; i < data.length; i++) {
       let concatValue = _.zipObject(
         _.map(data[0], (header, i) => _.camelCase(header)),
         data[i]
@@ -693,7 +743,7 @@ class ReceiptOfFunds extends Component {
           </ModalBody>
           <ModalFooter>
             <Button
-              onClick={() => this.setState({ resiModal: true, modal: false })}
+              onClick={() => this.submitData()}
             >
               Next
             </Button>
