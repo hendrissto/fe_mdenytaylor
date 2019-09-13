@@ -10,11 +10,14 @@ import AuthRestService from "../../core/authRestService";
 import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";
+
+import { Messages } from 'primereact/messages'
+import { Message } from 'primereact/message';
 class Login extends Component {
   data = {
     grant_type: "password",
-    username: "admin@clodeo.com",
-    password: "HVVbPz64e5ejvsvm",
+    username: "",
+    password: "",
     client_id: "clodeo-admin-web"
   };
   constructor(props) {
@@ -27,18 +30,21 @@ class Login extends Component {
       password: "HVVbPz64e5ejvsvm",
       client_id: "clodeo-admin-web",
       loading: false,
+      error: false,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  handleSubmit() {
+  handleSubmit(values) {
     if (this.state.username !== "" && this.state.password !== "") {
       this.setState({loading: true})
-      this.authRest.login(this.data).subscribe(response => {
+      this.authRest.login(values).subscribe(response => {
         this.props.loginUser(response, this.props.history);
         this.setState({loading: false})
+      }, err => {
+        this.setState({loading: false, error: true})
       });
     }
   }
@@ -74,6 +80,9 @@ class Login extends Component {
               <NavLink to={`/`} className="white">
                 <span className="logo-single" />
               </NavLink>
+              {this.state.error && (
+                <span>Periksa Kembali Username dan Password Anda.</span>
+              )}
               <CardTitle className="mb-4">
                 <IntlMessages id="user.login-title" />
               </CardTitle>
