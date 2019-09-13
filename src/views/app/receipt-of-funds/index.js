@@ -25,8 +25,6 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
 
-// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -521,55 +519,59 @@ class ReceiptOfFunds extends Component {
 
   fileHandler = event => {
     let fileObj = event.target.files[0];
+
     //just pass the fileObj as parameter
     ExcelRenderer(fileObj, (err, resp) => {
       if (err) {
         console.log(err);
       } else {
-        let data = resp.rows;
-        data.splice(0, 2);
-        data.shift();
-        console.log(data);
+        let excelData = resp.rows;
+        excelData.splice(0, 2);
+        excelData.shift();
 
-        let gabung = [];
-        for (let i = 1; i < data.length - 1; i++) {
-          let obj = _.zipObject(
-            _.map(data[0], (v, i) => _.camelCase(v)),
-            data[i]
-          );
-          gabung.push(obj);
-        }
-
-        let filter = _(gabung)
+        const excelValue = this.extractExcelData(excelData);
+        const newExcelData = this.createObjectExcel(excelValue);
+        
+        let data = _(newExcelData)
           .groupBy("osName")
-          .map((v, i) => ({
-            osName: i,
-            v,
-            package: v.length,
-            totalAmount: _.sumBy(v, "totalAmount"),
-            codFeeRp: _.sumBy(v, "codFeeRp"),
-            totalReceive: _.sumBy(v, "totAmountCodFee")
+          .map((newDataExcel, sellerName) => ({
+            osName: sellerName,
+            lines: newDataExcel,
+            package: newDataExcel.length,
+            totalAmount: _.sumBy(newDataExcel, "totalAmount"),
+            codFeeRp: _.sumBy(newDataExcel, "codFeeRp"),
+            totalReceive: _.sumBy(newDataExcel, "totAmountCodFee")
           }))
           .value();
-        this.setState({ data: filter });
-
-        // let sumData = _(gabung)
-        //   .groupBy("osName")
-        //   .map((objs, key) => ({
-        //     osName: key,
-        //     totalAmount: _.sumBy(objs, "totalAmount"),
-        //     codFeeRp: _.sumBy(objs, "codFeeRp")
-        //   }))
-        //   .value();
-        //console.log(sumData);
-        // let finish = { sumData }
-        //let summary = Object.assign({}, totalamount)
-        // gabung.push(finish);
-        // console.log(gabung);
-        // this.setState({data: gabung})
+          console.log(data)
+        this.setState({ data });
       }
     });
   };
+
+  extractExcelData(data) {
+    let excelData = [];
+    data = _.pull(data, []);
+    for (let i = 1; i < data.length - 1; i++) {
+      // we should getting true data
+      if (data[i].length > 10) {
+        excelData.push(data[i]);
+      }
+    }
+    return excelData;
+  }
+
+  createObjectExcel(data) {
+    let dataWithObject = [];
+    for (let i = 1; i < data.length - 1; i++) {
+      let concatValue = _.zipObject(
+        _.map(data[0], (header, i) => _.camelCase(header)),
+        data[i]
+      );
+      dataWithObject.push(concatValue);
+    }
+    return dataWithObject;
+  }
 
   currencyFormat(cell, row) {
     return `Rp. ${numeral(cell).format("0,0")}`;
@@ -719,7 +721,7 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              {/* <BootstrapTable
+            {/* <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -798,6 +800,7 @@ class ReceiptOfFunds extends Component {
                 </TableHeaderColumn>
               </BootstrapTable> */}
             </ModalBody>
+
             <ModalFooter>
             <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
               <Button onClick={() => this.showModal()}>OK</Button>
