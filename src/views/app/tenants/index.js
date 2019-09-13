@@ -1,3 +1,4 @@
+import moment from "moment";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody, } from "reactstrap";
 import ReactTable from "react-table";
@@ -7,12 +8,12 @@ import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 import { InputGroup, Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
-import SubscriptionRestService from "../../../core/subscriptionRestService";
+import TenantRestService from "../../../core/tenantRestService";
 
-export default class Subscription extends Component {
+export default class Tenant extends Component {
   constructor(props) {
     super(props);
-    this.subscriptionRest = new SubscriptionRestService();
+    this.tenantRest = new TenantRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
 
     this.toggle = this.toggle.bind(this);
@@ -85,7 +86,7 @@ export default class Subscription extends Component {
     }
 
 
-    this.subscriptionRest.getTenants({ params })
+    this.tenantRest.getTenants({ params })
       .subscribe((response) => {
         const table = { ...this.state.table }
         table.data = response.data;
@@ -110,20 +111,20 @@ export default class Subscription extends Component {
     return (
       [
         {
-          Header: "ID",
+          Header: "ID Tenant",
           accessor: "id",
           Cell: props =>
-            <Button color="link" className="text-primary" onClick={() => {
-              this.toggle();
-              this.setState({ oneData: props.original });
-            }}>
-              <p>{props.value}</p>
-            </Button>
+            // <Button color="link" className="text-primary" onClick={() => {
+            //   this.toggle();
+            //   this.setState({ oneData: props.original });
+            // }}>
+            //   <p>{props.value}</p>
+            // </Button>
+            <p>{props.value}</p>
         },
         {
-          Header: "Owner",
-          accessor: "owner.fullName",
-          Cell: props => <p>{props.value}</p>
+          Header: "Nama Perusahaan",
+          accessor: "companyInfo.name",
         },
         {
           Header: "Email",
@@ -131,9 +132,54 @@ export default class Subscription extends Component {
           Cell: props => <p>{props.value}</p>
         },
         {
-          Header: "Phone",
+          Header: "No Telp",
           accessor: "phone",
           Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total SKU",
+          accessor: "totalSku",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total Order",
+          accessor: "totalOrder",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total Receipt",
+          accessor: "totalReceipt",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total User",
+          accessor: "totalUser",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Last Login",
+          accessor: "owner.lastLoginDateUtc",
+          Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        },
+        {
+          Header: "Join Date",
+          accessor: "owner.joinDateUtc",
+          Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        },
+        {
+          Header: "Sicepat COD",
+          accessor: "siCepatCOD",
+          Cell: props => <p>{ props.value === false ? 'Tidak Aktif' : 'Aktif' }</p>
+        },
+        {
+          Header: "ID Sicepat",
+          accessor: "siCepatMemberId",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Status",
+          accessor: "status",
+          Cell: props => <p>{props.value === 1 ? 'Aktif' : 'Tidak Aktif'}</p>
         },
       ]
     )
@@ -175,7 +221,7 @@ export default class Subscription extends Component {
       <Fragment>
         <Row>
           <Colxx xxs="12">
-            <Breadcrumb heading="menu.subscription" match={this.props.match} />
+            <Breadcrumb heading="menu.tenants" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
         </Row>

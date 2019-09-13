@@ -16,8 +16,8 @@ import { Message } from 'primereact/message';
 class Login extends Component {
   data = {
     grant_type: "password",
-    username: "",
-    password: "",
+    username: "admin@clodeo.com",
+    password: "HVVbPz64e5ejvsvm",
     client_id: "clodeo-admin-web"
   };
   constructor(props) {
@@ -25,10 +25,6 @@ class Login extends Component {
     this.authRest = new AuthRestService();
 
     this.state = {
-      grant_type: "password",
-      username: "admin@clodeo.com",
-      password: "HVVbPz64e5ejvsvm",
-      client_id: "clodeo-admin-web",
       loading: false,
       error: false,
     };

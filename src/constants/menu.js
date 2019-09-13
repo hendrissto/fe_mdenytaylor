@@ -23,17 +23,17 @@ const data = [
     label: "menu.request-withdraw-funds",
     to: "/app/request-withdraw-funds/",
   },
+  // {
+  //   id: "expenditurepage",
+  //   icon: "iconsminds-receipt-4",
+  //   label:"menu.expenditure",
+  //   to: "/app/expenditure",
+  // },
   {
-    id: "expenditurepage",
-    icon: "iconsminds-receipt-4",
-    label:"menu.expenditure",
-    to: "/app/expenditure",
-  },
-  {
-    id: "subscription",
-    icon: "iconsminds-money-bag",
-    label:"menu.subscription",
-    to: "/app/subscription",
+    id: "tenants",
+    icon: "simple-icon-people",
+    label:"menu.tenants",
+    to: "/app/tenants",
   },
   {
     id: "dashboards",
