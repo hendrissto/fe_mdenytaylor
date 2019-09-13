@@ -10,7 +10,7 @@ import { InputGroup, Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, 
 import CODRestService from "../../../core/codRestService";
 
 // const data = []
-  // const data = [
+// const data = [
 //   {
 //     id: 1,
 //     receiptNumber: 908989,
@@ -278,20 +278,24 @@ import CODRestService from "../../../core/codRestService";
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
-    this.codRest =  new CODRestService();
+    this.codRest = new CODRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
 
     // this.toggleDropDown = this.toggleDropDown.bind(this);
     // this.toggleSplit = this.toggleSplit.bind(this);
     // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     // this.toggleSplit1 = this.toggleSplit1.bind(this);
+    this.dataTable = this.dataTable.bind(this);
     this.toggle = this.toggle.bind(this);
     this.state = {
+      data: [],
       table: {
+        loading: true,
         data: [],
         pagination: {
-          currentPage: null,
+          currentPage: 0,
           totalPages: 0,
+          skipSize: 0,
           pageSize: 10
         }
       },
@@ -316,16 +320,47 @@ export default class CODReceiptNumber extends Component {
     });
   }
 
+  handleOnPageChange(pageIndex) {
+    const table = { ...this.state.table }
+    table.loading = true;
+    table.pagination.skipSize = (pageIndex * table.pagination.pageSize);
+    table.pagination.currentPage = pageIndex;
+
+    console.log(table);
+
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleOnPageSizeChange(newPageSize, newPage) {
+    const table = { ...this.state.table }
+    table.loading = true;
+    table.pagination.pageSize = newPageSize
+    this.setState({ table });
+    this.loadData();
+  }
+
   loadData() {
+    const table = { ...this.state.table }
+    table.loading = true;
+    this.setState({ table });
+
     const params = {
-      keyword: this.state.search || null
+      keyword: this.state.search || null,
+      "options.take": this.state.table.pagination.pageSize,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true,
     }
 
-    this.codRest.getCODReceipts({params}).subscribe((response) => {
-      this.setState({
-        data: response.data
-      });
-    })
+
+    this.codRest.getCODReceipts({ params })
+      .subscribe((response) => {
+        const table = { ...this.state.table }
+        table.data = response.data;
+        table.pagination.totalPages = response.total / table.pagination.pageSize;
+        table.loading = false;
+        this.setState({ table });
+      })
   }
 
   componentDidMount() {
@@ -333,13 +368,13 @@ export default class CODReceiptNumber extends Component {
   }
 
   // below is handler of table
-  handleOnPageChange(event) {
-    console.log(event)
-  }
+  // handleOnPageChange(event) {
+  //   console.log(event)
+  // }
 
-  handleOnPageSizeChange(newPageSize, newPage) {
-    console.log(newPageSize, newPage)
-  }
+  // handleOnPageSizeChange(newPageSize, newPage) {
+  //   console.log(newPageSize, newPage)
+  // }
 
   handleSortedChange(newSorted, column, additive) {
     console.log(newSorted)
@@ -347,43 +382,75 @@ export default class CODReceiptNumber extends Component {
     console.log(additive)
   }
 
-  columnsTable() {
-    return (
+  dataTable(){
+    return(
       [
         {
-          Header: "Resi",
-          accessor: "receiptNumber",
-          Cell: props =>
-            <Button color="link" className="text-primary" onClick={() => {
-              this.toggle();
-              this.setState({ oneData: props.original });
-            }}
-          >
-            <p>{props.value}</p>
-          </Button>
-      },
-      {
-        Header: "Pengirim",
-        accessor: "sender",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Penerima",
-        accessor: "receiver",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Total",
-        accessor: "amount",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: props => <p>{props.value}</p>
-      }
-    ]);
+          Header: "Tracking Number",
+          accessor: "trackingNumber",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Receiver Name",
+          accessor: "receiverName",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Seller Name",
+          accessor: "sellerName",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Total",
+          accessor: "amount",
+          Cell: props => <p>{props.value}</p>
+        },
+        {
+          Header: "Tracking Number",
+          accessor: "trackingNumber",
+          Cell: props => <p>{props.value}</p>
+        },
+      ]
+    )
   }
+
+  // columnsTable() {
+  //   return (
+  //     [
+  //       {
+  //         Header: "Resi",
+  //         accessor: "receiptNumber",
+  //         Cell: props =>
+  //           <Button color="link" className="text-primary" onClick={() => {
+  //             this.toggle();
+  //             this.setState({ oneData: props.original });
+  //           }}
+  //           >
+  //             <p>{props.value}</p>
+  //           </Button>
+  //       },
+  //       {
+  //         Header: "Pengirim",
+  //         accessor: "sender",
+  //         Cell: props => <p>{props.value}</p>
+  //       },
+  //       {
+  //         Header: "Penerima",
+  //         accessor: "receiver",
+  //         Cell: props => <p>{props.value}</p>
+  //       },
+  //       {
+  //         Header: "Total",
+  //         accessor: "amount",
+  //         Cell: props => <p>{props.value}</p>
+  //       },
+  //       {
+  //         Header: "Status",
+  //         accessor: "status",
+  //         Cell: props => <p>{props.value}</p>
+  //       }
+  //     ]);
+  // }
 
 
   // Others
@@ -415,7 +482,7 @@ export default class CODReceiptNumber extends Component {
   //     splitButtonOpen1: !this.state.splitButtonOpen1
   //   });
   // }
-  
+
   oneData() {
     return (
       <div>
@@ -450,7 +517,7 @@ export default class CODReceiptNumber extends Component {
   render() {
     const option = {
       sizePerPage: 5,
-      sizePerPageList: [ {
+      sizePerPageList: [{
         text: '5', value: 5
       }, {
         text: '10', value: 10
@@ -473,8 +540,8 @@ export default class CODReceiptNumber extends Component {
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
-                  <InputGroup>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
+                    <InputGroup>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
                       <DropdownToggle color="primary" className="default">
                         <i className="simple-icon-menu" />
                       </DropdownToggle>
@@ -483,16 +550,16 @@ export default class CODReceiptNumber extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                    <Input placeholder="Search.." name="search" value={this.state.search} onChange={this.handleInputChange} 
-                      onKeyPress={event => {
-                        if (event.key === 'Enter') {
-                          this.loadData();
-                        }
-                      }}/>
-                    <Button className="default"  color="primary" onClick={() => this.loadData()}>
-                      <i className="simple-icon-magnifier" />
-                    </Button>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
+                      <Input placeholder="Search.." name="search" value={this.state.search} onChange={this.handleInputChange}
+                        onKeyPress={event => {
+                          if (event.key === 'Enter') {
+                            this.loadData();
+                          }
+                        }} />
+                      <Button className="default" color="primary" onClick={() => this.loadData()}>
+                        <i className="simple-icon-magnifier" />
+                      </Button>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
                       <DropdownToggle color="primary" className="default">
                         <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
                       </DropdownToggle>
@@ -501,27 +568,34 @@ export default class CODReceiptNumber extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                  </InputGroup>
-                </div>
+                    </InputGroup>
+                  </div>
                 </div>
 
                 <ReactTable
-                  className="-striped"
-                  columns={this.columnsTable()}
-                  data={this.state.data}
-                  // loading={}
-                  // pageSize={100}
-                  onSortedChange={this.handleSortedChange}
-                  onPageChange={this.handleOnPageChange}
-                  onPageSizeChange={this.handleOnPageSizeChange}
-                  
-                  showPageJump={false}
-                  showPageSizeOptions={true}
-                  minRows={2}
-                  page={1}
-                  pages={5}
-                  defaultPageSize={this.state.table.pagination.pageSize}
+                  page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
+                  data={this.state.table.data}
+                  pages={this.state.table.pagination.totalPages}
+                  columns={this.dataTable()}
+                  defaultPageSize={this.state.table.pagination.pageSize}
+                  className='-striped'
+                  loading={this.state.table.loading}
+                  showPagination={true}
+                  showPaginationTop={false}
+                  showPaginationBottom={true}
+                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  manual // this would indicate that server side pagination has been enabled 
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
+
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
                 />
               </CardBody>
             </Card>

@@ -25,8 +25,8 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
 
-import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -34,14 +34,17 @@ class ReceiptOfFunds extends Component {
     this.codRest =  new CODRestService();
 
     this.showModal = this.showModal.bind(this);
-    this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
-    this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
+    this.dataTable = this.dataTable.bind(this);
+    // this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
+    // this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
     this.state = {
       table: {
+        loading: true,
         data: [],
         pagination: {
-          currentPage: null,
+          currentPage: 0,
           totalPages: 0,
+          skipSize: 0,
           pageSize: 10
         }
       },
@@ -112,7 +115,38 @@ class ReceiptOfFunds extends Component {
 
   componentDidMount() {
     this.codRest.getReceiptFunds().subscribe((response) => {
-    })
+    });
+    this.loadData();
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleOnPageChange(pageIndex) {
+    const table = { ...this.state.table }
+    table.loading = true;
+    table.pagination.skipSize = (pageIndex * table.pagination.pageSize);
+    table.pagination.currentPage = pageIndex;
+
+    console.log(table);
+
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleOnPageSizeChange(newPageSize, newPage) {
+    const table = { ...this.state.table }
+    table.loading = true;
+    table.pagination.pageSize = newPageSize
+    this.setState({ table });
+    this.loadData();
   }
 
   showModal(modalName) {
@@ -167,293 +201,243 @@ class ReceiptOfFunds extends Component {
   //   });
   // }
 
-  tableColumns() {
+  // tableColumns() {
+  //   return [
+  //     {
+  //       Header: "Tanggal Unggah",
+  //       accessor: "uploadDate",
+  //       Cell: props => <p>{props.value}</p>
+  //     },
+  //     {
+  //       Header: "ID File",
+  //       accessor: "idFile",
+  //       Cell: props => (
+  //         <Button color="link" onClick={() => this.showModal("resiModal")}>
+  //           <p>{props.value}</p>
+  //         </Button>
+  //       )
+  //     },
+  //     {
+  //       Header: "Nama File",
+  //       accessor: "fileName",
+  //       Cell: props => (
+  //         <Button color="link" onClick={() => this.showModal("resiModal")}>
+  //           <p className="list-item-heading">{props.value}</p>
+  //         </Button>
+  //       )
+  //     },
+  //     {
+  //       Header: "Diupload Oleh",
+  //       accessor: "uploadedBy",
+  //       Cell: props => <p>{props.value}</p>
+  //     }
+  //   ];
+  // }
+
+  dataTable() {
     return [
       {
-        Header: "Tanggal Unggah",
+        Header: "Upload Date",
         accessor: "uploadDate",
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "ID File",
-        accessor: "idFile",
-        Cell: props => (
-          <Button color="link" onClick={() => this.showModal("resiModal")}>
-            <p>{props.value}</p>
-          </Button>
-        )
-      },
-      {
-        Header: "Nama File",
-        accessor: "fileName",
-        Cell: props => (
-          <Button color="link" onClick={() => this.showModal("resiModal")}>
-            <p className="list-item-heading">{props.value}</p>
-          </Button>
-        )
-      },
-      {
-        Header: "Diupload Oleh",
-        accessor: "uploadedBy",
-        Cell: props => <p>{props.value}</p>
-      }
-    ];
-  }
-
-  dataTable() {
-    return [
-      {
-        id: 1,
-        uploadDate: "12-12-2012",
-        idFile: "0000001",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Admin"
-      },
-      {
-        id: 2,
-        uploadDate: "26-07-2019",
-        idFile: "0000002",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Manager"
-      },
-      {
-        id: 3,
-        uploadDate: "26-07-2019",
-        idFile: "0000003",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "CEO"
-      },
-      {
-        id: 4,
-        uploadDate: "26-07-2019",
-        idFile: "0000004",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "CRO"
-      },
-      {
-        id: 5,
-        uploadDate: "26-07-2019",
-        idFile: "0000005",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "CTO"
-      },
-      {
-        id: 6,
-        uploadDate: "26-07-2019",
-        idFile: "0000006",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Ngademin"
-      },
-      {
-        id: 7,
-        uploadDate: "26-07-2019",
-        idFile: "0000007",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Rakjel"
-      },
-      {
-        id: 8,
-        uploadDate: "26-07-2019",
-        idFile: "0000008",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Owner"
-      },
-      {
-        id: 9,
-        uploadDate: "26-07-2019",
-        idFile: "0000009",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Lalalala"
-      },
-      {
-        id: 10,
-        uploadDate: "26-07-2019",
-        idFile: "0000010",
-        fileName: "Data Laporan.csv",
-        uploadedBy: "Yeyeyeyeye"
-      }
-    ];
-  }
-
-  dataTableColumsCOD() {
-    // _.map(this.state.data, (v, i) => {
-    //   _.map(v.sumData, (v, i) => {
-    //     console.log(v.osName)
-    //   })
-    // })'
-    return [
-      {
-        Header: "Nama Seller",
-        accessor: "osName",
-        Footer: <p className="list-item-heading">Total</p>,
-        Cell: props => (
-          <p>
-            <Button
-              color="link"
-              className="text-primary"
-              onClick={() => this.dataTableCODSeller(props.value)}
-            >
-              {props.value}
-            </Button>
-          </p>
-        )
-      },
-      {
-        Header: "Jumlah Paket",
-        accessor: "package",
-        Cell: props => <p>{props.value} Paket</p>
-      },
-      {
-        Header: "Total",
-        accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.data.reduce(
-                (total, { totalAmount }) => (total += parseInt(totalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      },
-      {
-        Header: "Fee COD",
-        accessor: "codFeeRp",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.data.reduce(
-                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      }
-      // {
-      //   Header: "Fee COD",
-      //   accessor: "feeCOD",
-      //   Footer: (
-      //     <p>
-      //       Rp{" "}
-      //       {numeral(
-      //         this.state.data.reduce(
-      //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
-      //           0
-      //         )
-      //       ).format("0,0")}
-      //     </p>
-      //   ),
-      //   Cell: props => (
-      //     <p>
-      //       Rp {numeral(props.value).format("0,0")}
-      //     </p>
-      //   )
-      // }
-    ];
-  }
-
-  dataTableCOD() {
-    return [
-      {
-        id: 1,
-        sellerName: "A Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      },
-      {
-        id: 2,
-        sellerName: "B Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      },
-      {
-        id: 3,
-        sellerName: "C Shop",
-        packageAmount: "100 Paket",
-        total: "Rp. 2.000.000",
-        feeCOD: 1000000
-      }
-    ];
-  }
-
-  dataTableColumsCODSeller() {
-    return [
-      {
-        Header: "Resi",
-        accessor: "airwaybill",
-        Footer: <p>Total</p>,
-        Cell: props => (
-          <p>
-            <Button
-              color="link"
-              className="text-primary"
-              onClick={() => console.log(props.value)}
-            >
-              {props.value}
-            </Button>
-          </p>
-        )
-      },
-      {
-        Header: "Penerima Paket",
-        accessor: "penerima",
+        accessor: "file.id",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Total",
-        accessor: "totalAmount",
-        Cell: props => <p>{props.value}</p>,
-        Footer: props => (
-          <p>
-            Rp{" "}
-            {numeral(
-              this.state.oneData.reduce(
-                (total, { totalAmount }) => (total += parseInt(totalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        )
-      }
-      // {
-      //   Header: "Total",
-      //   accessor: "total",
-      //   Footer: (
-      //     <p>
-      //       Rp{" "}
-      //       {numeral(
-      //         this.dataTableCODSeller().reduce(
-      //           (sum, { total }) => (sum += total),
-      //           0
-      //         )
-      //       ).format("0,0")}
-      //     </p>
-      //   ),
-      //   Cell: props => (
-      //     <p>
-      //       Rp {numeral(props.value).format("0,0")}
-      //     </p>
-      //   )
-      // }
+        Header: "File Name",
+        accessor: "file.filename",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Upload By",
+        accessor: "uploadBy",
+        Cell: props => <p>{props.value}</p>
+      },
     ];
   }
 
-  dataTableCODSeller(osName) {
-    let i = _.findKey(this.state.data, ["osName", osName]);
-    let data = this.state.data[i];
+  // dataTableColumsCOD() {
+  //   // _.map(this.state.data, (v, i) => {
+  //   //   _.map(v.sumData, (v, i) => {
+  //   //     console.log(v.osName)
+  //   //   })
+  //   // })'
+  //   return [
+  //     {
+  //       Header: "Nama Seller",
+  //       accessor: "osName",
+  //       Footer: <p className="list-item-heading">Total</p>,
+  //       Cell: props => (
+  //         <p>
+  //           <Button
+  //             color="link"
+  //             className="text-primary"
+  //             onClick={() => this.dataTableCODSeller(props.value)}
+  //           >
+  //             {props.value}
+  //           </Button>
+  //         </p>
+  //       )
+  //     },
+  //     {
+  //       Header: "Jumlah Paket",
+  //       accessor: "package",
+  //       Cell: props => <p>{props.value} Paket</p>
+  //     },
+  //     {
+  //       Header: "Total",
+  //       accessor: "totalAmount",
+  //       Cell: props => <p>{props.value}</p>,
+  //       Footer: props => (
+  //         <p>
+  //           Rp{" "}
+  //           {numeral(
+  //             this.state.data.reduce(
+  //               (total, { totalAmount }) => (total += parseInt(totalAmount)),
+  //               0
+  //             )
+  //           ).format("0,0")}
+  //         </p>
+  //       )
+  //     },
+  //     {
+  //       Header: "Fee COD",
+  //       accessor: "codFeeRp",
+  //       Cell: props => <p>{props.value}</p>,
+  //       Footer: props => (
+  //         <p>
+  //           Rp{" "}
+  //           {numeral(
+  //             this.state.data.reduce(
+  //               (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+  //               0
+  //             )
+  //           ).format("0,0")}
+  //         </p>
+  //       )
+  //     }
+  //     // {
+  //     //   Header: "Fee COD",
+  //     //   accessor: "feeCOD",
+  //     //   Footer: (
+  //     //     <p>
+  //     //       Rp{" "}
+  //     //       {numeral(
+  //     //         this.state.data.reduce(
+  //     //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
+  //     //           0
+  //     //         )
+  //     //       ).format("0,0")}
+  //     //     </p>
+  //     //   ),
+  //     //   Cell: props => (
+  //     //     <p>
+  //     //       Rp {numeral(props.value).format("0,0")}
+  //     //     </p>
+  //     //   )
+  //     // }
+  //   ];
+  // }
 
-    let finish = data.v;
-    this.setState({ oneData: finish });
-    this.showModal("resiModalSeller");
-  }
+  // dataTableCOD() {
+  //   return [
+  //     {
+  //       id: 1,
+  //       sellerName: "A Shop",
+  //       packageAmount: "100 Paket",
+  //       total: "Rp. 2.000.000",
+  //       feeCOD: 1000000
+  //     },
+  //     {
+  //       id: 2,
+  //       sellerName: "B Shop",
+  //       packageAmount: "100 Paket",
+  //       total: "Rp. 2.000.000",
+  //       feeCOD: 1000000
+  //     },
+  //     {
+  //       id: 3,
+  //       sellerName: "C Shop",
+  //       packageAmount: "100 Paket",
+  //       total: "Rp. 2.000.000",
+  //       feeCOD: 1000000
+  //     }
+  //   ];
+  // }
+
+  // dataTableColumsCODSeller() {
+  //   return [
+  //     {
+  //       Header: "Resi",
+  //       accessor: "airwaybill",
+  //       Footer: <p>Total</p>,
+  //       Cell: props => (
+  //         <p>
+  //           <Button
+  //             color="link"
+  //             className="text-primary"
+  //             onClick={() => console.log(props.value)}
+  //           >
+  //             {props.value}
+  //           </Button>
+  //         </p>
+  //       )
+  //     },
+  //     {
+  //       Header: "Penerima Paket",
+  //       accessor: "penerima",
+  //       Cell: props => <p>{props.value}</p>
+  //     },
+  //     {
+  //       Header: "Total",
+  //       accessor: "totalAmount",
+  //       Cell: props => <p>{props.value}</p>,
+  //       Footer: props => (
+  //         <p>
+  //           Rp{" "}
+  //           {numeral(
+  //             this.state.oneData.reduce(
+  //               (total, { totalAmount }) => (total += parseInt(totalAmount)),
+  //               0
+  //             )
+  //           ).format("0,0")}
+  //         </p>
+  //       )
+  //     }
+  //     // {
+  //     //   Header: "Total",
+  //     //   accessor: "total",
+  //     //   Footer: (
+  //     //     <p>
+  //     //       Rp{" "}
+  //     //       {numeral(
+  //     //         this.dataTableCODSeller().reduce(
+  //     //           (sum, { total }) => (sum += total),
+  //     //           0
+  //     //         )
+  //     //       ).format("0,0")}
+  //     //     </p>
+  //     //   ),
+  //     //   Cell: props => (
+  //     //     <p>
+  //     //       Rp {numeral(props.value).format("0,0")}
+  //     //     </p>
+  //     //   )
+  //     // }
+  //   ];
+  // }
+
+  // dataTableCODSeller(osName) {
+  //   let i = _.findKey(this.state.data, ["osName", osName]);
+  //   let data = this.state.data[i];
+
+  //   let finish = data.v;
+  //   this.setState({ oneData: finish });
+  //   this.showModal("resiModalSeller");
+  // }
 
   // dataTableCODSeller() {
   //   return [
@@ -504,13 +488,36 @@ class ReceiptOfFunds extends Component {
   //   });
   // }
 
+
+  loadData() {
+    const table = { ...this.state.table }
+    table.loading = true;
+    this.setState({ table });
+
+    const params = {
+      keyword: this.state.search || null,
+      "options.take": this.state.table.pagination.pageSize,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true,
+    }
+
+    this.codRest.getReceiptFunds({ params })
+      .subscribe((response) => {
+        const table = { ...this.state.table }
+        table.data = response.data;
+        table.pagination.totalPages = response.total / table.pagination.pageSize;
+        table.loading = false;
+        this.setState({ table });
+      })
+  };
+
   handleData = data => {
     this.setState({ data: data });
   };
 
   cekdata(data) {
     return data;
-  }
+  };
 
   fileHandler = event => {
     let fileObj = event.target.files[0];
@@ -659,22 +666,29 @@ class ReceiptOfFunds extends Component {
                 </div>
 
                 <ReactTable
-                  className="-striped"
-                  columns={this.dataTable()}
-                  data={this.state.data}
-                  // loading={}
-                  // pageSize={100}
-                  onSortedChange={this.handleSortedChange}
-                  onPageChange={this.handleOnPageChange}
-                  onPageSizeChange={this.handleOnPageSizeChange}
-                  
-                  showPageJump={false}
-                  showPageSizeOptions={true}
-                  minRows={2}
-                  page={1}
-                  pages={5}
-                  // defaultPageSize={this.state.table.pagination.pageSize}
+                  page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
+                  data={this.state.table.data}
+                  pages={this.state.table.pagination.totalPages}
+                  columns={this.dataTable()}
+                  defaultPageSize={this.state.table.pagination.pageSize}
+                  className='-striped'
+                  loading={this.state.table.loading}
+                  showPagination={true}
+                  showPaginationTop={false}
+                  showPaginationBottom={true}
+                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  manual // this would indicate that server side pagination has been enabled 
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
+
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
                 />
               </CardBody>
             </Card>
@@ -705,7 +719,7 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <BootstrapTable
+              {/* <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -738,7 +752,7 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable>
+              </BootstrapTable> */}
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.showModal()}>OK</Button>
@@ -753,7 +767,7 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <BootstrapTable
+              {/* <BootstrapTable
                 data={this.state.oneData}
                 footerData={this.state.footerData2}
                 footer
@@ -782,7 +796,7 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable>
+              </BootstrapTable> */}
             </ModalBody>
             <ModalFooter>
             <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
