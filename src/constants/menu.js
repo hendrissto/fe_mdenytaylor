@@ -30,10 +30,10 @@ const data = [
     to: "/app/expenditure",
   },
   {
-    id: "subscription",
-    icon: "iconsminds-money-bag",
-    label:"menu.subscription",
-    to: "/app/subscription",
+    id: "tenants",
+    icon: "simple-icon-people",
+    label:"menu.tenants",
+    to: "/app/tenants",
   },
   {
     id: "dashboards",

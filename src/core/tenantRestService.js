@@ -1,7 +1,7 @@
 import React from "react";
 import RequestService from "../services/RequestService";
 
-export default class SubscriptionRestService extends React.Component {
+export default class TenantRestService extends React.Component {
   
   constructor() {
     super();
@@ -10,9 +10,5 @@ export default class SubscriptionRestService extends React.Component {
 
   getTenants(qParams) {
     return this.request.get('/admin/tenants', qParams);
-  }
-
-  getCODReceipts(qParams) {
-    return this.request.get('/cod-list', qParams);
   }
 }
