@@ -599,6 +599,7 @@ module.exports = {
     "modal.bank": "Bank",
     "modal.creditNumber": "No Rekening",
     "modal.total": "Total",
+    "modal.amount": "Jumlah Yang Dibayar",
     "modal.uploadReceiptTitle": "Upload Laporan Resi",
     "modal.receiptDataCOD": "Data Resi COD",
 

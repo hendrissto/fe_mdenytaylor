@@ -599,6 +599,7 @@ module.exports = {
   "modal.bank": "Bank",
   "modal.creditNumber": "Card Number",
   "modal.total": "Total",
+  "modal.amount": "Jumlah Yang Dibayar",
   "modal.uploadReceiptTitle": "Upload Report Receipt",
   "modal.receiptDataCOD": "COD Receipt Data",
 
