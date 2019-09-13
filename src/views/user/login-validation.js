@@ -5,7 +5,6 @@ const validate = Yup.object().shape({
     .email("Format email salah.")
     .required("Email tidak boleh kosong"),
   password: Yup.string()
-    .min(4, "Panjang password harus lebih dari 4")
     .required("Password tidak boleh kosong"),
 });
 
