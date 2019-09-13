@@ -24,8 +24,8 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 
-import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
@@ -538,7 +538,7 @@ class WithdrawFunds extends Component {
                     </InputGroup>
                   </div>
                 </div>
-                <BootstrapTable
+                {/* <BootstrapTable
                   data={this.dataTable()}
                   pagination={true}
                   options={option}
@@ -564,7 +564,7 @@ class WithdrawFunds extends Component {
                   <TableHeaderColumn dataFormat={this.button.bind(this)}>
                     Upload Bukti
                   </TableHeaderColumn>
-                </BootstrapTable>
+                </BootstrapTable> */}
               </CardBody>
             </Card>
           </Colxx>
