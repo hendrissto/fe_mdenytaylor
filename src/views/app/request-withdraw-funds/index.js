@@ -26,8 +26,8 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 
-import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);

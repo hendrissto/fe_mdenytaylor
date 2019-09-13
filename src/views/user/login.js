@@ -11,8 +11,9 @@ import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";
 
-import { Messages } from 'primereact/messages'
-import { Message } from 'primereact/message';
+import BaseAlert from '../base/baseAlert'
+import * as css from "../base/baseCss"
+
 class Login extends Component {
   data = {
     grant_type: "password",
@@ -35,12 +36,12 @@ class Login extends Component {
 
   handleSubmit(values) {
     if (this.state.username !== "" && this.state.password !== "") {
-      this.setState({loading: true})
+      this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
         this.props.loginUser(response, this.props.history);
-        this.setState({loading: false})
+        this.setState({ loading: false })
       }, err => {
-        this.setState({loading: false, error: true})
+        this.setState({ loading: false, error: true })
       });
     }
   }
@@ -53,6 +54,10 @@ class Login extends Component {
     this.setState({
       [name]: value
     });
+  }
+
+  showMsg() {
+    this.messages.show({ severity: 'success', summary: 'Success Message', detail: 'Order submitted' });
   }
 
   render() {
@@ -76,11 +81,15 @@ class Login extends Component {
               <NavLink to={`/`} className="white">
                 <span className="logo-single" />
               </NavLink>
-              {this.state.error && (
-                <span>Periksa Kembali Username dan Password Anda.</span>
-              )}
               <CardTitle className="mb-4">
-                <IntlMessages id="user.login-title" />
+                <strong style={css.style.login}><IntlMessages id="user.login-title" /></strong>
+                {this.state.error && (
+                <BaseAlert
+                  onClick={() => {
+                    this.setState({error: false});
+                  }}
+                />
+              )}
               </CardTitle>
               <Formik
                 initialValues={this.data}
@@ -96,9 +105,9 @@ class Login extends Component {
                         value={props.values.username}
                         onChange={props.handleChange}
                       />
-                      {props.errors && props.touched
+                      <strong style={css.style.required}>{props.errors && props.touched
                         ? props.errors.username
-                        : null}
+                        : null}</strong>
                     </Label>
 
                     <Label className="form-group has-float-label mb-4">
@@ -108,9 +117,9 @@ class Login extends Component {
                         value={props.values.password}
                         onChange={props.handleChange}
                       />
-                      {props.errors && props.touched
+                      <strong style={css.style.required}>{props.errors && props.touched
                         ? props.errors.password
-                        : null}
+                        : null}</strong>
                     </Label>
                     <div className="d-flex justify-content-between align-items-center">
                       <Button
