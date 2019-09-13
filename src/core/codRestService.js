@@ -9,7 +9,7 @@ export default class CODRestService extends React.Component {
   }
 
   getReceiptFunds(qParams) {
-      return this.request.get('/admin/tenants', qParams);
+      return this.request.get('/cod', qParams);
   }
 
   getCODReceipts(qParams) {
