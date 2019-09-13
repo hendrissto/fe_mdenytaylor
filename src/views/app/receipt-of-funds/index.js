@@ -26,6 +26,8 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import CODRestService from "../../../core/codRestService";
 import * as moment from 'moment';
 
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css'
 import "./receipt-of-funds.scss";
 
 const user = JSON.parse(localStorage.getItem('user'))
@@ -111,6 +113,63 @@ class ReceiptOfFunds extends Component {
     // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     // this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
+
+  sumData = (tableData, type) => {
+    switch (type) {
+      case "totalAmount":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "codFeeRp":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "totalReceive":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totalReceive }) => (total += parseInt(totalReceive)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+      case "totAmountCodFee":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+        break;
+    }
+  };
 
   componentDidMount() {
     this.codRest.getReceiptFunds().subscribe((response) => {
@@ -451,8 +510,8 @@ class ReceiptOfFunds extends Component {
   dataTableCODSeller(osName) {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
-
-    let finish = data.v;
+    
+    let finish = data.lines;
     this.setState({ oneData: finish });
     this.showModal("resiModalSeller");
   }
@@ -542,24 +601,25 @@ class ReceiptOfFunds extends Component {
             totalReceive: _.sumBy(newDataExcel, "totAmountCodFee")
           }))
           .value();
-        this.setState({ data });
+        this.setState({ data: data });
       }
     });
   };
 
   normalizeLines(array) {
-    let lineAmount = 0;
-    let lineCodValue = 0;
-    let lineTotal = 0;
-    for(let i = 0; i < array.length; i++){
-      lineAmount += Math.round(array[i].totalAmount);
-      lineCodValue += Math.round(array[i].codFeeRp);
-      lineTotal += Math.round(array[i].totAmountCodFee);
+    const lineValue = {
+      lines: [],
+      lineAmount: 0,
+      lineCodValue: 0,
+      lineTotal: 0,
+
     }
     
-    let lines = [];
     for(let i = 0; i < array.length; i++){
-      lines.push({
+      lineValue.lineAmount += Math.round(array[i].totalAmount);
+      lineValue.lineCodValue += Math.round(array[i].codFeeRp);
+      lineValue.lineTotal += Math.round(array[i].totAmountCodFee);
+      lineValue.lines.push({
           sellerName: array[i].osName,
           receiverName: array[i].penerima,
           trackingNumber: array[i].airwaybill.toString(),
@@ -569,20 +629,19 @@ class ReceiptOfFunds extends Component {
           total: array[i].totAmountCodFee,
       })
     }
+
     let data = {
-      lines: lines,
+      ...lineValue,
       documentNumber: '',
       uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
       lineCount: array.length,
-      lineAmount: lineAmount,
-      lineCODValue: lineCodValue,
-      lineTotal: lineTotal,
       uploadBy: user.user_name,
       file: {
         id: '',
         fileName: ''
       }
     }
+    
     this.setState({dataExcel: data})
   }
 
@@ -743,7 +802,7 @@ class ReceiptOfFunds extends Component {
           </ModalBody>
           <ModalFooter>
             <Button
-              onClick={() => this.submitData()}
+              onClick={() => this.setState({resiModal: true})}
             >
               Next
             </Button>
@@ -752,12 +811,12 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} toggle={this.showModal}>
+          <Modal isOpen={this.state.resiModal} size="lg">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-            {/* <BootstrapTable
+            <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -790,22 +849,22 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable> */}
+              </BootstrapTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.showModal()}>OK</Button>
+              <Button onClick={() => this.showModal()}>Submit</Button>
             </ModalFooter>
           </Modal>
         )}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} toggle={this.showModal}>
+          <Modal isOpen={this.state.resiModalSeller} size="lg">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              {/* <BootstrapTable
+              <BootstrapTable
                 data={this.state.oneData}
                 footerData={this.state.footerData2}
                 footer
@@ -834,12 +893,11 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable> */}
+              </BootstrapTable>
             </ModalBody>
 
             <ModalFooter>
             <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
-              <Button onClick={() => this.showModal()}>OK</Button>
             </ModalFooter>
           </Modal>
         )}
