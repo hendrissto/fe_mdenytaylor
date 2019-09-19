@@ -17,8 +17,8 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
-import { Formik } from "formik";
-import validate from "./validate";
+// import { Formik } from "formik";
+// import validate from "./validate";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 
@@ -483,19 +483,19 @@ class WithdrawFunds extends Component {
   }
 
   render() {
-    const option = {
-      sizePerPage: 5,
-      sizePerPageList: [
-        {
-          text: "5",
-          value: 5
-        },
-        {
-          text: "10",
-          value: 10
-        }
-      ]
-    };
+    // const option = {
+    //   sizePerPage: 5,
+    //   sizePerPageList: [
+    //     {
+    //       text: "5",
+    //       value: 5
+    //     },
+    //     {
+    //       text: "10",
+    //       value: 10
+    //     }
+    //   ]
+    // };
     return (
       <Fragment>
         <Row>

@@ -17,6 +17,10 @@ import app from "./views/app";
 import user from "./views/user";
 import error from "./views/error";
 import { getDirection } from "./helpers/Utils";
+import 'primereact/resources/themes/nova-light/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+
 const AuthRoute = ({ component: Component, authUser, ...rest }) => (
   <Route
     {...rest}

@@ -9,7 +9,7 @@ export default class CODRestService extends React.Component {
   }
 
   getReceiptFunds(qParams) {
-      return this.request.get('/cod', qParams);
+      return this.request.get('/credit-cod', qParams);
   }
 
   getCODReceipts(qParams) {
@@ -17,6 +17,6 @@ export default class CODRestService extends React.Component {
   }
 
   postCOD(qParams) {
-    return this.request.post('/cod', qParams);
+    return this.request.post('/credit-cod', qParams);
   }
 }

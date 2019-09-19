@@ -11,7 +11,7 @@ const IconCard = ({ className = "mb-4", icon, title, value }) => {
             <Col xs="2"> <h1 style={{ fontSize: '-webkit-xxx-large ' }}><i className={icon} /></h1> </Col>
           </Row>
           <Row>
-            <Col xs="4"><h2 className="text-left">
+            <Col xs="6"><h2 className="text-left" style={{wordBreak: 'keep-all'}}>
               <IntlMessages id={title} />
             </h2>
             </Col>

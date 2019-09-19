@@ -15,6 +15,5 @@ export default class RequestService extends HttpClientAxiosInterceptedService {
     }
 
     super(!baseUrl ? process.env.REACT_APP_API_ADMIN_URL : baseUrl, !baseUrl ? headers : {});
-
   }
 }

@@ -1,15 +1,30 @@
 import moment from "moment";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody, } from "reactstrap";
+import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
+import "react-table/react-table.css";
+import withFixedColumns from 'react-table-hoc-fixed-columns';
+import 'react-table-hoc-fixed-columns/lib/styles.css';
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
-import { InputGroup, Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
+import {
+  InputGroup,
+  Button,
+  Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Row,
+  Col
+} from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
+import IconCard from "../../../components/cards/IconCard";
 
+const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
@@ -18,6 +33,8 @@ export default class Tenant extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.state = {
+      totalTenants: 0,
+      totalCODTenants: 0,
       data: [],
       table: {
         loading: true,
@@ -48,9 +65,9 @@ export default class Tenant extends Component {
   }
 
   handleOnPageChange(pageIndex) {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = (pageIndex * table.pagination.pageSize);
+    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
     table.pagination.currentPage = pageIndex;
 
     console.log(table);
@@ -60,40 +77,45 @@ export default class Tenant extends Component {
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.pageSize = newPageSize
+    table.pagination.pageSize = newPageSize;
     this.setState({ table });
     this.loadData();
   }
 
   handleSortedChange(newSorted, column, additive) {
-    console.log(newSorted)
-    console.log(column)
-    console.log(additive)
+    console.log(newSorted);
+    console.log(column);
+    console.log(additive);
   }
 
   loadData() {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
+    let total = this.state.totalCODTenants;
 
     const params = {
       keyword: this.state.search || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
-      "options.includeTotalCount": true,
-    }
+      "options.includeTotalCount": true
+    };
 
-
-    this.tenantRest.getTenants({ params })
-      .subscribe((response) => {
-        const table = { ...this.state.table }
-        table.data = response.data;
-        table.pagination.totalPages = response.total / table.pagination.pageSize;
-        table.loading = false;
-        this.setState({ table });
-      })
+    this.tenantRest.getTenants({ params }).subscribe(response => {
+      const table = { ...this.state.table };
+      table.data = response.data;
+      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.loading = false;
+      for(let i = 0; i < response.data.length; i++){
+        if(response.data[i].siCepatCOD === true){
+          this.setState({totalCODTenants: this.state.totalCODTenants + 1})
+        }
+      }
+      this.setState({totalTenants: response.total})
+      this.setState({ table });
+    });
   }
 
   componentDidMount() {
@@ -106,83 +128,75 @@ export default class Tenant extends Component {
     }));
   }
 
-
   dataTable() {
-    return (
-      [
-        {
-          Header: "ID Tenant",
-          accessor: "id",
-          Cell: props =>
-            // <Button color="link" className="text-primary" onClick={() => {
-            //   this.toggle();
-            //   this.setState({ oneData: props.original });
-            // }}>
-            //   <p>{props.value}</p>
-            // </Button>
-            <p>{props.value}</p>
-        },
-        {
-          Header: "Nama Perusahaan",
-          accessor: "companyInfo.name",
-        },
-        {
-          Header: "Email",
-          accessor: "email",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "No Telp",
-          accessor: "phone",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Total SKU",
-          accessor: "totalSku",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Total Order",
-          accessor: "totalOrder",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Total Receipt",
-          accessor: "totalReceipt",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Total User",
-          accessor: "totalUser",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Last Login",
-          accessor: "owner.lastLoginDateUtc",
-          Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
-        },
-        {
-          Header: "Join Date",
-          accessor: "owner.joinDateUtc",
-          Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
-        },
-        {
-          Header: "Sicepat COD",
-          accessor: "siCepatCOD",
-          Cell: props => <p>{ props.value === false ? 'Tidak Aktif' : 'Aktif' }</p>
-        },
-        {
-          Header: "ID Sicepat",
-          accessor: "siCepatMemberId",
-          Cell: props => <p>{props.value}</p>
-        },
-        {
-          Header: "Status",
-          accessor: "status",
-          Cell: props => <p>{props.value === 1 ? 'Aktif' : 'Tidak Aktif'}</p>
-        },
-      ]
-    )
+    return [
+      {
+        Header: "ID Tenant",
+        accessor: "id",
+        fixed: 'left',
+        Cell: props => (
+          // <Button color="link" className="text-primary" onClick={() => {
+          //   this.toggle();
+          //   this.setState({ oneData: props.original });
+          // }}>
+          //   <p>{props.value}</p>
+          // </Button>
+          <p>{props.value}</p>
+        )
+      },
+      {
+        Header: "Nama Perusahaan",
+        accessor: "companyInfo.name",
+        fixed: 'left',
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+        fixed: 'left',
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "No Telp",
+        accessor: "phone",
+        fixed: 'left',
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Total SKU",
+        accessor: "totalSku",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Total Order",
+        accessor: "totalOrder",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Last Login",
+        accessor: "owner.lastLoginDateUtc",
+        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+      },
+      {
+        Header: "Join Date",
+        accessor: "owner.joinDateUtc",
+        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+      },
+      {
+        Header: "Sicepat COD",
+        accessor: "siCepatCOD",
+        Cell: props => <p>{props.value === false ? "Tidak Aktif" : "Aktif"}</p>
+      },
+      {
+        Header: "ID Sicepat",
+        accessor: "siCepatMemberId",
+        Cell: props => <p>{props.value === null ? '-' : props.value}</p>
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+        Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
+      }
+    ];
   }
   oneData() {
     return (
@@ -213,10 +227,10 @@ export default class Tenant extends Component {
           <Col> {this.state.oneData.status} </Col>
         </Row>
       </div>
-    )
+    );
   }
-  render() {
 
+  render() {
     return (
       <Fragment>
         <Row>
@@ -229,54 +243,69 @@ export default class Tenant extends Component {
           <Colxx xxs="12">
             <Card className="mb-12 lg-12">
               <CardBody>
+                <Row>
+                  <Colxx xxs="6">
+                    <IconCard
+                      title="Total Registered Tenants"
+                      value={this.state.totalTenants}
+                      className="mb-4"
+                    />
+                  </Colxx>
+                  <Colxx xxs="6">
+                    <IconCard
+                      title="Total Registered COD Tenants"
+                      value={'asap'}
+                      className="mb-4"
+                    />
+                  </Colxx>
+                </Row>
+              </CardBody>
+            </Card>
+          </Colxx>
+        </Row>
+        <Row style={{ marginTop: 20 }}>
+          <Colxx xxs="12">
+            <Card className="mb-12 lg-12">
+              <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} toggle={this.toggleSplit}>
-                      <DropdownToggle color="primary" className="default">
-                        <i className="simple-icon-menu" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
-                      <Input placeholder="Search Owner" name="search" value={this.state.search} onChange={this.handleInputChange}
+                      <Input
+                        placeholder="Search Owner"
+                        name="search"
+                        value={this.state.search}
+                        onChange={this.handleInputChange}
                         onKeyPress={event => {
-                          if (event.key === 'Enter') {
+                          if (event.key === "Enter") {
                             this.loadData();
                           }
-                        }} />
-                      <Button className="default" color="primary" onClick={() => this.loadData()}>
+                        }}
+                      />
+                      <Button
+                        className="default"
+                        color="primary"
+                        onClick={() => this.loadData()}
+                      >
                         <i className="simple-icon-magnifier" />
                       </Button>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} toggle={this.toggleSplit1}>
-                      <DropdownToggle color="primary" className="default">
-                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
                     </InputGroup>
                   </div>
                 </div>
 
-                <ReactTable
+                <ReactTableFixedColumn
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
                   pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
                   defaultPageSize={this.state.table.pagination.pageSize}
-                  className='-striped'
+                  className="-striped"
                   loading={this.state.table.loading}
                   showPagination={true}
                   showPaginationTop={false}
                   showPaginationBottom={true}
                   pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                  manual // this would indicate that server side pagination has been enabled 
+                  manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
 
@@ -293,16 +322,20 @@ export default class Tenant extends Component {
           </Colxx>
         </Row>
 
-        <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
+        <Modal
+          isOpen={this.state.modal}
+          toggle={this.toggle}
+          className={this.props.className}
+        >
           <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-          <ModalBody>
-            {this.oneData()}
-          </ModalBody>
+          <ModalBody>{this.oneData()}</ModalBody>
           <ModalFooter>
-            <Button color="primary" outline onClick={this.toggle}>Close</Button>
+            <Button color="primary" outline onClick={this.toggle}>
+              Close
+            </Button>
           </ModalFooter>
         </Modal>
       </Fragment>
-    )
+    );
   }
 }
