@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardBody, CardTitle } from "reactstrap";
-import BigCalendar from "react-big-calendar";
+// import BigCalendar from "react-big-calendar";
+import { Calendar as BigCalendar, momentLocalizer} from 'react-big-calendar';
 import moment from "moment";
 
 import { CalendarToolbar } from "../../components/CalendarToolbar";
@@ -9,10 +10,9 @@ import data from "../../data/events";
 
 import { getDirection } from "../../helpers/Utils";
 
-BigCalendar.momentLocalizer(moment);
 
 const Calendar = () => {
-  const localizer = BigCalendar.momentLocalizer(moment);
+  const localizer = momentLocalizer(moment);
   return (
     <Card>
       <CardBody>

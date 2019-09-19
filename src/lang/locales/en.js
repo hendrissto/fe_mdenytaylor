@@ -62,12 +62,14 @@ module.exports = {
   "menu.expenditure": "Expenditure",
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
-  "menu.receipt-of-funds": "Transfer COD Credit",
+  "menu.receipt-of-funds": "Receipt Funds History",
+  "menu.tenants": "Tenants",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
   "menu.ecommerce": "Ecommerce",
   "menu.content": "Content",
   "menu.pages": "Pages",
+  "menu.billing": "Billing Inggris",
   "menu.data-list": "Data List",
   "menu.thumb-list": "Thumb List",
   "menu.image-list": "Image List",
@@ -189,6 +191,9 @@ module.exports = {
   "dashboards.keyword": "Keyword",
   "dashboards.search": "Search",
   "dashboards.top-rated-items": "Top Rated Items",
+
+  /* Receipt Funds History */
+  "ui.menu.receipt-of-funds.list.button.uploadAWB": "Upload AWB Number",
 
   /* 05.Pages */
   "pages.add-new": "ADD NEW",
@@ -595,6 +600,7 @@ module.exports = {
   "modal.bank": "Bank",
   "modal.creditNumber": "Card Number",
   "modal.total": "Total",
+  "modal.amount": "Jumlah Yang Dibayar",
   "modal.uploadReceiptTitle": "Upload Report Receipt",
   "modal.receiptDataCOD": "COD Receipt Data",
 

@@ -134,6 +134,7 @@ export default class DataTablePagination extends Component {
             </PaginationItem>
 
             {this.renderPages()}
+
             <PaginationItem className={`${!canNext && "disabled"}`}>
               <PaginationLink
                 className="next"

@@ -1,0 +1,11 @@
+.rt-tbody {
+  overflow: visible !important;
+}
+
+.sticky {
+  position: sticky !important;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  background-color: white;
+}

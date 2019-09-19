@@ -29,6 +29,18 @@ const data = [
   //   label:"menu.expenditure",
   //   to: "/app/expenditure",
   // },
+  {
+    id: "tenants",
+    icon: "simple-icon-people",
+    label:"menu.tenants",
+    to: "/app/tenants",
+  },
+  {
+    id: "billing",
+    icon: "iconsminds-shop-4",
+    label:"menu.billing",
+    to: "/app/billing",
+  },
   // {
   //   id: "dashboards",
   //   icon: "iconsminds-shop-4",

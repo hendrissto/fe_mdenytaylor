@@ -302,7 +302,7 @@ class Sidebar extends Component {
         <div className="main-menu">
           <div className="scroll">
             <PerfectScrollbar
-              option={{ suppressScrollX: true, wheelPropagation: false }}
+              options={{ suppressScrollX: true, wheelPropagation: false }}
             >
               <Nav vertical className="list-unstyled">
                 {menuItems &&
@@ -347,7 +347,7 @@ class Sidebar extends Component {
         <div className="sub-menu">
           <div className="scroll">
             <PerfectScrollbar
-              option={{ suppressScrollX: true, wheelPropagation: false }}
+              options={{ suppressScrollX: true, wheelPropagation: false }}
             >
               {menuItems &&
                 menuItems.map(item => {

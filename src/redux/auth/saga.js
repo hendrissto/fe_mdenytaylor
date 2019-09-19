@@ -12,25 +12,37 @@ import {
     registerUserSuccess
 } from './actions';
 
-const loginWithEmailPasswordAsync = async (email, password) =>
-    await auth.signInWithEmailAndPassword(email, password)
-        .then(authUser => authUser)
-        .catch(error => error);
+// const loginWithEmailPasswordAsync = async (email, password) =>
+//     await auth.signInWithEmailAndPassword(email, password)
+//         .then(authUser => authUser)
+//         .catch(error => error);
 
 
 
-function* loginWithEmailPassword({ payload }) {
-    const { email, password } = payload.user;
+// function* loginWithEmailPassword({ payload }) {
+//     const { email, password } = payload.user;
+//     const { history } = payload;
+//     try {
+//         const loginUser = yield call(loginWithEmailPasswordAsync, email, password);
+//         if (!loginUser.message) {
+//             localStorage.setItem('user', loginUser.user.uid);
+//             yield put(loginUserSuccess(loginUser));
+//             history.push('/');
+//         } else {
+//             console.log('login failed :', loginUser.message)
+//         }
+//     } catch (error) {
+//         console.log('login error : ', error)
+//     }
+// }
+
+function* loginWithEmailPassword({payload}) {
+    const { user } = payload;
     const { history } = payload;
     try {
-        const loginUser = yield call(loginWithEmailPasswordAsync, email, password);
-        if (!loginUser.message) {
-            localStorage.setItem('user_id', loginUser.user.uid);
-            yield put(loginUserSuccess(loginUser));
-            history.push('/');
-        } else {
-            console.log('login failed :', loginUser.message)
-        }
+        localStorage.setItem('user', JSON.stringify(user));
+        yield put(loginUserSuccess(user));
+        history.push('/');
     } catch (error) {
         console.log('login error : ', error)
     }
@@ -69,7 +81,7 @@ function* logout({payload}) {
     const { history } = payload
     try {
         yield call(logoutAsync,history);
-        localStorage.removeItem('user_id');
+        localStorage.removeItem('user');
     } catch (error) {
     }
 }

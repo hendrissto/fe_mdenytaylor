@@ -6,18 +6,58 @@ import { connect } from "react-redux";
 import { loginUser } from "../../redux/actions";
 import { Colxx } from "../../components/common/CustomBootstrap";
 import IntlMessages from "../../helpers/IntlMessages";
+import AuthRestService from "../../core/authRestService";
+import Loading from '../../containers/pages/Spinner'
+import { Formik } from "formik";
+import validate from "./login-validation";
+
+import BaseAlert from '../base/baseAlert'
+import * as css from "../base/baseCss"
+
 class Login extends Component {
+  data = {
+    grant_type: "password",
+    username: "admin@clodeo.com",
+    password: "HVVbPz64e5ejvsvm",
+    client_id: "clodeo-admin-web"
+  };
   constructor(props) {
     super(props);
+    this.authRest = new AuthRestService();
+
     this.state = {
-      email: "demo@gogo.com",
-      password: "gogo123"
+      loading: false,
+      error: false,
     };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
-  onUserLogin() {
-    if (this.state.email !== "" && this.state.password !== "") {
-      this.props.loginUser(this.state, this.props.history);
+
+  handleSubmit(values) {
+    if (this.state.username !== "" && this.state.password !== "") {
+      this.setState({ loading: true })
+      this.authRest.login(values).subscribe(response => {
+        this.props.loginUser(response, this.props.history);
+        this.setState({ loading: false })
+      }, err => {
+        this.setState({ loading: false, error: true })
+      });
     }
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  showMsg() {
+    this.messages.show({ severity: 'success', summary: 'Success Message', detail: 'Order submitted' });
   }
 
   render() {
@@ -42,37 +82,64 @@ class Login extends Component {
                 <span className="logo-single" />
               </NavLink>
               <CardTitle className="mb-4">
-                <IntlMessages id="user.login-title" />
+                <strong style={css.style.login}><IntlMessages id="user.login-title" /></strong>
+                {this.state.error && (
+                <BaseAlert
+                  onClick={() => {
+                    this.setState({error: false});
+                  }}
+                />
+              )}
               </CardTitle>
-              <Form>
-                <Label className="form-group has-float-label mb-4">
-                  <Input type="email" defaultValue={this.state.email} />
-                  <IntlMessages id="user.email" />
-                </Label>
-                <Label className="form-group has-float-label mb-4">
-                  <Input type="password" />
-                  <IntlMessages
-                    id="user.password"
-                    defaultValue={this.state.password}
-                  />
-                </Label>
-                <div className="d-flex justify-content-between align-items-center">
-                  <NavLink to={`/forgot-password`}>
-                    <IntlMessages id="user.forgot-password-question" />
-                  </NavLink>
-                  <Button
-                    color="primary"
-                    className="btn-shadow"
-                    size="lg"
-                    onClick={() => this.onUserLogin()}
-                  >
-                    <IntlMessages id="user.login-button" />
-                  </Button>
-                </div>
-              </Form>
+              <Formik
+                initialValues={this.data}
+                onSubmit={this.handleSubmit}
+                validationSchema={validate}
+              >
+                {props => (
+                  <Form>
+                    <Label className="form-group has-float-label mb-4">
+                      <Input
+                        name="username"
+                        type="email"
+                        value={props.values.username}
+                        onChange={props.handleChange}
+                      />
+                      <strong style={css.style.required}>{props.errors && props.touched
+                        ? props.errors.username
+                        : null}</strong>
+                    </Label>
+
+                    <Label className="form-group has-float-label mb-4">
+                      <Input
+                        name="password"
+                        type="password"
+                        value={props.values.password}
+                        onChange={props.handleChange}
+                      />
+                      <strong style={css.style.required}>{props.errors && props.touched
+                        ? props.errors.password
+                        : null}</strong>
+                    </Label>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <Button
+                        color="primary"
+                        className="btn-shadow"
+                        size="lg"
+                        onClick={props.handleSubmit}
+                      >
+                        <IntlMessages id="user.login-button" />
+                      </Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
             </div>
           </Card>
         </Colxx>
+        {this.state.loading && (
+          <Loading />
+        )}
       </Row>
     );
   }
