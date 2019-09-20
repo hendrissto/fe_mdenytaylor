@@ -30,6 +30,7 @@ import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 
 import { Checkbox } from "primereact/checkbox";
+import { Dropdown } from "primereact/dropdown";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
@@ -63,9 +64,13 @@ export default class Billing extends Component {
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.toggleRenew = this.toggleRenew.bind(this);
+    this.toggleUpgrade = this.toggleUpgrade.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
     this.togglePopoverColumns = this.togglePopoverColumns.bind(this);
     this.onFilterColumnChange = this.onFilterColumnChange.bind(this);
+    this.onPackageChange = this.onPackageChange.bind(this);
+    this.onBillingCycleChange = this.onBillingCycleChange.bind(this);
     this.loadTenantsSubscriptionsSummary = this.loadTenantsSubscriptionsSummary.bind(
       this
     );
@@ -87,12 +92,15 @@ export default class Billing extends Component {
         }
       },
       tenantsSubscriptionsSummary: [],
+      package: [],
       checked: false,
       dropdownOpen: false,
       popoverOpen: false,
       popoverColumns: false,
       collapse: false,
       modal: false,
+      renewModal: false,
+      upgradeModal: false,
       oneData: "",
       search: ""
     };
@@ -176,6 +184,14 @@ export default class Billing extends Component {
     console.log(additive);
   }
 
+  onPackageChange(e) {
+    this.setState({ package: e.value });
+  }
+
+  onBillingCycleChange(e) {
+    this.setState({ billingCycle: e.value});
+  }
+
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -213,7 +229,19 @@ export default class Billing extends Component {
 
   toggle() {
     this.setState(prevState => ({
-      modal: !prevState.modal
+      modal: false
+    }));
+  }
+
+  toggleRenew() {
+    this.setState(prevState => ({
+      renewModal: false
+    }));
+  }
+
+  toggleUpgrade() {
+    this.setState(prevState => ({
+      upgradeModal: false
     }));
   }
 
@@ -276,7 +304,13 @@ export default class Billing extends Component {
           this.state.filterColumns.indexOf("Expired Date Trial") > -1
             ? false
             : true,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Tanggal Mulai",
@@ -284,7 +318,13 @@ export default class Billing extends Component {
         width: 150,
         show:
           this.state.filterColumns.indexOf("Tanggal Mulai") > -1 ? false : true,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Tanggal Penagihan",
@@ -294,7 +334,13 @@ export default class Billing extends Component {
           this.state.filterColumns.indexOf("Tanggal Penagihan") > -1
             ? false
             : true,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Billing Cycle",
@@ -324,10 +370,19 @@ export default class Billing extends Component {
               className="float-right default"
               color="secondary"
               style={{ marginRight: 10 }}
+              onClick={() => {
+                this.setState({ upgradeModal: true });
+              }}
             >
               Upgrade
             </Button>
-            <Button className="float-right default" color="secondary">
+            <Button
+              className="float-right default"
+              color="secondary"
+              onClick={() => {
+                this.setState({ renewModal: true });
+              }}
+            >
               Renew
             </Button>
           </Row>
@@ -390,6 +445,18 @@ export default class Billing extends Component {
   }
 
   render() {
+    const paket = [
+      { name: "Starter", code: "starter" },
+      { name: "Growing", code: "growing" },
+      { name: "Professional", code: "professional" }
+    ];
+
+    const billingCycle = [
+      { name: "1 Bulan", code: "1" },
+      { name: "3 Bulan", code: "3" },
+      { name: "6 Bulan", code: "6" },
+      { name: "12 Bulan", code: "12" },
+    ]
     return (
       <Fragment>
         <Row>
@@ -438,7 +505,7 @@ export default class Billing extends Component {
                 </Row>
                 <Row
                   style={{
-										marginTop: 60,
+                    marginTop: 60,
                     height: 70
                   }}
                 >
@@ -748,19 +815,90 @@ export default class Billing extends Component {
           </Colxx>
         </Row>
 
-        <Modal
-          isOpen={this.state.modal}
-          toggle={this.toggle}
-          className={this.props.className}
-        >
-          <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-          <ModalBody>{this.oneData()}</ModalBody>
-          <ModalFooter>
-            <Button color="primary" outline onClick={this.toggle}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.modal && (
+          <Modal
+            isOpen={this.state.modal}
+            toggle={this.toggle}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalBody>{this.oneData()}</ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggle}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.renewModal && (
+          <Modal
+            isOpen={this.state.renewModal}
+            toggle={this.toggleRenew}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalBody>Renew Modal</ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleRenew}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.upgradeModal && (
+          <Modal
+            isOpen={this.state.upgradeModal}
+            toggle={this.toggleUpgrade}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col xs="3" style={{
+                  marginTop: 5
+                }}> Package </Col>
+                <Col xs="1" style={{
+                  marginTop: 5
+                }}>:</Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.package}
+                    options={paket}
+                    onChange={this.onPackageChange}
+                    placeholder="Select a Package"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row style={{
+                marginTop: 10
+              }}>
+                <Col xs="3" style={{
+                  marginTop: 5
+                }}> Billing Cycle </Col>
+                <Col xs="1" style={{
+                  marginTop: 5
+                }}>:</Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.billingCycle}
+                    options={billingCycle}
+                    onChange={this.onBillingCycleChange}
+                    placeholder="Select a Billing Cycle"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleUpgrade}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
       </Fragment>
     );
   }

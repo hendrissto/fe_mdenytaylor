@@ -11,4 +11,8 @@ export default class WithdrawRestService extends React.Component {
   getBallance(qParams) {
     return this.request.get('/wallet-balance', qParams);
   }
+
+  postBallance(qParams) {
+    return this.request.post('/debit-cod', qParams);
+  }
 }

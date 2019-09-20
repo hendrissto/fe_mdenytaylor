@@ -10,7 +10,8 @@ import {
   ModalBody,
   ModalFooter,
   InputGroup,
-  Input
+  Input,
+  Col
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
 
@@ -24,23 +25,33 @@ import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
+import RelatedDataRestService from "../../../core/relatedDataRestService"
 import * as moment from "moment";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 
+import { Dropdown } from "primereact/dropdown";
+
+
+import BaseAlert from "../../base/baseAlert";
+import * as css from "../../base/baseCss"
+
 const user = JSON.parse(localStorage.getItem("user"));
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
     this.codRest = new CODRestService();
+    this.relatedData = new RelatedDataRestService();
 
     this.showModal = this.showModal.bind(this);
     this.dataTable = this.dataTable.bind(this);
-    // this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
-    // this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
+    this.loadRelatedData = this.loadRelatedData.bind(this);
+    this.onCourierChange = this.onCourierChange.bind(this);
+
     this.state = {
+      error: false,
       fileTemp: null,
       dataExcel: null,
       table: {
@@ -53,6 +64,8 @@ class ReceiptOfFunds extends Component {
           pageSize: 10
         }
       },
+      relatedData: [],
+      selectedCourier: [],
       modal: false,
       resiModal: false,
       resiModalSeller: false,
@@ -175,9 +188,12 @@ class ReceiptOfFunds extends Component {
   };
 
   componentDidMount() {
-    this.codRest.getReceiptFunds().subscribe(response => {
-    });
     this.loadData();
+    this.loadRelatedData();
+  }
+
+  onCourierChange(e) {
+    this.setState({ selectedCourier: e.value });
   }
 
   handleInputChange(event) {
@@ -570,6 +586,12 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  loadRelatedData() {
+    this.relatedData.getCourierChannel().subscribe(response => {
+      this.setState({ relatedData: response });
+    });
+  }
+
   handleData = data => {
     this.setState({ data: data });
   };
@@ -581,7 +603,7 @@ class ReceiptOfFunds extends Component {
   fileHandler = event => {
     let fileObj = event.target.files[0];
 
-    this.setState({fileTemp: fileObj});
+    this.setState({ fileTemp: fileObj });
   };
 
   excelProcess() {
@@ -623,7 +645,6 @@ class ReceiptOfFunds extends Component {
         sellerName: array[i].osName,
         deliveryNotes: array[i].deliveredNotes,
         airwaybillNumber: array[i].airwaybill.toString(),
-        courierChannelId: "sicepat",
         note: array[i].notes || "",
         amount: array[i].totalAmount || 0,
         codValue: Math.round(array[i].codFeeRp) || 0,
@@ -644,10 +665,11 @@ class ReceiptOfFunds extends Component {
     let data = {
       ...lineValue,
       uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
-      uploadBy: user.user_name
+      uploadBy: user.user_name,
+      courierChannelId: this.state.selectedCourier.id,
     };
 
-    this.setState({ dataExcel: data });
+    this.setState({ dataExcel: data, selectedCourier: [] });
   }
 
   submitData() {
@@ -709,24 +731,17 @@ class ReceiptOfFunds extends Component {
   }
 
   nextStep() {
-    this.excelProcess();
-    this.setState({resiModal: true});
+    if(this.state.selectedCourier.length === 0 || this.state.fileTemp === null){
+      this.setState({ error: true })
+    }else{
+      this.setState({ error: false })
+      this.excelProcess();
+      this.setState({ resiModal: true });
+    }
   }
 
   render() {
-    const option = {
-      sizePerPage: 5,
-      sizePerPageList: [
-        {
-          text: "5",
-          value: 5
-        },
-        {
-          text: "10",
-          value: 10
-        }
-      ]
-    };
+    const option = this.state.relatedData.courierChannel;
     return (
       <Fragment>
         <Row>
@@ -827,17 +842,55 @@ class ReceiptOfFunds extends Component {
         </Row>
 
         {/* MODAL UPLOAD RESI */}
-        <Modal isOpen={this.state.modal} toggle={this.showModal}>
-          <ModalHeader>
-            <IntlMessages id="modal.uploadReceiptTitle" />
-          </ModalHeader>
-          <ModalBody>
-            <input type="file" onChange={this.fileHandler.bind(this)} />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.nextStep()}>Next</Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.modal && (
+          <Modal isOpen={this.state.modal} toggle={this.showModal}>
+            <ModalHeader>
+              <IntlMessages id="modal.uploadReceiptTitle" />
+            </ModalHeader>
+            <ModalBody>
+            {this.state.error && (
+              <BaseAlert
+                onClick={() => {
+                  this.setState({error: false});
+                }}
+                text={'Semua data wajib diisi'}
+              />
+            )}
+              <Row>
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Courier
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.selectedCourier}
+                    options={option}
+                    onChange={this.onCourierChange}
+                    placeholder="Select a Package"
+                    optionLabel="name"
+                    required
+                  />
+                </Col>
+              </Row>
+              <input type="file" onChange={this.fileHandler.bind(this)} required/>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.nextStep()}>Next</Button>
+            </ModalFooter>
+          </Modal>
+        )}
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (

@@ -29,6 +29,9 @@ import DataTablePagination from "../../../components/DatatablePagination";
 import WithdrawRestService from "../../../core/requestWithdrawRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import { InputText } from "primereact/inputtext";
+import { InputSwitch } from "primereact/inputswitch";
+
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
@@ -52,7 +55,8 @@ class WithdrawFunds extends Component {
       dropdownOpen: false,
       splitButtonOpen: false,
       dropdownOpen1: false,
-      splitButtonOpen1: false
+      splitButtonOpen1: false,
+      isDraft: false
     };
 
     this.loadData = this.loadData.bind(this);
@@ -102,28 +106,18 @@ class WithdrawFunds extends Component {
   dataTableColumns() {
     return [
       {
-        Header: "Permintaan Penarikan",
-        accessor: "requestWithdraw",
+        Header: "Full Name",
+        accessor: "fullName",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Seller",
-        accessor: "seller",
+        Header: "Company",
+        accessor: "companyName",
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Jumlah Saldo Ditarik",
-        accessor: "amountWithdraw",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Ditarik ke Rekening",
-        accessor: "withdrawToAccount",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Cabang Bank",
-        accessor: "bankBranch",
+        accessor: "balance",
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -264,19 +258,6 @@ class WithdrawFunds extends Component {
   }
 
   render() {
-    // const option = {
-    //   sizePerPage: 5,
-    //   sizePerPageList: [
-    //     {
-    //       text: "5",
-    //       value: 5
-    //     },
-    //     {
-    //       text: "10",
-    //       value: 10
-    //     }
-    //   ]
-    // };
     return (
       <Fragment>
         <Row>
@@ -386,71 +367,65 @@ class WithdrawFunds extends Component {
                     <IntlMessages id="modal.seller" />
                   </td>
                   <td>:</td>
-                  <td>{this.state.oneData.seller}</td>
+                  <td>sellerName [ debit-cod ]</td>
                 </tr>
                 <tr>
                   <td>
                     <IntlMessages id="modal.cardName" />
                   </td>
                   <td>:</td>
-                  <td>{this.state.oneData.seller}</td>
+                  <td>accountName [ tenant-bank ]</td>
                 </tr>
                 <tr>
                   <td>
                     <IntlMessages id="modal.bank" />
                   </td>
                   <td>:</td>
-                  <td>{this.state.oneData.withdrawToAccount}</td>
+                  <td>bankName [ tenant-bank ]</td>
                 </tr>
                 <tr>
                   <td>
                     <IntlMessages id="modal.creditNumber" />
                   </td>
                   <td>:</td>
-                  <td>{this.state.oneData.receiptNumber}</td>
+                  <td>accountNumber [ tenant-bank ]</td>
                 </tr>
                 <tr>
                   <td>
                     <IntlMessages id="modal.total" />
                   </td>
                   <td>:</td>
-                  <td>{this.state.oneData.amountWithdraw}</td>
+                  <td>amount [ debit-cod ]</td>
                 </tr>
                 <tr>
-                  {this.state.oneData.status === "Berhasil" ? (
-                    <div></div>
-                  ) : (
-                    <>
-                      <td>
-                        <IntlMessages id="modal.amount" />
-                      </td>
-                      <td>:</td>
-                      <td>
-                        <input type="text" name="amount" />
-                      </td>
-                    </>
-                  )}
+                  <td>Total Bayar</td>
+                  <td>:</td>
+                  <td>
+                    <InputText placeholder="pay amount" />
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="3">
+                    <Input type="file" />
+                  </td>
                 </tr>
               </tbody>
             </Table>
-            {this.state.oneData.status === "Berhasil" ? (
-              <div>Disini Bukti Transfer.</div>
-            ) : (
-              <div>
-                <Input type="file" />
-              </div>
-            )}
+            <InputSwitch
+              checked={this.state.isDraft}
+              onChange={e => this.setState({ isDraft: e.value })}
+            />
+            <div style={{
+              marginLeft: 50,
+              marginTop: -25
+            }}>
+              Simpan Sebagai Draft
+            </div>
           </ModalBody>
           <ModalFooter>
-            {this.state.oneData.status === "Berhasil" ? (
-              <Button color="danger" onClick={this.toggle}>
-                Close
-              </Button>
-            ) : (
-              <Button color="primary" onClick={this.toggle}>
-                Upload
-              </Button>
-            )}
+            <Button color="primary" onClick={this.toggle}>
+              Upload
+            </Button>
           </ModalFooter>
         </Modal>
       </Fragment>
