@@ -3,8 +3,8 @@ import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import withFixedColumns from 'react-table-hoc-fixed-columns';
-import 'react-table-hoc-fixed-columns/lib/styles.css';
+import withFixedColumns from "react-table-hoc-fixed-columns";
+import "react-table-hoc-fixed-columns/lib/styles.css";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -30,6 +30,7 @@ export default class Tenant extends Component {
     super(props);
     this.tenantRest = new TenantRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
 
     this.toggle = this.toggle.bind(this);
     this.state = {
@@ -46,7 +47,7 @@ export default class Tenant extends Component {
           pageSize: 10
         }
       },
-
+      tenantsSummary: [],
       dropdownOpen: false,
       modal: false,
       oneData: "",
@@ -108,18 +109,25 @@ export default class Tenant extends Component {
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
       table.loading = false;
-      for(let i = 0; i < response.data.length; i++){
-        if(response.data[i].siCepatCOD === true){
-          this.setState({totalCODTenants: this.state.totalCODTenants + 1})
+      for (let i = 0; i < response.data.length; i++) {
+        if (response.data[i].siCepatCOD === true) {
+          this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
         }
       }
-      this.setState({totalTenants: response.total})
+      this.setState({ totalTenants: response.total });
       this.setState({ table });
     });
   }
 
   componentDidMount() {
     this.loadData();
+    this.loadTenantsSummmary();
+  }
+
+  loadTenantsSummmary() {
+    this.tenantRest.getTenantsSummary().subscribe(response => {
+      this.setState({ tenantsSummary: response });
+    });
   }
 
   toggle() {
@@ -133,7 +141,7 @@ export default class Tenant extends Component {
       {
         Header: "ID Tenant",
         accessor: "id",
-        fixed: 'left',
+        fixed: "left",
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -147,18 +155,18 @@ export default class Tenant extends Component {
       {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
-        fixed: 'left',
+        fixed: "left"
       },
       {
         Header: "Email",
         accessor: "email",
-        fixed: 'left',
+        fixed: "left",
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "No Telp",
         accessor: "phone",
-        fixed: 'left',
+        fixed: "left",
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -170,6 +178,27 @@ export default class Tenant extends Component {
         Header: "Total Order",
         accessor: "totalOrder",
         Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Total Receipt",
+        accessor: "totalReceipt",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Total User",
+        accessor: "totalUser",
+        Cell: props => (
+          <Button
+            color="link"
+            className="text-primary"
+            onClick={() => {
+              this.toggle();
+              this.setState({ oneData: props.original });
+            }}
+          >
+            <p>{props.value}</p>
+          </Button>
+        )
       },
       {
         Header: "Last Login",
@@ -189,7 +218,7 @@ export default class Tenant extends Component {
       {
         Header: "ID Sicepat",
         accessor: "siCepatMemberId",
-        Cell: props => <p>{props.value === null ? '-' : props.value}</p>
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
@@ -199,35 +228,29 @@ export default class Tenant extends Component {
     ];
   }
   oneData() {
-    return (
-      <div>
-        <Row>
-          <Col xs="3"> No. Receipt </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.receiptNumber} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Sender </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.sender} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Receiver </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.receiver} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Total </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.amount} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Status </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.status} </Col>
-        </Row>
-      </div>
-    );
+    let dataTable = [];
+    const data = this.state.oneData.users;
+    
+    for (let i = 0; i < data.length; i++) {
+      dataTable.push(
+        <div style={{
+          marginBottom: 10
+        }}>
+          <Row>
+            <Col xs="3"> ID User </Col>
+            <Col xs="1">:</Col>
+            <Col> {data[i].id} </Col>
+          </Row>
+          <Row>
+            <Col xs="3"> User Name </Col>
+            <Col xs="1">:</Col>
+            <Col> {data[i].fullName} </Col>
+          </Row>
+        </div>
+      );
+    }
+    
+    return dataTable;
   }
 
   render() {
@@ -247,14 +270,14 @@ export default class Tenant extends Component {
                   <Colxx xxs="6">
                     <IconCard
                       title="Total Registered Tenants"
-                      value={this.state.totalTenants}
+                      value={this.state.tenantsSummary.totalTenant}
                       className="mb-4"
                     />
                   </Colxx>
                   <Colxx xxs="6">
                     <IconCard
                       title="Total Registered COD Tenants"
-                      value={'asap'}
+                      value={this.state.tenantsSummary.totalTenantRegisteredCOD}
                       className="mb-4"
                     />
                   </Colxx>
@@ -322,19 +345,21 @@ export default class Tenant extends Component {
           </Colxx>
         </Row>
 
-        <Modal
-          isOpen={this.state.modal}
-          toggle={this.toggle}
-          className={this.props.className}
-        >
-          <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-          <ModalBody>{this.oneData()}</ModalBody>
-          <ModalFooter>
-            <Button color="primary" outline onClick={this.toggle}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.oneData && (
+          <Modal
+            isOpen={this.state.modal}
+            toggle={this.toggle}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalBody>{this.oneData()}</ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggle}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
       </Fragment>
     );
   }

@@ -14,6 +14,7 @@ export default class RequestService extends HttpClientAxiosInterceptedService {
       }
     }
 
-    super(!baseUrl ? process.env.REACT_APP_API_ADMIN_URL : baseUrl, !baseUrl ? headers : {});
+    super(!baseUrl ? 'https://clodeo-dev-api-admin.azurewebsites.net' : baseUrl, !baseUrl ? headers : {});
+    console.log(!baseUrl ? process.env.REACT_APP_API_ADMIN_URL : baseUrl)
   }
 }

@@ -26,7 +26,7 @@ import {
   PopoverBody
 } from "reactstrap";
 
-import TenantRestService from "../../../core/tenantRestService";
+import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 
 import { Checkbox } from "primereact/checkbox";
@@ -37,21 +37,45 @@ const filterStyle = {
   marginLeft: 30,
   marginTop: 10
 };
+
+const filterColumnsStyle = {
+  marginBottom: 7
+};
+
+const tableColumnsData = [
+  "ID Tenant",
+  "Nama Perusahaan",
+  "Email",
+  "No Telepon",
+  "Package",
+  "Expired Date Trial",
+  "Tanggal Mulai",
+  "Tanggal Penagihan",
+  "Billing Cycle",
+  "Total Penagihan",
+  "Status"
+];
 export default class Billing extends Component {
   constructor(props) {
     super(props);
-    this.tenantRest = new TenantRestService();
+    this.billingRest = new BillingRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
     this.toggle = this.toggle.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
+    this.togglePopoverColumns = this.togglePopoverColumns.bind(this);
+    this.onFilterColumnChange = this.onFilterColumnChange.bind(this);
+    this.loadTenantsSubscriptionsSummary = this.loadTenantsSubscriptionsSummary.bind(
+      this
+    );
 
     this.state = {
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
       filter: [],
+      filterColumns: [],
       table: {
         loading: true,
         data: [],
@@ -62,9 +86,11 @@ export default class Billing extends Component {
           pageSize: 10
         }
       },
+      tenantsSubscriptionsSummary: [],
       checked: false,
       dropdownOpen: false,
       popoverOpen: false,
+      popoverColumns: false,
       collapse: false,
       modal: false,
       oneData: "",
@@ -84,6 +110,18 @@ export default class Billing extends Component {
     this.setState({ filter: selectedFilter });
   }
 
+  onFilterColumnChange(e) {
+    let selectedFilter = [...this.state.filterColumns];
+
+    if (e.checked) {
+      selectedFilter.splice(selectedFilter.indexOf(e.value), 1);
+    } else {
+      selectedFilter.push(e.value);
+    }
+
+    this.setState({ filterColumns: selectedFilter });
+  }
+
   toggleCollapse() {
     this.setState({
       collapse: !this.state.collapse
@@ -93,6 +131,12 @@ export default class Billing extends Component {
   togglePopover() {
     this.setState({
       popoverOpen: !this.state.popoverOpen
+    });
+  }
+
+  togglePopoverColumns() {
+    this.setState({
+      popoverColumns: !this.state.popoverColumns
     });
   }
 
@@ -145,23 +189,26 @@ export default class Billing extends Component {
       "options.includeTotalCount": true
     };
 
-    this.tenantRest.getTenants({ params }).subscribe(response => {
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
+      console.log(response);
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
       table.loading = false;
-      for (let i = 0; i < response.data.length; i++) {
-        if (response.data[i].siCepatCOD === true) {
-          this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
-        }
-      }
-      this.setState({ totalTenants: response.total });
+
       this.setState({ table });
     });
   }
 
   componentDidMount() {
     this.loadData();
+    this.loadTenantsSubscriptionsSummary();
+  }
+
+  loadTenantsSubscriptionsSummary() {
+    this.billingRest.getTenantsSubscriptionsSummary().subscribe(response => {
+      this.setState({ tenantsSubscriptionsSummary: response });
+    });
   }
 
   toggle() {
@@ -174,9 +221,10 @@ export default class Billing extends Component {
     return [
       {
         Header: "ID Tenant",
-        accessor: "id",
+        accessor: "tenantId",
         fixed: "left",
         width: 70,
+        show: this.state.filterColumns.indexOf("ID Tenant") > -1 ? false : true,
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -191,60 +239,85 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 120
+        width: 120,
+        show:
+          this.state.filterColumns.indexOf("Nama Perusahaan") > -1
+            ? false
+            : true
       },
       {
         Header: "Email",
-        accessor: "email",
+        accessor: "companyInfo.email",
         fixed: "left",
         width: 170,
-        Cell: props => <p>{props.value}</p>
+        show: this.state.filterColumns.indexOf("Email") > -1 ? false : true,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "No Telp",
-        accessor: "phone",
+        accessor: "companyInfo.phone",
         fixed: "left",
         width: 140,
-        Cell: props => <p>{props.value}</p>
+        show:
+          this.state.filterColumns.indexOf("No Telepon") > -1 ? false : true,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Package",
-        accessor: "subscriptionPlan.subscriptionPlanName",
+        accessor: "subscriptionPlanName",
+        show: this.state.filterColumns.indexOf("Package") > -1 ? false : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Expired Date Free Trial",
-        accessor: "owner.lastLoginDateUtc",
+        accessor: "freeTrialEndDate",
         width: 150,
+        show:
+          this.state.filterColumns.indexOf("Expired Date Trial") > -1
+            ? false
+            : true,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Tanggal Mulai",
-        accessor: "owner.lastLoginDateUtc",
+        accessor: "billingPeriodStartDate",
         width: 150,
+        show:
+          this.state.filterColumns.indexOf("Tanggal Mulai") > -1 ? false : true,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Tanggal Penagihan",
-        accessor: "owner.joinDateUtc",
+        accessor: "billingPeriodEndDate",
         width: 150,
+        show:
+          this.state.filterColumns.indexOf("Tanggal Penagihan") > -1
+            ? false
+            : true,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Billing Cycle",
-        accessor: "siCepatCOD",
-        Cell: props => <p>{props.value === false ? "Tidak Aktif" : "Aktif"}</p>
+        accessor: "billingCycle",
+        show:
+          this.state.filterColumns.indexOf("Billing Cycle") > -1 ? false : true,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Total Penagihan",
         accessor: "siCepatMemberId",
         width: 130,
+        show:
+          this.state.filterColumns.indexOf("Total Penagihan") > -1
+            ? false
+            : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
         width: 200,
+        show: this.state.filterColumns.indexOf("Status") > -1 ? false : true,
         Cell: props => (
           <Row>
             <Button
@@ -262,6 +335,28 @@ export default class Billing extends Component {
       }
     ];
   }
+
+  _renderFilterColumns() {
+    let data = [];
+    for (let i = 0; i < tableColumnsData.length; i++) {
+      data.push(
+        <div>
+          <Checkbox
+            value={tableColumnsData[i]}
+            checked={
+              this.state.filterColumns.indexOf(tableColumnsData[i]) === -1
+            }
+            onChange={this.onFilterColumnChange}
+            style={filterColumnsStyle}
+          ></Checkbox>
+          {tableColumnsData[i]}
+        </div>
+      );
+    }
+
+    return data;
+  }
+
   oneData() {
     return (
       <div>
@@ -307,44 +402,73 @@ export default class Billing extends Component {
           <Colxx xxs="12">
             <Card className="mb-12 lg-12">
               <CardBody>
-                <Row>
-                  <Colxx xxs="4">
+                <Row
+                  style={{
+                    height: 70
+                  }}
+                >
+                  <div className="col">
                     <IconCard
                       title="Free Trial User (Total)"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalFreeTrial
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="4">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Free Trial User (7 hari lagi)"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary
+                          .totalFreeTrialNearlyExp
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="4">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Jumlah Stater User"
-                      value={this.state.totalTenants}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalStarter
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
+                  </div>
                 </Row>
-                <Row>
-                  <Colxx xxs="6">
+                <Row
+                  style={{
+										marginTop: 60,
+                    height: 70
+                  }}
+                >
+                  <div className="col">
                     <IconCard
                       title="Jumlah Growing User"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalGrowing
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="6">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Jumlah Professional User"
-                      value={this.state.totalTenants}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalProfessional
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
+                  </div>
+                  <div className="col">
+                    <IconCard
+                      title="Jumlah Enterprise User"
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalEnterprise
+                      }
+                      className="mb-4"
+                    />
+                  </div>
                 </Row>
               </CardBody>
             </Card>
@@ -486,7 +610,9 @@ export default class Billing extends Component {
                                   value="7 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("7 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "7 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -502,7 +628,9 @@ export default class Billing extends Component {
                                   value="3 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("3 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "3 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -518,7 +646,9 @@ export default class Billing extends Component {
                                   value="1 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("1 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "1 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -534,7 +664,9 @@ export default class Billing extends Component {
                                   value="3 Hari Setelah Jatuh Tempo"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("3 Hari Setelah Jatuh Tempo") !== -1
+                                    this.state.filter.indexOf(
+                                      "3 Hari Setelah Jatuh Tempo"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -558,6 +690,32 @@ export default class Billing extends Component {
                       </Collapse>
                     </InputGroup>
                   </div>
+                  {/*
+                  <div
+                    style={{
+                      marginLeft: 650
+                    }}
+                  >
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      // onClick={this.toggleCollapse}
+                      id="Popover2"
+                    >
+                      <i className="simple-icon-menu" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverColumns}
+                      target="Popover2"
+                      toggle={this.togglePopoverColumns}
+                    >
+                      <PopoverBody>
+                        {this._renderFilterColumns()}
+                      </PopoverBody>
+                    </Popover>
+                  </div>
+									 */}
                 </div>
 
                 <ReactTableFixedColumn

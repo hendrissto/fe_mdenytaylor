@@ -26,11 +26,15 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 
+import WithdrawRestService from "../../../core/requestWithdrawRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
+    this.requestWithdrawRest = new WithdrawRestService();
+    this.handleInputChange = this.handleInputChange.bind(this);
+
     this.state = {
       table: {
         loading: true,
@@ -43,6 +47,7 @@ class WithdrawFunds extends Component {
         }
       },
       oneData: "",
+      search: "",
       modal: false,
       dropdownOpen: false,
       splitButtonOpen: false,
@@ -50,11 +55,48 @@ class WithdrawFunds extends Component {
       splitButtonOpen1: false
     };
 
+    this.loadData = this.loadData.bind(this);
     this.toggle = this.toggle.bind(this);
     this.toggleDropDown = this.toggleDropDown.bind(this);
     this.toggleSplit = this.toggleSplit.bind(this);
     this.toggleDropDown1 = this.toggleDropDown1.bind(this);
     this.toggleSplit1 = this.toggleSplit1.bind(this);
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  loadData() {
+    const table = { ...this.state.table };
+    table.loading = true;
+    this.setState({ table });
+
+    const params = {
+      keyword: this.state.search || null,
+      "options.take": this.state.table.pagination.pageSize,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true
+    };
+
+    this.requestWithdrawRest.getBallance({ params }).subscribe(response => {
+      const table = { ...this.state.table };
+      table.data = response.data;
+      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.loading = false;
+
+      this.setState({ table });
+    });
   }
 
   dataTableColumns() {
@@ -130,291 +172,30 @@ class WithdrawFunds extends Component {
     ];
   }
 
-  dataTable() {
-    return [
-      {
-        id: 1,
-        receiptNumber: 908989,
-        seller: "Marble Cake",
-        img: "/assets/img/marble-cake-thumb.jpg",
-        bankBranch: "BRI",
-        requestWithdraw: "02.04.2018",
-        withdrawToAccount: "BNI",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake with flowers Macarons and blueberries",
-        amountWithdraw: "Rp. 164.000",
-        stock: 62
-      },
-      {
-        id: 2,
-        receiptNumber: 890800,
-        seller: "Fat Rascal",
-        bankBranch: "BNI",
-        img: "/assets/img/fat-rascal-thumb.jpg",
-        requestWithdraw: "01.04.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Cheesecake with chocolate cookies and Cream biscuits",
-        amountWithdraw: "Rp. 124.000",
-        stock: 48
-      },
-      {
-        id: 3,
-        receiptNumber: 23423400,
-        seller: "Chocolate Cake",
-        img: "/assets/img/chocolate-cake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "25.03.2018",
-        withdrawToAccount: "BRI",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Homemade cheesecake with fresh berries and mint",
-        amountWithdraw: "Rp. 108.000",
-        stock: 57
-      },
-      {
-        id: 4,
-        receiptNumber: 2342300,
-        seller: "Goose Breast",
-        img: "/assets/img/goose-breast-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "21.03.2018",
-        withdrawToAccount: "BLS",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Chocolate cake with berries",
-        amountWithdraw: "Rp. 101.004",
-        stock: 41
-      },
-      {
-        id: 5,
-        receiptNumber: 23423400,
-        seller: "Petit Gâteau",
-        bankBranch: "BNI",
-        img: "/assets/img/petit-gateau-thumb.jpg",
-        requestWithdraw: "02.06.2018",
-        withdrawToAccount: "BCM",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Chocolate cake with mascarpone",
-        amountWithdraw: "Rp. 985.000",
-        stock: 23
-      },
-      {
-        id: 6,
-        receiptNumber: 234234200,
-        seller: "Salzburger Nockerl",
-        img: "/assets/img/salzburger-nockerl-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "14.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Wedding cake decorated with donuts and wild berries",
-        amountWithdraw: "Rp. 962.000",
-        stock: 34
-      },
-      {
-        id: 7,
-        receiptNumber: 23400,
-        seller: "Napoleonshat",
-        img: "/assets/img/napoleonshat-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "05.02.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Cheesecake with fresh berries and mint for dessert",
-        amountWithdraw: "Rp. 921.000",
-        stock: 31
-      },
-      {
-        id: 8,
-        receiptNumber: 2349802938400,
-        seller: "Cheesecake",
-        img: "/assets/img/cheesecake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "18.08.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Delicious vegan chocolate cake",
-        amountWithdraw: "Rp. 887.000",
-        stock: 21
-      },
-      {
-        id: 9,
-        receiptNumber: 230984029300,
-        seller: "Financier",
-        img: "/assets/img/financier-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "15.03.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description:
-          "White chocolate strawberry yogurt cake decorated with fresh fruits and chocolate",
-        amountWithdraw: "Rp. 865.000",
-        stock: 53
-      },
-      {
-        id: 10,
-        receiptNumber: 203984000,
-        seller: "Genoise",
-        img: "/assets/img/genoise-thumb.jpg",
-        bankBranch: "BNI",
-        requestWithdraw: "11.06.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Christmas fruit cake, pudding on top",
-        amountWithdraw: "Rp. 824.000",
-        stock: 55
-      },
-      {
-        id: 11,
-        receiptNumber: 2398409200,
-        seller: "Gingerbread",
-        img: "/assets/img/gingerbread-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "10.04.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake decorated with donuts and wild berries",
-        amountWithdraw: "Rp. 714.000",
-        stock: 12
-      },
-      {
-        id: 12,
-        receiptNumber: 239849238400,
-        seller: "Magdalena",
-        img: "/assets/img/magdalena-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Christmas fruit cake, pudding on top",
-        amountWithdraw: "Rp. 702.000",
-        stock: 14
-      },
-      {
-        id: 13,
-        receiptNumber: 2039840200,
-        seller: "Parkin",
-        img: "/assets/img/parkin-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.08.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description:
-          "White chocolate strawberry yogurt cake decorated with fresh fruits and chocolate",
-        amountWithdraw: "Rp. 689.000",
-        stock: 78
-      },
-      {
-        id: 14,
-        receiptNumber: 2093804200,
-        seller: "Streuselkuchen",
-        img: "/assets/img/streuselkuchen-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Delicious vegan chocolate cake",
-        amountWithdraw: "Rp. 645.000",
-        stock: 55
-      },
-      {
-        id: 15,
-        receiptNumber: 239480239400,
-        seller: "Tea loaf",
-        img: "/assets/img/tea-loaf-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "10.09.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Cheesecake with fresh berries and mint for dessert",
-        amountWithdraw: "Rp. 632.000",
-        stock: 20
-      },
-      {
-        id: 16,
-        receiptNumber: 23084023900,
-        seller: "Merveilleux",
-        img: "/assets/img/merveilleux-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "18.02.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Chocolate cake with mascarpone",
-        amountWithdraw: "Rp. 621.000",
-        stock: 6
-      },
-      {
-        id: 17,
-        receiptNumber: 4023980400,
-        seller: "Fruitcake",
-        img: "/assets/img/fruitcake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "12.01.2019",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Chocolate cake with berries",
-        amountWithdraw: "Rp. 595.000",
-        stock: 17
-      },
-      {
-        id: 18,
-        receiptNumber: 23984029300,
-        seller: "Bebinca",
-        img: "/assets/img/bebinca-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "04.02.2019",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Homemade cheesecake with fresh berries and mint",
-        amountWithdraw: "Rp. 574.000",
-        stock: 16
-      },
-      {
-        id: 19,
-        receiptNumber: 230984000,
-        seller: "Cremeschnitte",
-        img: "/assets/img/cremeschnitte-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "04.03.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Cheesecake with chocolate cookies and Cream biscuits",
-        amountWithdraw: "Rp. 562.000",
-        stock: 9
-      },
-      {
-        id: 20,
-        receiptNumber: 23094800,
-        seller: "Soufflé",
-        img: "/assets/img/souffle-thumb.jpg",
-        bankBranch: "BNI",
-        requestWithdraw: "16.01.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake with flowers Macarons and blueberries",
-        amountWithdraw: "Rp. 524.000",
-        stock: 14
-      }
-    ];
+  handleOnPageChange(pageIndex) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
+    table.pagination.currentPage = pageIndex;
+
+    console.log(table);
+
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleOnPageSizeChange(newPageSize, newPage) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.pageSize = newPageSize;
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleSortedChange(newSorted, column, additive) {
+    console.log(newSorted);
+    console.log(column);
+    console.log(additive);
   }
 
   toggle() {
@@ -512,41 +293,24 @@ class WithdrawFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      <InputGroupButtonDropdown
-                        addonType="prepend"
-                        isOpen={this.state.splitButtonOpen}
-                        toggle={this.toggleSplit}
-                      >
-                        <DropdownToggle color="primary" className="default">
-                          <i className="simple-icon-menu" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
+                      <Input
+                        placeholder="Search Owner"
+                        name="search"
+                        value={this.state.search}
+                        onChange={this.handleInputChange}
+                        onKeyPress={event => {
+                          if (event.key === "Enter") {
+                            this.loadData();
+                          }
+                        }}
+                      />
                       <Button
-                        className="default disabled"
-                        outline
-                        color="ligth"
+                        className="default"
+                        color="primary"
+                        onClick={() => this.loadData()}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
-                      <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown
-                        addonType="prepend"
-                        isOpen={this.state.splitButtonOpen1}
-                        toggle={this.toggleSplit1}
-                      >
-                        <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span>{" "}
-                          <i className="iconsminds-arrow-down-2" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
                     </InputGroup>
                   </div>
                 </div>
@@ -582,17 +346,27 @@ class WithdrawFunds extends Component {
                 <ReactTable
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
-                  data={this.dataTable()}
+                  data={this.state.table.data}
                   pages={this.state.table.pagination.totalPages}
                   columns={this.dataTableColumns()}
                   defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
-                  // loading={this.state.table.loading}
+                  loading={this.state.table.loading}
                   showPagination={true}
                   showPaginationTop={false}
                   showPaginationBottom={true}
                   pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                   manual // this would indicate that server side pagination has been enabled
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
+
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
                 />
               </CardBody>
             </Card>
@@ -643,9 +417,9 @@ class WithdrawFunds extends Component {
                   <td>{this.state.oneData.amountWithdraw}</td>
                 </tr>
                 <tr>
-                {this.state.oneData.status === "Berhasil" ? (
-                  <div></div>
-                ) : (
+                  {this.state.oneData.status === "Berhasil" ? (
+                    <div></div>
+                  ) : (
                     <>
                       <td>
                         <IntlMessages id="modal.amount" />
@@ -655,7 +429,7 @@ class WithdrawFunds extends Component {
                         <input type="text" name="amount" />
                       </td>
                     </>
-                )}
+                  )}
                 </tr>
               </tbody>
             </Table>
