@@ -31,6 +31,7 @@ import IconCard from "../../../components/cards/IconCard";
 
 import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
@@ -71,9 +72,16 @@ export default class Billing extends Component {
     this.onFilterColumnChange = this.onFilterColumnChange.bind(this);
     this.onPackageChange = this.onPackageChange.bind(this);
     this.onBillingCycleChange = this.onBillingCycleChange.bind(this);
+    this.onBillingCycleChange2 = this.onBillingCycleChange2.bind(this);
     this.loadTenantsSubscriptionsSummary = this.loadTenantsSubscriptionsSummary.bind(
       this
     );
+
+    let today = new Date();
+    today.setDate(today.getDate() - 1);
+
+    let today2 = new Date();
+    today2.setDate(today2.getDate() - 1);
 
     this.state = {
       totalTenants: 0,
@@ -102,7 +110,11 @@ export default class Billing extends Component {
       renewModal: false,
       upgradeModal: false,
       oneData: "",
-      search: ""
+      search: "",
+      date: null,
+      date2: null,
+      invalidDates: [today],
+      invalidDates2: [today],
     };
   }
 
@@ -189,8 +201,13 @@ export default class Billing extends Component {
   }
 
   onBillingCycleChange(e) {
-    this.setState({ billingCycle: e.value});
+    this.setState({ billingCycle: e.value });
   }
+
+  onBillingCycleChange2(e) {
+    this.setState({ billingCycle2: e.value });
+  }
+
 
   loadData() {
     const table = { ...this.state.table };
@@ -217,6 +234,9 @@ export default class Billing extends Component {
   }
 
   componentDidMount() {
+    const date = new Date();
+    this.setState({ date: date, date2: date });
+
     this.loadData();
     this.loadTenantsSubscriptionsSummary();
   }
@@ -351,7 +371,7 @@ export default class Billing extends Component {
       },
       {
         Header: "Total Penagihan",
-        accessor: "siCepatMemberId",
+        accessor: "billingAmount",
         width: 130,
         show:
           this.state.filterColumns.indexOf("Total Penagihan") > -1
@@ -445,6 +465,11 @@ export default class Billing extends Component {
   }
 
   render() {
+    const minimunDate = new Date();
+    minimunDate.setDate(minimunDate.getDate() - 1);
+
+    const minimunDate2 = new Date();
+    minimunDate2.setDate(minimunDate2.getDate() - 1);
     const paket = [
       { name: "Starter", code: "starter" },
       { name: "Growing", code: "growing" },
@@ -455,8 +480,8 @@ export default class Billing extends Component {
       { name: "1 Bulan", code: "1" },
       { name: "3 Bulan", code: "3" },
       { name: "6 Bulan", code: "6" },
-      { name: "12 Bulan", code: "12" },
-    ]
+      { name: "12 Bulan", code: "12" }
+    ];
     return (
       <Fragment>
         <Row>
@@ -837,8 +862,72 @@ export default class Billing extends Component {
             toggle={this.toggleRenew}
             className={this.props.className}
           >
-            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-            <ModalBody>Renew Modal</ModalBody>
+            <ModalHeader toggle={this.toggleRenew}>Renew</ModalHeader>
+            <ModalBody>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Billing Cycle
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.billingCycle2}
+                    options={billingCycle}
+                    onChange={this.onBillingCycleChange2}
+                    placeholder="Select a Billing Cycle"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Tanggal Mulai
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Calendar
+                    value={this.state.date2}
+                    onChange={e => this.setState({ date2: e.value })}
+                    disabledDates={this.state.invalidDates2}
+                    dateFormat="dd/mm/yy"
+                    readonlyInput={true}
+                    minDate={minimunDate2}
+                  />
+                </Col>
+              </Row>
+            </ModalBody>
             <ModalFooter>
               <Button color="primary" outline onClick={this.toggleRenew}>
                 Close
@@ -853,15 +942,25 @@ export default class Billing extends Component {
             toggle={this.toggleUpgrade}
             className={this.props.className}
           >
-            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalHeader toggle={this.toggleUpgrade}>Upgrade</ModalHeader>
             <ModalBody>
               <Row>
-                <Col xs="3" style={{
-                  marginTop: 5
-                }}> Package </Col>
-                <Col xs="1" style={{
-                  marginTop: 5
-                }}>:</Col>
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Package
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
                 <Col>
                   <Dropdown
                     value={this.state.package}
@@ -872,15 +971,27 @@ export default class Billing extends Component {
                   />
                 </Col>
               </Row>
-              <Row style={{
-                marginTop: 10
-              }}>
-                <Col xs="3" style={{
-                  marginTop: 5
-                }}> Billing Cycle </Col>
-                <Col xs="1" style={{
-                  marginTop: 5
-                }}>:</Col>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Billing Cycle
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
                 <Col>
                   <Dropdown
                     value={this.state.billingCycle}
@@ -888,6 +999,38 @@ export default class Billing extends Component {
                     onChange={this.onBillingCycleChange}
                     placeholder="Select a Billing Cycle"
                     optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Tanggal Mulai
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Calendar
+                    value={this.state.date}
+                    onChange={e => this.setState({ date: e.value })}
+                    disabledDates={this.state.invalidDates}
+                    dateFormat="dd/mm/yy"
+                    readonlyInput={true}
+                    minDate={minimunDate}
                   />
                 </Col>
               </Row>

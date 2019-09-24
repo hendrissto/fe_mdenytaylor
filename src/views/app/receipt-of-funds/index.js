@@ -14,6 +14,7 @@ import {
   Col
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
+import Loader from "react-loader-spinner";
 
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
@@ -25,7 +26,7 @@ import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService"
+import RelatedDataRestService from "../../../core/relatedDataRestService";
 import * as moment from "moment";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -34,9 +35,20 @@ import "./receipt-of-funds.scss";
 
 import { Dropdown } from "primereact/dropdown";
 
-
 import BaseAlert from "../../base/baseAlert";
-import * as css from "../../base/baseCss"
+import * as css from "../../base/baseCss";
+
+const regex = /\[(.*?)\-/;
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)"
+  }
+};
 
 const user = JSON.parse(localStorage.getItem("user"));
 class ReceiptOfFunds extends Component {
@@ -49,9 +61,13 @@ class ReceiptOfFunds extends Component {
     this.dataTable = this.dataTable.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
     this.onCourierChange = this.onCourierChange.bind(this);
+    this.showModal = this.showModalError.bind(this);
+    this.loadDetailData = this.loadDetailData.bind(this);
 
     this.state = {
       error: false,
+      errorFile: false,
+      resError: null,
       fileTemp: null,
       dataExcel: null,
       table: {
@@ -67,8 +83,11 @@ class ReceiptOfFunds extends Component {
       relatedData: [],
       selectedCourier: [],
       modal: false,
+      resiModalDetail: false,
       resiModal: false,
       resiModalSeller: false,
+      resiModalSellerDetail: false,
+      modalError: false,
       data: [],
       oneData: [],
       footerData: [
@@ -120,6 +139,32 @@ class ReceiptOfFunds extends Component {
             columnIndex: 4,
             align: "left",
             formatter: tableData => this.sumData(tableData, "totAmountCodFee")
+          }
+        ]
+      ],
+      footerData3: [
+        [
+          {
+            label: "Total",
+            columnIndex: 0
+          },
+          {
+            label: "Nilai Paket",
+            columnIndex: 2,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "totalAmount")
+          },
+          {
+            label: "Fee COD",
+            columnIndex: 3,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "codFeeValue")
+          },
+          {
+            label: "Total Diterima",
+            columnIndex: 4,
+            align: "left",
+            formatter: tableData => this.sumData(tableData, "subTotalAmount")
           }
         ]
       ]
@@ -182,6 +227,31 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         );
+      case "codFeeValue":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { codFeeValue }) => (total += parseInt(codFeeValue)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
+      case "subTotalAmount":
+        return (
+          <p>
+            Rp{" "}
+            {numeral(
+              tableData.reduce(
+                (total, { subTotalAmount }) =>
+                  (total += parseInt(subTotalAmount)),
+                0
+              )
+            ).format("0,0")}
+          </p>
+        );
       default:
         return <p>Wrong value.</p>;
     }
@@ -229,6 +299,7 @@ class ReceiptOfFunds extends Component {
   showModal(modalName) {
     switch (modalName) {
       case "modal":
+        this.setState({ selectedCourier: [] });
         this.setState(prevState => ({
           modal: !prevState.modal
         }));
@@ -255,68 +326,12 @@ class ReceiptOfFunds extends Component {
     }
   }
 
-  // toggleDropDown() {
-  //   this.setState({
-  //     dropdownOpen: !this.state.dropdownOpen
-  //   });
-  // }
-
-  // toggleSplit() {
-  //   this.setState({
-  //     splitButtonOpen: !this.state.splitButtonOpen
-  //   });
-  // }
-  // toggleDropDown1() {
-  //   this.setState({
-  //     dropdownOpen1: !this.state.dropdownOpen1
-  //   });
-  // }
-
-  // toggleSplit1() {
-  //   this.setState({
-  //     splitButtonOpen1: !this.state.splitButtonOpen1
-  //   });
-  // }
-
-  // tableColumns() {
-  //   return [
-  //     {
-  //       Header: "Tanggal Unggah",
-  //       accessor: "uploadDate",
-  //       Cell: props => <p>{props.value}</p>
-  //     },
-  //     {
-  //       Header: "ID File",
-  //       accessor: "idFile",
-  //       Cell: props => (
-  //         <Button color="link" onClick={() => this.showModal("resiModal")}>
-  //           <p>{props.value}</p>
-  //         </Button>
-  //       )
-  //     },
-  //     {
-  //       Header: "Nama File",
-  //       accessor: "fileName",
-  //       Cell: props => (
-  //         <Button color="link" onClick={() => this.showModal("resiModal")}>
-  //           <p className="list-item-heading">{props.value}</p>
-  //         </Button>
-  //       )
-  //     },
-  //     {
-  //       Header: "Diupload Oleh",
-  //       accessor: "uploadedBy",
-  //       Cell: props => <p>{props.value}</p>
-  //     }
-  //   ];
-  // }
-
   dataTable() {
     return [
       {
         Header: "Upload Date",
         accessor: "uploadDate",
-        Cell: props => <p>{props.value}</p>
+        Cell: props => <p> {moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "ID File",
@@ -324,246 +339,42 @@ class ReceiptOfFunds extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "File Name",
-        accessor: "file.filename",
-        Cell: props => <p>{props.value}</p>
-      },
-      {
         Header: "Upload By",
         accessor: "uploadBy",
         Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Detail",
+        Cell: props => (
+          <p>
+            <Button
+              onClick={() => {
+                this.loadDetailData(props.original.id);
+              }}
+            >
+              Detail
+            </Button>
+          </p>
+        )
       }
     ];
   }
-
-  // dataTableColumsCOD() {
-  //   // _.map(this.state.data, (v, i) => {
-  //   //   _.map(v.sumData, (v, i) => {
-  //   //     console.log(v.osName)
-  //   //   })
-  //   // })'
-  //   return [
-  //     {
-  //       Header: "Nama Seller",
-  //       accessor: "osName",
-  //       Footer: <p className="list-item-heading">Total</p>,
-  //       Cell: props => (
-  //         <p>
-  //           <Button
-  //             color="link"
-  //             className="text-primary"
-  //             onClick={() => this.dataTableCODSeller(props.value)}
-  //           >
-  //             {props.value}
-  //           </Button>
-  //         </p>
-  //       )
-  //     },
-  //     {
-  //       Header: "Jumlah Paket",
-  //       accessor: "package",
-  //       Cell: props => <p>{props.value} Paket</p>
-  //     },
-  //     {
-  //       Header: "Total",
-  //       accessor: "totalAmount",
-  //       Cell: props => <p>{props.value}</p>,
-  //       Footer: props => (
-  //         <p>
-  //           Rp{" "}
-  //           {numeral(
-  //             this.state.data.reduce(
-  //               (total, { totalAmount }) => (total += parseInt(totalAmount)),
-  //               0
-  //             )
-  //           ).format("0,0")}
-  //         </p>
-  //       )
-  //     },
-  //     {
-  //       Header: "Fee COD",
-  //       accessor: "codFeeRp",
-  //       Cell: props => <p>{props.value}</p>,
-  //       Footer: props => (
-  //         <p>
-  //           Rp{" "}
-  //           {numeral(
-  //             this.state.data.reduce(
-  //               (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
-  //               0
-  //             )
-  //           ).format("0,0")}
-  //         </p>
-  //       )
-  //     }
-  //     // {
-  //     //   Header: "Fee COD",
-  //     //   accessor: "feeCOD",
-  //     //   Footer: (
-  //     //     <p>
-  //     //       Rp{" "}
-  //     //       {numeral(
-  //     //         this.state.data.reduce(
-  //     //           (total, { feeCOD }) => (total += parseInt(feeCOD)),
-  //     //           0
-  //     //         )
-  //     //       ).format("0,0")}
-  //     //     </p>
-  //     //   ),
-  //     //   Cell: props => (
-  //     //     <p>
-  //     //       Rp {numeral(props.value).format("0,0")}
-  //     //     </p>
-  //     //   )
-  //     // }
-  //   ];
-  // }
-
-  // dataTableCOD() {
-  //   return [
-  //     {
-  //       id: 1,
-  //       sellerName: "A Shop",
-  //       packageAmount: "100 Paket",
-  //       total: "Rp. 2.000.000",
-  //       feeCOD: 1000000
-  //     },
-  //     {
-  //       id: 2,
-  //       sellerName: "B Shop",
-  //       packageAmount: "100 Paket",
-  //       total: "Rp. 2.000.000",
-  //       feeCOD: 1000000
-  //     },
-  //     {
-  //       id: 3,
-  //       sellerName: "C Shop",
-  //       packageAmount: "100 Paket",
-  //       total: "Rp. 2.000.000",
-  //       feeCOD: 1000000
-  //     }
-  //   ];
-  // }
-
-  // dataTableColumsCODSeller() {
-  //   return [
-  //     {
-  //       Header: "Resi",
-  //       accessor: "airwaybill",
-  //       Footer: <p>Total</p>,
-  //       Cell: props => (
-  //         <p>
-  //           <Button
-  //             color="link"
-  //             className="text-primary"
-  //             onClick={() => console.log(props.value)}
-  //           >
-  //             {props.value}
-  //           </Button>
-  //         </p>
-  //       )
-  //     },
-  //     {
-  //       Header: "Penerima Paket",
-  //       accessor: "penerima",
-  //       Cell: props => <p>{props.value}</p>
-  //     },
-  //     {
-  //       Header: "Total",
-  //       accessor: "totalAmount",
-  //       Cell: props => <p>{props.value}</p>,
-  //       Footer: props => (
-  //         <p>
-  //           Rp{" "}
-  //           {numeral(
-  //             this.state.oneData.reduce(
-  //               (total, { totalAmount }) => (total += parseInt(totalAmount)),
-  //               0
-  //             )
-  //           ).format("0,0")}
-  //         </p>
-  //       )
-  //     }
-  //     // {
-  //     //   Header: "Total",
-  //     //   accessor: "total",
-  //     //   Footer: (
-  //     //     <p>
-  //     //       Rp{" "}
-  //     //       {numeral(
-  //     //         this.dataTableCODSeller().reduce(
-  //     //           (sum, { total }) => (sum += total),
-  //     //           0
-  //     //         )
-  //     //       ).format("0,0")}
-  //     //     </p>
-  //     //   ),
-  //     //   Cell: props => (
-  //     //     <p>
-  //     //       Rp {numeral(props.value).format("0,0")}
-  //     //     </p>
-  //     //   )
-  //     // }
-  //   ];
-  // }
 
   dataTableCODSeller(osName) {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
     let finish = data.lines;
-    this.setState({ oneData: finish });
-    this.showModal("resiModalSeller");
+    this.setState({ oneData: finish, resiModalSeller: true });
   }
 
-  // dataTableCODSeller() {
-  //   return [
-  //     {
-  //       id: 1,
-  //       sellerName: "A Shop",
-  //       receipt: "2340823941",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     },
-  //     {
-  //       id: 2,
-  //       sellerName: "B Shop",
-  //       receipt: "2340823942",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     },
-  //     {
-  //       id: 3,
-  //       sellerName: "C Shop",
-  //       receipt: "2340823943",
-  //       receive: "Mas Ucok",
-  //       total: 1000000
-  //     }
-  //   ];
-  // }
+  dataTableCODSellerDetail(osName) {
+    let i = _.findKey(this.state.data, ["osName", osName]);
+    let data = this.state.data[i];
 
-  // toggleDropDown() {
-  //   this.setState({
-  //     dropdownOpen: !this.state.dropdownOpen
-  //   });
-  // }
-
-  // toggleSplit() {
-  //   this.setState({
-  //     splitButtonOpen: !this.state.splitButtonOpen
-  //   });
-  // }
-  // toggleDropDown1() {
-  //   this.setState({
-  //     dropdownOpen1: !this.state.dropdownOpen1
-  //   });
-  // }
-
-  // toggleSplit1() {
-  //   this.setState({
-  //     splitButtonOpen1: !this.state.splitButtonOpen1
-  //   });
-  // }
+    let finish = data.lines;
+    this.setState({ oneData: finish, resiModalSellerDetail: true });
+  }
 
   loadData() {
     const table = { ...this.state.table };
@@ -592,6 +403,26 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  loadDetailData(id) {
+    let receiver = [];
+    let newReceiver = [];
+    this.codRest.getdDetailCod(id, {}).subscribe(response => {
+      const resData = response.codCreditTransactions[0].lines;
+      const data = _(resData)
+        .groupBy("sellerName")
+        .map((value, index) => ({
+          osName: index,
+          package: value.length,
+          lines: value,
+          totalAmount: Math.round(_.sumBy(value, "totalAmount")),
+          codFeeRp: Math.round(_.sumBy(value, "codFeeValue")),
+          totalReceive: Math.round(_.sumBy(value, "subTotalAmount"))
+        }))
+        .value();
+      this.setState({ data: data, resiModalDetail: true });
+    });
+  }
+
   handleData = data => {
     this.setState({ data: data });
   };
@@ -603,7 +434,14 @@ class ReceiptOfFunds extends Component {
   fileHandler = event => {
     let fileObj = event.target.files[0];
 
-    this.setState({ fileTemp: fileObj });
+    if (
+      fileObj.type ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ) {
+      this.setState({ fileTemp: fileObj });
+    } else {
+      this.setState({ errorFile: true });
+    }
   };
 
   excelProcess() {
@@ -630,6 +468,7 @@ class ReceiptOfFunds extends Component {
             totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
+        console.log(data);
         this.setState({ data: data });
       }
     });
@@ -645,7 +484,8 @@ class ReceiptOfFunds extends Component {
         sellerName: array[i].osName,
         deliveryNotes: array[i].deliveredNotes,
         airwaybillNumber: array[i].airwaybill.toString(),
-        note: array[i].notes || "",
+        notes: array[i].notes || "",
+        destination: array[i].destination || "",
         amount: array[i].totalAmount || 0,
         codValue: Math.round(array[i].codFeeRp) || 0,
         goodValue: array[i].goodsValue || 0,
@@ -666,16 +506,25 @@ class ReceiptOfFunds extends Component {
       ...lineValue,
       uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
       uploadBy: user.user_name,
-      courierChannelId: this.state.selectedCourier.id,
+      courierChannelId: this.state.selectedCourier.id
     };
-
     this.setState({ dataExcel: data, selectedCourier: [] });
   }
 
   submitData() {
-    this.codRest.postCOD(this.state.dataExcel).subscribe(response => {
-      console.log(response);
-    });
+    this.codRest.postCOD(this.state.dataExcel).subscribe(
+      response => {
+        this.setState({ resiModal: false, modal: false });
+        this.loadData();
+      },
+      error => {
+        this.setState({
+          resError: error.data[0].errorMessage,
+          resiModal: false
+        });
+        this.showModalError();
+      }
+    );
   }
 
   extractExcelData(data) {
@@ -730,18 +579,47 @@ class ReceiptOfFunds extends Component {
     );
   }
 
+  buttonResiCodDetail(cell, row) {
+    return (
+      <a
+        href="#"
+        onClick={() => this.dataTableCODSellerDetail(cell)}
+        className="button"
+      >
+        {cell}
+      </a>
+    );
+  }
+
   nextStep() {
-    if(this.state.selectedCourier.length === 0 || this.state.fileTemp === null){
-      this.setState({ error: true })
-    }else{
-      this.setState({ error: false })
+    if (
+      this.state.selectedCourier.length === 0 ||
+      this.state.fileTemp === null ||
+      this.state.errorFile === true
+    ) {
+      this.setState({ error: true });
+    } else {
+      this.setState({ error: false });
       this.excelProcess();
       this.setState({ resiModal: true });
     }
   }
 
+  showModalError() {
+    this.setState({ modalError: true });
+
+    if (this.state.modalError === false) {
+      setTimeout(() => {
+        this.setState({ modalError: false });
+      }, 2000);
+    }
+  }
+
   render() {
     const option = this.state.relatedData.courierChannel;
+    if (this.state.relatedData.length > 0) {
+      option = this.state.relatedData.courierChannel;
+		}
     return (
       <Fragment>
         <Row>
@@ -801,7 +679,7 @@ class ReceiptOfFunds extends Component {
                     <Button
                       className="float-right default"
                       color="secondary"
-                      onClick={() => this.showModal("modal")}
+                      onClick={() => this.setState({ modal: true })}
                     >
                       <i className="iconsminds-upload mr-2" />
                       <IntlMessages
@@ -812,6 +690,7 @@ class ReceiptOfFunds extends Component {
                 </div>
 
                 <ReactTable
+                  minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
@@ -843,51 +722,124 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL UPLOAD RESI */}
         {this.state.modal && (
-          <Modal isOpen={this.state.modal} toggle={this.showModal}>
+          <Modal
+            isOpen={this.state.modal}
+            toggle={() => this.setState({ modal: false })}
+          >
             <ModalHeader>
               <IntlMessages id="modal.uploadReceiptTitle" />
             </ModalHeader>
             <ModalBody>
-            {this.state.error && (
-              <BaseAlert
-                onClick={() => {
-                  this.setState({error: false});
-                }}
-                text={'Semua data wajib diisi'}
-              />
-            )}
-              <Row>
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
+              {this.state.error && (
+                <BaseAlert
+                  onClick={() => {
+                    this.setState({ error: false });
                   }}
-                >
-                  Courier
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Dropdown
-                    value={this.state.selectedCourier}
-                    options={option}
-                    onChange={this.onCourierChange}
-                    placeholder="Select a Package"
-                    optionLabel="name"
+                  text={"Semua data wajib diisi"}
+                />
+              )}
+              {option.length > 0 && (
+                <div>
+                  <Row>
+                    <Col
+                      xs="3"
+                      style={{
+                        marginTop: 5
+                      }}
+                    >
+                      Courier
+                    </Col>
+                    <Col
+                      xs="1"
+                      style={{
+                        marginTop: 5
+                      }}
+                    >
+                      :
+                    </Col>
+                    <Col>
+                      <Dropdown
+                        value={this.state.selectedCourier}
+                        options={option}
+                        onChange={this.onCourierChange}
+                        placeholder="Select a Package"
+                        optionLabel="name"
+                        required
+                      />
+                    </Col>
+                  </Row>
+                  <input
+                    type="file"
+                    onChange={this.fileHandler.bind(this)}
                     required
                   />
-                </Col>
-              </Row>
-              <input type="file" onChange={this.fileHandler.bind(this)} required/>
+                  {this.state.errorFile && (
+                    <BaseAlert
+                      onClick={() => {
+                        this.setState({ errorFile: false });
+                      }}
+                      text={"Hanya file excel yang bisa diupload."}
+                    />
+                  )}
+                </div>
+              )}
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.nextStep()}>Next</Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {/* MODAL DATA RESI DETAIL*/}
+        {this.state.resiModalDetail && (
+          <Modal
+            isOpen={this.state.resiModalDetail}
+            size="lg"
+            toggle={() => this.setState({ resiModalDetail: false })}
+          >
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody>
+              <BootstrapTable
+                data={this.state.data}
+                footerData={this.state.footerData}
+                footer
+              >
+                <TableHeaderColumn
+                  dataField="osName"
+                  isKey
+                  dataFormat={this.buttonResiCodDetail.bind(this)}
+                >
+                  Nama Seller
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="package">
+                  Jumlah Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalReceive"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.setState({ resiModalDetail: false })}>
+                OK
+              </Button>
             </ModalFooter>
           </Modal>
         )}
@@ -935,7 +887,10 @@ class ReceiptOfFunds extends Component {
               </BootstrapTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.showModal()}>Submit</Button>
+              <Button onClick={() => this.setState({ resiModal: false })}>
+                Back
+              </Button>
+              <Button onClick={() => this.submitData()}>Submit</Button>
             </ModalFooter>
           </Modal>
         )}
@@ -955,7 +910,7 @@ class ReceiptOfFunds extends Component {
                 <TableHeaderColumn dataField="airwaybill" isKey>
                   Resi
                 </TableHeaderColumn>
-                <TableHeaderColumn dataField="penerima">
+                <TableHeaderColumn dataField="deliveredNotes" width={300}>
                   Penerima Paket
                 </TableHeaderColumn>
                 <TableHeaderColumn
@@ -980,11 +935,75 @@ class ReceiptOfFunds extends Component {
             </ModalBody>
 
             <ModalFooter>
-              <Button
-                onClick={() =>
-                  this.setState({ resiModalSeller: false, resiModal: true })
-                }
+              <Button onClick={() => this.setState({ resiModalSeller: false })}>
+                Back
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {/* MODAL DATA RESI SELLER DETAIL */}
+        {this.state.resiModalSellerDetail && (
+          <Modal isOpen={this.state.resiModalSellerDetail} size="lg">
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody>
+              <BootstrapTable
+                data={this.state.oneData}
+                footerData={this.state.footerData3}
+                footer
               >
+                <TableHeaderColumn dataField="airwaybillNumber" isKey>
+                  Resi
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="deliveryNotes" width={300}>
+                  Penerima Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeValue"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="subTotalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                onClick={() => this.setState({ resiModalSellerDetail: false })}
+              >
+                Back
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.modalError && (
+          <Modal
+            isOpen={this.state.modalError}
+            style={{
+              width: 500
+            }}
+            toggle={() => this.setState({ modalError: false })}
+          >
+            <ModalHeader>Error</ModalHeader>
+            <ModalBody>{this.state.resError}</ModalBody>
+
+            <ModalFooter>
+              <Button onClick={() => this.setState({ modalError: false })}>
                 Back
               </Button>
             </ModalFooter>
