@@ -38,6 +38,7 @@ class Login extends Component {
     if (this.state.username !== "" && this.state.password !== "") {
       this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
+        localStorage.setItem("user", response)
         this.props.loginUser(response, this.props.history);
         this.setState({ loading: false })
       }, err => {
@@ -88,6 +89,7 @@ class Login extends Component {
                   onClick={() => {
                     this.setState({error: false});
                   }}
+                  text={'Username & password salah, silahkan periksa kembali..'}
                 />
               )}
               </CardTitle>

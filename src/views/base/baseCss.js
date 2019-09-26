@@ -1,12 +1,12 @@
 export const style = {
     alert: {
-        "width": "249px",
+        "width": "100%",
         "height": "83px",
         "borderRadius": "5px",
         "border": "solid 1px #E14054",
         "backgroundColor": "#ffffff",
         "padding": "8px",
-        "marginBottom": "5px",
+        "marginBottom": "10px",
         "marginTop": "5px"
     },
     closebtn: {
@@ -25,7 +25,7 @@ export const style = {
     fontDetail: {
         "fontSize": "12px",
         "textAlign": "left",
-        "color": "#9b9b9b"
+        "color": "#000"
     },
     required: {
         "fontSize": "14px",

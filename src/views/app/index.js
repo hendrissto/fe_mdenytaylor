@@ -9,6 +9,7 @@ import Tenant from "./tenants";
 import Billing from "./billings";
 import WithdrawFunds from "./request-withdraw-funds";
 import ReceiptOfFunds from "./receipt-of-funds";
+import DebitCod from './debit-cod'
 import expenditureListPage from "./app-expenditure-list/expenditure-list-page"
 import dashboards from "./dashboards";
 import pages from "./pages";
@@ -30,6 +31,7 @@ class App extends Component {
           <Route path={`${match.url}/tenants`} component={Tenant} />
           <Route path={`${match.url}/billing`} component={Billing} />
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
+          <Route path={`${match.url}/debit-cod`} component={DebitCod} />
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
           <Route path={`${match.url}/dashboards`} component={dashboards} />
           <Route path={`${match.url}/applications`} component={applications} />

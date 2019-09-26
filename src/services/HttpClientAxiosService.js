@@ -14,7 +14,9 @@ export class HttpClientAxiosService {
       config.cancelToken = axiosCancel.token;
 
       (this.axios.post(url, data, config))
-        .catch((error) => observer.error(error))
+        .catch((error) => {
+          observer.error(error.response)
+        })
         .then((response) => {
           if (response) {
             observer.next(response.data);

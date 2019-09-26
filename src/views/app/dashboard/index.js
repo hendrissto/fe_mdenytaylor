@@ -7,8 +7,9 @@ import FundReimbursement from "./fund-reimbursement";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 
-
+const user = JSON.parse(localStorage.getItem("user"));
 export default class Dashboard extends Component {
+
 	render() {
 		return (
 			<Fragment>

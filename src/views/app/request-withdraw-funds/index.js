@@ -26,11 +26,26 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 
+import WithdrawRestService from "../../../core/requestWithdrawRestService";
+import RelatedDataRestService from "../../../core/relatedDataRestService";
+import PictureRestService from "../../../core/pictureRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import { InputText } from "primereact/inputtext";
+import { InputSwitch } from "primereact/inputswitch";
+import { Dropdown } from "primereact/dropdown";
+
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
+    this.requestWithdrawRest = new WithdrawRestService();
+    this.relatedDataRestService = new RelatedDataRestService();
+    this.pictureRestService = new PictureRestService();
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.loadTenantBank = this.loadTenantBank.bind(this);
+    this.fileHandler = this.fileHandler.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+
     this.state = {
       table: {
         loading: true,
@@ -42,14 +57,23 @@ class WithdrawFunds extends Component {
           pageSize: 10
         }
       },
+      amount: null,
+      tenantBank: null,
       oneData: "",
+      search: "",
       modal: false,
       dropdownOpen: false,
       splitButtonOpen: false,
       dropdownOpen1: false,
-      splitButtonOpen1: false
+      splitButtonOpen1: false,
+      isDraft: false,
+      selectedBank: [],
+      image: null,
+      loading: false,
+      imageUrl: null
     };
 
+    this.loadData = this.loadData.bind(this);
     this.toggle = this.toggle.bind(this);
     this.toggleDropDown = this.toggleDropDown.bind(this);
     this.toggleSplit = this.toggleSplit.bind(this);
@@ -57,364 +81,159 @@ class WithdrawFunds extends Component {
     this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
+  componentDidMount() {
+    this.loadData();
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  loadData() {
+    const table = { ...this.state.table };
+    table.loading = true;
+    this.setState({ table });
+
+    const params = {
+      keyword: this.state.search || null,
+      "options.take": this.state.table.pagination.pageSize,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true
+    };
+
+    this.requestWithdrawRest.getBallance({ params }).subscribe(response => {
+      const table = { ...this.state.table };
+      table.data = response.data;
+      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.loading = false;
+
+      this.setState({ table });
+    });
+  }
+
+  loadTenantBank(id) {
+    this.relatedDataRestService.getTenantBank(id, {}).subscribe(response => {
+      this.setState({ tenantBank: response.data });
+    });
+  }
+
   dataTableColumns() {
     return [
       {
-        Header: "Permintaan Penarikan",
-        accessor: "requestWithdraw",
+        Header: "Tenant ID",
+        accessor: "tenantId",
+        show: false,
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Seller",
-        accessor: "seller",
+        Header: "Company",
+        accessor: "companyName",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Jumlah Saldo Ditarik",
-        accessor: "amountWithdraw",
+        Header: "Company Email",
+        accessor: "companyEmail",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Ditarik ke Rekening",
-        accessor: "withdrawToAccount",
+        Header: "Full Name",
+        accessor: "fullName",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Cabang Bank",
-        accessor: "bankBranch",
+        Header: "Username",
+        accessor: "username",
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Status",
-        accessor: "status",
+        Header: "Email",
+        accessor: "userEmail",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Industry",
+        accessor: "industry",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Phone",
+        accessor: "phone",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Website",
+        accessor: "website",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Ballance Transactions",
+        accessor: "balanceTransaction",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "COD Balance",
+        accessor: "codBalance",
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Ballance Amount",
+        accessor: "balanceAmount",
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload Bukti",
         Cell: props => {
-          if (props.original.status === "Berhasil") {
-            return (
-              <div>
-                <Button
-                  outline
-                  color="info"
-                  onClick={() => {
-                    this.toggle();
-                    this.setState({ oneData: props.original });
-                  }}
-                >
-                  <i className="simple-icon-paper-clip mr-2" />
-                  Bukti Transfer
-                </Button>
-              </div>
-            );
-          } else {
-            return (
-              <div>
-                <Button
-                  outline
-                  color="success"
-                  onClick={() => {
-                    this.toggle();
-                    this.setState({ oneData: props.original });
-                  }}
-                >
-                  <i className="iconsminds-upload mr-2 " />
-                  Upload Bukti
-                </Button>
-              </div>
-            );
-          }
+          return (
+            <div>
+              <Button
+                outline
+                color="success"
+                onClick={() => {
+                  this.loadTenantBank(props.original.tenantId);
+                  this.toggle();
+                  this.setState({ oneData: props.original });
+                }}
+              >
+                <i className="iconsminds-upload mr-2 " />
+                Upload Bukti
+              </Button>
+            </div>
+          );
         }
       }
     ];
   }
 
-  dataTable() {
-    return [
-      {
-        id: 1,
-        receiptNumber: 908989,
-        seller: "Marble Cake",
-        img: "/assets/img/marble-cake-thumb.jpg",
-        bankBranch: "BRI",
-        requestWithdraw: "02.04.2018",
-        withdrawToAccount: "BNI",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake with flowers Macarons and blueberries",
-        amountWithdraw: "Rp. 164.000",
-        stock: 62
-      },
-      {
-        id: 2,
-        receiptNumber: 890800,
-        seller: "Fat Rascal",
-        bankBranch: "BNI",
-        img: "/assets/img/fat-rascal-thumb.jpg",
-        requestWithdraw: "01.04.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Cheesecake with chocolate cookies and Cream biscuits",
-        amountWithdraw: "Rp. 124.000",
-        stock: 48
-      },
-      {
-        id: 3,
-        receiptNumber: 23423400,
-        seller: "Chocolate Cake",
-        img: "/assets/img/chocolate-cake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "25.03.2018",
-        withdrawToAccount: "BRI",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Homemade cheesecake with fresh berries and mint",
-        amountWithdraw: "Rp. 108.000",
-        stock: 57
-      },
-      {
-        id: 4,
-        receiptNumber: 2342300,
-        seller: "Goose Breast",
-        img: "/assets/img/goose-breast-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "21.03.2018",
-        withdrawToAccount: "BLS",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Chocolate cake with berries",
-        amountWithdraw: "Rp. 101.004",
-        stock: 41
-      },
-      {
-        id: 5,
-        receiptNumber: 23423400,
-        seller: "Petit Gâteau",
-        bankBranch: "BNI",
-        img: "/assets/img/petit-gateau-thumb.jpg",
-        requestWithdraw: "02.06.2018",
-        withdrawToAccount: "BCM",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Chocolate cake with mascarpone",
-        amountWithdraw: "Rp. 985.000",
-        stock: 23
-      },
-      {
-        id: 6,
-        receiptNumber: 234234200,
-        seller: "Salzburger Nockerl",
-        img: "/assets/img/salzburger-nockerl-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "14.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Wedding cake decorated with donuts and wild berries",
-        amountWithdraw: "Rp. 962.000",
-        stock: 34
-      },
-      {
-        id: 7,
-        receiptNumber: 23400,
-        seller: "Napoleonshat",
-        img: "/assets/img/napoleonshat-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "05.02.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Cheesecake with fresh berries and mint for dessert",
-        amountWithdraw: "Rp. 921.000",
-        stock: 31
-      },
-      {
-        id: 8,
-        receiptNumber: 2349802938400,
-        seller: "Cheesecake",
-        img: "/assets/img/cheesecake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "18.08.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Delicious vegan chocolate cake",
-        amountWithdraw: "Rp. 887.000",
-        stock: 21
-      },
-      {
-        id: 9,
-        receiptNumber: 230984029300,
-        seller: "Financier",
-        img: "/assets/img/financier-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "15.03.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description:
-          "White chocolate strawberry yogurt cake decorated with fresh fruits and chocolate",
-        amountWithdraw: "Rp. 865.000",
-        stock: 53
-      },
-      {
-        id: 10,
-        receiptNumber: 203984000,
-        seller: "Genoise",
-        img: "/assets/img/genoise-thumb.jpg",
-        bankBranch: "BNI",
-        requestWithdraw: "11.06.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Christmas fruit cake, pudding on top",
-        amountWithdraw: "Rp. 824.000",
-        stock: 55
-      },
-      {
-        id: 11,
-        receiptNumber: 2398409200,
-        seller: "Gingerbread",
-        img: "/assets/img/gingerbread-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "10.04.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake decorated with donuts and wild berries",
-        amountWithdraw: "Rp. 714.000",
-        stock: 12
-      },
-      {
-        id: 12,
-        receiptNumber: 239849238400,
-        seller: "Magdalena",
-        img: "/assets/img/magdalena-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Christmas fruit cake, pudding on top",
-        amountWithdraw: "Rp. 702.000",
-        stock: 14
-      },
-      {
-        id: 13,
-        receiptNumber: 2039840200,
-        seller: "Parkin",
-        img: "/assets/img/parkin-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.08.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description:
-          "White chocolate strawberry yogurt cake decorated with fresh fruits and chocolate",
-        amountWithdraw: "Rp. 689.000",
-        stock: 78
-      },
-      {
-        id: 14,
-        receiptNumber: 2093804200,
-        seller: "Streuselkuchen",
-        img: "/assets/img/streuselkuchen-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "22.07.2018",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Delicious vegan chocolate cake",
-        amountWithdraw: "Rp. 645.000",
-        stock: 55
-      },
-      {
-        id: 15,
-        receiptNumber: 239480239400,
-        seller: "Tea loaf",
-        img: "/assets/img/tea-loaf-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "10.09.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Cheesecake with fresh berries and mint for dessert",
-        amountWithdraw: "Rp. 632.000",
-        stock: 20
-      },
-      {
-        id: 16,
-        receiptNumber: 23084023900,
-        seller: "Merveilleux",
-        img: "/assets/img/merveilleux-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "18.02.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Chocolate cake with mascarpone",
-        amountWithdraw: "Rp. 621.000",
-        stock: 6
-      },
-      {
-        id: 17,
-        receiptNumber: 4023980400,
-        seller: "Fruitcake",
-        img: "/assets/img/fruitcake-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "12.01.2019",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Chocolate cake with berries",
-        amountWithdraw: "Rp. 595.000",
-        stock: 17
-      },
-      {
-        id: 18,
-        receiptNumber: 23984029300,
-        seller: "Bebinca",
-        img: "/assets/img/bebinca-thumb.jpg",
-        bankBranch: "BCA",
-        requestWithdraw: "04.02.2019",
-        withdrawToAccount: "BCA",
-        status: "Tertunda",
-        statusColor: "secondary",
-        description: "Homemade cheesecake with fresh berries and mint",
-        amountWithdraw: "Rp. 574.000",
-        stock: 16
-      },
-      {
-        id: 19,
-        receiptNumber: 230984000,
-        seller: "Cremeschnitte",
-        img: "/assets/img/cremeschnitte-thumb.jpg",
-        bankBranch: "Desserts",
-        requestWithdraw: "04.03.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Cheesecake with chocolate cookies and Cream biscuits",
-        amountWithdraw: "Rp. 562.000",
-        stock: 9
-      },
-      {
-        id: 20,
-        receiptNumber: 23094800,
-        seller: "Soufflé",
-        img: "/assets/img/souffle-thumb.jpg",
-        bankBranch: "BNI",
-        requestWithdraw: "16.01.2018",
-        withdrawToAccount: "BCA",
-        status: "Berhasil",
-        statusColor: "primary",
-        description: "Wedding cake with flowers Macarons and blueberries",
-        amountWithdraw: "Rp. 524.000",
-        stock: 14
-      }
-    ];
+  handleOnPageChange(pageIndex) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
+    table.pagination.currentPage = pageIndex;
+
+    console.log(table);
+
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleOnPageSizeChange(newPageSize, newPage) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.pageSize = newPageSize;
+    this.setState({ table });
+    this.loadData();
+  }
+
+  handleSortedChange(newSorted, column, additive) {
+    console.log(newSorted);
+    console.log(column);
+    console.log(additive);
   }
 
   toggle() {
@@ -446,6 +265,21 @@ class WithdrawFunds extends Component {
     });
   }
 
+  fileHandler = event => {
+    this.setState({ loading: false });
+    let fileObj = event.target.files[0];
+
+    let data = new FormData();
+    data.append("file", fileObj);
+
+    this.pictureRestService.postPicture(data).subscribe(response => {
+      this.setState({
+        imageUrl: response.fileUrl,
+        loading: true,
+        image: response
+      });
+    });
+  };
   button(cell, row) {
     if (row.status === "Berhasil") {
       return (
@@ -482,20 +316,26 @@ class WithdrawFunds extends Component {
     }
   }
 
+  handleChange(e) {
+    this.setState({amount: e.target.value});
+  }
+
+  submitData() {
+    let lines = {
+      fileId: this.state.image.id,
+      amount: parseInt(this.state.amount),
+      feeTransfer: 2500,
+      tenantId: this.state.oneData.tenantId,
+      tenantBankId: this.state.selectedBank.id,
+      isDraft: this.state.isDraft,
+    }
+
+    this.requestWithdrawRest.postBallance(lines).subscribe(response => {
+      console.log(response)
+    })
+  }
+
   render() {
-    // const option = {
-    //   sizePerPage: 5,
-    //   sizePerPageList: [
-    //     {
-    //       text: "5",
-    //       value: 5
-    //     },
-    //     {
-    //       text: "10",
-    //       value: 10
-    //     }
-    //   ]
-    // };
     return (
       <Fragment>
         <Row>
@@ -512,41 +352,24 @@ class WithdrawFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      <InputGroupButtonDropdown
-                        addonType="prepend"
-                        isOpen={this.state.splitButtonOpen}
-                        toggle={this.toggleSplit}
-                      >
-                        <DropdownToggle color="primary" className="default">
-                          <i className="simple-icon-menu" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
+                      <Input
+                        placeholder="Search Owner"
+                        name="search"
+                        value={this.state.search}
+                        onChange={this.handleInputChange}
+                        onKeyPress={event => {
+                          if (event.key === "Enter") {
+                            this.loadData();
+                          }
+                        }}
+                      />
                       <Button
-                        className="default disabled"
-                        outline
-                        color="ligth"
+                        className="default"
+                        color="primary"
+                        onClick={() => this.loadData()}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
-                      <Input placeholder="Search.." />
-                      <InputGroupButtonDropdown
-                        addonType="prepend"
-                        isOpen={this.state.splitButtonOpen1}
-                        toggle={this.toggleSplit1}
-                      >
-                        <DropdownToggle color="primary" className="default">
-                          <span className="mr-2">Filter</span>{" "}
-                          <i className="iconsminds-arrow-down-2" />
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem>1</DropdownItem>
-                          <DropdownItem>2</DropdownItem>
-                        </DropdownMenu>
-                      </InputGroupButtonDropdown>
                     </InputGroup>
                   </div>
                 </div>
@@ -582,17 +405,27 @@ class WithdrawFunds extends Component {
                 <ReactTable
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
-                  data={this.dataTable()}
+                  data={this.state.table.data}
                   pages={this.state.table.pagination.totalPages}
                   columns={this.dataTableColumns()}
                   defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
-                  // loading={this.state.table.loading}
+                  loading={this.state.table.loading}
                   showPagination={true}
                   showPaginationTop={false}
                   showPaginationBottom={true}
                   pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                   manual // this would indicate that server side pagination has been enabled
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
+
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
                 />
               </CardBody>
             </Card>
@@ -600,85 +433,120 @@ class WithdrawFunds extends Component {
         </Row>
 
         {/* MODAL */}
-        <Modal isOpen={this.state.modal} toggle={this.toggle}>
-          <ModalHeader toggle={this.toggle}>
-            <IntlMessages id="modal.modalTitle" />
-          </ModalHeader>
-          <ModalBody>
-            <Table>
-              <tbody>
-                <tr>
-                  <td>
-                    <IntlMessages id="modal.seller" />
-                  </td>
-                  <td>:</td>
-                  <td>{this.state.oneData.seller}</td>
-                </tr>
-                <tr>
-                  <td>
-                    <IntlMessages id="modal.cardName" />
-                  </td>
-                  <td>:</td>
-                  <td>{this.state.oneData.seller}</td>
-                </tr>
-                <tr>
-                  <td>
-                    <IntlMessages id="modal.bank" />
-                  </td>
-                  <td>:</td>
-                  <td>{this.state.oneData.withdrawToAccount}</td>
-                </tr>
-                <tr>
-                  <td>
-                    <IntlMessages id="modal.creditNumber" />
-                  </td>
-                  <td>:</td>
-                  <td>{this.state.oneData.receiptNumber}</td>
-                </tr>
-                <tr>
-                  <td>
-                    <IntlMessages id="modal.total" />
-                  </td>
-                  <td>:</td>
-                  <td>{this.state.oneData.amountWithdraw}</td>
-                </tr>
-                <tr>
-                {this.state.oneData.status === "Berhasil" ? (
-                  <div></div>
-                ) : (
-                    <>
-                      <td>
-                        <IntlMessages id="modal.amount" />
+        {this.state.modal && this.state.tenantBank !== null && (
+          <Modal isOpen={this.state.modal} toggle={this.toggle}>
+            <ModalHeader toggle={this.toggle}>
+              <IntlMessages id="modal.modalTitle" />
+            </ModalHeader>
+            <ModalBody>
+              <Table>
+                <tbody>
+                  <tr>
+                    <td>Company Name</td>
+                    <td>:</td>
+                    <td>{this.state.oneData.companyName}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <IntlMessages id="modal.cardName" />
+                    </td>
+                    <td>:</td>
+                    <td>
+                      <Dropdown
+                        optionLabel="accountName"
+                        value={this.state.selectedBank}
+                        options={this.state.tenantBank}
+                        onChange={e => {
+                          this.setState({ selectedBank: e.value });
+                        }}
+                        placeholder="Select a Bank Account"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <IntlMessages id="modal.bank" />
+                    </td>
+                    <td>:</td>
+                    <td>
+                      {this.state.selectedBank.length === 0
+                        ? "-"
+                        : this.state.selectedBank.bank.bankName}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <IntlMessages id="modal.creditNumber" />
+                    </td>
+                    <td>:</td>
+                    <td>
+                      {this.state.selectedBank.length === 0
+                        ? "-"
+                        : this.state.selectedBank.accountNumber}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Balance Amount</td>
+                    <td>:</td>
+                    <td>{this.state.oneData.balanceAmount}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Bayar</td>
+                    <td>:</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={this.state.amount}
+                        onChange={this.handleChange}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3">
+                      <input
+                        type="file"
+                        onChange={this.fileHandler.bind(this)}
+                      />
+                    </td>
+                  </tr>
+                  {this.state.loading && (
+                    <tr>
+                      <td colSpan="3">
+                        <img
+                          src={this.state.imageUrl}
+                          height="150"
+                          width="150"
+                        />
                       </td>
-                      <td>:</td>
-                      <td>
-                        <input type="text" name="amount" />
-                      </td>
-                    </>
-                )}
-                </tr>
-              </tbody>
-            </Table>
-            {this.state.oneData.status === "Berhasil" ? (
-              <div>Disini Bukti Transfer.</div>
-            ) : (
-              <div>
-                <Input type="file" />
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+              <InputSwitch
+                checked={this.state.isDraft}
+                onChange={e => this.setState({ isDraft: e.value })}
+              />
+              <div
+                style={{
+                  marginLeft: 50,
+                  marginTop: -25
+                }}
+              >
+                Simpan Sebagai Draft
               </div>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            {this.state.oneData.status === "Berhasil" ? (
-              <Button color="danger" onClick={this.toggle}>
-                Close
-              </Button>
-            ) : (
-              <Button color="primary" onClick={this.toggle}>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="primary"
+                onClick={() => {
+                  this.submitData();
+                }}
+              >
                 Upload
               </Button>
-            )}
-          </ModalFooter>
-        </Modal>
+            </ModalFooter>
+          </Modal>
+        )}
       </Fragment>
     );
   }
