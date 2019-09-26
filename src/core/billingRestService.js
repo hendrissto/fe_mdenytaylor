@@ -26,4 +26,8 @@ export default class BillingRestService extends React.Component {
   upgradeTenantsSubscriptions(id, qParams) {
     return this.request.put(`/admin/tenants/${id}/upgrade-subscription`, qParams);
   }
+
+  renewTenantsSubscriptions(id, qParams) {
+    return this.request.put(`/admin/tenants/${id}/renew-subscription`, qParams);
+  }
 }
