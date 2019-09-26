@@ -25,6 +25,7 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+import moment from "moment";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -32,7 +33,9 @@ import Spinner from "../../../containers/pages/Spinner";
 
 export default class FormTenantSubscription extends Component {
   constructor(props) {
-    super(props);
+		super(props);
+		
+		const today = new Date();
 
     this.billingRest = new BillingRestService();
     this.loadData = this.loadData.bind(this);
@@ -40,6 +43,7 @@ export default class FormTenantSubscription extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this._renderTable = this._renderTable.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.toggleAll = this.toggleAll.bind(this);
 
     this.state = {
       type: this.props.match.params.type,
@@ -53,7 +57,10 @@ export default class FormTenantSubscription extends Component {
         { name: "12 Bulan", code: "yearlyPrice" }
       ],
       dropdownOpen: false,
-      discount: "Rp."
+      dropdownOpenAll: false,
+      discount: "Rp.",
+			discountAll: "Rp.",
+			today: moment(today).format('YYYY-MM-DD'),
     };
   }
 
@@ -65,6 +72,12 @@ export default class FormTenantSubscription extends Component {
   toggle() {
     this.setState({
       dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  toggleAll() {
+    this.setState({
+      dropdownOpenAll: !this.state.dropdownOpenAll
     });
   }
 
@@ -102,8 +115,6 @@ export default class FormTenantSubscription extends Component {
   }
 
   _renderTable(props) {
-    console.log(props);
-
     if (
       props.values.package === undefined ||
       props.values.billingCycle === undefined
@@ -128,10 +139,10 @@ export default class FormTenantSubscription extends Component {
     }
 
     if (props.values.discountType == "Rp.") {
-      props.values.prices = props.values.prices - props.values.discountAmount;
+      props.values.prices = props.values.prices - (props.values.discountAmount * props.values.qty);
     } else if (props.values.discountType == "%") {
       const discAmount =
-        (props.values.prices * props.values.discountAmount) / 100;
+        (props.values.prices * props.values.discountAmount * props.values.qty) / 100;
       props.values.prices = props.values.prices - discAmount;
     } else {
       props.values.prices = props.values.prices;
@@ -292,6 +303,26 @@ export default class FormTenantSubscription extends Component {
   }
 
   _renderPrice(props) {
+		props.values.total = props.values.prices
+
+    if (props.values.discountTypeAll == "Rp.") {
+      props.values.total = props.values.prices - props.values.discountTotalAmount;
+    } else if (props.values.discountTypeAll == "%") {
+      const discAmount =
+        (props.values.total * props.values.discountTotalAmount) / 100;
+      props.values.total = props.values.prices - discAmount;
+    } else {
+      props.values.total = props.values.prices;
+		}
+		
+		if(props.values.adjustmentAmount != 0){
+			props.values.total = props.values.total + parseInt(props.values.adjustmentAmount)
+		}
+
+		if(props.values.taxRate > 0){
+			const taxRate = (props.values.total * parseInt(props.values.taxRate)) / 100;
+			props.values.total = props.values.total + taxRate;
+		}
     return (
       <div
         style={{
@@ -300,11 +331,11 @@ export default class FormTenantSubscription extends Component {
       >
         <div
           class="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 50 }}
+          style={{ marginRight: 85 }}
         >
           <Row
             style={{
-              width: 250
+              width: 420
             }}
           >
             <Col
@@ -313,68 +344,107 @@ export default class FormTenantSubscription extends Component {
                 marginTop: 5
               }}
             >
-              Subtotal
+              <span
+                style={{
+                  marginLeft: 30
+                }}
+              >
+                Subtotal
+              </span>
             </Col>
             <Col
-              xs="1"
               style={{
-                marginTop: 5
+                marginTop: 5,
+                textAlign: "right"
               }}
             >
-              :
-            </Col>
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              1000000
+              {props.values.prices}
             </Col>
           </Row>
         </div>
         <div
           class="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 50 }}
+          style={{ marginRight: 85 }}
         >
           <Row
             style={{
-              width: 250
+              width: 420
             }}
           >
             <Col
               md="5"
               style={{
-                marginTop: 5
+                marginTop: 15
               }}
             >
-              Subtotal
+              <span
+                style={{
+                  marginLeft: 30
+                }}
+              >
+                Discount
+              </span>
             </Col>
             <Col
-              xs="1"
               style={{
-                marginTop: 5
+                marginTop: 5,
+                width: 500
               }}
             >
-              :
-            </Col>
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              1000000
+              <Row>
+                <ButtonDropdown
+                  isOpen={this.state.dropdownOpenAll}
+                  toggle={this.toggleAll}
+                >
+                  <DropdownToggle
+                    caret
+                    style={{
+                      borderRadius: 0,
+                      backgroundColor: "#848484",
+                      border: 0,
+                      width: 60
+                    }}
+                  >
+                    {this.state.discountAll}
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    <DropdownItem
+                      onClick={() => {
+                        this.setState({ discountAll: "Rp." });
+                        props.values.discountTypeAll = "Rp.";
+                      }}
+                    >
+                      Rp.
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        this.setState({ discountAll: "%" });
+                        props.values.discountTypeAll = "%";
+                      }}
+                    >
+                      %
+                    </DropdownItem>
+                  </DropdownMenu>
+                </ButtonDropdown>
+                <InputText
+                  name="discountTotalAmount"
+                  onChange={props.handleChange}
+                  value={props.values.discountTotalAmount}
+                  style={{
+                    textAlign: "right"
+                  }}
+                />
+              </Row>
             </Col>
           </Row>
         </div>
         <div
           class="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 50 }}
+          style={{ marginRight: 85 }}
         >
           <Row
             style={{
-              width: 250
+              width: 420
             }}
           >
             <Col
@@ -383,32 +453,188 @@ export default class FormTenantSubscription extends Component {
                 marginTop: 5
               }}
             >
-              Subtotal
+              <span
+                style={{
+                  marginLeft: 30
+                }}
+              >
+                Tax
+              </span>
             </Col>
             <Col
-              xs="1"
               style={{
-                marginTop: 5
+                marginTop: 5,
+                textAlign: "right"
               }}
             >
-              :
+              <InputText
+                style={{
+                  width: "45px",
+                  height: "35px",
+                  borderRadius: 5,
+                  textAlign: "right"
+                }}
+                keyfilter="pint"
+                value={props.values.taxRate}
+                onChange={props.handleChange}
+                name="taxRate"
+              />
+              <span style={{ fontSize: "20px", marginLeft: "5px" }}>%</span>
             </Col>
+          </Row>
+        </div>
+        <div
+          class="d-flex flex-row-reverse bd-highlight"
+          style={{ marginRight: 85 }}
+        >
+          <Row
+            style={{
+              width: 420
+            }}
+          >
             <Col
               md="5"
               style={{
                 marginTop: 5
               }}
             >
-              1000000
+              <span
+                style={{
+                  marginLeft: 30
+                }}
+              >
+                Adjustment
+              </span>
             </Col>
+            <Col
+              style={{
+                marginTop: 5,
+                textAlign: "right"
+              }}
+            >
+              <InputText
+                name="adjustmentAmount"
+                value={props.values.adjustmentAmount}
+                onChange={props.handleChange}
+                style={{
+                  textAlign: "right"
+                }}
+              />
+            </Col>
+          </Row>
+        </div>
+        <div
+          class="d-flex flex-row-reverse bd-highlight"
+          style={{ marginRight: 85 }}
+        >
+          <Row
+            style={{
+              width: 420
+            }}
+          >
+            <Col
+              md="5"
+              style={{
+                marginTop: 5
+              }}
+            >
+              <span
+                style={{
+                  marginLeft: 30,
+                  fontSize: 20,
+                  color: "#848484"
+                }}
+              >
+                Total
+              </span>
+            </Col>
+            <Col
+              style={{
+                marginTop: 5,
+                textAlign: "right"
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 20,
+                  color: "#848484"
+                }}
+              >
+                {props.values.total}
+              </span>
+            </Col>
+          </Row>
+        </div>
+        <div class="d-flex flex-row-reverse bd-highlight">
+          <Row
+            style={{
+              marginRight: 80
+            }}
+          >
+            <Button
+              style={{
+                borderRadius: "5px",
+                marginRight: "10px",
+                width: "110px"
+              }}
+            >
+              Cancel
+            </Button>
+            <Button style={{ borderRadius: "5px", width: "110px" }} onClick={props.handleSubmit}>
+              Save
+            </Button>
           </Row>
         </div>
       </div>
     );
   }
 
-  handleSubmit(values) {
-    console.log(values);
+  handleSubmit(props) {
+		
+    if (props.billingCycle.code == "monthlyPrice") {
+        props.packagePrice =
+          props.package.monthlyPrice;
+      } else if (props.billingCycle.code == "quaterlyPrice") {
+        props.packagePrice =
+          props.package.quaterlyPrice;
+      } else if (props.billingCycle.code == "semesterlyPrice") {
+        props.packagePrice =
+          props.package.semesterlyPrice;
+      } else if (props.billingCycle.code == "yearlyPrice") {
+        props.packagePrice =
+          props.package.yearlyPrice;
+      } else {
+        props.packagePrice = 0;
+			}
+
+		let data = {
+			subscriptionPlanId: props.package.id,
+			invoiceNumber: null,
+			invoiceDate: this.state.today,
+			subtotal: props.prices,
+			lastPaymentDate: this.state.today,
+			discountPercent: null,
+			discountAmount: parseInt(props.discountTotalAmount),
+			taxRate: parseInt(props.taxRate),
+			amountPaid: props.total,
+			adjustmentAmount: parseInt(props.adjustmentAmount),
+			items: [
+				{
+					itemType: 0,
+					billingCycle: props.billingCycle.code,
+					description: props.package.description,
+					qty: parseInt(props.qty),
+					unitPrice: props.packagePrice,
+					discountPercent: null,
+					discountAmount: parseInt(props.discountAmount),
+				}
+			]
+		}
+
+		console.log(data)
+		this.billingRest.upgradeTenantsSubscriptions(parseInt(this.props.match.params.tenantId), data).subscribe(response => {
+			console.log(response)
+		})
   }
 
   render() {
@@ -445,8 +671,15 @@ export default class FormTenantSubscription extends Component {
                       initialValues={{
                         qty: 1,
                         discountType: "Rp.",
-                        discountAmount: 0,
-                        prices: 0
+                        discountTypeAll: "Rp.",
+												discountAmount: 0,
+												discountTotalAmount: 0,
+												packagePrice: 0,
+												prices: 0,
+                        taxRate: 0,
+												adjustmentAmount: 0,
+												total: 0,
+												invoiceNumber:""
                       }}
                       onSubmit={this.handleSubmit}
                       enableReinitialize={true}
@@ -457,6 +690,36 @@ export default class FormTenantSubscription extends Component {
                             width: "100%"
                           }}
                         >
+												<Row
+													style={{
+														marginTop: 10,
+														width: "50%"
+													}}
+												>
+													<Col
+														xs="3"
+														style={{
+															marginTop: 5
+														}}
+													>
+														invoice Number
+													</Col>
+													<Col
+														xs="1"
+														style={{
+															marginTop: 5
+														}}
+													>
+														:
+													</Col>
+													<Col>
+														<InputText
+															name="invoiceNumber"
+															value={props.values.invoiceNumber}
+															onChange={props.handleChange}
+														/>
+													</Col>
+												</Row>
                           <Row
                             style={{
                               marginTop: 10,

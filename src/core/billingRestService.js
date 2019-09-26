@@ -22,4 +22,8 @@ export default class BillingRestService extends React.Component {
   getRelatedData(qParams) {
     return this.request.get("/admin/entry-related-data", qParams);
   }
+
+  upgradeTenantsSubscriptions(id, qParams) {
+    return this.request.put(`/admin/tenants/${id}/upgrade-subscription`, qParams);
+  }
 }
