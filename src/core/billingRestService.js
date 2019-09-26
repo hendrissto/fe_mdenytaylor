@@ -11,7 +11,15 @@ export default class BillingRestService extends React.Component {
     return this.request.get("/admin/tenant-subscriptions", qParams);
   }
 
+  getTenantsSubscriptionsById(id, qParams) {
+    return this.request.get(`/admin/tenant-subscriptions/${id}`, qParams);
+  }
+
   getTenantsSubscriptionsSummary(qParams) {
     return this.request.get("/admin/tenant-subscriptions-summary", qParams);
+  }
+
+  getRelatedData(qParams) {
+    return this.request.get("/admin/entry-related-data", qParams);
   }
 }

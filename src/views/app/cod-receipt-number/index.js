@@ -96,7 +96,6 @@ export default class CODReceiptNumber extends Component {
         table.pagination.totalPages = response.total / table.pagination.pageSize;
         table.loading = false;
         this.setState({ table });
-        console.log(response.data)
       })
   }
 
@@ -146,9 +145,15 @@ export default class CODReceiptNumber extends Component {
           Cell: props => <p>{props.value === null ? '-' : props.value}</p>
         },
         {
-          Header: "Note",
-          accessor: "note",
+          Header: "Destination",
+          accessor: "destination",
+          width: 150,
           Cell: props => <p>{props.value === null ? '-' : props.value}</p>
+        },
+        {
+          Header: "Note",
+          accessor: "notes",
+          Cell: props => <p>{props.value === "" ? '-' : props.value}</p>
         },
         {
           Header: "Total",

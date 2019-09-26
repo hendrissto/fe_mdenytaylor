@@ -15,6 +15,7 @@ import {
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
 import Loader from "react-loader-spinner";
+import Loading from "../../../containers/pages/Spinner"
 
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
@@ -65,6 +66,7 @@ class ReceiptOfFunds extends Component {
     this.loadDetailData = this.loadDetailData.bind(this);
 
     this.state = {
+      loading: false,
       error: false,
       errorFile: false,
       resError: null,
@@ -468,7 +470,6 @@ class ReceiptOfFunds extends Component {
             totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
-        console.log(data);
         this.setState({ data: data });
       }
     });
@@ -512,15 +513,17 @@ class ReceiptOfFunds extends Component {
   }
 
   submitData() {
+    this.setState({resiModal: false, modal: false, loading: true})
     this.codRest.postCOD(this.state.dataExcel).subscribe(
       response => {
-        this.setState({ resiModal: false, modal: false });
+        this.setState({ resiModal: false, modal: false, loading: false });
         this.loadData();
       },
       error => {
         this.setState({
           resError: error.data[0].errorMessage,
-          resiModal: false
+          resiModal: false,
+          loading: false,
         });
         this.showModalError();
       }
@@ -738,7 +741,6 @@ class ReceiptOfFunds extends Component {
                   text={"Semua data wajib diisi"}
                 />
               )}
-              {option.length > 0 && (
                 <div>
                   <Row>
                     <Col
@@ -782,7 +784,6 @@ class ReceiptOfFunds extends Component {
                     />
                   )}
                 </div>
-              )}
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.nextStep()}>Next</Button>
@@ -1008,6 +1009,9 @@ class ReceiptOfFunds extends Component {
               </Button>
             </ModalFooter>
           </Modal>
+        )}
+        {this.state.loading && (
+          <Loading />
         )}
       </Fragment>
     );

@@ -1,4 +1,5 @@
 import moment from "moment";
+import { NavLink } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
@@ -28,6 +29,7 @@ import {
 
 import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
@@ -61,6 +63,9 @@ export default class Billing extends Component {
   constructor(props) {
     super(props);
     this.billingRest = new BillingRestService();
+    this.moneyFormat = new MoneyFormat();
+    this.loadRelatedData = this.loadRelatedData.bind(this);
+    this.loadDetailTenant = this.loadDetailTenant.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
@@ -100,6 +105,7 @@ export default class Billing extends Component {
         }
       },
       tenantsSubscriptionsSummary: [],
+      subscriptionPlanData: [],
       package: [],
       checked: false,
       dropdownOpen: false,
@@ -115,6 +121,7 @@ export default class Billing extends Component {
       date2: null,
       invalidDates: [today],
       invalidDates2: [today],
+      redirect: null
     };
   }
 
@@ -208,7 +215,6 @@ export default class Billing extends Component {
     this.setState({ billingCycle2: e.value });
   }
 
-
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -223,7 +229,6 @@ export default class Billing extends Component {
     };
 
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
-      console.log(response);
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
@@ -386,29 +391,77 @@ export default class Billing extends Component {
         show: this.state.filterColumns.indexOf("Status") > -1 ? false : true,
         Cell: props => (
           <Row>
-            <Button
-              className="float-right default"
-              color="secondary"
-              style={{ marginRight: 10 }}
-              onClick={() => {
-                this.setState({ upgradeModal: true });
-              }}
-            >
-              Upgrade
-            </Button>
-            <Button
-              className="float-right default"
-              color="secondary"
-              onClick={() => {
-                this.setState({ renewModal: true });
-              }}
-            >
-              Renew
-            </Button>
+            <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                style={{ marginRight: 10 }}
+                // onClick={() => {
+                //   this.loadDetailTenant(props.original.tenantId);
+                //   this.loadRelatedData();
+                //   this.setState({ upgradeModal: true });
+                // }}
+              >
+                Upgrade
+              </Button>
+            </NavLink>
+            <NavLink to={`billings/renew/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                // onClick={() => {
+                //   this.setState({ renewModal: true });
+                // }}
+              >
+                Renew
+              </Button>
+            </NavLink>
           </Row>
         )
       }
     ];
+  }
+
+  loadRelatedData() {
+    this.billingRest.getRelatedData({}).subscribe(response => {
+      this.setState({
+        subscriptionPlanData: response.subscriptionPlan,
+        upgradeModal: true
+      });
+    });
+  }
+
+  loadDetailTenant(id) {
+    this.billingRest.getTenantsSubscriptionsById(id, {}).subscribe(response => {
+      console.log(response);
+    });
+  }
+
+  _renderPrice() {
+    const selectedPackage = this.state.package;
+    const billingCycle = this.state.billingCycle;
+    let price;
+    if (selectedPackage.length !== [] && billingCycle !== undefined) {
+      let code = billingCycle.code;
+      if (code == 1) {
+        console.log(selectedPackage.monthlyPrice);
+        price = selectedPackage.monthlyPrice;
+      } else if (code == 3) {
+        console.log(selectedPackage.quaterlyPrice);
+        price = selectedPackage.quaterlyPrice;
+      } else if (code == 6) {
+        console.log(selectedPackage.semesterlyPrice);
+        price = selectedPackage.semesterlyPrice;
+      } else if (code == 12) {
+        console.log(selectedPackage.yearlyPrice);
+        price = selectedPackage.yearlyPrice;
+      } else {
+        price = 0;
+      }
+    } else {
+      price = 0;
+    }
+    return price;
   }
 
   _renderFilterColumns() {
@@ -964,7 +1017,7 @@ export default class Billing extends Component {
                 <Col>
                   <Dropdown
                     value={this.state.package}
-                    options={paket}
+                    options={this.state.subscriptionPlanData}
                     onChange={this.onPackageChange}
                     placeholder="Select a Package"
                     optionLabel="name"
@@ -1000,6 +1053,35 @@ export default class Billing extends Component {
                     placeholder="Select a Billing Cycle"
                     optionLabel="name"
                   />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Price
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  {this.moneyFormat.numberFormat(this._renderPrice())}
                 </Col>
               </Row>
               <Row
