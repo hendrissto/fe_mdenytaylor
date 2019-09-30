@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
+import { Redirect } from "react-router-dom";
 import {
   Row,
   Card,
@@ -19,6 +20,7 @@ import {
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 
@@ -34,6 +36,8 @@ import PictureRestService from "../../../core/pictureRestService";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
+import Loader from "react-loader-spinner";
+import Spinner from "../../../containers/pages/Spinner";
 
 class WithdrawFunds extends Component {
   constructor(props) {
@@ -41,14 +45,19 @@ class WithdrawFunds extends Component {
     this.requestWithdrawRest = new WithdrawRestService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
+    this.moneyFormat = new MoneyFormat();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantBank = this.loadTenantBank.bind(this);
     this.fileHandler = this.fileHandler.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.toggleModal = this.toggleModal.bind(this);
+    this.submitData = this.submitData.bind(this);
 
     this.state = {
       table: {
         loading: true,
+        loadingSubmit: false,
+        spinner: false,
         data: [],
         pagination: {
           currentPage: 0,
@@ -61,7 +70,9 @@ class WithdrawFunds extends Component {
       tenantBank: null,
       oneData: "",
       search: "",
-      modal: false,
+			modal: false,
+			modal2: false,
+      modalResponse: false,
       dropdownOpen: false,
       splitButtonOpen: false,
       dropdownOpen1: false,
@@ -70,7 +81,9 @@ class WithdrawFunds extends Component {
       selectedBank: [],
       image: null,
       loading: false,
-      imageUrl: null
+      imageUrl: null,
+			redirect: false,
+			errorData: '',
     };
 
     this.loadData = this.loadData.bind(this);
@@ -82,6 +95,13 @@ class WithdrawFunds extends Component {
   }
 
   componentDidMount() {
+    this.loadData();
+  }
+
+  toggleModal() {
+    this.setState({
+      modal2: !this.state.modal2
+    });
     this.loadData();
   }
 
@@ -120,7 +140,9 @@ class WithdrawFunds extends Component {
   loadTenantBank(id) {
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(response => {
       this.setState({ tenantBank: response.data });
-    });
+    }, err => {
+			console.log(err)
+		});
   }
 
   dataTableColumns() {
@@ -134,16 +156,19 @@ class WithdrawFunds extends Component {
       {
         Header: "Company",
         accessor: "companyName",
+        width: 150,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Company Email",
         accessor: "companyEmail",
+        width: 180,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Full Name",
         accessor: "fullName",
+        width: 150,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -154,40 +179,48 @@ class WithdrawFunds extends Component {
       {
         Header: "Email",
         accessor: "userEmail",
+        width: 150,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Industry",
         accessor: "industry",
+        width: 100,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Phone",
         accessor: "phone",
+        width: 120,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Website",
         accessor: "website",
+        width: 140,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Ballance Transactions",
         accessor: "balanceTransaction",
-        Cell: props => <p>{props.value}</p>
+        width: 150,
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "COD Balance",
         accessor: "codBalance",
-        Cell: props => <p>{props.value}</p>
+        width: 120,
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Ballance Amount",
         accessor: "balanceAmount",
-        Cell: props => <p>{props.value}</p>
+        width: 150,
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Upload Bukti",
+        width: 200,
         Cell: props => {
           return (
             <div>
@@ -197,7 +230,10 @@ class WithdrawFunds extends Component {
                 onClick={() => {
                   this.loadTenantBank(props.original.tenantId);
                   this.toggle();
-                  this.setState({ oneData: props.original });
+                  this.setState({
+                    oneData: props.original,
+                    amount: props.original.balanceAmount
+                  });
                 }}
               >
                 <i className="iconsminds-upload mr-2 " />
@@ -266,7 +302,7 @@ class WithdrawFunds extends Component {
   }
 
   fileHandler = event => {
-    this.setState({ loading: false });
+    this.setState({ loading: false, spinner: true });
     let fileObj = event.target.files[0];
 
     let data = new FormData();
@@ -274,6 +310,7 @@ class WithdrawFunds extends Component {
 
     this.pictureRestService.postPicture(data).subscribe(response => {
       this.setState({
+        spinner: false,
         imageUrl: response.fileUrl,
         loading: true,
         image: response
@@ -317,25 +354,42 @@ class WithdrawFunds extends Component {
   }
 
   handleChange(e) {
-    this.setState({amount: e.target.value});
+    this.setState({ amount: e.target.value });
   }
 
   submitData() {
+		this.setState({ modal: false, loadingSubmit: true, errorData: '' });
+		
+
     let lines = {
-      fileId: this.state.image.id,
+      fileId: this.state.isDraft === true ? undefined : this.state.image.id,
       amount: parseInt(this.state.amount),
       feeTransfer: 2500,
       tenantId: this.state.oneData.tenantId,
       tenantBankId: this.state.selectedBank.id,
-      isDraft: this.state.isDraft,
-    }
-
+      isDraft: this.state.isDraft
+    };
+    console.log(lines);
     this.requestWithdrawRest.postBallance(lines).subscribe(response => {
-      console.log(response)
-    })
+      this.setState({
+				modal2: true,
+        loadingSubmit: false,
+				modalResponse: true,
+      });
+    }, err => {
+      this.setState({
+        loadingSubmit: false,
+				modal2: true,
+				modalError: true,
+				errorData: err.data[0].errorMessage
+      });
+		});
   }
 
   render() {
+    if (this.state.redirect === true) {
+      return <Redirect to="/app/request-withdraw-funds/" />;
+    }
     return (
       <Fragment>
         <Row>
@@ -373,36 +427,8 @@ class WithdrawFunds extends Component {
                     </InputGroup>
                   </div>
                 </div>
-                {/*
-                <BootstrapTable
-                  data={this.dataTable()}
-                  pagination={true}
-                  options={option}
-                >
-                  <TableHeaderColumn dataField="requestWithdraw" isKey>
-                    Permintaan Penarikan
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataField="seller">
-                    Seller
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataField="amountWithdraw">
-                    Jumlah Saldo Ditarik
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataField="withdrawToAccount">
-                    Ditarik ke Rekening
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataField="bankBranch">
-                    Cabang Bank
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataField="status">
-                    Status
-                  </TableHeaderColumn>
-                  <TableHeaderColumn dataFormat={this.button.bind(this)}>
-                    Upload Bukti
-                  </TableHeaderColumn>
-                </BootstrapTable>
-                 */}
                 <ReactTable
+                  minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
@@ -430,6 +456,8 @@ class WithdrawFunds extends Component {
               </CardBody>
             </Card>
           </Colxx>
+
+          {this.state.loadingSubmit && <Spinner />}
         </Row>
 
         {/* MODAL */}
@@ -503,12 +531,38 @@ class WithdrawFunds extends Component {
                   </tr>
                   <tr>
                     <td colSpan="3">
-                      <input
-                        type="file"
-                        onChange={this.fileHandler.bind(this)}
+                      <InputSwitch
+                        checked={this.state.isDraft}
+                        onChange={e => this.setState({ isDraft: e.value })}
                       />
+                      <div
+                        style={{
+                          marginLeft: 50,
+                          marginTop: -25
+                        }}
+                      >
+                        Simpan Sebagai Draft
+                      </div>
                     </td>
                   </tr>
+                  <tr>
+                    <td colSpan="3">
+                      {!this.state.isDraft && (
+                        <input
+                          type="file"
+                          onChange={this.fileHandler.bind(this)}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                  {this.state.spinner && (
+                    <Loader
+                      type="Oval"
+                      color="#51BEEA"
+                      height={80}
+                      width={80}
+                    />
+                  )}
                   {this.state.loading && (
                     <tr>
                       <td colSpan="3">
@@ -522,18 +576,6 @@ class WithdrawFunds extends Component {
                   )}
                 </tbody>
               </Table>
-              <InputSwitch
-                checked={this.state.isDraft}
-                onChange={e => this.setState({ isDraft: e.value })}
-              />
-              <div
-                style={{
-                  marginLeft: 50,
-                  marginTop: -25
-                }}
-              >
-                Simpan Sebagai Draft
-              </div>
             </ModalBody>
             <ModalFooter>
               <Button
@@ -543,6 +585,23 @@ class WithdrawFunds extends Component {
                 }}
               >
                 Upload
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.modal2 && (
+          <Modal isOpen={this.state.modal2}>
+						<ModalHeader>Status</ModalHeader>
+						{this.state.modalResponse && (
+							<ModalBody>Berhasil.</ModalBody>
+						)}
+						{this.state.modalError && (
+							<ModalBody>{this.state.errorData}</ModalBody>
+						)}
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleModal}>
+                Close
               </Button>
             </ModalFooter>
           </Modal>

@@ -12,10 +12,6 @@ import {
   Table,
   Input,
   InputGroup,
-  InputGroupButtonDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
@@ -28,10 +24,13 @@ import DataTablePagination from "../../../components/DatatablePagination";
 
 import DebitRestService from "../../../core/debitRestService";
 import RelatedDataRestService from "../../../core/relatedDataRestService";
-// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import PictureRestService from "../../../core/pictureRestService";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import {InputText} from "primereact/inputtext";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import Loader from "react-loader-spinner";
+import Spinner from "../../../containers/pages/Spinner";
 
 class DebitCod extends Component {
   constructor(props) {
@@ -39,9 +38,24 @@ class DebitCod extends Component {
 
     this.debitRestService = new DebitRestService();
     this.relatedData = new RelatedDataRestService();
+    this.pictureRestService = new PictureRestService();
+    this.moneyFormat = new MoneyFormat();
+    this.toggle = this.toggle.bind(this);
+    this.loadRelatedData = this.loadRelatedData.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.submitData = this.submitData.bind(this);
+    this.toggleModal = this.toggleModal.bind(this);
 
     this.state = {
+      loadingSubmit: false,
+      spinner: false,
+      loading: false,
       relatedData: [],
+      selectedBank: [],
+      tenantBank: null,
+      amount: null,
+      image: null,
+      imageUrl: null,
       table: {
         loading: true,
         data: [],
@@ -52,8 +66,29 @@ class DebitCod extends Component {
           pageSize: 10
         }
       },
-      modal: false
+      modal: false,
+      modal2: false,
+      modal3: false,
+      errorData: "",
+      oneData: null
     };
+  }
+
+  handleChange(e) {
+    this.setState({ amount: e.target.value });
+  }
+
+  toggle() {
+    this.setState({
+      modal: !this.state.modal
+    });
+  }
+
+  toggleModal() {
+    this.setState({
+      modal2: !this.state.modal2
+    });
+    this.loadData();
   }
 
   componentDidMount() {
@@ -81,18 +116,25 @@ class DebitCod extends Component {
     });
   }
 
-  loadRelatedData() {
-    this.relatedData.getTenantBank().subscribe(response => {
-      this.setState({ relatedData: response });
+  loadRelatedData(id) {
+    this.relatedData.getTenantBank(id, {}).subscribe(response => {
+      console.log(response);
+      this.setState({ tenantBank: response.data });
     });
   }
 
   dataTable() {
     return [
       {
+        Header: "Id",
+        accessor: "id",
+        show: false,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
         Header: "Permintaan Penarikan",
         accessor: "deliveryDate",
-        Cell: props => <p>{props.value}</p>
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Seller",
@@ -102,7 +144,7 @@ class DebitCod extends Component {
       {
         Header: "Jumlah Saldo Ditarik",
         accessor: "amount",
-        Cell: props => <p>{props.value}</p>
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Ditarik ke Rekening",
@@ -122,14 +164,14 @@ class DebitCod extends Component {
       {
         Header: "Upload Bukti",
         Cell: props => {
-          if (props.original.status === "Berhasil") {
+          if (props.original.status !== "draft") {
             return (
               <div>
                 <Button
                   outline
                   color="info"
                   onClick={() => {
-                    this.setState({ modal: true });
+                    this.setState({ modal3: true });
                     this.setState({ oneData: props.original });
                   }}
                 >
@@ -145,12 +187,17 @@ class DebitCod extends Component {
                   outline
                   color="success"
                   onClick={() => {
+                    this.loadRelatedData(props.original.tenantId);
                     this.setState({ modal: true });
-                    this.setState({ oneData: props.original });
+                    console.log(props.original);
+                    this.setState({
+                      oneData: props.original,
+                      amount: props.original.amount
+                    });
                   }}
                 >
                   <i className="iconsminds-upload mr-2 " />
-                  Upload Bukti
+                  Upload
                 </Button>
               </div>
             );
@@ -158,6 +205,53 @@ class DebitCod extends Component {
         }
       }
     ];
+  }
+
+  fileHandler = event => {
+    this.setState({ loading: false, spinner: true });
+    let fileObj = event.target.files[0];
+
+    let data = new FormData();
+    data.append("file", fileObj);
+
+    this.pictureRestService.postPicture(data).subscribe(response => {
+      this.setState({
+        spinner: false,
+        imageUrl: response.fileUrl,
+        loading: true,
+        image: response
+      });
+    });
+  };
+
+  submitData() {
+    this.setState({ modal: false, loadingSubmit: true });
+    let lines = {
+      id: this.state.oneData.id,
+      fileId: this.state.image.id,
+      amount: parseInt(this.state.amount),
+      feeTransfer: 2500,
+      tenantId: this.state.oneData.tenantId,
+      tenantBankId: this.state.selectedBank.id
+    };
+
+    this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
+      response => {
+        this.setState({
+          modal2: true,
+          loadingSubmit: false,
+          modalResponse: true
+        });
+      },
+      err => {
+        this.setState({
+          loadingSubmit: false,
+          modal2: true,
+          modalError: true,
+          errorData: err.data[0].errorMessage
+        });
+      }
+    );
   }
 
   render() {
@@ -197,6 +291,7 @@ class DebitCod extends Component {
                 </div>
 
                 <ReactTable
+                  minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
@@ -224,66 +319,167 @@ class DebitCod extends Component {
               </CardBody>
             </Card>
           </Colxx>
+          {this.state.loadingSubmit && <Spinner />}
         </Row>
 
         {/* MODAL */}
-        {this.state.modal && (
+        {this.state.modal && this.state.tenantBank !== null && (
           <Modal isOpen={this.state.modal} toggle={this.toggle}>
             <ModalHeader toggle={this.toggle}>
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
             <ModalBody>
+              {console.log(this.state.tenantBank)}
               <Table>
                 <tbody>
                   <tr>
-                    <td>
-                      <IntlMessages id="modal.seller" />
-                    </td>
+                    <td>Company Name</td>
                     <td>:</td>
-                    <td>sellerName [ debit-cod ]</td>
+                    <td>{this.state.oneData.sellerName}</td>
                   </tr>
                   <tr>
                     <td>
                       <IntlMessages id="modal.cardName" />
                     </td>
                     <td>:</td>
-                    <td>accountName [ tenant-bank ]</td>
+                    <td>
+                      <Dropdown
+                        optionLabel="accountName"
+                        value={this.state.selectedBank}
+                        options={this.state.tenantBank}
+                        onChange={e => {
+                          this.setState({ selectedBank: e.value });
+                        }}
+                        placeholder="Select a Bank Account"
+                      />
+                    </td>
                   </tr>
                   <tr>
                     <td>
                       <IntlMessages id="modal.bank" />
                     </td>
                     <td>:</td>
-                    <td>bankName [ tenant-bank ]</td>
+                    <td>
+                      {this.state.selectedBank.length === 0
+                        ? "-"
+                        : this.state.selectedBank.bank.bankName}
+                    </td>
                   </tr>
                   <tr>
                     <td>
                       <IntlMessages id="modal.creditNumber" />
                     </td>
                     <td>:</td>
-                    <td>accountNumber [ tenant-bank ]</td>
+                    <td>
+                      {this.state.selectedBank.length === 0
+                        ? "-"
+                        : this.state.selectedBank.accountNumber}
+                    </td>
                   </tr>
                   <tr>
                     <td>
                       <IntlMessages id="modal.total" />
                     </td>
                     <td>:</td>
-                    <td>amount [ debit-cod ]</td>
+                    <td>{this.state.oneData.amount}</td>
                   </tr>
                   <tr>
-                    <td>
-                      Total Bayar
-                    </td>
+                    <td>Total Bayar</td>
                     <td>:</td>
-                    <td><InputText placeholder="pay amount" /></td>
+                    <td>
+                      <input
+                        type="text"
+                        value={this.state.amount}
+                        onChange={this.handleChange}
+                      />
+                    </td>
                   </tr>
                 </tbody>
               </Table>
-              <Input type="file" />
+              <input type="file" onChange={this.fileHandler.bind(this)} />
+              {this.state.spinner && (
+                <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+              )}
+              {this.state.loading && (
+                <tr>
+                  <td colSpan="3">
+                    <img src={this.state.imageUrl} height="150" width="150" />
+                  </td>
+                </tr>
+              )}
             </ModalBody>
             <ModalFooter>
-              <Button color="primary" onClick={this.toggle}>
+              <Button
+                color="primary"
+                onClick={() => {
+                  this.submitData();
+                }}
+              >
                 Upload
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.modal2 && (
+          <Modal isOpen={this.state.modal2}>
+            <ModalHeader>Status</ModalHeader>
+            {this.state.modalResponse && <ModalBody>Berhasil.</ModalBody>}
+            {this.state.modalError && (
+              <ModalBody>{this.state.errorData}</ModalBody>
+            )}
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleModal}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.modal3 && (
+          <Modal isOpen={this.state.modal3}>
+            <ModalHeader>Status</ModalHeader>
+            <ModalBody>
+              <Table>
+                <tbody>
+                  <tr>
+                    <td>Company Name</td>
+                    <td>:</td>
+                    <td>{this.state.oneData.sellerName}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <IntlMessages id="modal.bank" />
+                    </td>
+                    <td>:</td>
+                    <td>{this.state.oneData.bankName}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Bayar</td>
+                    <td>:</td>
+                    <td>{this.moneyFormat.numberFormat(this.state.oneData.amount)}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3">
+                      <a target="_blank" href={this.state.oneData.file.fileUrl}>
+                        <img
+                          src={this.state.oneData.file.fileUrl}
+                          height="150"
+                          width="150"
+                        />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="primary"
+                outline
+                onClick={() => this.setState({ modal3: false })}
+              >
+                Close
               </Button>
             </ModalFooter>
           </Modal>

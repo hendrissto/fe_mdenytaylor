@@ -277,7 +277,7 @@ export default class Billing extends Component {
         accessor: "tenantId",
         fixed: "left",
         width: 70,
-        show: this.state.filterColumns.indexOf("ID Tenant") > -1 ? false : true,
+        show: false,
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -292,18 +292,13 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 120,
-        show:
-          this.state.filterColumns.indexOf("Nama Perusahaan") > -1
-            ? false
-            : true
+        width: 150,
       },
       {
         Header: "Email",
         accessor: "companyInfo.email",
         fixed: "left",
         width: 170,
-        show: this.state.filterColumns.indexOf("Email") > -1 ? false : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
@@ -311,8 +306,6 @@ export default class Billing extends Component {
         accessor: "companyInfo.phone",
         fixed: "left",
         width: 140,
-        show:
-          this.state.filterColumns.indexOf("No Telepon") > -1 ? false : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {

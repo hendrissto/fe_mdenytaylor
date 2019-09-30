@@ -101,7 +101,7 @@ export default class FormTenantSubscription extends Component {
       .subscribe(response => {
         this.setState({ data: response, loading: false });
 
-        if (this.props.match.params.type == "renew") {
+        if (this.props.match.params.type == "renew" && this.state.relatedData.subscriptionPlan !== undefined) {
           let activePackage = [];
           for (
             let i = 0;

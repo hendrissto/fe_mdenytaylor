@@ -23,6 +23,7 @@ import {
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
 import IconCard from "../../../components/cards/IconCard";
+import "./tenants.css";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
@@ -142,6 +143,8 @@ export default class Tenant extends Component {
         Header: "ID Tenant",
         accessor: "id",
         fixed: "left",
+        width: 70,
+        show: false,
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -155,33 +158,39 @@ export default class Tenant extends Component {
       {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
-        fixed: "left"
+        fixed: "left",
+        width: 150
       },
       {
         Header: "Email",
         accessor: "email",
         fixed: "left",
+        width: 170,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "No Telp",
         accessor: "phone",
         fixed: "left",
+        width: 140,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total SKU",
         accessor: "totalSku",
+        width: 70,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total Order",
         accessor: "totalOrder",
+        width: 80,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total Receipt",
         accessor: "totalReceipt",
+        width: 80,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -203,11 +212,13 @@ export default class Tenant extends Component {
       {
         Header: "Last Login",
         accessor: "owner.lastLoginDateUtc",
+        width: 150,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
+        width: 150,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
@@ -230,12 +241,14 @@ export default class Tenant extends Component {
   oneData() {
     let dataTable = [];
     const data = this.state.oneData.users;
-    
+
     for (let i = 0; i < data.length; i++) {
       dataTable.push(
-        <div style={{
-          marginBottom: 10
-        }}>
+        <div
+          style={{
+            marginBottom: 10
+          }}
+        >
           <Row>
             <Col xs="3"> ID User </Col>
             <Col xs="1">:</Col>
@@ -249,7 +262,7 @@ export default class Tenant extends Component {
         </div>
       );
     }
-    
+
     return dataTable;
   }
 
@@ -346,19 +359,31 @@ export default class Tenant extends Component {
         </Row>
 
         {this.state.oneData && (
-          <Modal
-            isOpen={this.state.modal}
-            toggle={this.toggle}
-            className={this.props.className}
+          <div
+            style={{
+              maxHeight: 580
+            }}
           >
-            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-            <ModalBody>{this.oneData()}</ModalBody>
-            <ModalFooter>
-              <Button color="primary" outline onClick={this.toggle}>
-                Close
-              </Button>
-            </ModalFooter>
-          </Modal>
+            <Modal
+              isOpen={this.state.modal}
+              toggle={this.toggle}
+            >
+              <ModalHeader toggle={this.toggle}>Detail User</ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
+                }}
+              >
+                {this.oneData()}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" outline onClick={this.toggle}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
         )}
       </Fragment>
     );
