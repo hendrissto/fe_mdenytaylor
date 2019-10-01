@@ -13,10 +13,8 @@ import {
   Table,
   Input,
   InputGroup,
-  InputGroupButtonDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
+  Popover,
+  PopoverBody
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
@@ -53,8 +51,22 @@ class WithdrawFunds extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.submitData = this.submitData.bind(this);
+    this.togglePopOver = this.togglePopOver.bind(this);
 
     this.state = {
+      companyName: true,
+      companyEmail: true,
+      fullName: true,
+      username: true,
+      userEmail: true,
+      industry: true,
+      phone: true,
+      website: true,
+      balanceTransaction: true,
+      codBalance: true,
+      balanceAmount: true,
+      fileAttach: true,
+      popoverOpen: false,
       error: false,
       table: {
         loading: true,
@@ -100,11 +112,27 @@ class WithdrawFunds extends Component {
     this.loadData();
   }
 
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
   toggleModal() {
     this.setState({
       modal2: !this.state.modal2
     });
     this.loadData();
+  }
+
+  togglePopOver() {
+    this.setState(prevState => ({
+      popoverOpen: !prevState.popoverOpen
+    }));
   }
 
   handleInputChange(event) {
@@ -162,70 +190,82 @@ class WithdrawFunds extends Component {
         Header: "Company",
         accessor: "companyName",
         width: 150,
+        show: this.state.companyName,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Company Email",
         accessor: "companyEmail",
         width: 180,
+        show: this.state.companyEmail,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Full Name",
         accessor: "fullName",
         width: 150,
+        show: this.state.fullName,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Username",
         accessor: "username",
+        show: this.state.username,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Email",
         accessor: "userEmail",
         width: 150,
+        show: this.state.userEmail,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Industry",
         accessor: "industry",
         width: 100,
+        show: this.state.industry,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Phone",
         accessor: "phone",
         width: 120,
+        show: this.state.phone,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Website",
         accessor: "website",
         width: 140,
+        show: this.state.website,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Ballance Transactions",
         accessor: "balanceTransaction",
         width: 150,
+        show: this.state.balanceTransaction,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "COD Balance",
         accessor: "codBalance",
         width: 120,
+        show: this.state.codBalance,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Ballance Amount",
         accessor: "balanceAmount",
         width: 150,
+        show: this.state.balanceAmount,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Upload Bukti",
         width: 200,
+        show: this.state.fileAttach,
         Cell: props => {
           return (
             <div>
@@ -363,20 +403,25 @@ class WithdrawFunds extends Component {
   }
 
   validateError() {
-    if(this.state.isDraft === false || this.state.amount === null || this.state.amount === undefined || this.state.selectedBank === []){
-      if(this.state.image === null){
+    if (
+      this.state.isDraft === false ||
+      this.state.amount === null ||
+      this.state.amount === undefined ||
+      this.state.selectedBank === []
+    ) {
+      if (this.state.image === null) {
         return true;
-      }else{
+      } else {
         return false;
       }
-    }else{
+    } else {
       return false;
     }
   }
 
   submitData() {
     if (this.validateError()) {
-      this.setState({error: true});
+      this.setState({ error: true });
     } else {
       this.setState({ modal: false, loadingSubmit: true, errorData: "" });
 
@@ -448,6 +493,135 @@ class WithdrawFunds extends Component {
                         <i className="simple-icon-magnifier" />
                       </Button>
                     </InputGroup>
+                  </div>
+                  <div className="col-md-7">
+                    <Button
+                      className="float-right default"
+                      id="Popover1"
+                      type="button"
+                      style={{
+                        marginLeft: 10
+                      }}
+                    >
+                      <i className="simple-icon-menu mr-2" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverOpen}
+                      target="Popover1"
+                      toggle={this.togglePopOver}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="companyName"
+                            type="checkbox"
+                            checked={this.state.companyName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Company
+                        </div>
+                        <div>
+                          <input
+                            name="companyEmail"
+                            type="checkbox"
+                            checked={this.state.companyEmail}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Company Email
+                        </div>
+                        <div>
+                          <input
+                            name="fullName"
+                            type="checkbox"
+                            checked={this.state.fullName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Full Name
+                        </div>
+                        <div>
+                          <input
+                            name="username"
+                            type="checkbox"
+                            checked={this.state.username}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Username
+                        </div>
+                        <div>
+                          <input
+                            name="userEmail"
+                            type="checkbox"
+                            checked={this.state.userEmail}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Email
+                        </div>
+                        <div>
+                          <input
+                            name="industry"
+                            type="checkbox"
+                            checked={this.state.industry}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Industry
+                        </div>
+                        <div>
+                          <input
+                            name="phone"
+                            type="checkbox"
+                            checked={this.state.phone}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Phone
+                        </div>
+                        <div>
+                          <input
+                            name="website"
+                            type="checkbox"
+                            checked={this.state.website}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Website
+                        </div>
+                        <div>
+                          <input
+                            name="balanceTransaction"
+                            type="checkbox"
+                            checked={this.state.balanceTransaction}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Ballance Transactions
+                        </div>
+                        <div>
+                          <input
+                            name="codBalance"
+                            type="checkbox"
+                            checked={this.state.codBalance}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          COD Balance
+                        </div>
+                        <div>
+                          <input
+                            name="balanceAmount"
+                            type="checkbox"
+                            checked={this.state.balanceAmount}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Ballance Amount
+                        </div>
+                        <div>
+                          <input
+                            name="fileAttach"
+                            type="checkbox"
+                            checked={this.state.fileAttach}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Bukti
+                        </div>
+                      </PopoverBody>
+                    </Popover>
                   </div>
                 </div>
                 <ReactTable

@@ -11,7 +11,9 @@ import {
   ModalFooter,
   InputGroup,
   Input,
-  Col
+  Col,
+  Popover,
+  PopoverBody
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
 import Loader from "react-loader-spinner";
@@ -66,8 +68,14 @@ class ReceiptOfFunds extends Component {
     this.onCourierChange = this.onCourierChange.bind(this);
     this.showModal = this.showModalError.bind(this);
     this.loadDetailData = this.loadDetailData.bind(this);
+    this.toggle = this.toggle.bind(this);
 
     this.state = {
+      uploadDateShow: true,
+      idFileShow: true,
+      uploadByShow: true,
+      detailShow: true,
+      popoverOpen: false,
       loading: false,
       error: false,
       errorFile: false,
@@ -180,6 +188,12 @@ class ReceiptOfFunds extends Component {
     // this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
+  toggle() {
+    this.setState({
+      popoverOpen: !this.state.popoverOpen
+    });
+  }
+
   sumData = (tableData, type) => {
     switch (type) {
       case "totalAmount":
@@ -280,6 +294,14 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({ [name]: value });
+  }
+
   handleOnPageChange(pageIndex) {
     const table = { ...this.state.table };
     table.loading = true;
@@ -335,20 +357,24 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Upload Date",
         accessor: "uploadDate",
+        show: this.state.uploadDateShow,
         Cell: props => <p> {moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "ID File",
         accessor: "documentNumber",
+        show: this.state.idFileShow,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload By",
         accessor: "uploadBy",
+        show: this.state.uploadByShow,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Detail",
+        show: this.state.detailShow,
         Cell: props => (
           <p>
             <Button
@@ -364,7 +390,7 @@ class ReceiptOfFunds extends Component {
     ];
   }
 
-  dataTableDetail() { 
+  dataTableDetail() {
     return [
       {
         Header: "No Resi",
@@ -412,7 +438,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { shippingCharge }) => (total += parseInt(shippingCharge)),
+                (total, { shippingCharge }) =>
+                  (total += parseInt(shippingCharge)),
                 0
               )
             )}
@@ -441,10 +468,7 @@ class ReceiptOfFunds extends Component {
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
-              props.data.reduce(
-                (total, { tax }) => (total += parseInt(tax)),
-                0
-              )
+              props.data.reduce((total, { tax }) => (total += parseInt(tax)), 0)
             )}
           </p>
         ),
@@ -488,7 +512,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { subTotalAmount }) => (total += parseInt(subTotalAmount)),
+                (total, { subTotalAmount }) =>
+                  (total += parseInt(subTotalAmount)),
                 0
               )
             )}
@@ -541,7 +566,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
+                (total, { totAmountCodFee }) =>
+                  (total += parseInt(totAmountCodFee)),
                 0
               )
             )}
@@ -554,7 +580,7 @@ class ReceiptOfFunds extends Component {
     ];
   }
 
-  dataTableDetailFromBackend(){
+  dataTableDetailFromBackend() {
     return [
       {
         Header: "No Resi",
@@ -602,7 +628,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { shippingCharge }) => (total += parseInt(shippingCharge)),
+                (total, { shippingCharge }) =>
+                  (total += parseInt(shippingCharge)),
                 0
               )
             )}
@@ -631,10 +658,7 @@ class ReceiptOfFunds extends Component {
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
-              props.data.reduce(
-                (total, { tax }) => (total += parseInt(tax)),
-                0
-              )
+              props.data.reduce((total, { tax }) => (total += parseInt(tax)), 0)
             )}
           </p>
         ),
@@ -678,7 +702,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { subTotalAmount }) => (total += parseInt(subTotalAmount)),
+                (total, { subTotalAmount }) =>
+                  (total += parseInt(subTotalAmount)),
                 0
               )
             )}
@@ -731,7 +756,8 @@ class ReceiptOfFunds extends Component {
           <p>
             {this.moneyFormat.numberFormat(
               props.data.reduce(
-                (total, { receiveAmount }) => (total += parseInt(receiveAmount)),
+                (total, { receiveAmount }) =>
+                  (total += parseInt(receiveAmount)),
                 0
               )
             )}
@@ -1021,15 +1047,6 @@ class ReceiptOfFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
-                      <DropdownToggle color="primary" className="default">
-                        <i className="simple-icon-menu" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
                       <Input
                         placeholder="Search.."
                         name="search"
@@ -1048,19 +1065,65 @@ class ReceiptOfFunds extends Component {
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
-                      <DropdownToggle color="primary" className="default">
-                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
                     </InputGroup>
                   </div>
 
                   <div className="col-md-7">
+                    <Button
+                      className="float-right default"
+                      id="Popover1"
+                      type="button"
+                      style={{
+                        marginLeft: 10
+                      }}
+                    >
+                      <i className="simple-icon-menu mr-2" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverOpen}
+                      target="Popover1"
+                      toggle={this.toggle}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="uploadDateShow"
+                            type="checkbox"
+                            checked={this.state.uploadDateShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Date
+                        </div>
+                        <div>
+                          <input
+                            name="idFileShow"
+                            type="checkbox"
+                            checked={this.state.idFileShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          ID File
+                        </div>
+                        <div>
+                          <input
+                            name="uploadByShow"
+                            type="checkbox"
+                            checked={this.state.uploadByShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload By
+                        </div>
+                        <div>
+                          <input
+                            name="detailShow"
+                            type="checkbox"
+                            checked={this.state.detailShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Detail
+                        </div>
+                      </PopoverBody>
+                    </Popover>
                     <Button
                       className="float-right default"
                       color="secondary"
@@ -1328,35 +1391,34 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
+              <ReactTable
+                minRows={0}
+                page={this.state.table.pagination.currentPage}
+                PaginationComponent={DataTablePagination}
+                data={this.state.oneData}
+                pages={this.state.table.pagination.totalPages}
+                columns={this.dataTableDetailFromBackend()}
+                defaultPageSize={this.state.table.pagination.pageSize}
+                className="-striped"
+                loading={this.state.table.loading}
+                showPagination={true}
+                showPaginationTop={false}
+                showPaginationBottom={true}
+                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                manual // this would indicate that server side pagination has been enabled
+                onFetchData={(state, instance) => {
+                  const newState = { ...this.state.table };
 
-            <ReactTable
-              minRows={0}
-              page={this.state.table.pagination.currentPage}
-              PaginationComponent={DataTablePagination}
-              data={this.state.oneData}
-              pages={this.state.table.pagination.totalPages}
-              columns={this.dataTableDetailFromBackend()}
-              defaultPageSize={this.state.table.pagination.pageSize}
-              className="-striped"
-              loading={this.state.table.loading}
-              showPagination={true}
-              showPaginationTop={false}
-              showPaginationBottom={true}
-              pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-              manual // this would indicate that server side pagination has been enabled
-              onFetchData={(state, instance) => {
-                const newState = { ...this.state.table };
+                  newState.pagination.currentPage = state.page;
+                  newState.pagination.pageSize = state.pageSize;
+                  newState.pagination.skipSize = state.pageSize * state.page;
 
-                newState.pagination.currentPage = state.page;
-                newState.pagination.pageSize = state.pageSize;
-                newState.pagination.skipSize = state.pageSize * state.page;
+                  this.setState({ newState });
+                  this.loadData();
+                }}
+              />
 
-                this.setState({ newState });
-                this.loadData();
-              }}
-            />
-
-            {/*
+              {/*
               
               <BootstrapTable
                 data={this.state.oneData}

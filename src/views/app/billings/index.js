@@ -89,6 +89,13 @@ export default class Billing extends Component {
     today2.setDate(today2.getDate() - 1);
 
     this.state = {
+      subscriptionPlanName: true,
+      freeTrialEndDate: true,
+      billingPeriodStartDate: true,
+      billingPeriodEndDate: true,
+      billingCycle: true,
+      billingAmount: true,
+      status: true,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
@@ -246,6 +253,16 @@ export default class Billing extends Component {
     this.loadTenantsSubscriptionsSummary();
   }
 
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
   loadTenantsSubscriptionsSummary() {
     this.billingRest.getTenantsSubscriptionsSummary().subscribe(response => {
       this.setState({ tenantsSubscriptionsSummary: response });
@@ -292,7 +309,7 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 150,
+        width: 150
       },
       {
         Header: "Email",
@@ -311,17 +328,14 @@ export default class Billing extends Component {
       {
         Header: "Package",
         accessor: "subscriptionPlanName",
-        show: this.state.filterColumns.indexOf("Package") > -1 ? false : true,
+        show: this.state.subscriptionPlanName,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Expired Date Free Trial",
         accessor: "freeTrialEndDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Expired Date Trial") > -1
-            ? false
-            : true,
+        show: this.state.freeTrialEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -334,8 +348,7 @@ export default class Billing extends Component {
         Header: "Tanggal Mulai",
         accessor: "billingPeriodStartDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Tanggal Mulai") > -1 ? false : true,
+        show: this.state.billingPeriodStartDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -348,10 +361,7 @@ export default class Billing extends Component {
         Header: "Tanggal Penagihan",
         accessor: "billingPeriodEndDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Tanggal Penagihan") > -1
-            ? false
-            : true,
+        show: this.state.billingPeriodEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -363,25 +373,21 @@ export default class Billing extends Component {
       {
         Header: "Billing Cycle",
         accessor: "billingCycle",
-        show:
-          this.state.filterColumns.indexOf("Billing Cycle") > -1 ? false : true,
+        show: this.state.billingCycle,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Total Penagihan",
         accessor: "billingAmount",
         width: 130,
-        show:
-          this.state.filterColumns.indexOf("Total Penagihan") > -1
-            ? false
-            : true,
+        show: this.state.billingAmount,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
         width: 200,
-        show: this.state.filterColumns.indexOf("Status") > -1 ? false : true,
+        show: this.state.status,
         Cell: props => (
           <Row>
             <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
@@ -828,7 +834,7 @@ export default class Billing extends Component {
                       </Collapse>
                     </InputGroup>
                   </div>
-                  {/*
+
                   <div
                     style={{
                       marginLeft: 650
@@ -849,11 +855,72 @@ export default class Billing extends Component {
                       toggle={this.togglePopoverColumns}
                     >
                       <PopoverBody>
-                        {this._renderFilterColumns()}
+                        <div>
+                          <input
+                            name="subscriptionPlanName"
+                            type="checkbox"
+                            checked={this.state.subscriptionPlanName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Package
+                        </div>
+                        <div>
+                          <input
+                            name="freeTrialEndDate"
+                            type="checkbox"
+                            checked={this.state.freeTrialEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Expired Date Free Trial
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodStartDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodStartDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Mulai
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodEndDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="billingCycle"
+                            type="checkbox"
+                            checked={this.state.billingCycle}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Billing Cycle
+                        </div>
+                        <div>
+                          <input
+                            name="billingAmount"
+                            type="checkbox"
+                            checked={this.state.billingAmount}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="status"
+                            type="checkbox"
+                            checked={this.state.status}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Status
+                        </div>
                       </PopoverBody>
                     </Popover>
                   </div>
-									 */}
                 </div>
 
                 <ReactTableFixedColumn

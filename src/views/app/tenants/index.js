@@ -18,7 +18,9 @@ import {
   ModalBody,
   ModalFooter,
   Row,
-  Col
+  Col,
+  Popover,
+  PopoverBody,
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
@@ -32,9 +34,20 @@ export default class Tenant extends Component {
     this.tenantRest = new TenantRestService();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
+    this.togglePopOver = this.togglePopOver.bind(this);
 
     this.toggle = this.toggle.bind(this);
     this.state = {
+      totalSku: true,
+      totalOrder: true,
+      totalReceipt: true,
+      totalUser: true,
+      lastLoginDateUtc: true,
+      joinDateUtc: true,
+      siCepatCOD: true,
+      siCepatMemberId: true,
+      status: true,
+      popoverOpen: false,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
@@ -54,6 +67,22 @@ export default class Tenant extends Component {
       oneData: "",
       search: ""
     };
+  }
+
+  togglePopOver() {
+    this.setState(prevState => ({
+      popoverOpen: !prevState.popoverOpen
+    }));
+  }
+
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   handleInputChange(event) {
@@ -179,23 +208,27 @@ export default class Tenant extends Component {
         Header: "Total SKU",
         accessor: "totalSku",
         width: 70,
+        show: this.state.totalSku,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total Order",
         accessor: "totalOrder",
         width: 80,
+        show: this.state.totalOrder,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total Receipt",
         accessor: "totalReceipt",
         width: 80,
+        show: this.state.totalReceipt,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total User",
         accessor: "totalUser",
+        show: this.state.totalUser,
         Cell: props => (
           <Button
             color="link"
@@ -213,27 +246,32 @@ export default class Tenant extends Component {
         Header: "Last Login",
         accessor: "owner.lastLoginDateUtc",
         width: 150,
+        show: this.state.lastLoginDateUtc,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
         width: 150,
+        show: this.state.joinDateUtc,
         Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "Sicepat COD",
         accessor: "siCepatCOD",
+        show: this.state.siCepatCOD,
         Cell: props => <p>{props.value === false ? "Tidak Aktif" : "Aktif"}</p>
       },
       {
         Header: "ID Sicepat",
         accessor: "siCepatMemberId",
+        show: this.state.siCepatMemberId,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
+        show: this.state.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
       }
     ];
@@ -326,6 +364,108 @@ export default class Tenant extends Component {
                       </Button>
                     </InputGroup>
                   </div>
+                  <div className="col-md-7">
+                    <Button
+                      className="float-right default"
+                      id="Popover1"
+                      type="button"
+                      style={{
+                        marginLeft: 10
+                      }}
+                    >
+                      <i className="simple-icon-menu mr-2" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverOpen}
+                      target="Popover1"
+                      toggle={this.togglePopOver}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="totalSku"
+                            type="checkbox"
+                            checked={this.state.totalSku}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total SKU
+                        </div>
+                        <div>
+                          <input
+                            name="totalOrder"
+                            type="checkbox"
+                            checked={this.state.totalOrder}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Order
+                        </div>
+                        <div>
+                          <input
+                            name="totalReceipt"
+                            type="checkbox"
+                            checked={this.state.totalReceipt}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Receipt
+                        </div>
+                        <div>
+                          <input
+                            name="totalUser"
+                            type="checkbox"
+                            checked={this.state.totalUser}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total User
+                        </div>
+                        <div>
+                          <input
+                            name="lastLoginDateUtc"
+                            type="checkbox"
+                            checked={this.state.lastLoginDateUtc}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Last Login
+                        </div>
+                        <div>
+                          <input
+                            name="joinDateUtc"
+                            type="checkbox"
+                            checked={this.state.joinDateUtc}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Join Date
+                        </div>
+                        <div>
+                          <input
+                            name="siCepatCOD"
+                            type="checkbox"
+                            checked={this.state.siCepatCOD}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Sicepat COD
+                        </div>
+                        <div>
+                          <input
+                            name="siCepatMemberId"
+                            type="checkbox"
+                            checked={this.state.siCepatMemberId}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          ID Sicepat
+                        </div>
+                        <div>
+                          <input
+                            name="status"
+                            type="checkbox"
+                            checked={this.state.status}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Status
+                        </div>
+                      </PopoverBody>
+                    </Popover>
+                  </div>
                 </div>
 
                 <ReactTableFixedColumn
@@ -364,10 +504,7 @@ export default class Tenant extends Component {
               maxHeight: 580
             }}
           >
-            <Modal
-              isOpen={this.state.modal}
-              toggle={this.toggle}
-            >
+            <Modal isOpen={this.state.modal} toggle={this.toggle}>
               <ModalHeader toggle={this.toggle}>Detail User</ModalHeader>
               <ModalBody
                 style={{

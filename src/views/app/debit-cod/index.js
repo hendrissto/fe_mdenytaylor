@@ -11,7 +11,9 @@ import {
   ModalFooter,
   Table,
   Input,
-  InputGroup
+  InputGroup,
+  Popover,
+  PopoverBody
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
@@ -46,8 +48,17 @@ class DebitCod extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.submitData = this.submitData.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
+    this.togglePopOver = this.togglePopOver.bind(this);
 
     this.state = {
+      deliveryDate: true,
+      sellerName: true,
+      amount2: true,
+      bankName: true,
+      bankDistrict: true,
+      status: true,
+      fileAttach: true,
+      popoverOpen: false,
       error: false,
       loadingSubmit: false,
       spinner: false,
@@ -78,6 +89,22 @@ class DebitCod extends Component {
 
   handleChange(e) {
     this.setState({ amount: e.target.value });
+  }
+
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  togglePopOver() {
+    this.setState(prevState => ({
+      popoverOpen: !prevState.popoverOpen
+    }));
   }
 
   toggle() {
@@ -136,35 +163,42 @@ class DebitCod extends Component {
       {
         Header: "Permintaan Penarikan",
         accessor: "deliveryDate",
+        show: this.state.deliveryDate,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Seller",
         accessor: "sellerName",
+        show: this.state.sellerName,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Jumlah Saldo Ditarik",
         accessor: "amount",
+        show: this.state.amount2,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Ditarik ke Rekening",
         accessor: "bankName",
+        show: this.state.bankName,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Cabang Bank",
         accessor: "bankDistrict",
+        show: this.state.bankDistrict,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
+        show: this.state.status,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload Bukti",
+        show: this.state.fileAttach,
         Cell: props => {
           if (props.original.status !== "draft") {
             return (
@@ -306,6 +340,91 @@ class DebitCod extends Component {
                         <i className="simple-icon-magnifier" />
                       </Button>
                     </InputGroup>
+                  </div>
+
+                  <div className="col-md-7">
+                    <Button
+                      className="float-right default"
+                      id="Popover1"
+                      type="button"
+                      style={{
+                        marginLeft: 10
+                      }}
+                    >
+                      <i className="simple-icon-menu mr-2" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverOpen}
+                      target="Popover1"
+                      toggle={this.togglePopOver}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="deliveryDate"
+                            type="checkbox"
+                            checked={this.state.deliveryDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Permintaan Penarikan
+                        </div>
+                        <div>
+                          <input
+                            name="sellerName"
+                            type="checkbox"
+                            checked={this.state.sellerName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Seller
+                        </div>
+                        <div>
+                          <input
+                            name="amount2"
+                            type="checkbox"
+                            checked={this.state.amount2}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Jumlah Saldo Ditarik
+                        </div>
+                        <div>
+                          <input
+                            name="bankName"
+                            type="checkbox"
+                            checked={this.state.bankName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Ditarik ke Rekening
+                        </div>
+                        <div>
+                          <input
+                            name="bankDistrict"
+                            type="checkbox"
+                            checked={this.state.bankDistrict}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Cabang Bank
+                        </div>
+                        <div>
+                          <input
+                            name="status"
+                            type="checkbox"
+                            checked={this.state.status}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Status
+                        </div>
+                        <div>
+                          <input
+                            name="fileAttach"
+                            type="checkbox"
+                            checked={this.state.fileAttach}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Bukti
+                        </div>
+                      </PopoverBody>
+                    </Popover>
                   </div>
                 </div>
 
