@@ -5,22 +5,14 @@ import BillingRestService from "../../../core/billingRestService";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Card, CardBody } from "reactstrap";
-import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import {
-  InputGroup,
   Button,
-  Input,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Row,
   Col,
-  Collapse,
-  CardFooter,
-  Popover,
-  PopoverHeader,
-  PopoverBody,
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
@@ -101,7 +93,7 @@ export default class FormTenantSubscription extends Component {
       .subscribe(response => {
         this.setState({ data: response, loading: false });
 
-        if (this.props.match.params.type == "renew" && this.state.relatedData.subscriptionPlan !== undefined) {
+        if (this.props.match.params.type === "renew" && this.state.relatedData.subscriptionPlan !== undefined) {
           let activePackage = [];
           for (
             let i = 0;
@@ -109,7 +101,7 @@ export default class FormTenantSubscription extends Component {
             i++
           ) {
             if (
-              response.subscriptionPlanId ==
+              response.subscriptionPlanId ===
               this.state.relatedData.subscriptionPlan[i].id
             ) {
               activePackage.push({
@@ -147,7 +139,7 @@ export default class FormTenantSubscription extends Component {
   }
 
   _renderPackage(props) {
-    if (this.props.match.params.type == "renew") {
+    if (this.props.match.params.type === "renew") {
       return (
         <Dropdown
           value={props.values.package}
@@ -180,16 +172,16 @@ export default class FormTenantSubscription extends Component {
     ) {
       props.values.prices = 0;
     } else {
-      if (props.values.billingCycle.code == "monthlyPrice") {
+      if (props.values.billingCycle.code === "monthlyPrice") {
         props.values.prices =
           props.values.package.monthlyPrice * props.values.qty;
-      } else if (props.values.billingCycle.code == "quaterlyPrice") {
+      } else if (props.values.billingCycle.code === "quaterlyPrice") {
         props.values.prices =
           props.values.package.quaterlyPrice * props.values.qty;
-      } else if (props.values.billingCycle.code == "semesterlyPrice") {
+      } else if (props.values.billingCycle.code === "semesterlyPrice") {
         props.values.prices =
           props.values.package.semesterlyPrice * props.values.qty;
-      } else if (props.values.billingCycle.code == "yearlyPrice") {
+      } else if (props.values.billingCycle.code === "yearlyPrice") {
         props.values.prices =
           props.values.package.yearlyPrice * props.values.qty;
       } else {
@@ -197,16 +189,16 @@ export default class FormTenantSubscription extends Component {
       }
     }
 
-    if (props.values.discountType == "Rp.") {
+    if (props.values.discountType === "Rp.") {
       props.values.prices =
         props.values.prices - props.values.discountAmount * props.values.qty;
-    } else if (props.values.discountType == "%") {
+    } else if (props.values.discountType === "%") {
       const discAmount =
         (props.values.prices * props.values.discountAmount * props.values.qty) /
         100;
       props.values.prices = props.values.prices - discAmount;
     } else {
-      props.values.prices = props.values.prices;
+      props.values.prices = props.values.prices * 1;
     }
 
     return (
@@ -303,13 +295,13 @@ export default class FormTenantSubscription extends Component {
               {props.values.package === undefined ||
               props.values.billingCycle === undefined
                 ? "-"
-                : props.values.billingCycle.code == "monthlyPrice"
+                : props.values.billingCycle.code === "monthlyPrice"
                 ? props.values.package.monthlyPrice
-                : props.values.billingCycle.code == "quaterlyPrice"
+                : props.values.billingCycle.code === "quaterlyPrice"
                 ? props.values.package.quaterlyPrice
-                : props.values.billingCycle.code == "semesterlyPrice"
+                : props.values.billingCycle.code === "semesterlyPrice"
                 ? props.values.package.semesterlyPrice
-                : props.values.billingCycle.code == "yearlyPrice"
+                : props.values.billingCycle.code === "yearlyPrice"
                 ? props.values.package.yearlyPrice
                 : "Wrong Value"}
             </td>
@@ -366,10 +358,10 @@ export default class FormTenantSubscription extends Component {
   _renderPrice(props) {
     props.values.total = props.values.prices;
 
-    if (props.values.discountTypeAll == "Rp.") {
+    if (props.values.discountTypeAll === "Rp.") {
       props.values.total =
         props.values.prices - props.values.discountTotalAmount;
-    } else if (props.values.discountTypeAll == "%") {
+    } else if (props.values.discountTypeAll === "%") {
       const discAmount =
         (props.values.total * props.values.discountTotalAmount) / 100;
       props.values.total = props.values.prices - discAmount;
@@ -377,7 +369,7 @@ export default class FormTenantSubscription extends Component {
       props.values.total = props.values.prices;
     }
 
-    if (props.values.adjustmentAmount != 0) {
+    if (props.values.adjustmentAmount !== 0) {
       props.values.total =
         props.values.total + parseInt(props.values.adjustmentAmount);
     }
@@ -658,13 +650,13 @@ export default class FormTenantSubscription extends Component {
 
   handleSubmit(props) {
     this.setState({ loading: true });
-    if (props.billingCycle.code == "monthlyPrice") {
+    if (props.billingCycle.code === "monthlyPrice") {
       props.packagePrice = props.package.monthlyPrice;
-    } else if (props.billingCycle.code == "quaterlyPrice") {
+    } else if (props.billingCycle.code === "quaterlyPrice") {
       props.packagePrice = props.package.quaterlyPrice;
-    } else if (props.billingCycle.code == "semesterlyPrice") {
+    } else if (props.billingCycle.code === "semesterlyPrice") {
       props.packagePrice = props.package.semesterlyPrice;
-    } else if (props.billingCycle.code == "yearlyPrice") {
+    } else if (props.billingCycle.code === "yearlyPrice") {
       props.packagePrice = props.package.yearlyPrice;
     } else {
       props.packagePrice = 0;
@@ -695,7 +687,7 @@ export default class FormTenantSubscription extends Component {
     };
 
     console.log(data);
-    if (this.props.match.params.type == "upgrade") {
+    if (this.props.match.params.type === "upgrade") {
       this.billingRest
         .upgradeTenantsSubscriptions(
           parseInt(this.props.match.params.tenantId),

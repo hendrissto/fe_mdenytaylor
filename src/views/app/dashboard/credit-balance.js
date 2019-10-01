@@ -1,13 +1,18 @@
-import React from "react";
+import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
+class CreditBalance extends Component {
+  constructor(props){
+    super(props);
+  }
 
-const CreditBalance = () => {
-    const card = { title: 'dashboards.cards.credit-balance', icon: "iconsminds-money-bag", value: 17 };
-
-  return (
-    <IconCard {... card} className="mb-4" />
-  );
-};
+  render() {
+    return (
+      <div>
+        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag" value={this.props.value} className="mb-4" />
+      </div>
+    )
+  }
+}
 
 export default CreditBalance;
