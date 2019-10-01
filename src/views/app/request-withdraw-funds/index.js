@@ -38,6 +38,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
+import BaseAlert from "../../base/baseAlert";
 
 class WithdrawFunds extends Component {
   constructor(props) {
@@ -54,6 +55,7 @@ class WithdrawFunds extends Component {
     this.submitData = this.submitData.bind(this);
 
     this.state = {
+      error: false,
       table: {
         loading: true,
         loadingSubmit: false,
@@ -70,8 +72,8 @@ class WithdrawFunds extends Component {
       tenantBank: null,
       oneData: "",
       search: "",
-			modal: false,
-			modal2: false,
+      modal: false,
+      modal2: false,
       modalResponse: false,
       dropdownOpen: false,
       splitButtonOpen: false,
@@ -82,8 +84,8 @@ class WithdrawFunds extends Component {
       image: null,
       loading: false,
       imageUrl: null,
-			redirect: false,
-			errorData: '',
+      redirect: false,
+      errorData: ""
     };
 
     this.loadData = this.loadData.bind(this);
@@ -138,11 +140,14 @@ class WithdrawFunds extends Component {
   }
 
   loadTenantBank(id) {
-    this.relatedDataRestService.getTenantBank(id, {}).subscribe(response => {
-      this.setState({ tenantBank: response.data });
-    }, err => {
-			console.log(err)
-		});
+    this.relatedDataRestService.getTenantBank(id, {}).subscribe(
+      response => {
+        this.setState({ tenantBank: response.data });
+      },
+      err => {
+        console.log(err);
+      }
+    );
   }
 
   dataTableColumns() {
@@ -357,33 +362,51 @@ class WithdrawFunds extends Component {
     this.setState({ amount: e.target.value });
   }
 
-  submitData() {
-		this.setState({ modal: false, loadingSubmit: true, errorData: '' });
-		
+  validateError() {
+    if(this.state.isDraft === false || this.state.amount === null || this.state.amount === undefined || this.state.selectedBank === []){
+      if(this.state.image === null){
+        return true;
+      }else{
+        return false;
+      }
+    }else{
+      return false;
+    }
+  }
 
-    let lines = {
-      fileId: this.state.isDraft === true ? undefined : this.state.image.id,
-      amount: parseInt(this.state.amount),
-      feeTransfer: 2500,
-      tenantId: this.state.oneData.tenantId,
-      tenantBankId: this.state.selectedBank.id,
-      isDraft: this.state.isDraft
-    };
-    console.log(lines);
-    this.requestWithdrawRest.postBallance(lines).subscribe(response => {
-      this.setState({
-				modal2: true,
-        loadingSubmit: false,
-				modalResponse: true,
-      });
-    }, err => {
-      this.setState({
-        loadingSubmit: false,
-				modal2: true,
-				modalError: true,
-				errorData: err.data[0].errorMessage
-      });
-		});
+  submitData() {
+    if (this.validateError()) {
+      this.setState({error: true});
+    } else {
+      this.setState({ modal: false, loadingSubmit: true, errorData: "" });
+
+      let lines = {
+        fileId: this.state.isDraft === true ? undefined : this.state.image.id,
+        amount: parseInt(this.state.amount),
+        feeTransfer: 2500,
+        tenantId: this.state.oneData.tenantId,
+        tenantBankId: this.state.selectedBank.id,
+        isDraft: this.state.isDraft
+      };
+      console.log(lines);
+      this.requestWithdrawRest.postBallance(lines).subscribe(
+        response => {
+          this.setState({
+            modal2: true,
+            loadingSubmit: false,
+            modalResponse: true
+          });
+        },
+        err => {
+          this.setState({
+            loadingSubmit: false,
+            modal2: true,
+            modalError: true,
+            errorData: err.data[0].errorMessage
+          });
+        }
+      );
+    }
   }
 
   render() {
@@ -467,6 +490,14 @@ class WithdrawFunds extends Component {
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
             <ModalBody>
+              {this.state.error && (
+                <BaseAlert
+                  onClick={() => {
+                    this.setState({ error: false });
+                  }}
+                  text={"Pastikan semua data telah terisi."}
+                />
+              )}
               <Table>
                 <tbody>
                   <tr>
@@ -592,13 +623,11 @@ class WithdrawFunds extends Component {
 
         {this.state.modal2 && (
           <Modal isOpen={this.state.modal2}>
-						<ModalHeader>Status</ModalHeader>
-						{this.state.modalResponse && (
-							<ModalBody>Berhasil.</ModalBody>
-						)}
-						{this.state.modalError && (
-							<ModalBody>{this.state.errorData}</ModalBody>
-						)}
+            <ModalHeader>Status</ModalHeader>
+            {this.state.modalResponse && <ModalBody>Berhasil.</ModalBody>}
+            {this.state.modalError && (
+              <ModalBody>{this.state.errorData}</ModalBody>
+            )}
             <ModalFooter>
               <Button color="primary" outline onClick={this.toggleModal}>
                 Close

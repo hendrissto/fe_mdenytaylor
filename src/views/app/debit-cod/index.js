@@ -11,7 +11,7 @@ import {
   ModalFooter,
   Table,
   Input,
-  InputGroup,
+  InputGroup
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
@@ -31,6 +31,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
+import BaseAlert from "../../base/baseAlert";
 
 class DebitCod extends Component {
   constructor(props) {
@@ -47,6 +48,7 @@ class DebitCod extends Component {
     this.toggleModal = this.toggleModal.bind(this);
 
     this.state = {
+      error: false,
       loadingSubmit: false,
       spinner: false,
       loading: false,
@@ -224,34 +226,51 @@ class DebitCod extends Component {
     });
   };
 
-  submitData() {
-    this.setState({ modal: false, loadingSubmit: true });
-    let lines = {
-      id: this.state.oneData.id,
-      fileId: this.state.image.id,
-      amount: parseInt(this.state.amount),
-      feeTransfer: 2500,
-      tenantId: this.state.oneData.tenantId,
-      tenantBankId: this.state.selectedBank.id
-    };
+  validateError() {
+    if (
+      this.state.image === null ||
+      this.state.amount === null ||
+      this.state.amount === undefined ||
+      this.state.selectedBank === []
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-    this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
-      response => {
-        this.setState({
-          modal2: true,
-          loadingSubmit: false,
-          modalResponse: true
-        });
-      },
-      err => {
-        this.setState({
-          loadingSubmit: false,
-          modal2: true,
-          modalError: true,
-          errorData: err.data[0].errorMessage
-        });
-      }
-    );
+  submitData() {
+    if (this.validateError()) {
+      this.setState({ error: true });
+    } else {
+      this.setState({ modal: false, loadingSubmit: true });
+      let lines = {
+        id: this.state.oneData.id,
+        fileId: this.state.image.id,
+        amount: parseInt(this.state.amount),
+        feeTransfer: 2500,
+        tenantId: this.state.oneData.tenantId,
+        tenantBankId: this.state.selectedBank.id
+      };
+
+      this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
+        response => {
+          this.setState({
+            modal2: true,
+            loadingSubmit: false,
+            modalResponse: true
+          });
+        },
+        err => {
+          this.setState({
+            loadingSubmit: false,
+            modal2: true,
+            modalError: true,
+            errorData: err.data[0].errorMessage
+          });
+        }
+      );
+    }
   }
 
   render() {
@@ -329,7 +348,14 @@ class DebitCod extends Component {
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
             <ModalBody>
-              {console.log(this.state.tenantBank)}
+              {this.state.error && (
+                <BaseAlert
+                  onClick={() => {
+                    this.setState({ error: false });
+                  }}
+                  text={"Pastikan semua data telah terisi."}
+                />
+              )}
               <Table>
                 <tbody>
                   <tr>
@@ -457,7 +483,9 @@ class DebitCod extends Component {
                   <tr>
                     <td>Total Bayar</td>
                     <td>:</td>
-                    <td>{this.moneyFormat.numberFormat(this.state.oneData.amount)}</td>
+                    <td>
+                      {this.moneyFormat.numberFormat(this.state.oneData.amount)}
+                    </td>
                   </tr>
                   <tr>
                     <td colSpan="3">

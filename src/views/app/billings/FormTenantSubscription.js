@@ -23,6 +23,7 @@ import moment from "moment";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import Spinner from "../../../containers/pages/Spinner";
+import BaseAlert from "../../base/baseAlert";
 
 export default class FormTenantSubscription extends Component {
   constructor(props) {
@@ -41,6 +42,7 @@ export default class FormTenantSubscription extends Component {
     this.toggleModal = this.toggleModal.bind(this);
 
     this.state = {
+      error: false,
       type: this.props.match.params.type,
       data: [],
       relatedData: [],
@@ -57,8 +59,8 @@ export default class FormTenantSubscription extends Component {
       discountAll: "Rp.",
       today: moment(today).format("YYYY-MM-DD"),
       packageActive: [],
-			modal: false,
-			redirect: false,
+      modal: false,
+      redirect: false
     };
   }
 
@@ -75,8 +77,8 @@ export default class FormTenantSubscription extends Component {
 
   toggleModal() {
     this.setState({
-			modal: !this.state.modal,
-			redirect: !this.state.redirect,
+      modal: !this.state.modal,
+      redirect: !this.state.redirect
     });
   }
 
@@ -93,7 +95,10 @@ export default class FormTenantSubscription extends Component {
       .subscribe(response => {
         this.setState({ data: response, loading: false });
 
-        if (this.props.match.params.type === "renew" && this.state.relatedData.subscriptionPlan !== undefined) {
+        if (
+          this.props.match.params.type === "renew" &&
+          this.state.relatedData.subscriptionPlan !== undefined
+        ) {
           let activePackage = [];
           for (
             let i = 0;
@@ -648,69 +653,80 @@ export default class FormTenantSubscription extends Component {
     );
   }
 
-  handleSubmit(props) {
-    this.setState({ loading: true });
-    if (props.billingCycle.code === "monthlyPrice") {
-      props.packagePrice = props.package.monthlyPrice;
-    } else if (props.billingCycle.code === "quaterlyPrice") {
-      props.packagePrice = props.package.quaterlyPrice;
-    } else if (props.billingCycle.code === "semesterlyPrice") {
-      props.packagePrice = props.package.semesterlyPrice;
-    } else if (props.billingCycle.code === "yearlyPrice") {
-      props.packagePrice = props.package.yearlyPrice;
+  validateError(props) {
+    if (props.package.length === 0 || props.billingCycle === undefined) {
+      return true;
     } else {
-      props.packagePrice = 0;
+      return false;
     }
+  }
 
-    let data = {
-      subscriptionPlanId: props.package.id,
-      invoiceNumber: null,
-      invoiceDate: this.state.today,
-      subtotal: props.prices,
-      lastPaymentDate: this.state.today,
-      discountPercent: null,
-      discountAmount: parseInt(props.discountTotalAmount),
-      taxRate: parseInt(props.taxRate),
-      amountPaid: props.total,
-      adjustmentAmount: parseInt(props.adjustmentAmount),
-      items: [
-        {
-          itemType: 0,
-          billingCycle: props.billingCycle.status,
-          description: props.package.description,
-          qty: parseInt(props.qty),
-          unitPrice: props.packagePrice,
-          discountPercent: null,
-          discountAmount: parseInt(props.discountAmount)
-        }
-      ]
-    };
-
-    console.log(data);
-    if (this.props.match.params.type === "upgrade") {
-      this.billingRest
-        .upgradeTenantsSubscriptions(
-          parseInt(this.props.match.params.tenantId),
-          data
-        )
-        .subscribe(response => {
-          this.setState({ loading: false, modal: true });
-        });
+  handleSubmit(props) {
+    if (this.validateError(props)) {
+      this.setState({ error: true });
     } else {
-      this.billingRest
-        .renewTenantsSubscriptions(
-          parseInt(this.props.match.params.tenantId),
-          data
-        )
-        .subscribe(response => {
-          this.setState({ loading: false, modal: true });
-        });
+      this.setState({ loading: true });
+      if (props.billingCycle.code === "monthlyPrice") {
+        props.packagePrice = props.package.monthlyPrice;
+      } else if (props.billingCycle.code === "quaterlyPrice") {
+        props.packagePrice = props.package.quaterlyPrice;
+      } else if (props.billingCycle.code === "semesterlyPrice") {
+        props.packagePrice = props.package.semesterlyPrice;
+      } else if (props.billingCycle.code === "yearlyPrice") {
+        props.packagePrice = props.package.yearlyPrice;
+      } else {
+        props.packagePrice = 0;
+      }
+
+      let data = {
+        subscriptionPlanId: props.package.id,
+        invoiceNumber: null,
+        invoiceDate: this.state.today,
+        subtotal: props.prices,
+        lastPaymentDate: this.state.today,
+        discountPercent: null,
+        discountAmount: parseInt(props.discountTotalAmount),
+        taxRate: parseInt(props.taxRate),
+        amountPaid: props.total,
+        adjustmentAmount: parseInt(props.adjustmentAmount),
+        items: [
+          {
+            itemType: 0,
+            billingCycle: props.billingCycle.status,
+            description: props.package.description,
+            qty: parseInt(props.qty),
+            unitPrice: props.packagePrice,
+            discountPercent: null,
+            discountAmount: parseInt(props.discountAmount)
+          }
+        ]
+      };
+
+      if (this.props.match.params.type === "upgrade") {
+        this.billingRest
+          .upgradeTenantsSubscriptions(
+            parseInt(this.props.match.params.tenantId),
+            data
+          )
+          .subscribe(response => {
+            this.setState({ loading: false, modal: true });
+          });
+      } else {
+        this.billingRest
+          .renewTenantsSubscriptions(
+            parseInt(this.props.match.params.tenantId),
+            data
+          )
+          .subscribe(response => {
+            this.setState({ loading: false, modal: true });
+          });
+      }
     }
   }
 
   render() {
     if (this.state.redirect === true) {
-      return <Redirect to='/app/billing' />
+      return <Redirect to="/app/billing" />;
     }
     return (
       <>
@@ -765,6 +781,14 @@ export default class FormTenantSubscription extends Component {
                             width: "100%"
                           }}
                         >
+                          {this.state.error && (
+                            <BaseAlert
+                              onClick={() => {
+                                this.setState({ error: false });
+                              }}
+                              text={"Pastikan semua data telah terisi."}
+                            />
+                          )}
                           <Row
                             style={{
                               marginTop: 10,
@@ -785,7 +809,7 @@ export default class FormTenantSubscription extends Component {
                                 marginTop: 5
                               }}
                             >
-                              :{console.log(props)}
+                              :
                             </Col>
                             <Col>
                               <InputText
