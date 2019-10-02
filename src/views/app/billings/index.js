@@ -1,4 +1,5 @@
 import moment from "moment";
+import { NavLink } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
@@ -28,6 +29,7 @@ import {
 
 import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
@@ -61,6 +63,9 @@ export default class Billing extends Component {
   constructor(props) {
     super(props);
     this.billingRest = new BillingRestService();
+    this.moneyFormat = new MoneyFormat();
+    this.loadRelatedData = this.loadRelatedData.bind(this);
+    this.loadDetailTenant = this.loadDetailTenant.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
@@ -84,6 +89,13 @@ export default class Billing extends Component {
     today2.setDate(today2.getDate() - 1);
 
     this.state = {
+      subscriptionPlanName: true,
+      freeTrialEndDate: true,
+      billingPeriodStartDate: true,
+      billingPeriodEndDate: true,
+      billingCycle: true,
+      billingAmount: true,
+      status: true,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
@@ -100,6 +112,7 @@ export default class Billing extends Component {
         }
       },
       tenantsSubscriptionsSummary: [],
+      subscriptionPlanData: [],
       package: [],
       checked: false,
       dropdownOpen: false,
@@ -115,6 +128,7 @@ export default class Billing extends Component {
       date2: null,
       invalidDates: [today],
       invalidDates2: [today],
+      redirect: null
     };
   }
 
@@ -208,7 +222,6 @@ export default class Billing extends Component {
     this.setState({ billingCycle2: e.value });
   }
 
-
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -223,7 +236,6 @@ export default class Billing extends Component {
     };
 
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
-      console.log(response);
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
@@ -239,6 +251,16 @@ export default class Billing extends Component {
 
     this.loadData();
     this.loadTenantsSubscriptionsSummary();
+  }
+
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   loadTenantsSubscriptionsSummary() {
@@ -272,7 +294,7 @@ export default class Billing extends Component {
         accessor: "tenantId",
         fixed: "left",
         width: 70,
-        show: this.state.filterColumns.indexOf("ID Tenant") > -1 ? false : true,
+        show: false,
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -287,18 +309,13 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 120,
-        show:
-          this.state.filterColumns.indexOf("Nama Perusahaan") > -1
-            ? false
-            : true
+        width: 150
       },
       {
         Header: "Email",
         accessor: "companyInfo.email",
         fixed: "left",
         width: 170,
-        show: this.state.filterColumns.indexOf("Email") > -1 ? false : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
@@ -306,24 +323,19 @@ export default class Billing extends Component {
         accessor: "companyInfo.phone",
         fixed: "left",
         width: 140,
-        show:
-          this.state.filterColumns.indexOf("No Telepon") > -1 ? false : true,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Package",
         accessor: "subscriptionPlanName",
-        show: this.state.filterColumns.indexOf("Package") > -1 ? false : true,
+        show: this.state.subscriptionPlanName,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Expired Date Free Trial",
         accessor: "freeTrialEndDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Expired Date Trial") > -1
-            ? false
-            : true,
+        show: this.state.freeTrialEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -336,8 +348,7 @@ export default class Billing extends Component {
         Header: "Tanggal Mulai",
         accessor: "billingPeriodStartDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Tanggal Mulai") > -1 ? false : true,
+        show: this.state.billingPeriodStartDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -350,10 +361,7 @@ export default class Billing extends Component {
         Header: "Tanggal Penagihan",
         accessor: "billingPeriodEndDate",
         width: 150,
-        show:
-          this.state.filterColumns.indexOf("Tanggal Penagihan") > -1
-            ? false
-            : true,
+        show: this.state.billingPeriodEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -365,50 +373,94 @@ export default class Billing extends Component {
       {
         Header: "Billing Cycle",
         accessor: "billingCycle",
-        show:
-          this.state.filterColumns.indexOf("Billing Cycle") > -1 ? false : true,
+        show: this.state.billingCycle,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Total Penagihan",
         accessor: "billingAmount",
         width: 130,
-        show:
-          this.state.filterColumns.indexOf("Total Penagihan") > -1
-            ? false
-            : true,
+        show: this.state.billingAmount,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
         width: 200,
-        show: this.state.filterColumns.indexOf("Status") > -1 ? false : true,
+        show: this.state.status,
         Cell: props => (
           <Row>
-            <Button
-              className="float-right default"
-              color="secondary"
-              style={{ marginRight: 10 }}
-              onClick={() => {
-                this.setState({ upgradeModal: true });
-              }}
-            >
-              Upgrade
-            </Button>
-            <Button
-              className="float-right default"
-              color="secondary"
-              onClick={() => {
-                this.setState({ renewModal: true });
-              }}
-            >
-              Renew
-            </Button>
+            <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                style={{ marginRight: 10 }}
+                // onClick={() => {
+                //   this.loadDetailTenant(props.original.tenantId);
+                //   this.loadRelatedData();
+                //   this.setState({ upgradeModal: true });
+                // }}
+              >
+                Upgrade
+              </Button>
+            </NavLink>
+            <NavLink to={`billings/renew/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                // onClick={() => {
+                //   this.setState({ renewModal: true });
+                // }}
+              >
+                Renew
+              </Button>
+            </NavLink>
           </Row>
         )
       }
     ];
+  }
+
+  loadRelatedData() {
+    this.billingRest.getRelatedData({}).subscribe(response => {
+      this.setState({
+        subscriptionPlanData: response.subscriptionPlan,
+        upgradeModal: true
+      });
+    });
+  }
+
+  loadDetailTenant(id) {
+    this.billingRest.getTenantsSubscriptionsById(id, {}).subscribe(response => {
+      console.log(response);
+    });
+  }
+
+  _renderPrice() {
+    const selectedPackage = this.state.package;
+    const billingCycle = this.state.billingCycle;
+    let price;
+    if (selectedPackage.length !== [] && billingCycle !== undefined) {
+      let code = billingCycle.code;
+      if (code == 1) {
+        console.log(selectedPackage.monthlyPrice);
+        price = selectedPackage.monthlyPrice;
+      } else if (code == 3) {
+        console.log(selectedPackage.quaterlyPrice);
+        price = selectedPackage.quaterlyPrice;
+      } else if (code == 6) {
+        console.log(selectedPackage.semesterlyPrice);
+        price = selectedPackage.semesterlyPrice;
+      } else if (code == 12) {
+        console.log(selectedPackage.yearlyPrice);
+        price = selectedPackage.yearlyPrice;
+      } else {
+        price = 0;
+      }
+    } else {
+      price = 0;
+    }
+    return price;
   }
 
   _renderFilterColumns() {
@@ -782,7 +834,7 @@ export default class Billing extends Component {
                       </Collapse>
                     </InputGroup>
                   </div>
-                  {/*
+
                   <div
                     style={{
                       marginLeft: 650
@@ -803,11 +855,72 @@ export default class Billing extends Component {
                       toggle={this.togglePopoverColumns}
                     >
                       <PopoverBody>
-                        {this._renderFilterColumns()}
+                        <div>
+                          <input
+                            name="subscriptionPlanName"
+                            type="checkbox"
+                            checked={this.state.subscriptionPlanName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Package
+                        </div>
+                        <div>
+                          <input
+                            name="freeTrialEndDate"
+                            type="checkbox"
+                            checked={this.state.freeTrialEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Expired Date Free Trial
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodStartDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodStartDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Mulai
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodEndDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="billingCycle"
+                            type="checkbox"
+                            checked={this.state.billingCycle}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Billing Cycle
+                        </div>
+                        <div>
+                          <input
+                            name="billingAmount"
+                            type="checkbox"
+                            checked={this.state.billingAmount}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="status"
+                            type="checkbox"
+                            checked={this.state.status}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Status
+                        </div>
                       </PopoverBody>
                     </Popover>
                   </div>
-									 */}
                 </div>
 
                 <ReactTableFixedColumn
@@ -964,7 +1077,7 @@ export default class Billing extends Component {
                 <Col>
                   <Dropdown
                     value={this.state.package}
-                    options={paket}
+                    options={this.state.subscriptionPlanData}
                     onChange={this.onPackageChange}
                     placeholder="Select a Package"
                     optionLabel="name"
@@ -1000,6 +1113,35 @@ export default class Billing extends Component {
                     placeholder="Select a Billing Cycle"
                     optionLabel="name"
                   />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Price
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  {this.moneyFormat.numberFormat(this._renderPrice())}
                 </Col>
               </Row>
               <Row

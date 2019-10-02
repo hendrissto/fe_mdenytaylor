@@ -1,13 +1,18 @@
-import React from "react";
+import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
+class CODFee extends Component {
+  constructor(props){
+    super(props);
+  }
 
-const CODFee = () => {
-    const card = { title: 'dashboards.cards.cod-fee', icon: "iconsminds-handshake", value: 20 };
-
-  return (
-    <IconCard {... card} className="mb-4" />
-  );
-};
+  render() {
+    return (
+      <div>
+        <IconCard title='dashboards.cards.cod-fee' icon="iconsminds-handshake" value={this.props.value} className="mb-4" />
+      </div>
+    )
+  }
+}
 
 export default CODFee;

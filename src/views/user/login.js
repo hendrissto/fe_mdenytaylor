@@ -38,7 +38,6 @@ class Login extends Component {
     if (this.state.username !== "" && this.state.password !== "") {
       this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
-        localStorage.setItem("user", response)
         this.props.loginUser(response, this.props.history);
         this.setState({ loading: false })
       }, err => {

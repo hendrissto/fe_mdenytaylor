@@ -11,10 +11,13 @@ import {
   ModalFooter,
   InputGroup,
   Input,
-  Col
+  Col,
+  Popover,
+  PopoverBody
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
 import Loader from "react-loader-spinner";
+import Loading from "../../../containers/pages/Spinner";
 
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
@@ -34,6 +37,7 @@ import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 
 import { Dropdown } from "primereact/dropdown";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import BaseAlert from "../../base/baseAlert";
 import * as css from "../../base/baseCss";
@@ -55,6 +59,7 @@ class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
     this.codRest = new CODRestService();
+    this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
 
     this.showModal = this.showModal.bind(this);
@@ -63,8 +68,15 @@ class ReceiptOfFunds extends Component {
     this.onCourierChange = this.onCourierChange.bind(this);
     this.showModal = this.showModalError.bind(this);
     this.loadDetailData = this.loadDetailData.bind(this);
+    this.toggle = this.toggle.bind(this);
 
     this.state = {
+      uploadDateShow: true,
+      idFileShow: true,
+      uploadByShow: true,
+      detailShow: true,
+      popoverOpen: false,
+      loading: false,
       error: false,
       errorFile: false,
       resError: null,
@@ -176,6 +188,12 @@ class ReceiptOfFunds extends Component {
     // this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
+  toggle() {
+    this.setState({
+      popoverOpen: !this.state.popoverOpen
+    });
+  }
+
   sumData = (tableData, type) => {
     switch (type) {
       case "totalAmount":
@@ -276,6 +294,14 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({ [name]: value });
+  }
+
   handleOnPageChange(pageIndex) {
     const table = { ...this.state.table };
     table.loading = true;
@@ -331,20 +357,24 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Upload Date",
         accessor: "uploadDate",
+        show: this.state.uploadDateShow,
         Cell: props => <p> {moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
       },
       {
         Header: "ID File",
         accessor: "documentNumber",
+        show: this.state.idFileShow,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload By",
         accessor: "uploadBy",
+        show: this.state.uploadByShow,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Detail",
+        show: this.state.detailShow,
         Cell: props => (
           <p>
             <Button
@@ -355,6 +385,386 @@ class ReceiptOfFunds extends Component {
               Detail
             </Button>
           </p>
+        )
+      }
+    ];
+  }
+
+  dataTableDetail() {
+    return [
+      {
+        Header: "No Resi",
+        accessor: "airwaybill",
+        width: 130,
+        Footer: <p>Total</p>,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Delivery Notes",
+        accessor: "deliveredNotes",
+        width: 350,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Destination",
+        accessor: "destination",
+        width: 150,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
+      },
+      {
+        Header: "Note",
+        accessor: "notes",
+        Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
+      },
+      {
+        Header: "Good Value",
+        accessor: "goodsValue",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { goodsValue }) => (total += parseInt(goodsValue)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Shipping Charge",
+        accessor: "shippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { shippingCharge }) =>
+                  (total += parseInt(shippingCharge)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Discount",
+        accessor: "discount",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { discount }) => (total += parseInt(discount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Tax",
+        accessor: "tax",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce((total, { tax }) => (total += parseInt(tax)), 0)
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Adjustment",
+        accessor: "adjustment",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { adjustment }) => (total += parseInt(adjustment)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Total",
+        accessor: "total",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total2, { total }) => (total2 += parseInt(total)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Sub Total Amount",
+        accessor: "subTotalAmount",
+        width: 140,
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { subTotalAmount }) =>
+                  (total += parseInt(subTotalAmount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Total Amount",
+        accessor: "totalAmount",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Fee COD (%)",
+        accessor: "codFee",
+        Cell: props => <p>{props.value * 100} %</p>
+      },
+      {
+        Header: "Fee COD (Rp)",
+        accessor: "codFeeRp",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
+        Header: "Receive Amount",
+        accessor: "totAmountCodFee",
+        width: 140,
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totAmountCodFee }) =>
+                  (total += parseInt(totAmountCodFee)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      }
+    ];
+  }
+
+  dataTableDetailFromBackend() {
+    return [
+      {
+        Header: "No Resi",
+        accessor: "airwaybillNumber",
+        width: 130,
+        Footer: <p>Total</p>,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Delivery Notes",
+        accessor: "deliveryNotes",
+        width: 350,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Destination",
+        accessor: "destination",
+        width: 150,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
+      },
+      {
+        Header: "Note",
+        accessor: "notes",
+        Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
+      },
+      {
+        Header: "Good Value",
+        accessor: "goodValue",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { goodValue }) => (total += parseInt(goodValue)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Shipping Charge",
+        accessor: "shippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { shippingCharge }) =>
+                  (total += parseInt(shippingCharge)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Discount",
+        accessor: "discount",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { discount }) => (total += parseInt(discount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Tax",
+        accessor: "tax",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce((total, { tax }) => (total += parseInt(tax)), 0)
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Adjustment",
+        accessor: "adjustment",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { adjustment }) => (total += parseInt(adjustment)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Total",
+        accessor: "total",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total2, { total }) => (total2 += parseInt(total)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Sub Total Amount",
+        accessor: "subTotalAmount",
+        width: 140,
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { subTotalAmount }) =>
+                  (total += parseInt(subTotalAmount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Total Amount",
+        accessor: "totalAmount",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalAmount }) => (total += parseInt(totalAmount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      },
+      {
+        Header: "Fee COD (%)",
+        accessor: "codFeePercentage",
+        Cell: props => <p>{props.value} %</p>
+      },
+      {
+        Header: "Fee COD (Rp)",
+        accessor: "codFeeValue",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { codFeeValue }) => (total += parseInt(codFeeValue)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
+        Header: "Receive Amount",
+        accessor: "receiveAmount",
+        width: 140,
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { receiveAmount }) =>
+                  (total += parseInt(receiveAmount)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
         )
       }
     ];
@@ -468,7 +878,6 @@ class ReceiptOfFunds extends Component {
             totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
-        console.log(data);
         this.setState({ data: data });
       }
     });
@@ -512,15 +921,17 @@ class ReceiptOfFunds extends Component {
   }
 
   submitData() {
+    this.setState({ resiModal: false, modal: false, loading: true });
     this.codRest.postCOD(this.state.dataExcel).subscribe(
       response => {
-        this.setState({ resiModal: false, modal: false });
+        this.setState({ resiModal: false, modal: false, loading: false });
         this.loadData();
       },
       error => {
         this.setState({
           resError: error.data[0].errorMessage,
-          resiModal: false
+          resiModal: false,
+          loading: false
         });
         this.showModalError();
       }
@@ -619,7 +1030,7 @@ class ReceiptOfFunds extends Component {
     const option = this.state.relatedData.courierChannel;
     if (this.state.relatedData.length > 0) {
       option = this.state.relatedData.courierChannel;
-		}
+    }
     return (
       <Fragment>
         <Row>
@@ -636,15 +1047,6 @@ class ReceiptOfFunds extends Component {
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
-                      <DropdownToggle color="primary" className="default">
-                        <i className="simple-icon-menu" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
                       <Input
                         placeholder="Search.."
                         name="search"
@@ -663,19 +1065,65 @@ class ReceiptOfFunds extends Component {
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
-                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
-                      <DropdownToggle color="primary" className="default">
-                        <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem>1</DropdownItem>
-                        <DropdownItem>2</DropdownItem>
-                      </DropdownMenu>
-                    </InputGroupButtonDropdown> */}
                     </InputGroup>
                   </div>
 
                   <div className="col-md-7">
+                    <Button
+                      className="float-right default"
+                      id="Popover1"
+                      type="button"
+                      style={{
+                        marginLeft: 10
+                      }}
+                    >
+                      <i className="simple-icon-menu mr-2" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverOpen}
+                      target="Popover1"
+                      toggle={this.toggle}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="uploadDateShow"
+                            type="checkbox"
+                            checked={this.state.uploadDateShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Date
+                        </div>
+                        <div>
+                          <input
+                            name="idFileShow"
+                            type="checkbox"
+                            checked={this.state.idFileShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          ID File
+                        </div>
+                        <div>
+                          <input
+                            name="uploadByShow"
+                            type="checkbox"
+                            checked={this.state.uploadByShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload By
+                        </div>
+                        <div>
+                          <input
+                            name="detailShow"
+                            type="checkbox"
+                            checked={this.state.detailShow}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Upload Detail
+                        </div>
+                      </PopoverBody>
+                    </Popover>
                     <Button
                       className="float-right default"
                       color="secondary"
@@ -738,51 +1186,49 @@ class ReceiptOfFunds extends Component {
                   text={"Semua data wajib diisi"}
                 />
               )}
-              {option.length > 0 && (
-                <div>
-                  <Row>
-                    <Col
-                      xs="3"
-                      style={{
-                        marginTop: 5
-                      }}
-                    >
-                      Courier
-                    </Col>
-                    <Col
-                      xs="1"
-                      style={{
-                        marginTop: 5
-                      }}
-                    >
-                      :
-                    </Col>
-                    <Col>
-                      <Dropdown
-                        value={this.state.selectedCourier}
-                        options={option}
-                        onChange={this.onCourierChange}
-                        placeholder="Select a Package"
-                        optionLabel="name"
-                        required
-                      />
-                    </Col>
-                  </Row>
-                  <input
-                    type="file"
-                    onChange={this.fileHandler.bind(this)}
-                    required
-                  />
-                  {this.state.errorFile && (
-                    <BaseAlert
-                      onClick={() => {
-                        this.setState({ errorFile: false });
-                      }}
-                      text={"Hanya file excel yang bisa diupload."}
+              <div>
+                <Row>
+                  <Col
+                    xs="3"
+                    style={{
+                      marginTop: 5
+                    }}
+                  >
+                    Courier
+                  </Col>
+                  <Col
+                    xs="1"
+                    style={{
+                      marginTop: 5
+                    }}
+                  >
+                    :
+                  </Col>
+                  <Col>
+                    <Dropdown
+                      value={this.state.selectedCourier}
+                      options={option}
+                      onChange={this.onCourierChange}
+                      placeholder="Select a Package"
+                      optionLabel="name"
+                      required
                     />
-                  )}
-                </div>
-              )}
+                  </Col>
+                </Row>
+                <input
+                  type="file"
+                  onChange={this.fileHandler.bind(this)}
+                  required
+                />
+                {this.state.errorFile && (
+                  <BaseAlert
+                    onClick={() => {
+                      this.setState({ errorFile: false });
+                    }}
+                    text={"Hanya file excel yang bisa diupload."}
+                  />
+                )}
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.nextStep()}>Next</Button>
@@ -902,36 +1348,32 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <BootstrapTable
+              <ReactTable
+                minRows={0}
+                page={this.state.table.pagination.currentPage}
+                PaginationComponent={DataTablePagination}
                 data={this.state.oneData}
-                footerData={this.state.footerData2}
-                footer
-              >
-                <TableHeaderColumn dataField="airwaybill" isKey>
-                  Resi
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="deliveredNotes" width={300}>
-                  Penerima Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Nilai Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="codFeeRp"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Fee COD
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totAmountCodFee"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total Diterima
-                </TableHeaderColumn>
-              </BootstrapTable>
+                pages={this.state.table.pagination.totalPages}
+                columns={this.dataTableDetail()}
+                defaultPageSize={this.state.table.pagination.pageSize}
+                className="-striped"
+                loading={this.state.table.loading}
+                showPagination={true}
+                showPaginationTop={false}
+                showPaginationBottom={true}
+                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                manual // this would indicate that server side pagination has been enabled
+                onFetchData={(state, instance) => {
+                  const newState = { ...this.state.table };
+
+                  newState.pagination.currentPage = state.page;
+                  newState.pagination.pageSize = state.pageSize;
+                  newState.pagination.skipSize = state.pageSize * state.page;
+
+                  this.setState({ newState });
+                  this.loadData();
+                }}
+              />
             </ModalBody>
 
             <ModalFooter>
@@ -949,6 +1391,35 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
+              <ReactTable
+                minRows={0}
+                page={this.state.table.pagination.currentPage}
+                PaginationComponent={DataTablePagination}
+                data={this.state.oneData}
+                pages={this.state.table.pagination.totalPages}
+                columns={this.dataTableDetailFromBackend()}
+                defaultPageSize={this.state.table.pagination.pageSize}
+                className="-striped"
+                loading={this.state.table.loading}
+                showPagination={true}
+                showPaginationTop={false}
+                showPaginationBottom={true}
+                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                manual // this would indicate that server side pagination has been enabled
+                onFetchData={(state, instance) => {
+                  const newState = { ...this.state.table };
+
+                  newState.pagination.currentPage = state.page;
+                  newState.pagination.pageSize = state.pageSize;
+                  newState.pagination.skipSize = state.pageSize * state.page;
+
+                  this.setState({ newState });
+                  this.loadData();
+                }}
+              />
+
+              {/*
+              
               <BootstrapTable
                 data={this.state.oneData}
                 footerData={this.state.footerData3}
@@ -979,6 +1450,7 @@ class ReceiptOfFunds extends Component {
                   Total Diterima
                 </TableHeaderColumn>
               </BootstrapTable>
+             */}
             </ModalBody>
 
             <ModalFooter>
@@ -1009,6 +1481,7 @@ class ReceiptOfFunds extends Component {
             </ModalFooter>
           </Modal>
         )}
+        {this.state.loading && <Loading />}
       </Fragment>
     );
   }

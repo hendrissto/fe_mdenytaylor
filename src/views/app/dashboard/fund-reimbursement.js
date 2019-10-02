@@ -1,13 +1,18 @@
-import React from "react";
+import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
+class FundReimbursement extends Component {
+  constructor(props){
+    super(props);
+  }
 
-const FundReimbursement = () => {
-    const card = { title: 'dashboards.cards.fund-reimbursement', icon: "iconsminds-financial", value: 17 };
-
-  return (
-    <IconCard {... card} className="mb-4" />
-  );
-};
+  render() {
+    return (
+      <div>
+        <IconCard title='dashboards.cards.fund-reimbursement' icon="iconsminds-financial" value={this.props.value} className="mb-4" />
+      </div>
+    )
+  }
+}
 
 export default FundReimbursement;
