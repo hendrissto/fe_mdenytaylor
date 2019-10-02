@@ -61,7 +61,7 @@ module.exports = {
     "menu.cod-receipt-number": "Resi COD",
     "menu.request-withdraw-funds": "Permintaan Penarikan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",
-    "menu.receipt-of-funds": "Riwayat Penerimaan Dana",
+    "menu.receipt-of-funds": "Transfer Kredit COD",
     "menu.tenants": "Tenan",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
