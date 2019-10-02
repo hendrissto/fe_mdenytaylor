@@ -69,7 +69,7 @@ module.exports = {
   "menu.ecommerce": "Ecommerce",
   "menu.content": "Content",
   "menu.pages": "Pages",
-  "menu.billing": "Billing Inggris",
+  "menu.billing": "Billing",
   "menu.data-list": "Data List",
   "menu.thumb-list": "Thumb List",
   "menu.image-list": "Image List",
