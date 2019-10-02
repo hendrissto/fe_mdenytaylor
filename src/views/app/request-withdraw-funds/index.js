@@ -17,6 +17,8 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+// import { Formik } from "formik";
+// import validate from "./validate";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 
@@ -30,6 +32,16 @@ class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      table: {
+        loading: true,
+        data: [],
+        pagination: {
+          currentPage: 0,
+          totalPages: 0,
+          skipSize: 0,
+          pageSize: 10
+        }
+      },
       oneData: "",
       modal: false,
       dropdownOpen: false,
@@ -471,19 +483,19 @@ class WithdrawFunds extends Component {
   }
 
   render() {
-    const option = {
-      sizePerPage: 5,
-      sizePerPageList: [
-        {
-          text: "5",
-          value: 5
-        },
-        {
-          text: "10",
-          value: 10
-        }
-      ]
-    };
+    // const option = {
+    //   sizePerPage: 5,
+    //   sizePerPageList: [
+    //     {
+    //       text: "5",
+    //       value: 5
+    //     },
+    //     {
+    //       text: "10",
+    //       value: 10
+    //     }
+    //   ]
+    // };
     return (
       <Fragment>
         <Row>
@@ -538,7 +550,8 @@ class WithdrawFunds extends Component {
                     </InputGroup>
                   </div>
                 </div>
-                {/* <BootstrapTable
+                {/*
+                <BootstrapTable
                   data={this.dataTable()}
                   pagination={true}
                   options={option}
@@ -564,7 +577,23 @@ class WithdrawFunds extends Component {
                   <TableHeaderColumn dataFormat={this.button.bind(this)}>
                     Upload Bukti
                   </TableHeaderColumn>
-                </BootstrapTable> */}
+                </BootstrapTable>
+                 */}
+                <ReactTable
+                  page={this.state.table.pagination.currentPage}
+                  PaginationComponent={DataTablePagination}
+                  data={this.dataTable()}
+                  pages={this.state.table.pagination.totalPages}
+                  columns={this.dataTableColumns()}
+                  defaultPageSize={this.state.table.pagination.pageSize}
+                  className="-striped"
+                  // loading={this.state.table.loading}
+                  showPagination={true}
+                  showPaginationTop={false}
+                  showPaginationBottom={true}
+                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  manual // this would indicate that server side pagination has been enabled
+                />
               </CardBody>
             </Card>
           </Colxx>
@@ -577,41 +606,58 @@ class WithdrawFunds extends Component {
           </ModalHeader>
           <ModalBody>
             <Table>
-              <tr>
-                <td>
-                  <IntlMessages id="modal.seller" />
-                </td>
-                <td>:</td>
-                <td>{this.state.oneData.seller}</td>
-              </tr>
-              <tr>
-                <td>
-                  <IntlMessages id="modal.cardName" />
-                </td>
-                <td>:</td>
-                <td>{this.state.oneData.seller}</td>
-              </tr>
-              <tr>
-                <td>
-                  <IntlMessages id="modal.bank" />
-                </td>
-                <td>:</td>
-                <td>{this.state.oneData.withdrawToAccount}</td>
-              </tr>
-              <tr>
-                <td>
-                  <IntlMessages id="modal.creditNumber" />
-                </td>
-                <td>:</td>
-                <td>{this.state.oneData.receiptNumber}</td>
-              </tr>
-              <tr>
-                <td>
-                  <IntlMessages id="modal.total" />
-                </td>
-                <td>:</td>
-                <td>{this.state.oneData.amountWithdraw}</td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>
+                    <IntlMessages id="modal.seller" />
+                  </td>
+                  <td>:</td>
+                  <td>{this.state.oneData.seller}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <IntlMessages id="modal.cardName" />
+                  </td>
+                  <td>:</td>
+                  <td>{this.state.oneData.seller}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <IntlMessages id="modal.bank" />
+                  </td>
+                  <td>:</td>
+                  <td>{this.state.oneData.withdrawToAccount}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <IntlMessages id="modal.creditNumber" />
+                  </td>
+                  <td>:</td>
+                  <td>{this.state.oneData.receiptNumber}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <IntlMessages id="modal.total" />
+                  </td>
+                  <td>:</td>
+                  <td>{this.state.oneData.amountWithdraw}</td>
+                </tr>
+                <tr>
+                {this.state.oneData.status === "Berhasil" ? (
+                  <div></div>
+                ) : (
+                    <>
+                      <td>
+                        <IntlMessages id="modal.amount" />
+                      </td>
+                      <td>:</td>
+                      <td>
+                        <input type="text" name="amount" />
+                      </td>
+                    </>
+                )}
+                </tr>
+              </tbody>
             </Table>
             {this.state.oneData.status === "Berhasil" ? (
               <div>Disini Bukti Transfer.</div>

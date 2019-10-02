@@ -515,14 +515,14 @@ export default class CODReceiptNumber extends Component {
     );
   }
   render() {
-    const option = {
-      sizePerPage: 5,
-      sizePerPageList: [{
-        text: '5', value: 5
-      }, {
-        text: '10', value: 10
-      }],
-    }
+    // const option = {
+    //   sizePerPage: 5,
+    //   sizePerPageList: [{
+    //     text: '5', value: 5
+    //   }, {
+    //     text: '10', value: 10
+    //   }],
+    // }
     return (
       <Fragment>
         <Row>

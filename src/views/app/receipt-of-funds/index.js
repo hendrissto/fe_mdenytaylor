@@ -24,23 +24,24 @@ import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../core/codRestService";
-import * as moment from 'moment';
+import * as moment from "moment";
 
-import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
-import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css'
+import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 
-const user = JSON.parse(localStorage.getItem('user'))
+const user = JSON.parse(localStorage.getItem("user"));
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
-    this.codRest =  new CODRestService();
+    this.codRest = new CODRestService();
 
     this.showModal = this.showModal.bind(this);
     this.dataTable = this.dataTable.bind(this);
     // this.dataTableColumsCOD = this.dataTableColumsCOD.bind(this);
     // this.dataTableCODSeller = this.dataTableCODSeller.bind(this);
     this.state = {
+      fileTemp: null,
       dataExcel: null,
       table: {
         loading: true,
@@ -131,7 +132,6 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         );
-        break;
       case "codFeeRp":
         return (
           <p>
@@ -144,7 +144,6 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         );
-        break;
       case "totalReceive":
         return (
           <p>
@@ -157,25 +156,26 @@ class ReceiptOfFunds extends Component {
             ).format("0,0")}
           </p>
         );
-        break;
       case "totAmountCodFee":
         return (
           <p>
             Rp{" "}
             {numeral(
               tableData.reduce(
-                (total, { totAmountCodFee }) => (total += parseInt(totAmountCodFee)),
+                (total, { totAmountCodFee }) =>
+                  (total += parseInt(totAmountCodFee)),
                 0
               )
             ).format("0,0")}
           </p>
         );
-        break;
+      default:
+        return <p>Wrong value.</p>;
     }
   };
 
   componentDidMount() {
-    this.codRest.getReceiptFunds().subscribe((response) => {
+    this.codRest.getReceiptFunds().subscribe(response => {
     });
     this.loadData();
   }
@@ -191,9 +191,9 @@ class ReceiptOfFunds extends Component {
   }
 
   handleOnPageChange(pageIndex) {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = (pageIndex * table.pagination.pageSize);
+    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
     table.pagination.currentPage = pageIndex;
 
     console.log(table);
@@ -203,9 +203,9 @@ class ReceiptOfFunds extends Component {
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.pageSize = newPageSize
+    table.pagination.pageSize = newPageSize;
     this.setState({ table });
     this.loadData();
   }
@@ -304,7 +304,7 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "ID File",
-        accessor: "file.id",
+        accessor: "documentNumber",
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -316,7 +316,7 @@ class ReceiptOfFunds extends Component {
         Header: "Upload By",
         accessor: "uploadBy",
         Cell: props => <p>{props.value}</p>
-      },
+      }
     ];
   }
 
@@ -494,7 +494,7 @@ class ReceiptOfFunds extends Component {
   dataTableCODSeller(osName) {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
-    
+
     let finish = data.lines;
     this.setState({ oneData: finish });
     this.showModal("resiModalSeller");
@@ -549,9 +549,8 @@ class ReceiptOfFunds extends Component {
   //   });
   // }
 
-
   loadData() {
-    const table = { ...this.state.table }
+    const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
 
@@ -559,18 +558,17 @@ class ReceiptOfFunds extends Component {
       keyword: this.state.search || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
-      "options.includeTotalCount": true,
-    }
+      "options.includeTotalCount": true
+    };
 
-    this.codRest.getReceiptFunds({ params })
-      .subscribe((response) => {
-        const table = { ...this.state.table }
-        table.data = response.data;
-        table.pagination.totalPages = response.total / table.pagination.pageSize;
-        table.loading = false;
-        this.setState({ table });
-      })
-  };
+    this.codRest.getReceiptFunds({ params }).subscribe(response => {
+      const table = { ...this.state.table };
+      table.data = response.data;
+      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.loading = false;
+      this.setState({ table });
+    });
+  }
 
   handleData = data => {
     this.setState({ data: data });
@@ -578,13 +576,16 @@ class ReceiptOfFunds extends Component {
 
   cekdata(data) {
     return data;
-  };
+  }
 
   fileHandler = event => {
     let fileObj = event.target.files[0];
 
-    //just pass the fileObj as parameter
-    ExcelRenderer(fileObj, (err, resp) => {
+    this.setState({fileTemp: fileObj});
+  };
+
+  excelProcess() {
+    ExcelRenderer(this.state.fileTemp, (err, resp) => {
       if (err) {
         console.log(err);
       } else {
@@ -594,62 +595,59 @@ class ReceiptOfFunds extends Component {
 
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
-
-        this.normalizeLines(newExcelData)
+        this.normalizeLines(newExcelData);
 
         let data = _(newExcelData)
           .groupBy("osName")
           .map((newDataExcel, sellerName) => ({
             osName: sellerName,
-            lines: newDataExcel,  
+            lines: newDataExcel,
             package: newDataExcel.length,
-            totalAmount: _.sumBy(newDataExcel, "totalAmount"),
-            codFeeRp: _.sumBy(newDataExcel, "codFeeRp"),
-            totalReceive: _.sumBy(newDataExcel, "totAmountCodFee")
+            totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
+            codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
+            totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
         this.setState({ data: data });
       }
     });
-  };
+  }
 
   normalizeLines(array) {
     const lineValue = {
-      lines: [],
-      lineAmount: 0,
-      lineCodValue: 0,
-      lineTotal: 0,
+      lines: []
+    };
 
-    }
-    
-    for(let i = 0; i < array.length; i++){
-      lineValue.lineAmount += Math.round(array[i].totalAmount);
-      lineValue.lineCodValue += Math.round(array[i].codFeeRp);
-      lineValue.lineTotal += Math.round(array[i].totAmountCodFee);
+    for (let i = 0; i < array.length; i++) {
       lineValue.lines.push({
-          sellerName: array[i].osName,
-          receiverName: array[i].penerima,
-          trackingNumber: array[i].airwaybill.toString(),
-          courierChannelId: 'sicepat',
-          amount: array[i].totalAmount,
-          codValue: array[i].codFeeRp,
-          total: array[i].totAmountCodFee,
-      })
+        sellerName: array[i].osName,
+        deliveryNotes: array[i].deliveredNotes,
+        airwaybillNumber: array[i].airwaybill.toString(),
+        courierChannelId: "sicepat",
+        note: array[i].notes || "",
+        amount: array[i].totalAmount || 0,
+        codValue: Math.round(array[i].codFeeRp) || 0,
+        goodValue: array[i].goodsValue || 0,
+        shippingCharge: array[i].shippingCharge || 0,
+        discount: array[i].discount || 0,
+        tax: array[i].tax || 0,
+        adjustment: array[i].adjustment || 0,
+        total: array[i].total || 0,
+        subTotalAmount: array[i].subTotalAmount || 0,
+        totalAmount: array[i].totalAmount || 0,
+        codFeePercentage: array[i].codFee * 100 || 0,
+        codFeeValue: Math.round(array[i].codFeeRp) || 0,
+        receiveAmount: Math.round(array[i].totAmountCodFee) || 0
+      });
     }
 
     let data = {
       ...lineValue,
-      documentNumber: '',
       uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
-      lineCount: array.length,
-      uploadBy: user.user_name,
-      file: {
-        id: '',
-        fileName: ''
-      }
-    }
-    
-    this.setState({dataExcel: data})
+      uploadBy: user.user_name
+    };
+
+    this.setState({ dataExcel: data });
   }
 
   submitData() {
@@ -688,12 +686,13 @@ class ReceiptOfFunds extends Component {
 
   button(cell, row) {
     return (
-    <a
-      href="#"
-      // onClick={() => this.dataTableCODSeller(cell)}
-      className="button"
-    >{cell}
-    </a>
+      <a
+        href="#"
+        // onClick={() => this.dataTableCODSeller(cell)}
+        className="button"
+      >
+        {cell}
+      </a>
     );
   }
 
@@ -709,15 +708,25 @@ class ReceiptOfFunds extends Component {
     );
   }
 
+  nextStep() {
+    this.excelProcess();
+    this.setState({resiModal: true});
+  }
+
   render() {
     const option = {
       sizePerPage: 5,
-      sizePerPageList: [ {
-        text: '5', value: 5
-      }, {
-        text: '10', value: 10
-      }],
-    }
+      sizePerPageList: [
+        {
+          text: "5",
+          value: 5
+        },
+        {
+          text: "10",
+          value: 10
+        }
+      ]
+    };
     return (
       <Fragment>
         <Row>
@@ -733,8 +742,8 @@ class ReceiptOfFunds extends Component {
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
-                  <InputGroup>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
+                    <InputGroup>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen} showModal={this.toggleSplit}>
                       <DropdownToggle color="primary" className="default">
                         <i className="simple-icon-menu" />
                       </DropdownToggle>
@@ -743,16 +752,25 @@ class ReceiptOfFunds extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                    <Input placeholder="Search.." name="search" value={this.state.search} onChange={this.handleInputChange} 
-                      onKeyPress={event => {
-                        if (event.key === 'Enter') {
-                          this.loadData();
-                        }
-                      }}/>
-                    <Button className="default"  color="primary" onClick={() => this.loadData()}>
-                      <i className="simple-icon-magnifier" />
-                    </Button>
-                    {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
+                      <Input
+                        placeholder="Search.."
+                        name="search"
+                        value={this.state.search}
+                        onChange={this.handleInputChange}
+                        onKeyPress={event => {
+                          if (event.key === "Enter") {
+                            this.loadData();
+                          }
+                        }}
+                      />
+                      <Button
+                        className="default"
+                        color="primary"
+                        onClick={() => this.loadData()}
+                      >
+                        <i className="simple-icon-magnifier" />
+                      </Button>
+                      {/* <InputGroupButtonDropdown addonType="prepend" isOpen={this.state.splitButtonOpen1} showModal={this.toggleSplit1}>
                       <DropdownToggle color="primary" className="default">
                         <span className="mr-2">Filter</span> <i className="iconsminds-arrow-down-2" />
                       </DropdownToggle>
@@ -761,7 +779,7 @@ class ReceiptOfFunds extends Component {
                         <DropdownItem>2</DropdownItem>
                       </DropdownMenu>
                     </InputGroupButtonDropdown> */}
-                  </InputGroup>
+                    </InputGroup>
                   </div>
 
                   <div className="col-md-7">
@@ -771,8 +789,10 @@ class ReceiptOfFunds extends Component {
                       onClick={() => this.showModal("modal")}
                     >
                       <i className="iconsminds-upload mr-2" />
-                      <IntlMessages id={"ui.menu.receipt-of-funds.list.button.uploadAWB"} />
-                  </Button>
+                      <IntlMessages
+                        id={"ui.menu.receipt-of-funds.list.button.uploadAWB"}
+                      />
+                    </Button>
                   </div>
                 </div>
 
@@ -783,13 +803,13 @@ class ReceiptOfFunds extends Component {
                   pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
                   defaultPageSize={this.state.table.pagination.pageSize}
-                  className='-striped'
+                  className="-striped"
                   loading={this.state.table.loading}
                   showPagination={true}
                   showPaginationTop={false}
                   showPaginationBottom={true}
                   pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                  manual // this would indicate that server side pagination has been enabled 
+                  manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
 
@@ -815,11 +835,7 @@ class ReceiptOfFunds extends Component {
             <input type="file" onChange={this.fileHandler.bind(this)} />
           </ModalBody>
           <ModalFooter>
-            <Button
-              onClick={() => this.setState({resiModal: true})}
-            >
-              Next
-            </Button>
+            <Button onClick={() => this.nextStep()}>Next</Button>
           </ModalFooter>
         </Modal>
 
@@ -830,7 +846,7 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-            <BootstrapTable
+              <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -911,7 +927,13 @@ class ReceiptOfFunds extends Component {
             </ModalBody>
 
             <ModalFooter>
-            <Button onClick={() => this.setState({resiModalSeller: false, resiModal: true})}>Back</Button>
+              <Button
+                onClick={() =>
+                  this.setState({ resiModalSeller: false, resiModal: true })
+                }
+              >
+                Back
+              </Button>
             </ModalFooter>
           </Modal>
         )}

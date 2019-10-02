@@ -68,6 +68,7 @@ module.exports = {
     "menu.ecommerce": "Ecommerce",
     "menu.content": "Content",
     "menu.pages": "Pages",
+    "menu.billing": "Billing Indo",
     "menu.data-list": "Data List",
     "menu.thumb-list": "Thumb List",
     "menu.image-list": "Image List",
@@ -599,6 +600,7 @@ module.exports = {
     "modal.bank": "Bank",
     "modal.creditNumber": "No Rekening",
     "modal.total": "Total",
+    "modal.amount": "Jumlah Yang Dibayar",
     "modal.uploadReceiptTitle": "Upload Laporan Resi",
     "modal.receiptDataCOD": "Data Resi COD",
 

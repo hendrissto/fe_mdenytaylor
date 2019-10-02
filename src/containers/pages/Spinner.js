@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Loader from "react-loader-spinner";
 import Modal from "react-modal";
 
