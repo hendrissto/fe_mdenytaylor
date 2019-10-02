@@ -19,4 +19,8 @@ export default class CODRestService extends React.Component {
   postCOD(qParams) {
     return this.request.post('/credit-cod', qParams);
   }
+
+  getdDetailCod(id, qParams) {
+    return this.request.get(`/credit-cod/${id}`, qParams);
+  }
 }

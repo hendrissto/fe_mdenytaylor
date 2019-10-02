@@ -1,6 +1,6 @@
 import { HttpClientAxiosInterceptedService } from "./HttpClientAxiosInterceptedService";
 
-export default class RequestService extends HttpClientAxiosInterceptedService {
+export default class RequestLoginService extends HttpClientAxiosInterceptedService {
   constructor(baseUrl) {
     let headers;
     if (localStorage.getItem('user')) {
@@ -14,6 +14,6 @@ export default class RequestService extends HttpClientAxiosInterceptedService {
       }
     }
 
-    super(!baseUrl ? process.env.REACT_APP_API_ADMIN_URL : baseUrl, !baseUrl ? headers : headers);
+    super(!baseUrl ? process.env.REACT_APP_API_ADMIN_URL : baseUrl, !baseUrl ? headers : {});
   }
 }

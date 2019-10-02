@@ -6,29 +6,65 @@ import CODFee from "./cod-fee";
 import FundReimbursement from "./fund-reimbursement";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
+import DashboardRestService from "../../../core/dashboardRestService";
 
+import Loading from "../../../containers/pages/Spinner";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat"
 
+const user = JSON.parse(localStorage.getItem("user"));
 export default class Dashboard extends Component {
-	render() {
-		return (
-			<Fragment>
-				<Row>
-					<Colxx xxs="12">
-						<Breadcrumb heading="menu.dashboards" match={this.props.match} />
-						<Separator className="mb-5" />
-					</Colxx>
-				</Row>
-				<Row>
-					<Colxx lg="12" xl="6">
-						<CreditIssued />
-						<BalanceCredit />
-					</Colxx>
-					<Colxx lg="12" xl="6">
-						<CODFee />
-						<FundReimbursement />
-					</Colxx>
-				</Row>
-			</Fragment>
-		)
-	}
+  constructor(props) {
+    super(props);
+
+		this.dashboardRestService = new DashboardRestService();
+		this.moneyFormat = new MoneyFormat();
+    this.loadData = this.loadData.bind(this);
+
+    this.state = {
+      loading: false,
+      data: null
+    };
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.setState({ loading: true });
+    this.dashboardRestService.getSummary({}).subscribe(response => {
+			this.setState({ data: response, loading: false });
+    });
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this.state.loading && <Loading />}
+        {this.state.data !== null && (
+          <div>
+            <Row>
+              <Colxx xxs="12">
+                <Breadcrumb
+                  heading="menu.dashboards"
+                  match={this.props.match}
+                />
+                <Separator className="mb-5" />
+              </Colxx>
+            </Row>
+            <Row>
+              <Colxx lg="12" xl="6">
+                <CreditIssued value={this.moneyFormat.numberFormat(this.state.data.creditCOD)} />
+                <BalanceCredit value={this.moneyFormat.numberFormat(this.state.data.creditRemaining)} />
+              </Colxx>
+              <Colxx lg="12" xl="6">
+                <CODFee value={this.moneyFormat.numberFormat(this.state.data.feeCOD)} />
+                <FundReimbursement value={this.moneyFormat.numberFormat(this.state.data.creditTotal)} />
+              </Colxx>
+            </Row>
+          </div>
+        )}
+      </Fragment>
+    );
+  }
 }

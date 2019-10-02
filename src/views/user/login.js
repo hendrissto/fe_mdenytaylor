@@ -88,6 +88,7 @@ class Login extends Component {
                   onClick={() => {
                     this.setState({error: false});
                   }}
+                  text={'Username & password salah, silahkan periksa kembali..'}
                 />
               )}
               </CardTitle>

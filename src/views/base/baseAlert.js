@@ -11,8 +11,8 @@ export default class BaseAlert extends Component {
         this.alertInstance = (
             <div style={css.style.alert} id="alert">
                 <span style={css.style.closebtn} onClick={() => this.props.onClick()}>&times;</span>
-                <strong><i style={css.style.font16} className="iconsminds-close"></i> Error Login</strong><br />
-                <span style={css.style.fontDetail}>Username & password salah, silahkan periksa kembali..</span>
+                <strong><i style={css.style.font16} className="iconsminds-close"></i> Error</strong><br />
+                <span style={css.style.fontDetail}>{this.props.text}</span>
             </div>
         )
     }

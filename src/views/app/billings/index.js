@@ -1,4 +1,5 @@
 import moment from "moment";
+import { NavLink } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
@@ -26,10 +27,13 @@ import {
   PopoverBody
 } from "reactstrap";
 
-import TenantRestService from "../../../core/tenantRestService";
+import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import { Checkbox } from "primereact/checkbox";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
@@ -37,21 +41,66 @@ const filterStyle = {
   marginLeft: 30,
   marginTop: 10
 };
+
+const filterColumnsStyle = {
+  marginBottom: 7
+};
+
+const tableColumnsData = [
+  "ID Tenant",
+  "Nama Perusahaan",
+  "Email",
+  "No Telepon",
+  "Package",
+  "Expired Date Trial",
+  "Tanggal Mulai",
+  "Tanggal Penagihan",
+  "Billing Cycle",
+  "Total Penagihan",
+  "Status"
+];
 export default class Billing extends Component {
   constructor(props) {
     super(props);
-    this.tenantRest = new TenantRestService();
+    this.billingRest = new BillingRestService();
+    this.moneyFormat = new MoneyFormat();
+    this.loadRelatedData = this.loadRelatedData.bind(this);
+    this.loadDetailTenant = this.loadDetailTenant.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.toggleRenew = this.toggleRenew.bind(this);
+    this.toggleUpgrade = this.toggleUpgrade.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
+    this.togglePopoverColumns = this.togglePopoverColumns.bind(this);
+    this.onFilterColumnChange = this.onFilterColumnChange.bind(this);
+    this.onPackageChange = this.onPackageChange.bind(this);
+    this.onBillingCycleChange = this.onBillingCycleChange.bind(this);
+    this.onBillingCycleChange2 = this.onBillingCycleChange2.bind(this);
+    this.loadTenantsSubscriptionsSummary = this.loadTenantsSubscriptionsSummary.bind(
+      this
+    );
+
+    let today = new Date();
+    today.setDate(today.getDate() - 1);
+
+    let today2 = new Date();
+    today2.setDate(today2.getDate() - 1);
 
     this.state = {
+      subscriptionPlanName: true,
+      freeTrialEndDate: true,
+      billingPeriodStartDate: true,
+      billingPeriodEndDate: true,
+      billingCycle: true,
+      billingAmount: true,
+      status: true,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
       filter: [],
+      filterColumns: [],
       table: {
         loading: true,
         data: [],
@@ -62,13 +111,24 @@ export default class Billing extends Component {
           pageSize: 10
         }
       },
+      tenantsSubscriptionsSummary: [],
+      subscriptionPlanData: [],
+      package: [],
       checked: false,
       dropdownOpen: false,
       popoverOpen: false,
+      popoverColumns: false,
       collapse: false,
       modal: false,
+      renewModal: false,
+      upgradeModal: false,
       oneData: "",
-      search: ""
+      search: "",
+      date: null,
+      date2: null,
+      invalidDates: [today],
+      invalidDates2: [today],
+      redirect: null
     };
   }
 
@@ -84,6 +144,18 @@ export default class Billing extends Component {
     this.setState({ filter: selectedFilter });
   }
 
+  onFilterColumnChange(e) {
+    let selectedFilter = [...this.state.filterColumns];
+
+    if (e.checked) {
+      selectedFilter.splice(selectedFilter.indexOf(e.value), 1);
+    } else {
+      selectedFilter.push(e.value);
+    }
+
+    this.setState({ filterColumns: selectedFilter });
+  }
+
   toggleCollapse() {
     this.setState({
       collapse: !this.state.collapse
@@ -93,6 +165,12 @@ export default class Billing extends Component {
   togglePopover() {
     this.setState({
       popoverOpen: !this.state.popoverOpen
+    });
+  }
+
+  togglePopoverColumns() {
+    this.setState({
+      popoverColumns: !this.state.popoverColumns
     });
   }
 
@@ -132,6 +210,18 @@ export default class Billing extends Component {
     console.log(additive);
   }
 
+  onPackageChange(e) {
+    this.setState({ package: e.value });
+  }
+
+  onBillingCycleChange(e) {
+    this.setState({ billingCycle: e.value });
+  }
+
+  onBillingCycleChange2(e) {
+    this.setState({ billingCycle2: e.value });
+  }
+
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -145,28 +235,55 @@ export default class Billing extends Component {
       "options.includeTotalCount": true
     };
 
-    this.tenantRest.getTenants({ params }).subscribe(response => {
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
       table.loading = false;
-      for (let i = 0; i < response.data.length; i++) {
-        if (response.data[i].siCepatCOD === true) {
-          this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
-        }
-      }
-      this.setState({ totalTenants: response.total });
+
       this.setState({ table });
     });
   }
 
   componentDidMount() {
+    const date = new Date();
+    this.setState({ date: date, date2: date });
+
     this.loadData();
+    this.loadTenantsSubscriptionsSummary();
+  }
+
+  handleFilterChange(event) {
+    const target = event.target;
+    const value = target.checked;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  loadTenantsSubscriptionsSummary() {
+    this.billingRest.getTenantsSubscriptionsSummary().subscribe(response => {
+      this.setState({ tenantsSubscriptionsSummary: response });
+    });
   }
 
   toggle() {
     this.setState(prevState => ({
-      modal: !prevState.modal
+      modal: false
+    }));
+  }
+
+  toggleRenew() {
+    this.setState(prevState => ({
+      renewModal: false
+    }));
+  }
+
+  toggleUpgrade() {
+    this.setState(prevState => ({
+      upgradeModal: false
     }));
   }
 
@@ -174,9 +291,10 @@ export default class Billing extends Component {
     return [
       {
         Header: "ID Tenant",
-        accessor: "id",
+        accessor: "tenantId",
         fixed: "left",
         width: 70,
+        show: false,
         Cell: props => (
           // <Button color="link" className="text-primary" onClick={() => {
           //   this.toggle();
@@ -191,77 +309,181 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 120
+        width: 150
       },
       {
         Header: "Email",
-        accessor: "email",
+        accessor: "companyInfo.email",
         fixed: "left",
         width: 170,
-        Cell: props => <p>{props.value}</p>
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "No Telp",
-        accessor: "phone",
+        accessor: "companyInfo.phone",
         fixed: "left",
         width: 140,
-        Cell: props => <p>{props.value}</p>
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Package",
-        accessor: "subscriptionPlan.subscriptionPlanName",
+        accessor: "subscriptionPlanName",
+        show: this.state.subscriptionPlanName,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Expired Date Free Trial",
-        accessor: "owner.lastLoginDateUtc",
+        accessor: "freeTrialEndDate",
         width: 150,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        show: this.state.freeTrialEndDate,
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Tanggal Mulai",
-        accessor: "owner.lastLoginDateUtc",
+        accessor: "billingPeriodStartDate",
         width: 150,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        show: this.state.billingPeriodStartDate,
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Tanggal Penagihan",
-        accessor: "owner.joinDateUtc",
+        accessor: "billingPeriodEndDate",
         width: 150,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        show: this.state.billingPeriodEndDate,
+        Cell: props => (
+          <p>
+            {props.value === null
+              ? "-"
+              : moment(props.value).format("DD-MM-YYYY HH:mm")}
+          </p>
+        )
       },
       {
         Header: "Billing Cycle",
-        accessor: "siCepatCOD",
-        Cell: props => <p>{props.value === false ? "Tidak Aktif" : "Aktif"}</p>
+        accessor: "billingCycle",
+        show: this.state.billingCycle,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Total Penagihan",
-        accessor: "siCepatMemberId",
+        accessor: "billingAmount",
         width: 130,
+        show: this.state.billingAmount,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
         width: 200,
+        show: this.state.status,
         Cell: props => (
           <Row>
-            <Button
-              className="float-right default"
-              color="secondary"
-              style={{ marginRight: 10 }}
-            >
-              Upgrade
-            </Button>
-            <Button className="float-right default" color="secondary">
-              Renew
-            </Button>
+            <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                style={{ marginRight: 10 }}
+                // onClick={() => {
+                //   this.loadDetailTenant(props.original.tenantId);
+                //   this.loadRelatedData();
+                //   this.setState({ upgradeModal: true });
+                // }}
+              >
+                Upgrade
+              </Button>
+            </NavLink>
+            <NavLink to={`billings/renew/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                // onClick={() => {
+                //   this.setState({ renewModal: true });
+                // }}
+              >
+                Renew
+              </Button>
+            </NavLink>
           </Row>
         )
       }
     ];
   }
+
+  loadRelatedData() {
+    this.billingRest.getRelatedData({}).subscribe(response => {
+      this.setState({
+        subscriptionPlanData: response.subscriptionPlan,
+        upgradeModal: true
+      });
+    });
+  }
+
+  loadDetailTenant(id) {
+    this.billingRest.getTenantsSubscriptionsById(id, {}).subscribe(response => {
+      console.log(response);
+    });
+  }
+
+  _renderPrice() {
+    const selectedPackage = this.state.package;
+    const billingCycle = this.state.billingCycle;
+    let price;
+    if (selectedPackage.length !== [] && billingCycle !== undefined) {
+      let code = billingCycle.code;
+      if (code == 1) {
+        console.log(selectedPackage.monthlyPrice);
+        price = selectedPackage.monthlyPrice;
+      } else if (code == 3) {
+        console.log(selectedPackage.quaterlyPrice);
+        price = selectedPackage.quaterlyPrice;
+      } else if (code == 6) {
+        console.log(selectedPackage.semesterlyPrice);
+        price = selectedPackage.semesterlyPrice;
+      } else if (code == 12) {
+        console.log(selectedPackage.yearlyPrice);
+        price = selectedPackage.yearlyPrice;
+      } else {
+        price = 0;
+      }
+    } else {
+      price = 0;
+    }
+    return price;
+  }
+
+  _renderFilterColumns() {
+    let data = [];
+    for (let i = 0; i < tableColumnsData.length; i++) {
+      data.push(
+        <div>
+          <Checkbox
+            value={tableColumnsData[i]}
+            checked={
+              this.state.filterColumns.indexOf(tableColumnsData[i]) === -1
+            }
+            onChange={this.onFilterColumnChange}
+            style={filterColumnsStyle}
+          ></Checkbox>
+          {tableColumnsData[i]}
+        </div>
+      );
+    }
+
+    return data;
+  }
+
   oneData() {
     return (
       <div>
@@ -295,6 +517,23 @@ export default class Billing extends Component {
   }
 
   render() {
+    const minimunDate = new Date();
+    minimunDate.setDate(minimunDate.getDate() - 1);
+
+    const minimunDate2 = new Date();
+    minimunDate2.setDate(minimunDate2.getDate() - 1);
+    const paket = [
+      { name: "Starter", code: "starter" },
+      { name: "Growing", code: "growing" },
+      { name: "Professional", code: "professional" }
+    ];
+
+    const billingCycle = [
+      { name: "1 Bulan", code: "1" },
+      { name: "3 Bulan", code: "3" },
+      { name: "6 Bulan", code: "6" },
+      { name: "12 Bulan", code: "12" }
+    ];
     return (
       <Fragment>
         <Row>
@@ -307,44 +546,73 @@ export default class Billing extends Component {
           <Colxx xxs="12">
             <Card className="mb-12 lg-12">
               <CardBody>
-                <Row>
-                  <Colxx xxs="4">
+                <Row
+                  style={{
+                    height: 70
+                  }}
+                >
+                  <div className="col">
                     <IconCard
                       title="Free Trial User (Total)"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalFreeTrial
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="4">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Free Trial User (7 hari lagi)"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary
+                          .totalFreeTrialNearlyExp
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="4">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Jumlah Stater User"
-                      value={this.state.totalTenants}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalStarter
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
+                  </div>
                 </Row>
-                <Row>
-                  <Colxx xxs="6">
+                <Row
+                  style={{
+                    marginTop: 60,
+                    height: 70
+                  }}
+                >
+                  <div className="col">
                     <IconCard
                       title="Jumlah Growing User"
-                      value={0}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalGrowing
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
-                  <Colxx xxs="6">
+                  </div>
+                  <div className="col">
                     <IconCard
                       title="Jumlah Professional User"
-                      value={this.state.totalTenants}
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalProfessional
+                      }
                       className="mb-4"
                     />
-                  </Colxx>
+                  </div>
+                  <div className="col">
+                    <IconCard
+                      title="Jumlah Enterprise User"
+                      value={
+                        this.state.tenantsSubscriptionsSummary.totalEnterprise
+                      }
+                      className="mb-4"
+                    />
+                  </div>
                 </Row>
               </CardBody>
             </Card>
@@ -486,7 +754,9 @@ export default class Billing extends Component {
                                   value="7 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("7 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "7 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -502,7 +772,9 @@ export default class Billing extends Component {
                                   value="3 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("3 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "3 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -518,7 +790,9 @@ export default class Billing extends Component {
                                   value="1 Hari Sebelum"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("1 Hari Sebelum") !== -1
+                                    this.state.filter.indexOf(
+                                      "1 Hari Sebelum"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -534,7 +808,9 @@ export default class Billing extends Component {
                                   value="3 Hari Setelah Jatuh Tempo"
                                   onChange={this.onFilterChange}
                                   checked={
-                                    this.state.filter.indexOf("3 Hari Setelah Jatuh Tempo") !== -1
+                                    this.state.filter.indexOf(
+                                      "3 Hari Setelah Jatuh Tempo"
+                                    ) !== -1
                                   }
                                 ></Checkbox>
                                 <label
@@ -557,6 +833,93 @@ export default class Billing extends Component {
                         </Card>
                       </Collapse>
                     </InputGroup>
+                  </div>
+
+                  <div
+                    style={{
+                      marginLeft: 650
+                    }}
+                  >
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      // onClick={this.toggleCollapse}
+                      id="Popover2"
+                    >
+                      <i className="simple-icon-menu" />
+                    </Button>
+                    <Popover
+                      placement="bottom"
+                      isOpen={this.state.popoverColumns}
+                      target="Popover2"
+                      toggle={this.togglePopoverColumns}
+                    >
+                      <PopoverBody>
+                        <div>
+                          <input
+                            name="subscriptionPlanName"
+                            type="checkbox"
+                            checked={this.state.subscriptionPlanName}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Package
+                        </div>
+                        <div>
+                          <input
+                            name="freeTrialEndDate"
+                            type="checkbox"
+                            checked={this.state.freeTrialEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Expired Date Free Trial
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodStartDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodStartDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Mulai
+                        </div>
+                        <div>
+                          <input
+                            name="billingPeriodEndDate"
+                            type="checkbox"
+                            checked={this.state.billingPeriodEndDate}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Tanggal Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="billingCycle"
+                            type="checkbox"
+                            checked={this.state.billingCycle}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Billing Cycle
+                        </div>
+                        <div>
+                          <input
+                            name="billingAmount"
+                            type="checkbox"
+                            checked={this.state.billingAmount}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Penagihan
+                        </div>
+                        <div>
+                          <input
+                            name="status"
+                            type="checkbox"
+                            checked={this.state.status}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Status
+                        </div>
+                      </PopoverBody>
+                    </Popover>
                   </div>
                 </div>
 
@@ -590,19 +953,237 @@ export default class Billing extends Component {
           </Colxx>
         </Row>
 
-        <Modal
-          isOpen={this.state.modal}
-          toggle={this.toggle}
-          className={this.props.className}
-        >
-          <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-          <ModalBody>{this.oneData()}</ModalBody>
-          <ModalFooter>
-            <Button color="primary" outline onClick={this.toggle}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>
+        {this.state.modal && (
+          <Modal
+            isOpen={this.state.modal}
+            toggle={this.toggle}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
+            <ModalBody>{this.oneData()}</ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggle}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.renewModal && (
+          <Modal
+            isOpen={this.state.renewModal}
+            toggle={this.toggleRenew}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggleRenew}>Renew</ModalHeader>
+            <ModalBody>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Billing Cycle
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.billingCycle2}
+                    options={billingCycle}
+                    onChange={this.onBillingCycleChange2}
+                    placeholder="Select a Billing Cycle"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Tanggal Mulai
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Calendar
+                    value={this.state.date2}
+                    onChange={e => this.setState({ date2: e.value })}
+                    disabledDates={this.state.invalidDates2}
+                    dateFormat="dd/mm/yy"
+                    readonlyInput={true}
+                    minDate={minimunDate2}
+                  />
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleRenew}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.upgradeModal && (
+          <Modal
+            isOpen={this.state.upgradeModal}
+            toggle={this.toggleUpgrade}
+            className={this.props.className}
+          >
+            <ModalHeader toggle={this.toggleUpgrade}>Upgrade</ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Package
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.package}
+                    options={this.state.subscriptionPlanData}
+                    onChange={this.onPackageChange}
+                    placeholder="Select a Package"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Billing Cycle
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Dropdown
+                    value={this.state.billingCycle}
+                    options={billingCycle}
+                    onChange={this.onBillingCycleChange}
+                    placeholder="Select a Billing Cycle"
+                    optionLabel="name"
+                  />
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Price
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  {this.moneyFormat.numberFormat(this._renderPrice())}
+                </Col>
+              </Row>
+              <Row
+                style={{
+                  marginTop: 10
+                }}
+              >
+                <Col
+                  xs="3"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  Tanggal Mulai
+                </Col>
+                <Col
+                  xs="1"
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  :
+                </Col>
+                <Col>
+                  <Calendar
+                    value={this.state.date}
+                    onChange={e => this.setState({ date: e.value })}
+                    disabledDates={this.state.invalidDates}
+                    dateFormat="dd/mm/yy"
+                    readonlyInput={true}
+                    minDate={minimunDate}
+                  />
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" outline onClick={this.toggleUpgrade}>
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
       </Fragment>
     );
   }

@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
-import { Redirect } from "react-router-dom";
 import {
   Row,
   Card,
@@ -18,7 +17,6 @@ import {
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
-import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 
@@ -26,52 +24,53 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 
-import WithdrawRestService from "../../../core/requestWithdrawRestService";
+import DebitRestService from "../../../core/debitRestService";
 import RelatedDataRestService from "../../../core/relatedDataRestService";
 import PictureRestService from "../../../core/pictureRestService";
-// import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-// import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+
 import { InputText } from "primereact/inputtext";
-import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 
-class WithdrawFunds extends Component {
+class DebitCod extends Component {
   constructor(props) {
     super(props);
-    this.requestWithdrawRest = new WithdrawRestService();
-    this.relatedDataRestService = new RelatedDataRestService();
+
+    this.debitRestService = new DebitRestService();
+    this.relatedData = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.moneyFormat = new MoneyFormat();
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.loadTenantBank = this.loadTenantBank.bind(this);
-    this.fileHandler = this.fileHandler.bind(this);
+    this.toggle = this.toggle.bind(this);
+    this.loadRelatedData = this.loadRelatedData.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.toggleModal = this.toggleModal.bind(this);
     this.submitData = this.submitData.bind(this);
+    this.toggleModal = this.toggleModal.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
 
     this.state = {
-      companyName: true,
-      companyEmail: true,
-      fullName: true,
-      username: true,
-      userEmail: true,
-      industry: true,
-      phone: true,
-      website: true,
-      balanceTransaction: true,
-      codBalance: true,
-      balanceAmount: true,
+      deliveryDate: true,
+      sellerName: true,
+      amount2: true,
+      bankName: true,
+      bankDistrict: true,
+      status: true,
       fileAttach: true,
       popoverOpen: false,
       error: false,
+      loadingSubmit: false,
+      spinner: false,
+      loading: false,
+      relatedData: [],
+      selectedBank: [],
+      tenantBank: null,
+      amount: null,
+      image: null,
+      imageUrl: null,
       table: {
         loading: true,
-        loadingSubmit: false,
-        spinner: false,
         data: [],
         pagination: {
           currentPage: 0,
@@ -80,36 +79,16 @@ class WithdrawFunds extends Component {
           pageSize: 10
         }
       },
-      amount: null,
-      tenantBank: null,
-      oneData: "",
-      search: "",
       modal: false,
       modal2: false,
-      modalResponse: false,
-      dropdownOpen: false,
-      splitButtonOpen: false,
-      dropdownOpen1: false,
-      splitButtonOpen1: false,
-      isDraft: false,
-      selectedBank: [],
-      image: null,
-      loading: false,
-      imageUrl: null,
-      redirect: false,
-      errorData: ""
+      modal3: false,
+      errorData: "",
+      oneData: null
     };
-
-    this.loadData = this.loadData.bind(this);
-    this.toggle = this.toggle.bind(this);
-    this.toggleDropDown = this.toggleDropDown.bind(this);
-    this.toggleSplit = this.toggleSplit.bind(this);
-    this.toggleDropDown1 = this.toggleDropDown1.bind(this);
-    this.toggleSplit1 = this.toggleSplit1.bind(this);
   }
 
-  componentDidMount() {
-    this.loadData();
+  handleChange(e) {
+    this.setState({ amount: e.target.value });
   }
 
   handleFilterChange(event) {
@@ -122,6 +101,18 @@ class WithdrawFunds extends Component {
     });
   }
 
+  togglePopOver() {
+    this.setState(prevState => ({
+      popoverOpen: !prevState.popoverOpen
+    }));
+  }
+
+  toggle() {
+    this.setState({
+      modal: !this.state.modal
+    });
+  }
+
   toggleModal() {
     this.setState({
       modal2: !this.state.modal2
@@ -129,20 +120,8 @@ class WithdrawFunds extends Component {
     this.loadData();
   }
 
-  togglePopOver() {
-    this.setState(prevState => ({
-      popoverOpen: !prevState.popoverOpen
-    }));
-  }
-
-  handleInputChange(event) {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-
-    this.setState({
-      [name]: value
-    });
+  componentDidMount() {
+    this.loadData();
   }
 
   loadData() {
@@ -157,193 +136,111 @@ class WithdrawFunds extends Component {
       "options.includeTotalCount": true
     };
 
-    this.requestWithdrawRest.getBallance({ params }).subscribe(response => {
+    this.debitRestService.getDebitCod({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = response.total / table.pagination.pageSize;
       table.loading = false;
-
       this.setState({ table });
     });
   }
 
-  loadTenantBank(id) {
-    this.relatedDataRestService.getTenantBank(id, {}).subscribe(
-      response => {
-        this.setState({ tenantBank: response.data });
-      },
-      err => {
-        console.log(err);
-      }
-    );
+  loadRelatedData(id) {
+    this.relatedData.getTenantBank(id, {}).subscribe(response => {
+      console.log(response);
+      this.setState({ tenantBank: response.data });
+    });
   }
 
-  dataTableColumns() {
+  dataTable() {
     return [
       {
-        Header: "Tenant ID",
-        accessor: "tenantId",
+        Header: "Id",
+        accessor: "id",
         show: false,
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Company",
-        accessor: "companyName",
-        width: 150,
-        show: this.state.companyName,
+        Header: "Permintaan Penarikan",
+        accessor: "deliveryDate",
+        show: this.state.deliveryDate,
+        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
+      },
+      {
+        Header: "Seller",
+        accessor: "sellerName",
+        show: this.state.sellerName,
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Company Email",
-        accessor: "companyEmail",
-        width: 180,
-        show: this.state.companyEmail,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Full Name",
-        accessor: "fullName",
-        width: 150,
-        show: this.state.fullName,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Username",
-        accessor: "username",
-        show: this.state.username,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Email",
-        accessor: "userEmail",
-        width: 150,
-        show: this.state.userEmail,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Industry",
-        accessor: "industry",
-        width: 100,
-        show: this.state.industry,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Phone",
-        accessor: "phone",
-        width: 120,
-        show: this.state.phone,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Website",
-        accessor: "website",
-        width: 140,
-        show: this.state.website,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Ballance Transactions",
-        accessor: "balanceTransaction",
-        width: 150,
-        show: this.state.balanceTransaction,
+        Header: "Jumlah Saldo Ditarik",
+        accessor: "amount",
+        show: this.state.amount2,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
-        Header: "COD Balance",
-        accessor: "codBalance",
-        width: 120,
-        show: this.state.codBalance,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+        Header: "Ditarik ke Rekening",
+        accessor: "bankName",
+        show: this.state.bankName,
+        Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Ballance Amount",
-        accessor: "balanceAmount",
-        width: 150,
-        show: this.state.balanceAmount,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+        Header: "Cabang Bank",
+        accessor: "bankDistrict",
+        show: this.state.bankDistrict,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+        show: this.state.status,
+        Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Upload Bukti",
-        width: 200,
         show: this.state.fileAttach,
         Cell: props => {
-          return (
-            <div>
-              <Button
-                outline
-                color="success"
-                onClick={() => {
-                  this.loadTenantBank(props.original.tenantId);
-                  this.toggle();
-                  this.setState({
-                    oneData: props.original,
-                    amount: props.original.balanceAmount
-                  });
-                }}
-              >
-                <i className="iconsminds-upload mr-2 " />
-                Upload Bukti
-              </Button>
-            </div>
-          );
+          if (props.original.status !== "draft") {
+            return (
+              <div>
+                <Button
+                  outline
+                  color="info"
+                  onClick={() => {
+                    this.setState({ modal3: true });
+                    this.setState({ oneData: props.original });
+                  }}
+                >
+                  <i className="simple-icon-paper-clip mr-2" />
+                  Bukti Transfer
+                </Button>
+              </div>
+            );
+          } else {
+            return (
+              <div>
+                <Button
+                  outline
+                  color="success"
+                  onClick={() => {
+                    this.loadRelatedData(props.original.tenantId);
+                    this.setState({ modal: true });
+                    console.log(props.original);
+                    this.setState({
+                      oneData: props.original,
+                      amount: props.original.amount
+                    });
+                  }}
+                >
+                  <i className="iconsminds-upload mr-2 " />
+                  Upload
+                </Button>
+              </div>
+            );
+          }
         }
       }
     ];
-  }
-
-  handleOnPageChange(pageIndex) {
-    const table = { ...this.state.table };
-    table.loading = true;
-    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
-    table.pagination.currentPage = pageIndex;
-
-    console.log(table);
-
-    this.setState({ table });
-    this.loadData();
-  }
-
-  handleOnPageSizeChange(newPageSize, newPage) {
-    const table = { ...this.state.table };
-    table.loading = true;
-    table.pagination.pageSize = newPageSize;
-    this.setState({ table });
-    this.loadData();
-  }
-
-  handleSortedChange(newSorted, column, additive) {
-    console.log(newSorted);
-    console.log(column);
-    console.log(additive);
-  }
-
-  toggle() {
-    this.setState(prevState => ({
-      modal: !prevState.modal
-    }));
-  }
-
-  toggleDropDown() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen
-    });
-  }
-
-  toggleSplit() {
-    this.setState({
-      splitButtonOpen: !this.state.splitButtonOpen
-    });
-  }
-  toggleDropDown1() {
-    this.setState({
-      dropdownOpen1: !this.state.dropdownOpen1
-    });
-  }
-
-  toggleSplit1() {
-    this.setState({
-      splitButtonOpen1: !this.state.splitButtonOpen1
-    });
   }
 
   fileHandler = event => {
@@ -362,58 +259,15 @@ class WithdrawFunds extends Component {
       });
     });
   };
-  button(cell, row) {
-    if (row.status === "Berhasil") {
-      return (
-        <div>
-          <Button
-            outline
-            color="info"
-            onClick={() => {
-              this.toggle();
-              this.setState({ oneData: row });
-            }}
-          >
-            <i className="simple-icon-paper-clip mr-2" />
-            Bukti Transfer
-          </Button>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <Button
-            outline
-            color="success"
-            onClick={() => {
-              this.toggle();
-              this.setState({ oneData: row });
-            }}
-          >
-            <i className="iconsminds-upload mr-2 " />
-            Upload Bukti
-          </Button>
-        </div>
-      );
-    }
-  }
-
-  handleChange(e) {
-    this.setState({ amount: e.target.value });
-  }
 
   validateError() {
     if (
-      this.state.isDraft === false ||
+      this.state.image === null ||
       this.state.amount === null ||
       this.state.amount === undefined ||
       this.state.selectedBank === []
     ) {
-      if (this.state.image === null) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } else {
       return false;
     }
@@ -423,18 +277,17 @@ class WithdrawFunds extends Component {
     if (this.validateError()) {
       this.setState({ error: true });
     } else {
-      this.setState({ modal: false, loadingSubmit: true, errorData: "" });
-
+      this.setState({ modal: false, loadingSubmit: true });
       let lines = {
-        fileId: this.state.isDraft === true ? undefined : this.state.image.id,
+        id: this.state.oneData.id,
+        fileId: this.state.image.id,
         amount: parseInt(this.state.amount),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
-        tenantBankId: this.state.selectedBank.id,
-        isDraft: this.state.isDraft
+        tenantBankId: this.state.selectedBank.id
       };
-      console.log(lines);
-      this.requestWithdrawRest.postBallance(lines).subscribe(
+
+      this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
         response => {
           this.setState({
             modal2: true,
@@ -455,17 +308,11 @@ class WithdrawFunds extends Component {
   }
 
   render() {
-    if (this.state.redirect === true) {
-      return <Redirect to="/app/request-withdraw-funds/" />;
-    }
     return (
-      <Fragment>
+      <>
         <Row>
           <Colxx xxs={12}>
-            <Breadcrumb
-              heading="menu.request-withdraw-funds"
-              match={this.props.match}
-            />
+            <Breadcrumb heading="Debit COD" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
@@ -494,6 +341,7 @@ class WithdrawFunds extends Component {
                       </Button>
                     </InputGroup>
                   </div>
+
                   <div className="col-md-7">
                     <Button
                       className="float-right default"
@@ -514,102 +362,57 @@ class WithdrawFunds extends Component {
                       <PopoverBody>
                         <div>
                           <input
-                            name="companyName"
+                            name="deliveryDate"
                             type="checkbox"
-                            checked={this.state.companyName}
+                            checked={this.state.deliveryDate}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Company
+                          Permintaan Penarikan
                         </div>
                         <div>
                           <input
-                            name="companyEmail"
+                            name="sellerName"
                             type="checkbox"
-                            checked={this.state.companyEmail}
+                            checked={this.state.sellerName}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Company Email
+                          Seller
                         </div>
                         <div>
                           <input
-                            name="fullName"
+                            name="amount2"
                             type="checkbox"
-                            checked={this.state.fullName}
+                            checked={this.state.amount2}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Full Name
+                          Jumlah Saldo Ditarik
                         </div>
                         <div>
                           <input
-                            name="username"
+                            name="bankName"
                             type="checkbox"
-                            checked={this.state.username}
+                            checked={this.state.bankName}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Username
+                          Ditarik ke Rekening
                         </div>
                         <div>
                           <input
-                            name="userEmail"
+                            name="bankDistrict"
                             type="checkbox"
-                            checked={this.state.userEmail}
+                            checked={this.state.bankDistrict}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Email
+                          Cabang Bank
                         </div>
                         <div>
                           <input
-                            name="industry"
+                            name="status"
                             type="checkbox"
-                            checked={this.state.industry}
+                            checked={this.state.status}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Industry
-                        </div>
-                        <div>
-                          <input
-                            name="phone"
-                            type="checkbox"
-                            checked={this.state.phone}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          Phone
-                        </div>
-                        <div>
-                          <input
-                            name="website"
-                            type="checkbox"
-                            checked={this.state.website}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          Website
-                        </div>
-                        <div>
-                          <input
-                            name="balanceTransaction"
-                            type="checkbox"
-                            checked={this.state.balanceTransaction}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          Ballance Transactions
-                        </div>
-                        <div>
-                          <input
-                            name="codBalance"
-                            type="checkbox"
-                            checked={this.state.codBalance}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          COD Balance
-                        </div>
-                        <div>
-                          <input
-                            name="balanceAmount"
-                            type="checkbox"
-                            checked={this.state.balanceAmount}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          Ballance Amount
+                          Status
                         </div>
                         <div>
                           <input
@@ -624,13 +427,14 @@ class WithdrawFunds extends Component {
                     </Popover>
                   </div>
                 </div>
+
                 <ReactTable
                   minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
                   pages={this.state.table.pagination.totalPages}
-                  columns={this.dataTableColumns()}
+                  columns={this.dataTable()}
                   defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
@@ -653,7 +457,6 @@ class WithdrawFunds extends Component {
               </CardBody>
             </Card>
           </Colxx>
-
           {this.state.loadingSubmit && <Spinner />}
         </Row>
 
@@ -677,7 +480,7 @@ class WithdrawFunds extends Component {
                   <tr>
                     <td>Company Name</td>
                     <td>:</td>
-                    <td>{this.state.oneData.companyName}</td>
+                    <td>{this.state.oneData.sellerName}</td>
                   </tr>
                   <tr>
                     <td>
@@ -719,9 +522,11 @@ class WithdrawFunds extends Component {
                     </td>
                   </tr>
                   <tr>
-                    <td>Balance Amount</td>
+                    <td>
+                      <IntlMessages id="modal.total" />
+                    </td>
                     <td>:</td>
-                    <td>{this.state.oneData.balanceAmount}</td>
+                    <td>{this.state.oneData.amount}</td>
                   </tr>
                   <tr>
                     <td>Total Bayar</td>
@@ -734,53 +539,19 @@ class WithdrawFunds extends Component {
                       />
                     </td>
                   </tr>
-                  <tr>
-                    <td colSpan="3">
-                      <InputSwitch
-                        checked={this.state.isDraft}
-                        onChange={e => this.setState({ isDraft: e.value })}
-                      />
-                      <div
-                        style={{
-                          marginLeft: 50,
-                          marginTop: -25
-                        }}
-                      >
-                        Simpan Sebagai Draft
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan="3">
-                      {!this.state.isDraft && (
-                        <input
-                          type="file"
-                          onChange={this.fileHandler.bind(this)}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                  {this.state.spinner && (
-                    <Loader
-                      type="Oval"
-                      color="#51BEEA"
-                      height={80}
-                      width={80}
-                    />
-                  )}
-                  {this.state.loading && (
-                    <tr>
-                      <td colSpan="3">
-                        <img
-                          src={this.state.imageUrl}
-                          height="150"
-                          width="150"
-                        />
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </Table>
+              <input type="file" onChange={this.fileHandler.bind(this)} />
+              {this.state.spinner && (
+                <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+              )}
+              {this.state.loading && (
+                <tr>
+                  <td colSpan="3">
+                    <img src={this.state.imageUrl} height="150" width="150" />
+                  </td>
+                </tr>
+              )}
             </ModalBody>
             <ModalFooter>
               <Button
@@ -809,9 +580,60 @@ class WithdrawFunds extends Component {
             </ModalFooter>
           </Modal>
         )}
-      </Fragment>
+
+        {this.state.modal3 && (
+          <Modal isOpen={this.state.modal3}>
+            <ModalHeader>Status</ModalHeader>
+            <ModalBody>
+              <Table>
+                <tbody>
+                  <tr>
+                    <td>Company Name</td>
+                    <td>:</td>
+                    <td>{this.state.oneData.sellerName}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <IntlMessages id="modal.bank" />
+                    </td>
+                    <td>:</td>
+                    <td>{this.state.oneData.bankName}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Bayar</td>
+                    <td>:</td>
+                    <td>
+                      {this.moneyFormat.numberFormat(this.state.oneData.amount)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3">
+                      <a target="_blank" href={this.state.oneData.file.fileUrl}>
+                        <img
+                          src={this.state.oneData.file.fileUrl}
+                          height="150"
+                          width="150"
+                        />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="primary"
+                outline
+                onClick={() => this.setState({ modal3: false })}
+              >
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+      </>
     );
   }
 }
 
-export default WithdrawFunds;
+export default DebitCod;
