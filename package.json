@@ -57,8 +57,10 @@
     "yup": "^0.27.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "dotenv -e .env react-scripts start",
     "build": "react-scripts build",
+    "build-dev": "dotenv -e .env.development react-scripts build",
+    "build-prod": "dotenv -e .env.production react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -73,6 +75,7 @@
   ],
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.10.2",
+    "dotenv-cli": "^2.0.1",
     "node-sass": "^4.12.0"
   }
 }
