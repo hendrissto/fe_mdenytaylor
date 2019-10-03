@@ -5,6 +5,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
+import { Paginator } from 'primereact/paginator';
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -95,16 +96,16 @@ export default class Tenant extends Component {
     });
   }
 
-  handleOnPageChange(pageIndex) {
+  handleOnPageChange = (paginationEvent) => {
     const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
-    table.pagination.currentPage = pageIndex;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
 
-    console.log(table);
-
-    this.setState({ table });
-    this.loadData();
+    this.setState({ table }, () => {
+      this.loadData();
+    });
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
@@ -137,7 +138,7 @@ export default class Tenant extends Component {
     this.tenantRest.getTenants({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
-      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       for (let i = 0; i < response.data.length; i++) {
         if (response.data[i].siCepatCOD === true) {
@@ -469,18 +470,13 @@ export default class Tenant extends Component {
                 </div>
 
                 <ReactTableFixedColumn
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
+                  showPagination={false}
+                  showPaginationTop={false}
+                  showPaginationBottom={false}
                   data={this.state.table.data}
-                  pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
-                  showPagination={true}
-                  showPaginationTop={false}
-                  showPaginationBottom={true}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
@@ -488,11 +484,11 @@ export default class Tenant extends Component {
                     newState.pagination.currentPage = state.page;
                     newState.pagination.pageSize = state.pageSize;
                     newState.pagination.skipSize = state.pageSize * state.page;
-
                     this.setState({ newState });
                     this.loadData();
                   }}
                 />
+                <Paginator first={this.state.table.pagination.skipSize} rows={this.state.table.pagination.pageSize} totalRecords={Math.ceil(this.state.table.pagination.totalPages) * this.state.table.pagination.pageSize}onPageChange={this.handleOnPageChange} />
               </CardBody>
             </Card>
           </Colxx>

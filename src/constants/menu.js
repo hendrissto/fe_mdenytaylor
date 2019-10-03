@@ -1,39 +1,33 @@
 const data = [
-  {
-    id: "dasbor",
-    icon: "simple-icon-home",
-    label: "menu.dashboards",
-    to: "/app/dashboard",
-  }, 
-  {
-    id: "receipt-of-funds",
-    icon: "iconsminds-folder",
-    label: "menu.receipt-of-funds",
-    to: "/app/receipt-of-funds",
-  },
-  {
-    id: "cod-receipt-number",
-    icon: "iconsminds-newspaper",
-    label: "menu.cod-receipt-number",
-    to: "/app/cod-receipt-number",
-  },
-  {
-    id: "request-withdraw-funds",
-    icon: "iconsminds-wallet",
-    label: "menu.request-withdraw-funds",
-    to: "/app/request-withdraw-funds/",
-  },
-  {
-    id: "debit-cod",
-    icon: "iconsminds-wallet",
-    label: "Debit COD",
-    to: "/app/debit-cod/",
-  },
   // {
-  //   id: "expenditurepage",
-  //   icon: "iconsminds-receipt-4",
-  //   label:"menu.expenditure",
-  //   to: "/app/expenditure",
+  //   id: "dasbor",
+  //   icon: "simple-icon-home",
+  //   label: "menu.dashboards",
+  //   to: "/app/dashboard",
+  // }, 
+  // {
+  //   id: "receipt-of-funds",
+  //   icon: "iconsminds-folder",
+  //   label: "menu.receipt-of-funds",
+  //   to: "/app/receipt-of-funds",
+  // },
+  // {
+  //   id: "cod-receipt-number",
+  //   icon: "iconsminds-newspaper",
+  //   label: "menu.cod-receipt-number",
+  //   to: "/app/cod-receipt-number",
+  // },
+  // {
+  //   id: "request-withdraw-funds",
+  //   icon: "iconsminds-wallet",
+  //   label: "menu.request-withdraw-funds",
+  //   to: "/app/request-withdraw-funds/",
+  // },
+  // {
+  //   id: "debit-cod",
+  //   icon: "iconsminds-wallet",
+  //   label: "Debit COD",
+  //   to: "/app/debit-cod/",
   // },
   {
     id: "tenants",
