@@ -793,6 +793,7 @@ class ReceiptOfFunds extends Component {
 
     const params = {
       keyword: this.state.search || null,
+      subscriptionPlan : this.state.subscriptions || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true

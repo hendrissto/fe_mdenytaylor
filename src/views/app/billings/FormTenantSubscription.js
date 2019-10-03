@@ -22,6 +22,7 @@ import moment from "moment";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 
@@ -60,7 +61,8 @@ export default class FormTenantSubscription extends Component {
       today: moment(today).format("YYYY-MM-DD"),
       packageActive: [],
       modal: false,
-      redirect: false
+      redirect: false,
+      date: today,
     };
   }
 
@@ -154,6 +156,9 @@ export default class FormTenantSubscription extends Component {
           name="package"
           optionLabel="name"
           disabled
+          style={{
+            width: 204
+          }}
         />
       );
     } else {
@@ -165,6 +170,9 @@ export default class FormTenantSubscription extends Component {
           placeholder="Select a Package"
           name="package"
           optionLabel="name"
+          style={{
+            width: 204
+          }}
         />
       );
     }
@@ -199,7 +207,9 @@ export default class FormTenantSubscription extends Component {
         props.values.prices - props.values.discountAmount * props.values.qty;
     } else if (props.values.discountType === "%") {
       const discAmount =
-        (props.values.prices * props.values.discountAmount * props.values.qty) /
+        (props.values.prices *
+          props.values.discountPercent *
+          props.values.qty) /
         100;
       props.values.prices = props.values.prices - discAmount;
     } else {
@@ -331,6 +341,8 @@ export default class FormTenantSubscription extends Component {
                     <DropdownItem
                       onClick={() => {
                         this.setState({ discount: "Rp." });
+                        props.values.discountAmount = 0;
+                        props.values.discountPercent = 0;
                         props.values.discountType = "Rp.";
                       }}
                     >
@@ -339,6 +351,8 @@ export default class FormTenantSubscription extends Component {
                     <DropdownItem
                       onClick={() => {
                         this.setState({ discount: "%" });
+                        props.values.discountAmount = 0;
+                        props.values.discountPercent = 0;
                         props.values.discountType = "%";
                       }}
                     >
@@ -347,9 +361,17 @@ export default class FormTenantSubscription extends Component {
                   </DropdownMenu>
                 </ButtonDropdown>
                 <InputText
-                  name="discountAmount"
+                  name={
+                    props.values.discountType === "Rp."
+                      ? "discountAmount"
+                      : "discountPercent"
+                  }
                   onChange={props.handleChange}
-                  value={props.values.discountAmount}
+                  value={
+                    props.values.discountType === "Rp."
+                      ? props.values.discountAmount
+                      : props.values.discountPercent
+                  }
                 />
               </Row>
             </td>
@@ -368,21 +390,21 @@ export default class FormTenantSubscription extends Component {
         props.values.prices - props.values.discountTotalAmount;
     } else if (props.values.discountTypeAll === "%") {
       const discAmount =
-        (props.values.total * props.values.discountTotalAmount) / 100;
+        (props.values.total * props.values.discountTotalPercent) / 100;
       props.values.total = props.values.prices - discAmount;
     } else {
       props.values.total = props.values.prices;
-    }
-
-    if (props.values.adjustmentAmount !== 0) {
-      props.values.total =
-        props.values.total + parseInt(props.values.adjustmentAmount);
     }
 
     if (props.values.taxRate > 0) {
       const taxRate =
         (props.values.total * parseInt(props.values.taxRate)) / 100;
       props.values.total = props.values.total + taxRate;
+    }
+
+    if (props.values.adjustmentAmount !== 0) {
+      props.values.total =
+        props.values.total + parseInt(props.values.adjustmentAmount);
     }
     return (
       <div
@@ -472,6 +494,8 @@ export default class FormTenantSubscription extends Component {
                     <DropdownItem
                       onClick={() => {
                         this.setState({ discountAll: "Rp." });
+                        props.values.discountTotalAmount = 0;
+                        props.values.discountTotalPercent = 0;
                         props.values.discountTypeAll = "Rp.";
                       }}
                     >
@@ -480,6 +504,8 @@ export default class FormTenantSubscription extends Component {
                     <DropdownItem
                       onClick={() => {
                         this.setState({ discountAll: "%" });
+                        props.values.discountTotalAmount = 0;
+                        props.values.discountTotalPercent = 0;
                         props.values.discountTypeAll = "%";
                       }}
                     >
@@ -488,9 +514,17 @@ export default class FormTenantSubscription extends Component {
                   </DropdownMenu>
                 </ButtonDropdown>
                 <InputText
-                  name="discountTotalAmount"
+                  name={
+                    props.values.discountTypeAll === "Rp."
+                      ? "discountTotalAmount"
+                      : "discountTotalPercent"
+                  }
                   onChange={props.handleChange}
-                  value={props.values.discountTotalAmount}
+                  value={
+                    props.values.discountTypeAll === "Rp."
+                      ? props.values.discountTotalAmount
+                      : props.values.discountTotalPercent
+                  }
                   style={{
                     textAlign: "right"
                   }}
@@ -677,15 +711,22 @@ export default class FormTenantSubscription extends Component {
       } else {
         props.packagePrice = 0;
       }
-
+      
       let data = {
         subscriptionPlanId: props.package.id,
-        invoiceNumber: null,
+        subscriptionStartDate: moment(this.state.date).format("YYYY-MM-DD"),
+        invoiceNumber: props.invoiceNumber === "" ? null : props.invoiceNumber,
         invoiceDate: this.state.today,
         subtotal: props.prices,
         lastPaymentDate: this.state.today,
-        discountPercent: null,
-        discountAmount: parseInt(props.discountTotalAmount),
+        discountPercent:
+          parseInt(props.discountTotalPercent) === 0
+            ? null
+            : parseInt(props.discountTotalPercent),
+        discountAmount:
+          parseInt(props.discountTotalAmount) === 0
+            ? 0
+            : parseInt(props.discountTotalAmount),
         taxRate: parseInt(props.taxRate),
         amountPaid: props.total,
         adjustmentAmount: parseInt(props.adjustmentAmount),
@@ -696,12 +737,18 @@ export default class FormTenantSubscription extends Component {
             description: props.package.description,
             qty: parseInt(props.qty),
             unitPrice: props.packagePrice,
-            discountPercent: null,
-            discountAmount: parseInt(props.discountAmount)
+            discountPercent:
+              parseInt(props.discountPercent) === 0
+                ? null
+                : parseInt(props.discountPercent),
+            discountAmount:
+              parseInt(props.discountAmount) === 0
+                ? 0
+                : parseInt(props.discountAmount)
           }
         ]
       };
-
+      
       if (this.props.match.params.type === "upgrade") {
         this.billingRest
           .upgradeTenantsSubscriptions(
@@ -763,7 +810,9 @@ export default class FormTenantSubscription extends Component {
                         discountType: "Rp.",
                         discountTypeAll: "Rp.",
                         discountAmount: 0,
+                        discountPercent: 0,
                         discountTotalAmount: 0,
+                        discountTotalPercent: 0,
                         packagePrice: 0,
                         prices: 0,
                         taxRate: 0,
@@ -816,6 +865,9 @@ export default class FormTenantSubscription extends Component {
                                 name="invoiceNumber"
                                 value={props.values.invoiceNumber}
                                 onChange={props.handleChange}
+                                style={{
+                                  width: 204
+                                }}
                               />
                             </Col>
                           </Row>
@@ -842,6 +894,40 @@ export default class FormTenantSubscription extends Component {
                               :
                             </Col>
                             <Col>{this._renderPackage(props)}</Col>
+                          </Row>
+                          <Row
+                            style={{
+                              marginTop: 10,
+                              width: "50%"
+                            }}
+                          >
+                            <Col
+                              xs="3"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              Tanggal Mulai
+                            </Col>
+                            <Col
+                              xs="1"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              :
+                            </Col>
+                            <Col style={{
+                              width: 20
+                            }}>
+                              <Calendar
+                                value={this.state.date}
+                                onChange={e => {
+                                  this.setState({ date: e.value })
+                                }}
+                                showIcon={true}
+                              />
+                            </Col>
                           </Row>
                           <Row>
                             <Col>{this._renderTable(props)}</Col>
