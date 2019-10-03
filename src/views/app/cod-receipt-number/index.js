@@ -197,18 +197,6 @@ export default class CODReceiptNumber extends Component {
         Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
       },
       {
-        Header: "Total",
-        accessor: "amount",
-        show: this.state.amount,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
-      {
-        Header: "Fee COD",
-        accessor: "codValue",
-        show: this.state.codValue,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
-      {
         Header: "Good Value",
         accessor: "goodValue",
         show: this.state.goodValue,

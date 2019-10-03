@@ -64,6 +64,7 @@ export default class Billing extends Component {
     super(props);
     this.billingRest = new BillingRestService();
     this.moneyFormat = new MoneyFormat();
+    this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
     this.loadDetailTenant = this.loadDetailTenant.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -72,9 +73,7 @@ export default class Billing extends Component {
     this.toggle = this.toggle.bind(this);
     this.toggleRenew = this.toggleRenew.bind(this);
     this.toggleUpgrade = this.toggleUpgrade.bind(this);
-    this.onFilterChange = this.onFilterChange.bind(this);
     this.togglePopoverColumns = this.togglePopoverColumns.bind(this);
-    this.onFilterColumnChange = this.onFilterColumnChange.bind(this);
     this.onPackageChange = this.onPackageChange.bind(this);
     this.onBillingCycleChange = this.onBillingCycleChange.bind(this);
     this.onBillingCycleChange2 = this.onBillingCycleChange2.bind(this);
@@ -89,6 +88,8 @@ export default class Billing extends Component {
     today2.setDate(today2.getDate() - 1);
 
     this.state = {
+      dayBefore: 0,
+      dayAfter: 0,
       subscriptionPlanName: true,
       freeTrialEndDate: true,
       billingPeriodStartDate: true,
@@ -119,41 +120,16 @@ export default class Billing extends Component {
       popoverOpen: false,
       popoverColumns: false,
       collapse: false,
-      modal: false,
-      renewModal: false,
-      upgradeModal: false,
-      oneData: "",
       search: "",
       date: null,
       date2: null,
       invalidDates: [today],
       invalidDates2: [today],
-      redirect: null
+      redirect: null,
+      subscriptionPlan: null,
+      freeTrial: false,
+      freeTrialWeekBeforeExp: false
     };
-  }
-
-  onFilterChange(e) {
-    let selectedFilter = [...this.state.filter];
-
-    if (e.checked) {
-      selectedFilter.push(e.value);
-    } else {
-      selectedFilter.splice(selectedFilter.indexOf(e.value), 1);
-    }
-
-    this.setState({ filter: selectedFilter });
-  }
-
-  onFilterColumnChange(e) {
-    let selectedFilter = [...this.state.filterColumns];
-
-    if (e.checked) {
-      selectedFilter.splice(selectedFilter.indexOf(e.value), 1);
-    } else {
-      selectedFilter.push(e.value);
-    }
-
-    this.setState({ filterColumns: selectedFilter });
   }
 
   toggleCollapse() {
@@ -222,14 +198,17 @@ export default class Billing extends Component {
     this.setState({ billingCycle2: e.value });
   }
 
-  loadData() {
+  loadData(planName) {
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
-    let total = this.state.totalCODTenants;
 
     const params = {
       keyword: this.state.search || null,
+      subscriptionPlan: planName,
+      freeTrial: this.state.freeTrial || null,
+      freeTrialWeekBeforeExp: this.state.freeTrialWeekBeforeExp || null,
+      daysBeforeExpDate: this.state.dayBefore === 0 ? null : this.state.dayBefore,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -238,18 +217,19 @@ export default class Billing extends Component {
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
-      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.pagination.totalPages =  response.total / table.pagination.pageSize;
       table.loading = false;
 
       this.setState({ table });
     });
+    this.setState({ freeTrial: false, freeTrialWeekBeforeExp: false, dayAfter: 0, dayBefore: 0 });
   }
 
   componentDidMount() {
     const date = new Date();
     this.setState({ date: date, date2: date });
 
-    this.loadData();
+    this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
   }
 
@@ -261,6 +241,24 @@ export default class Billing extends Component {
     this.setState({
       [name]: value
     });
+  }
+
+  handleFilterDayChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    const day = value.substr(1);
+    if(parseInt(value) < 0){
+      this.setState({
+        dayAfter: 0,
+        dayBefore: parseInt(day)
+      });
+    }else{
+      this.setState({
+        dayBefore: 0,
+        dayAfter: parseInt(value)
+      });
+    }
   }
 
   loadTenantsSubscriptionsSummary() {
@@ -517,6 +515,9 @@ export default class Billing extends Component {
   }
 
   render() {
+    if (this.state.freeTrial || this.state.freeTrialWeekBeforeExp) {
+      this.loadData();
+    }
     const minimunDate = new Date();
     minimunDate.setDate(minimunDate.getDate() - 1);
 
@@ -551,7 +552,12 @@ export default class Billing extends Component {
                     height: 70
                   }}
                 >
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.setState({ freeTrial: true });
+                    }}
+                  >
                     <IconCard
                       title="Free Trial User (Total)"
                       value={
@@ -560,7 +566,12 @@ export default class Billing extends Component {
                       className="mb-4"
                     />
                   </div>
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.setState({ freeTrialWeekBeforeExp: true });
+                    }}
+                  >
                     <IconCard
                       title="Free Trial User (7 hari lagi)"
                       value={
@@ -570,9 +581,14 @@ export default class Billing extends Component {
                       className="mb-4"
                     />
                   </div>
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.loadData("starter");
+                    }}
+                  >
                     <IconCard
-                      title="Jumlah Stater User"
+                      title="Jumlah Starter User"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalStarter
                       }
@@ -586,7 +602,12 @@ export default class Billing extends Component {
                     height: 70
                   }}
                 >
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.loadData("growing");
+                    }}
+                  >
                     <IconCard
                       title="Jumlah Growing User"
                       value={
@@ -595,7 +616,12 @@ export default class Billing extends Component {
                       className="mb-4"
                     />
                   </div>
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.loadData("professional");
+                    }}
+                  >
                     <IconCard
                       title="Jumlah Professional User"
                       value={
@@ -604,7 +630,12 @@ export default class Billing extends Component {
                       className="mb-4"
                     />
                   </div>
-                  <div className="col">
+                  <div
+                    className="col"
+                    onClick={() => {
+                      this.loadData("enterprise");
+                    }}
+                  >
                     <IconCard
                       title="Jumlah Enterprise User"
                       value={
@@ -655,177 +686,55 @@ export default class Billing extends Component {
                       <Collapse isOpen={this.state.collapse}>
                         <Card style={{ width: 1000 }}>
                           <CardBody>
-                            <Row>
-                              <div style={{ marginLeft: 30 }}>
-                                <Button
-                                  className="float-right default"
-                                  color="primary"
-                                  id="Popover1"
-                                >
-                                  Paket
-                                </Button>
-                                <Popover
-                                  placement="bottom"
-                                  isOpen={this.state.popoverOpen}
-                                  target="Popover1"
-                                  toggle={this.togglePopover}
-                                >
-                                  <PopoverBody style={{ width: 500 }}>
-                                    <div style={{ marginLeft: 20 }}>
-                                      <div>
-                                        <Checkbox
-                                          inputId="cb1"
-                                          onChange={this.onFilterChange}
-                                          value="Starter"
-                                          checked={
-                                            this.state.filter.indexOf(
-                                              "Starter"
-                                            ) !== -1
-                                          }
-                                        ></Checkbox>
-                                        <label
-                                          htmlFor="cb1"
-                                          className="p-checkbox-label"
-                                        >
-                                          Starter
-                                        </label>
-                                      </div>
-                                      <div>
-                                        <Checkbox
-                                          inputId="cb2"
-                                          onChange={this.onFilterChange}
-                                          value="Growing"
-                                          checked={
-                                            this.state.filter.indexOf(
-                                              "Growing"
-                                            ) !== -1
-                                          }
-                                        ></Checkbox>
-                                        <label
-                                          htmlFor="cb2"
-                                          className="p-checkbox-label"
-                                        >
-                                          Growing
-                                        </label>
-                                      </div>
-                                      <div>
-                                        <Checkbox
-                                          inputId="cb3"
-                                          onChange={this.onFilterChange}
-                                          value="Professional"
-                                          checked={
-                                            this.state.filter.indexOf(
-                                              "Professional"
-                                            ) !== -1
-                                          }
-                                        ></Checkbox>
-                                        <label
-                                          htmlFor="cb3"
-                                          className="p-checkbox-label"
-                                        >
-                                          Professional
-                                        </label>
-                                      </div>
-                                      <div>
-                                        <Checkbox
-                                          inputId="cb4"
-                                          onChange={this.onFilterChange}
-                                          value="Enterprise"
-                                          checked={
-                                            this.state.filter.indexOf(
-                                              "Enterprise"
-                                            ) !== -1
-                                          }
-                                        ></Checkbox>
-                                        <label
-                                          htmlFor="cb4"
-                                          className="p-checkbox-label"
-                                        >
-                                          Enterprise
-                                        </label>
-                                      </div>
-                                    </div>
-                                  </PopoverBody>
-                                </Popover>
-                              </div>
-                              <div style={filterStyle}>
-                                <Checkbox
-                                  inputId="cb5"
-                                  value="7 Hari Sebelum"
-                                  onChange={this.onFilterChange}
-                                  checked={
-                                    this.state.filter.indexOf(
-                                      "7 Hari Sebelum"
-                                    ) !== -1
-                                  }
-                                ></Checkbox>
-                                <label
-                                  htmlFor="cb5"
-                                  className="p-checkbox-label"
-                                >
+                            <div
+                              onChange={this.handleFilterDayChange.bind(this)}
+                            >
+                              <Row>
+                                <div style={filterStyle}>
+                                  <input
+                                    name="dayBefore"
+                                    value="-7"
+                                    type="radio"
+                                  />
                                   7 Hari Sebelum
-                                </label>
-                              </div>
-                              <div style={filterStyle}>
-                                <Checkbox
-                                  inputId="cb6"
-                                  value="3 Hari Sebelum"
-                                  onChange={this.onFilterChange}
-                                  checked={
-                                    this.state.filter.indexOf(
-                                      "3 Hari Sebelum"
-                                    ) !== -1
-                                  }
-                                ></Checkbox>
-                                <label
-                                  htmlFor="cb6"
-                                  className="p-checkbox-label"
-                                >
+                                </div>
+                                <div style={filterStyle}>
+                                  <input
+                                    name="dayBefore"
+                                    value="-3"
+                                    type="radio"
+                                  />
                                   3 Hari Sebelum
-                                </label>
-                              </div>
-                              <div style={filterStyle}>
-                                <Checkbox
-                                  inputId="cb7"
-                                  value="1 Hari Sebelum"
-                                  onChange={this.onFilterChange}
-                                  checked={
-                                    this.state.filter.indexOf(
-                                      "1 Hari Sebelum"
-                                    ) !== -1
-                                  }
-                                ></Checkbox>
-                                <label
-                                  htmlFor="cb7"
-                                  className="p-checkbox-label"
-                                >
+                                </div>
+                                <div style={filterStyle}>
+                                  <input
+                                    name="dayBefore"
+                                    value="-1"
+                                    type="radio"
+                                  />
                                   1 Hari Sebelum
-                                </label>
-                              </div>
-                              <div style={filterStyle}>
-                                <Checkbox
-                                  inputId="cb8"
-                                  value="3 Hari Setelah Jatuh Tempo"
-                                  onChange={this.onFilterChange}
-                                  checked={
-                                    this.state.filter.indexOf(
-                                      "3 Hari Setelah Jatuh Tempo"
-                                    ) !== -1
-                                  }
-                                ></Checkbox>
-                                <label
-                                  htmlFor="cb8"
-                                  className="p-checkbox-label"
-                                >
+                                </div>
+                                {/*
+                                <div style={filterStyle}>
+                                  <input
+                                    name="dayBefore"
+                                    value="+3"
+                                    type="radio"
+                                  />
                                   3 Hari Setelah Jatuh Tempo
-                                </label>
-                              </div>
-                            </Row>
+                                </div>
+                                 */}
+                              </Row>
+                            </div>
                           </CardBody>
                           <CardFooter>
                             <Button
                               className="float-right default"
                               color="primary"
+                              onClick={() => {
+                                this.loadData();
+                                this.setState({collapse: false});
+                              }}
                             >
                               Apply
                             </Button>
@@ -837,7 +746,7 @@ export default class Billing extends Component {
 
                   <div
                     style={{
-                      marginLeft: 650
+                      marginLeft: 550
                     }}
                   >
                     <Button
@@ -920,10 +829,24 @@ export default class Billing extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      onClick={() => {
+                        this.loadData(null);
+                        this.setState({collapse: false});
+                      }}
+                      style={{
+                        marginRight: 10
+                      }}
+                    >
+                      <i className="simple-icon-refresh" />
+                    </Button>
                   </div>
                 </div>
 
                 <ReactTableFixedColumn
+                  minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
@@ -943,7 +866,6 @@ export default class Billing extends Component {
                     newState.pagination.currentPage = state.page;
                     newState.pagination.pageSize = state.pageSize;
                     newState.pagination.skipSize = state.pageSize * state.page;
-
                     this.setState({ newState });
                     this.loadData();
                   }}
@@ -952,238 +874,6 @@ export default class Billing extends Component {
             </Card>
           </Colxx>
         </Row>
-
-        {this.state.modal && (
-          <Modal
-            isOpen={this.state.modal}
-            toggle={this.toggle}
-            className={this.props.className}
-          >
-            <ModalHeader toggle={this.toggle}>Detail Resi COD</ModalHeader>
-            <ModalBody>{this.oneData()}</ModalBody>
-            <ModalFooter>
-              <Button color="primary" outline onClick={this.toggle}>
-                Close
-              </Button>
-            </ModalFooter>
-          </Modal>
-        )}
-
-        {this.state.renewModal && (
-          <Modal
-            isOpen={this.state.renewModal}
-            toggle={this.toggleRenew}
-            className={this.props.className}
-          >
-            <ModalHeader toggle={this.toggleRenew}>Renew</ModalHeader>
-            <ModalBody>
-              <Row
-                style={{
-                  marginTop: 10
-                }}
-              >
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Billing Cycle
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Dropdown
-                    value={this.state.billingCycle2}
-                    options={billingCycle}
-                    onChange={this.onBillingCycleChange2}
-                    placeholder="Select a Billing Cycle"
-                    optionLabel="name"
-                  />
-                </Col>
-              </Row>
-              <Row
-                style={{
-                  marginTop: 10
-                }}
-              >
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Tanggal Mulai
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Calendar
-                    value={this.state.date2}
-                    onChange={e => this.setState({ date2: e.value })}
-                    disabledDates={this.state.invalidDates2}
-                    dateFormat="dd/mm/yy"
-                    readonlyInput={true}
-                    minDate={minimunDate2}
-                  />
-                </Col>
-              </Row>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" outline onClick={this.toggleRenew}>
-                Close
-              </Button>
-            </ModalFooter>
-          </Modal>
-        )}
-
-        {this.state.upgradeModal && (
-          <Modal
-            isOpen={this.state.upgradeModal}
-            toggle={this.toggleUpgrade}
-            className={this.props.className}
-          >
-            <ModalHeader toggle={this.toggleUpgrade}>Upgrade</ModalHeader>
-            <ModalBody>
-              <Row>
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Package
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Dropdown
-                    value={this.state.package}
-                    options={this.state.subscriptionPlanData}
-                    onChange={this.onPackageChange}
-                    placeholder="Select a Package"
-                    optionLabel="name"
-                  />
-                </Col>
-              </Row>
-              <Row
-                style={{
-                  marginTop: 10
-                }}
-              >
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Billing Cycle
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Dropdown
-                    value={this.state.billingCycle}
-                    options={billingCycle}
-                    onChange={this.onBillingCycleChange}
-                    placeholder="Select a Billing Cycle"
-                    optionLabel="name"
-                  />
-                </Col>
-              </Row>
-              <Row
-                style={{
-                  marginTop: 10
-                }}
-              >
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Price
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  {this.moneyFormat.numberFormat(this._renderPrice())}
-                </Col>
-              </Row>
-              <Row
-                style={{
-                  marginTop: 10
-                }}
-              >
-                <Col
-                  xs="3"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  Tanggal Mulai
-                </Col>
-                <Col
-                  xs="1"
-                  style={{
-                    marginTop: 5
-                  }}
-                >
-                  :
-                </Col>
-                <Col>
-                  <Calendar
-                    value={this.state.date}
-                    onChange={e => this.setState({ date: e.value })}
-                    disabledDates={this.state.invalidDates}
-                    dateFormat="dd/mm/yy"
-                    readonlyInput={true}
-                    minDate={minimunDate}
-                  />
-                </Col>
-              </Row>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" outline onClick={this.toggleUpgrade}>
-                Close
-              </Button>
-            </ModalFooter>
-          </Modal>
-        )}
       </Fragment>
     );
   }
