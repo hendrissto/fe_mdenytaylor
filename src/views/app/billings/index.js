@@ -6,6 +6,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
+import { Paginator } from 'primereact/paginator';
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -160,24 +161,16 @@ export default class Billing extends Component {
     });
   }
 
-  handleOnPageChange(pageIndex) {
+  handleOnPageChange = (paginationEvent) => {
     const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
-    table.pagination.currentPage = pageIndex;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
 
-    console.log(table);
-
-    this.setState({ table });
-    this.loadData();
-  }
-
-  handleOnPageSizeChange(newPageSize, newPage) {
-    const table = { ...this.state.table };
-    table.loading = true;
-    table.pagination.pageSize = newPageSize;
-    this.setState({ table });
-    this.loadData();
+    this.setState({ table }, () => {
+      this.loadData();
+    });
   }
 
   handleSortedChange(newSorted, column, additive) {
@@ -217,7 +210,7 @@ export default class Billing extends Component {
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
-      table.pagination.totalPages =  response.total / table.pagination.pageSize;
+      table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
 
       this.setState({ table });
@@ -686,6 +679,7 @@ export default class Billing extends Component {
                       <Collapse isOpen={this.state.collapse}>
                         <Card style={{ width: 1000 }}>
                           <CardBody>
+                          Sisa Waktu Berlangganan
                             <div
                               onChange={this.handleFilterDayChange.bind(this)}
                             >
@@ -696,7 +690,7 @@ export default class Billing extends Component {
                                     value="-7"
                                     type="radio"
                                   />
-                                  7 Hari Sebelum
+                                  7 Hari
                                 </div>
                                 <div style={filterStyle}>
                                   <input
@@ -704,7 +698,7 @@ export default class Billing extends Component {
                                     value="-3"
                                     type="radio"
                                   />
-                                  3 Hari Sebelum
+                                  3 Hari
                                 </div>
                                 <div style={filterStyle}>
                                   <input
@@ -712,7 +706,7 @@ export default class Billing extends Component {
                                     value="-1"
                                     type="radio"
                                   />
-                                  1 Hari Sebelum
+                                  1 Hari
                                 </div>
                                 {/*
                                 <div style={filterStyle}>
@@ -846,19 +840,13 @@ export default class Billing extends Component {
                 </div>
 
                 <ReactTableFixedColumn
-                  minRows={0}
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
+                  showPagination={false}
+                  showPaginationTop={false}
+                  showPaginationBottom={false}
                   data={this.state.table.data}
-                  pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
-                  showPagination={true}
-                  showPaginationTop={false}
-                  showPaginationBottom={true}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
@@ -870,6 +858,7 @@ export default class Billing extends Component {
                     this.loadData();
                   }}
                 />
+                <Paginator first={this.state.table.pagination.skipSize} rows={this.state.table.pagination.pageSize} totalRecords={Math.ceil(this.state.table.pagination.totalPages) * this.state.table.pagination.pageSize}onPageChange={this.handleOnPageChange} />
               </CardBody>
             </Card>
           </Colxx>
