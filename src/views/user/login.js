@@ -17,8 +17,8 @@ import * as css from "../base/baseCss"
 class Login extends Component {
   data = {
     grant_type: "password",
-    username: "admin@clodeo.com",
-    password: "HVVbPz64e5ejvsvm",
+    username: "",
+    password: "",
     client_id: "clodeo-admin-web"
   };
   constructor(props) {

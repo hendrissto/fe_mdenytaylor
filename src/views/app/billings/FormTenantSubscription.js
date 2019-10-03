@@ -696,10 +696,11 @@ export default class FormTenantSubscription extends Component {
   }
 
   handleSubmit(props) {
+    console.log(props)
     if (this.validateError(props)) {
       this.setState({ error: true });
     } else {
-      this.setState({ loading: true });
+      // this.setState({ loading: true });
       if (props.billingCycle.code === "monthlyPrice") {
         props.packagePrice = props.package.monthlyPrice;
       } else if (props.billingCycle.code === "quaterlyPrice") {
@@ -720,14 +721,14 @@ export default class FormTenantSubscription extends Component {
         subtotal: props.prices,
         lastPaymentDate: this.state.today,
         discountPercent:
-          parseInt(props.discountTotalPercent) === 0
+          parseInt(props.discountTotalPercent) === 0 || isNaN(props.discountTotalPercent) === true || props.discountTotalPercent === ""
             ? null
             : parseInt(props.discountTotalPercent),
         discountAmount:
-          parseInt(props.discountTotalAmount) === 0
+          parseInt(props.discountTotalAmount) === 0 || isNaN(props.discountTotalAmount) === true || props.discountTotalAmount === ""
             ? 0
             : parseInt(props.discountTotalAmount),
-        taxRate: parseInt(props.taxRate),
+        taxRate: isNaN(parseInt(props.taxRate)) === true ? 0 : parseInt(props.taxRate),
         amountPaid: props.total,
         adjustmentAmount: parseInt(props.adjustmentAmount),
         items: [
@@ -738,11 +739,11 @@ export default class FormTenantSubscription extends Component {
             qty: parseInt(props.qty),
             unitPrice: props.packagePrice,
             discountPercent:
-              parseInt(props.discountPercent) === 0
+              parseInt(props.discountPercent) === 0  || isNaN(props.discountPercent) === true || props.discountPercent === ""
                 ? null
                 : parseInt(props.discountPercent),
             discountAmount:
-              parseInt(props.discountAmount) === 0
+              parseInt(props.discountAmount) === 0 || isNaN(props.discountAmount) === true || props.discountAmount === ""
                 ? 0
                 : parseInt(props.discountAmount)
           }
@@ -868,6 +869,7 @@ export default class FormTenantSubscription extends Component {
                                 style={{
                                   width: 204
                                 }}
+                                placeholder="- Auto -"
                               />
                             </Col>
                           </Row>
