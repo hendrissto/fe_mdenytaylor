@@ -59,6 +59,7 @@
     "start": "dotenv -e .env react-scripts start",
     "build": "react-scripts build",
     "build-dev": "dotenv -e .env.development react-scripts build",
+    "build-slot1": "dotenv -e .env.productionslot1 react-scripts build",
     "build-prod": "dotenv -e .env.production react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

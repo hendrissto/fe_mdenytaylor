@@ -26,7 +26,7 @@ class App extends Component {
     return (
       <AppLayout>
         <Switch>
-          <Redirect exact from={`${match.url}/`} to={`${match.url}/dashboard`} />
+          <Redirect exact from={`${match.url}/`} to={`${match.url}/billing`} />
           <Route path={`${match.url}/dashboard`} component={dashboard} />
           <Route path={`${match.url}/cod-receipt-number`} component={CODReceiptNumber} />
           <Route path={`${match.url}/tenants`} component={Tenant} />
