@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
@@ -66,7 +67,8 @@ export default class Tenant extends Component {
       dropdownOpen: false,
       modal: false,
       oneData: "",
-      search: ""
+      search: "",
+      redirect: false,
     };
   }
 
@@ -147,6 +149,8 @@ export default class Tenant extends Component {
       }
       this.setState({ totalTenants: response.total });
       this.setState({ table });
+    }, error => {
+      this.setState({redirect: true})
     });
   }
 
@@ -306,6 +310,10 @@ export default class Tenant extends Component {
   }
 
   render() {
+    if(this.state.redirect === true){
+      this.setState({redirect: false});
+      return <Redirect to="/user/login" />
+    }
     return (
       <Fragment>
         <Row>
@@ -470,6 +478,7 @@ export default class Tenant extends Component {
                 </div>
 
                 <ReactTableFixedColumn
+                  minRows={0}
                   showPagination={false}
                   showPaginationTop={false}
                   showPaginationBottom={false}

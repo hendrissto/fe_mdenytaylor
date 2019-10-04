@@ -1,0 +1,13 @@
+@media screen and (max-width: 980px) {
+  .responsive {
+      overflow: auto;
+  }
+
+  .tableResponsive {
+      min-width: 1000px;
+  }
+}
+
+.hover:hover {
+  cursor: pointer;
+}
