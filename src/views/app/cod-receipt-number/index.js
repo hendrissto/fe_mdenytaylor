@@ -181,6 +181,12 @@ export default class CODReceiptNumber extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
+        Header: "Tenant ID",
+        accessor: "tenantId",
+        width: 130,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
         Header: "Kurir",
         accessor: "courierChannelId",
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
