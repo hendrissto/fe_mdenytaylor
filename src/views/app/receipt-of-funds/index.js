@@ -891,6 +891,7 @@ class ReceiptOfFunds extends Component {
 
     for (let i = 0; i < array.length; i++) {
       lineValue.lines.push({
+        tenantId: array[i].tenantId,
         sellerName: array[i].osName,
         deliveryNotes: array[i].deliveredNotes,
         airwaybillNumber: array[i].airwaybill.toString(),
@@ -929,12 +930,20 @@ class ReceiptOfFunds extends Component {
         this.loadData();
       },
       error => {
+        let errorMessage = [];
+        if(error.data.length > 1){
+          for(let i = 0; i < error.data.length; i++){
+            errorMessage.push(error.data[i].errorMessage);
+          }
+        }
         this.setState({
-          resError: error.data[0].errorMessage,
+          resError: errorMessage.length === 0 ? error.data[0].errorMessage : errorMessage,
           resiModal: false,
           loading: false
         });
         this.showModalError();
+        console.log('ERROR RESPONSE', error)
+        console.log('ERROR MESSAGE', errorMessage)
       }
     );
   }
@@ -1025,6 +1034,22 @@ class ReceiptOfFunds extends Component {
         this.setState({ modalError: false });
       }, 2000);
     }
+  }
+
+  _renderError() {
+    let data = [];
+
+    if(this.state.resError !== null){
+      for(let i = 0; i < this.state.resError.length; i++){
+        data.push(
+          <p>
+            {this.state.resError[i]}
+          </p>
+        )
+      }
+    }
+
+    return data;
   }
 
   render() {
@@ -1473,7 +1498,7 @@ class ReceiptOfFunds extends Component {
             toggle={() => this.setState({ modalError: false })}
           >
             <ModalHeader>Error</ModalHeader>
-            <ModalBody>{this.state.resError}</ModalBody>
+            <ModalBody>{this._renderError()}</ModalBody>
 
             <ModalFooter>
               <Button onClick={() => this.setState({ modalError: false })}>

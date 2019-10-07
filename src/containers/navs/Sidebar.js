@@ -306,7 +306,6 @@ class Sidebar extends Component {
             <PerfectScrollbar
               options={{ suppressScrollX: true, wheelPropagation: false }}
               style={{
-                height: 1000,
                 backgroundColor: "#fff",
               }}
             >
