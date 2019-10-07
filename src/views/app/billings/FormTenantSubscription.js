@@ -25,6 +25,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
+import "./style.scss";
 
 export default class FormTenantSubscription extends Component {
   constructor(props) {
@@ -218,7 +219,7 @@ export default class FormTenantSubscription extends Component {
 
     return (
       <table
-        className="table table-striped"
+        className="table table-striped tableResponsive"
         style={{
           width: "100%"
         }}
@@ -233,14 +234,14 @@ export default class FormTenantSubscription extends Component {
           </th>
           <th
             style={{
-              width: 200
+              width: 110
             }}
           >
             Package
           </th>
           <th
             style={{
-              width: 200
+              width: 130
             }}
           >
             Description
@@ -259,11 +260,15 @@ export default class FormTenantSubscription extends Component {
           >
             Qty
           </th>
-          <th>Price</th>
-          <th>Discount</th>
+          <th style={{
+            width: 100
+          }}>Price</th>
+          <th style={{
+            width: 300
+          }}>Discount</th>
           <th
             style={{
-              width: 200
+              width: 107
             }}
           >
             Total
@@ -932,7 +937,7 @@ export default class FormTenantSubscription extends Component {
                             </Col>
                           </Row>
                           <Row>
-                            <Col>{this._renderTable(props)}</Col>
+                            <Col className="responsive">{this._renderTable(props)}</Col>
                           </Row>
                           <Row>
                             <Col>{this._renderPrice(props)}</Col>

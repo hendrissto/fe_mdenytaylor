@@ -12,7 +12,9 @@ class AppLayout extends Component {
       <div id="app-container" className={containerClassnames}>
         <TopNav history={this.props.history} />
         <Sidebar />
-        <main>
+        <main style={{
+          marginTop: 85
+        }}>
           <div className="container-fluid">
           {this.props.children}
           </div>
