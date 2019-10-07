@@ -1,23 +1,24 @@
-import Axios from 'axios';
+import Axios from "axios";
 import { Observable } from "rxjs";
 
 export class HttpClientAxiosService {
-   cancelToken = Axios.CancelToken;
+  cancelToken = Axios.CancelToken;
 
   constructor(axios) {
     this.axios = axios;
   }
 
-  post(url = '', data, config = {}) {
-    return Observable.create((observer) => {
+  post(url = "", data, config = {}) {
+    return Observable.create(observer => {
       const axiosCancel = this.cancelToken.source();
       config.cancelToken = axiosCancel.token;
 
-      (this.axios.post(url, data, config))
-        .catch((error) => {
-          observer.error(error.response)
+      this.axios
+        .post(url, data, config)
+        .catch(error => {
+          observer.error(error.response);
         })
-        .then((response) => {
+        .then(response => {
           if (response) {
             observer.next(response.data);
           }
@@ -31,14 +32,17 @@ export class HttpClientAxiosService {
     });
   }
 
-  put(url = '', data, config = {}) {
-    return Observable.create((observer) => {
+  put(url = "", data, config = {}) {
+    return Observable.create(observer => {
       const axiosCancel = this.cancelToken.source();
       config.cancelToken = axiosCancel.token;
 
-      (this.axios.put(url, data, config))
-        .catch((error) => observer.error(error))
-        .then((response) => {
+      this.axios
+        .put(url, data, config)
+        .catch(error => {
+          observer.error(error.response);
+        })
+        .then(response => {
           if (response) {
             observer.next(response.data);
           }
@@ -52,14 +56,17 @@ export class HttpClientAxiosService {
     });
   }
 
-  get(url = '', config = {}) {
-    return Observable.create((observer) => {
+  get(url = "", config = {}) {
+    return Observable.create(observer => {
       const axiosCancel = this.cancelToken.source();
       config.cancelToken = axiosCancel.token;
 
-      (this.axios.get(url, config))
-        .catch((error) => observer.error(error))
-        .then((response) => {
+      this.axios
+        .get(url, config)
+        .catch(error => {
+          observer.error(error);
+        })
+        .then(response => {
           if (response) {
             observer.next(response.data);
           }
@@ -73,14 +80,17 @@ export class HttpClientAxiosService {
     });
   }
 
-  delete(url = '', config = {}) {
-    return Observable.create((observer) => {
+  delete(url = "", config = {}) {
+    return Observable.create(observer => {
       const axiosCancel = this.cancelToken.source();
       config.cancelToken = axiosCancel.token;
 
-      (this.axios.delete(url, config))
-        .catch((error) => observer.error(error))
-        .then((response) => {
+      this.axios
+        .delete(url, config)
+        .catch(error => {
+          observer.error(error.response);
+        })
+        .then(response => {
           if (response) {
             observer.next(response.data);
           }

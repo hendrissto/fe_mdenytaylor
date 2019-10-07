@@ -1,5 +1,5 @@
 import moment from "moment";
-import { NavLink } from "react-router-dom";
+import { NavLink, Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
@@ -35,6 +35,7 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
+import "./style.scss";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
@@ -129,7 +130,7 @@ export default class Billing extends Component {
       redirect: null,
       subscriptionPlan: null,
       freeTrial: false,
-      freeTrialWeekBeforeExp: false
+      freeTrialWeekBeforeExp: false,
     };
   }
 
@@ -214,6 +215,8 @@ export default class Billing extends Component {
       table.loading = false;
 
       this.setState({ table });
+    }, error => {
+      this.setState({redirect: true})
     });
     this.setState({ freeTrial: false, freeTrialWeekBeforeExp: false, dayAfter: 0, dayBefore: 0 });
   }
@@ -508,6 +511,10 @@ export default class Billing extends Component {
   }
 
   render() {
+    if(this.state.redirect === true){
+      this.setState({redirect: false});
+      return <Redirect to="/user/login" />
+    }
     if (this.state.freeTrial || this.state.freeTrialWeekBeforeExp) {
       this.loadData();
     }
@@ -532,7 +539,7 @@ export default class Billing extends Component {
       <Fragment>
         <Row>
           <Colxx xxs="12">
-            <Breadcrumb heading="Billing" match={this.props.match} />
+            <Breadcrumb heading="Subscription" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
         </Row>
@@ -546,13 +553,13 @@ export default class Billing extends Component {
                   }}
                 >
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.setState({ freeTrial: true });
                     }}
                   >
                     <IconCard
-                      title="Free Trial User (Total)"
+                      title="Free Trial Tenant (Total)"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalFreeTrial
                       }
@@ -560,13 +567,13 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.setState({ freeTrialWeekBeforeExp: true });
                     }}
                   >
                     <IconCard
-                      title="Free Trial User (7 hari lagi)"
+                      title="Free Trial Tenant (7 hari lagi)"
                       value={
                         this.state.tenantsSubscriptionsSummary
                           .totalFreeTrialNearlyExp
@@ -575,13 +582,13 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.loadData("starter");
                     }}
                   >
                     <IconCard
-                      title="Jumlah Starter User"
+                      title="Jumlah Starter Tenant"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalStarter
                       }
@@ -596,13 +603,13 @@ export default class Billing extends Component {
                   }}
                 >
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.loadData("growing");
                     }}
                   >
                     <IconCard
-                      title="Jumlah Growing User"
+                      title="Jumlah Growing Tenant"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalGrowing
                       }
@@ -610,13 +617,13 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.loadData("professional");
                     }}
                   >
                     <IconCard
-                      title="Jumlah Professional User"
+                      title="Jumlah Professional Tenant"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalProfessional
                       }
@@ -624,13 +631,13 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col"
+                    className="col hover"
                     onClick={() => {
                       this.loadData("enterprise");
                     }}
                   >
                     <IconCard
-                      title="Jumlah Enterprise User"
+                      title="Jumlah Enterprise Tenant"
                       value={
                         this.state.tenantsSubscriptionsSummary.totalEnterprise
                       }
@@ -840,6 +847,7 @@ export default class Billing extends Component {
                 </div>
 
                 <ReactTableFixedColumn
+                  minRows={0}
                   showPagination={false}
                   showPaginationTop={false}
                   showPaginationBottom={false}
