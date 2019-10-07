@@ -54,13 +54,13 @@ const customStyles = {
   }
 };
 
-const user = JSON.parse(localStorage.getItem("user"));
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
     this.codRest = new CODRestService();
     this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
+    this.user = null;
 
     this.showModal = this.showModal.bind(this);
     this.dataTable = this.dataTable.bind(this);
@@ -276,6 +276,7 @@ class ReceiptOfFunds extends Component {
   };
 
   componentDidMount() {
+    this.user = JSON.parse(localStorage.getItem("user"));
     this.loadData();
     this.loadRelatedData();
   }
@@ -307,8 +308,6 @@ class ReceiptOfFunds extends Component {
     table.loading = true;
     table.pagination.skipSize = pageIndex * table.pagination.pageSize;
     table.pagination.currentPage = pageIndex;
-
-    console.log(table);
 
     this.setState({ table });
     this.loadData();
@@ -916,7 +915,7 @@ class ReceiptOfFunds extends Component {
     let data = {
       ...lineValue,
       uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
-      uploadBy: user.user_name,
+      uploadBy: this.user.user_name,
       courierChannelId: this.state.selectedCourier.id
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
@@ -1051,12 +1050,18 @@ class ReceiptOfFunds extends Component {
 
     return data;
   }
+  onShowModalAWBUpload() {
+    const defaultCourier = this.state.relatedData.courierChannel ?  _.find(this.state.relatedData.courierChannel, ['id', 'sicepat']) : [];
+    this.setState({ selectedCourier: defaultCourier });
+  }
 
   render() {
     const option = this.state.relatedData.courierChannel;
-    if (this.state.relatedData.length > 0) {
-      option = this.state.relatedData.courierChannel;
-    }
+    // this.setState({ selectedCourier: defaultCourier });
+    // if (this.state.relatedData.length > 0) {
+    //   option = this.state.relatedData.courierChannel;
+    //   console.log(defaultCourier);
+    // }
     return (
       <Fragment>
         <Row>
@@ -1199,6 +1204,7 @@ class ReceiptOfFunds extends Component {
           <Modal
             isOpen={this.state.modal}
             toggle={() => this.setState({ modal: false })}
+            onEnter={() => this.onShowModalAWBUpload()}
           >
             <ModalHeader>
               <IntlMessages id="modal.uploadReceiptTitle" />
@@ -1235,7 +1241,7 @@ class ReceiptOfFunds extends Component {
                       value={this.state.selectedCourier}
                       options={option}
                       onChange={this.onCourierChange}
-                      placeholder="Select a Package"
+                      placeholder="Select Courier"
                       optionLabel="name"
                       required
                     />
