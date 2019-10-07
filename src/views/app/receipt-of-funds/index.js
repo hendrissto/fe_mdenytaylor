@@ -941,8 +941,6 @@ class ReceiptOfFunds extends Component {
           loading: false
         });
         this.showModalError();
-        console.log('ERROR RESPONSE', error)
-        console.log('ERROR MESSAGE', errorMessage)
       }
     );
   }
