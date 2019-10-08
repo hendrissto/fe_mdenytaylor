@@ -151,7 +151,7 @@ export default class FormTenantSubscription extends Component {
 
   _renderTable(props) {
     if (
-      props.values.package === undefined ||
+      props.values.package.length === 0 ||
       props.values.billingCycle === undefined
     ) {
       props.values.prices = 0;
@@ -290,7 +290,7 @@ export default class FormTenantSubscription extends Component {
               />
             </td>
             <td>
-              {props.values.package === undefined ||
+              {props.values.package.length === 0 ||
               props.values.billingCycle === undefined
                 ? "-"
                 : props.values.billingCycle.code === "monthlyPrice"
@@ -391,6 +391,7 @@ export default class FormTenantSubscription extends Component {
     }
     
     if(props.values.adjustmentAmount === "") {
+      props.values.adjustmentAmount = 0;
       props.values.total = props.values.prices;
     }
     return (
