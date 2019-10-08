@@ -161,7 +161,7 @@ export default class FormTenantRenewSubscription extends Component {
 
   _renderTable(props) {
     if (
-      props.values.package === undefined ||
+      props.values.package.length === 0 ||
       props.values.billingCycle === undefined
     ) {
       props.values.prices = 0;
@@ -300,7 +300,7 @@ export default class FormTenantRenewSubscription extends Component {
               />
             </td>
             <td>
-              {props.values.package === undefined ||
+              {props.values.package.length === 0 ||
               props.values.billingCycle === undefined
                 ? "-"
                 : props.values.billingCycle.code === "monthlyPrice"
@@ -401,6 +401,7 @@ export default class FormTenantRenewSubscription extends Component {
     }
     
     if(props.values.adjustmentAmount === "") {
+      props.values.adjustmentAmount = 0;
       props.values.total = props.values.prices;
     }
     return (
@@ -669,6 +670,9 @@ export default class FormTenantRenewSubscription extends Component {
                 marginRight: "10px",
                 width: "110px"
               }}
+              onClick={() => {
+                this.setState({redirect: true})
+              }}
             >
               Cancel
             </Button>
@@ -711,7 +715,7 @@ export default class FormTenantRenewSubscription extends Component {
 
       let data = {
         subscriptionPlanId: props.package.id,
-        subscriptionStartDate: moment(this.state.date).format("YYYY-MM-DD"),
+        subscriptionStartDate: "",
         invoiceNumber: props.invoiceNumber === "" ? null : props.invoiceNumber,
         invoiceDate: this.state.today,
         subtotal: props.prices,
@@ -886,42 +890,6 @@ export default class FormTenantRenewSubscription extends Component {
                               :
                             </Col>
                             <Col>{this._renderPackage(props)}</Col>
-                          </Row>
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              Tanggal Mulai
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col
-                              style={{
-                                width: 20
-                              }}
-                            >
-                              <Calendar
-                                value={this.state.date}
-                                onChange={e => {
-                                  this.setState({ date: e.value });
-                                }}
-                                showIcon={true}
-                              />
-                            </Col>
                           </Row>
                           <Row>
                             <Col className="responsive">
