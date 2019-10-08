@@ -399,6 +399,10 @@ export default class FormTenantRenewSubscription extends Component {
       props.values.total =
         props.values.total + parseInt(props.values.adjustmentAmount);
     }
+    
+    if(props.values.adjustmentAmount === "") {
+      props.values.total = props.values.prices;
+    }
     return (
       <div
         style={{
@@ -727,7 +731,7 @@ export default class FormTenantRenewSubscription extends Component {
         taxRate:
           isNaN(parseInt(props.taxRate)) === true ? 0 : parseInt(props.taxRate),
         amountPaid: props.total,
-        adjustmentAmount: parseInt(props.adjustmentAmount),
+        adjustmentAmount: isNaN(parseInt(props.adjustmentAmount)) === true ? 0 : parseInt(props.adjustmentAmount),
         items: [
           {
             itemType: 0,

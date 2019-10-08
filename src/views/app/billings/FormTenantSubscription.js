@@ -389,6 +389,10 @@ export default class FormTenantSubscription extends Component {
       props.values.total =
         props.values.total + parseInt(props.values.adjustmentAmount);
     }
+    
+    if(props.values.adjustmentAmount === "") {
+      props.values.total = props.values.prices;
+    }
     return (
       <div
         style={{
@@ -655,6 +659,9 @@ export default class FormTenantSubscription extends Component {
                 marginRight: "10px",
                 width: "110px"
               }}
+              onClick={() => {
+                this.setState({redirect: true})
+              }}
             >
               Cancel
             </Button>
@@ -671,7 +678,7 @@ export default class FormTenantSubscription extends Component {
   }
 
   validateError(props) {
-    if (props.package.length === 0 || props.billingCycle === undefined) {
+    if (props.package.length === 0 || props.billingCycle === undefined || props.qty === "" || parseInt(props.qty) === 0) {
       return true;
     } else {
       return false;
@@ -717,7 +724,7 @@ export default class FormTenantSubscription extends Component {
         taxRate:
           isNaN(parseInt(props.taxRate)) === true ? 0 : parseInt(props.taxRate),
         amountPaid: props.total,
-        adjustmentAmount: parseInt(props.adjustmentAmount),
+        adjustmentAmount: isNaN(parseInt(props.adjustmentAmount)) === true ? 0 : parseInt(props.adjustmentAmount),
         items: [
           {
             itemType: 0,

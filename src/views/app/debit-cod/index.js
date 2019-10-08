@@ -19,6 +19,7 @@ import {
 // import validate from "./validate";
 
 import IntlMessages from "../../../helpers/IntlMessages";
+import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -124,6 +125,18 @@ class DebitCod extends Component {
     this.loadData();
   }
 
+  handleOnPageChange(paginationEvent) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
+
+    this.setState({ table }, () => {
+      this.loadData();
+    });
+  }
+
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -139,7 +152,7 @@ class DebitCod extends Component {
     this.debitRestService.getDebitCod({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
-      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       this.setState({ table });
     });
@@ -430,18 +443,13 @@ class DebitCod extends Component {
 
                 <ReactTable
                   minRows={0}
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
-                  pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
-                  showPagination={true}
+                  showPagination={false}
                   showPaginationTop={false}
-                  showPaginationBottom={true}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  showPaginationBottom={false}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
@@ -453,6 +461,15 @@ class DebitCod extends Component {
                     this.setState({ newState });
                     this.loadData();
                   }}
+                />
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
                 />
               </CardBody>
             </Card>

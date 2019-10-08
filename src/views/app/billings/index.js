@@ -49,19 +49,6 @@ const filterColumnsStyle = {
   marginBottom: 7
 };
 
-const tableColumnsData = [
-  "ID Tenant",
-  "Nama Perusahaan",
-  "Email",
-  "No Telepon",
-  "Package",
-  "Expired Date Trial",
-  "Tanggal Mulai",
-  "Tanggal Penagihan",
-  "Billing Cycle",
-  "Total Penagihan",
-  "Status"
-];
 export default class Billing extends Component {
   constructor(props) {
     super(props);
@@ -241,6 +228,10 @@ export default class Billing extends Component {
 
     this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
+    
+    if(JSON.parse(localStorage.getItem('filter')) === null){
+      localStorage.setItem('filter', JSON.stringify(this.state.tableFilter))
+    }
     tableFilter = JSON.parse(localStorage.getItem('filter'));
     this.setState({
       tableFilter: tableFilter
@@ -312,12 +303,6 @@ export default class Billing extends Component {
         width: 70,
         show: false,
         Cell: props => (
-          // <Button color="link" className="text-primary" onClick={() => {
-          //   this.toggle();
-          //   this.setState({ oneData: props.original });
-          // }}>
-          //   <p>{props.value}</p>
-          // </Button>
           <p>{props.value}</p>
         )
       },
@@ -411,11 +396,6 @@ export default class Billing extends Component {
                 className="float-right default"
                 color="secondary"
                 style={{ marginRight: 10 }}
-                // onClick={() => {
-                //   this.loadDetailTenant(props.original.tenantId);
-                //   this.loadRelatedData();
-                //   this.setState({ upgradeModal: true });
-                // }}
               >
                 Upgrade
               </Button>
@@ -424,9 +404,6 @@ export default class Billing extends Component {
               <Button
                 className="float-right default"
                 color="secondary"
-                // onClick={() => {
-                //   this.setState({ renewModal: true });
-                // }}
               >
                 Renew
               </Button>
@@ -479,27 +456,6 @@ export default class Billing extends Component {
     return price;
   }
 
-  _renderFilterColumns() {
-    let data = [];
-    for (let i = 0; i < tableColumnsData.length; i++) {
-      data.push(
-        <div>
-          <Checkbox
-            value={tableColumnsData[i]}
-            checked={
-              this.state.filterColumns.indexOf(tableColumnsData[i]) === -1
-            }
-            onChange={this.onFilterColumnChange}
-            style={filterColumnsStyle}
-          ></Checkbox>
-          {tableColumnsData[i]}
-        </div>
-      );
-    }
-
-    return data;
-  }
-
   oneData() {
     return (
       <div>
@@ -541,23 +497,6 @@ export default class Billing extends Component {
     if (this.state.freeTrial || this.state.freeTrialWeekBeforeExp) {
       this.loadData();
     }
-    const minimunDate = new Date();
-    minimunDate.setDate(minimunDate.getDate() - 1);
-
-    const minimunDate2 = new Date();
-    minimunDate2.setDate(minimunDate2.getDate() - 1);
-    const paket = [
-      { name: "Starter", code: "starter" },
-      { name: "Growing", code: "growing" },
-      { name: "Professional", code: "professional" }
-    ];
-
-    const billingCycle = [
-      { name: "1 Bulan", code: "1" },
-      { name: "3 Bulan", code: "3" },
-      { name: "6 Bulan", code: "6" },
-      { name: "12 Bulan", code: "12" }
-    ];
     return (
       <Fragment>
         <Row>
@@ -866,7 +805,9 @@ export default class Billing extends Component {
                       className="float-right default"
                       color="primary"
                       onClick={() => {
-                        this.loadData(null);
+                        this.setState({packageFilter: "", search: ""}, () => {
+                          this.loadData()
+                        })
                         this.setState({ collapse: false });
                       }}
                       style={{
