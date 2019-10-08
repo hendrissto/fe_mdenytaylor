@@ -241,6 +241,10 @@ export default class Billing extends Component {
 
     this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
+    
+    if(JSON.parse(localStorage.getItem('filter')) === null){
+      localStorage.setItem('filter', JSON.stringify(this.state.tableFilter))
+    }
     tableFilter = JSON.parse(localStorage.getItem('filter'));
     this.setState({
       tableFilter: tableFilter
@@ -866,7 +870,9 @@ export default class Billing extends Component {
                       className="float-right default"
                       color="primary"
                       onClick={() => {
-                        this.loadData(null);
+                        this.setState({packageFilter: "", search: ""}, () => {
+                          this.loadData()
+                        })
                         this.setState({ collapse: false });
                       }}
                       style={{

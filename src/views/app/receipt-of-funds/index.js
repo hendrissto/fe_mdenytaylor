@@ -18,6 +18,7 @@ import {
 import { ExcelRenderer } from "react-excel-renderer";
 import Loader from "react-loader-spinner";
 import Loading from "../../../containers/pages/Spinner";
+import { Paginator } from "primereact/paginator";
 
 import React, { Component, Fragment } from "react";
 import ReactTable from "react-table";
@@ -303,14 +304,16 @@ class ReceiptOfFunds extends Component {
     this.setState({ [name]: value });
   }
 
-  handleOnPageChange(pageIndex) {
+  handleOnPageChange(paginationEvent) {
     const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
-    table.pagination.currentPage = pageIndex;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
 
-    this.setState({ table });
-    this.loadData();
+    this.setState({ table }, () => {
+      this.loadData();
+    });
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
@@ -801,7 +804,7 @@ class ReceiptOfFunds extends Component {
     this.codRest.getReceiptFunds({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
-      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       this.setState({ table });
     });
@@ -930,13 +933,14 @@ class ReceiptOfFunds extends Component {
       },
       error => {
         let errorMessage = [];
-        if(error.data.length > 1){
+        if(error.data.length > 0){
           for(let i = 0; i < error.data.length; i++){
             errorMessage.push(error.data[i].errorMessage);
           }
         }
+        console.log(errorMessage)
         this.setState({
-          resError: errorMessage.length === 0 ? error.data[0].errorMessage : errorMessage,
+          resError: errorMessage,
           resiModal: false,
           loading: false
         });
@@ -1035,7 +1039,6 @@ class ReceiptOfFunds extends Component {
 
   _renderError() {
     let data = [];
-
     if(this.state.resError !== null){
       for(let i = 0; i < this.state.resError.length; i++){
         data.push(
@@ -1045,7 +1048,6 @@ class ReceiptOfFunds extends Component {
         )
       }
     }
-
     return data;
   }
   onShowModalAWBUpload() {
@@ -1055,11 +1057,7 @@ class ReceiptOfFunds extends Component {
 
   render() {
     const option = this.state.relatedData.courierChannel;
-    // this.setState({ selectedCourier: defaultCourier });
-    // if (this.state.relatedData.length > 0) {
-    //   option = this.state.relatedData.courierChannel;
-    //   console.log(defaultCourier);
-    // }
+    
     return (
       <Fragment>
         <Row>
@@ -1168,17 +1166,13 @@ class ReceiptOfFunds extends Component {
 
                 <ReactTable
                   minRows={0}
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
-                  pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
-                  showPagination={true}
+                  showPagination={false}
                   showPaginationTop={false}
-                  showPaginationBottom={true}
+                  showPaginationBottom={false}
                   pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
@@ -1191,6 +1185,15 @@ class ReceiptOfFunds extends Component {
                     this.setState({ newState });
                     this.loadData();
                   }}
+                />
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
                 />
               </CardBody>
             </Card>
@@ -1447,40 +1450,6 @@ class ReceiptOfFunds extends Component {
                   this.loadData();
                 }}
               />
-
-              {/*
-              
-              <BootstrapTable
-                data={this.state.oneData}
-                footerData={this.state.footerData3}
-                footer
-              >
-                <TableHeaderColumn dataField="airwaybillNumber" isKey>
-                  Resi
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="deliveryNotes" width={300}>
-                  Penerima Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Nilai Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="codFeeValue"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Fee COD
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="subTotalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total Diterima
-                </TableHeaderColumn>
-              </BootstrapTable>
-             */}
             </ModalBody>
 
             <ModalFooter>
