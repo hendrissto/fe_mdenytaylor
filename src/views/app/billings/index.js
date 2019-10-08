@@ -6,7 +6,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
-import { Paginator } from 'primereact/paginator';
+import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -23,6 +23,7 @@ import {
   Col,
   Collapse,
   CardFooter,
+  UncontrolledPopover,
   Popover,
   PopoverHeader,
   PopoverBody
@@ -48,19 +49,6 @@ const filterColumnsStyle = {
   marginBottom: 7
 };
 
-const tableColumnsData = [
-  "ID Tenant",
-  "Nama Perusahaan",
-  "Email",
-  "No Telepon",
-  "Package",
-  "Expired Date Trial",
-  "Tanggal Mulai",
-  "Tanggal Penagihan",
-  "Billing Cycle",
-  "Total Penagihan",
-  "Status"
-];
 export default class Billing extends Component {
   constructor(props) {
     super(props);
@@ -92,13 +80,15 @@ export default class Billing extends Component {
     this.state = {
       dayBefore: 0,
       dayAfter: 0,
-      subscriptionPlanName: true,
-      freeTrialEndDate: true,
-      billingPeriodStartDate: true,
-      billingPeriodEndDate: true,
-      billingCycle: true,
-      billingAmount: true,
-      status: true,
+      tableFilter: {
+        subscriptionPlanName: true,
+        freeTrialEndDate: true,
+        billingPeriodStartDate: true,
+        billingPeriodEndDate: true,
+        billingCycle: true,
+        billingAmount: true,
+        status: true,
+      },
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
@@ -131,6 +121,7 @@ export default class Billing extends Component {
       subscriptionPlan: null,
       freeTrial: false,
       freeTrialWeekBeforeExp: false,
+      packageFilter: "",
     };
   }
 
@@ -146,11 +137,11 @@ export default class Billing extends Component {
     });
   }
 
-  togglePopoverColumns() {
-    this.setState({
-      popoverColumns: !this.state.popoverColumns
-    });
-  }
+  togglePopoverColumns = () => {
+    this.setState(prevState => ({
+      popoverColumns: !prevState.popoverColumns
+    }));
+  };
 
   handleInputChange(event) {
     const target = event.target;
@@ -162,7 +153,7 @@ export default class Billing extends Component {
     });
   }
 
-  handleOnPageChange = (paginationEvent) => {
+  handleOnPageChange = paginationEvent => {
     const table = { ...this.state.table };
     table.loading = true;
     table.pagination.pageSize = paginationEvent.rows;
@@ -172,7 +163,7 @@ export default class Billing extends Component {
     this.setState({ table }, () => {
       this.loadData();
     });
-  }
+  };
 
   handleSortedChange(newSorted, column, additive) {
     console.log(newSorted);
@@ -192,51 +183,72 @@ export default class Billing extends Component {
     this.setState({ billingCycle2: e.value });
   }
 
-  loadData(planName) {
+  loadData() {
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
 
     const params = {
       keyword: this.state.search || null,
-      subscriptionPlan: planName,
+      subscriptionPlan: this.state.packageFilter || null,
       freeTrial: this.state.freeTrial || null,
       freeTrialWeekBeforeExp: this.state.freeTrialWeekBeforeExp || null,
-      daysBeforeExpDate: this.state.dayBefore === 0 ? null : this.state.dayBefore,
+      daysBeforeExpDate:
+        this.state.dayBefore === 0 ? null : this.state.dayBefore,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
 
-    this.billingRest.getTenantsSubscriptions({ params }).subscribe(response => {
-      const table = { ...this.state.table };
-      table.data = response.data;
-      table.pagination.totalPages = Math.ceil(response.total / response.take);
-      table.loading = false;
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(
+      response => {
+        const table = { ...this.state.table };
+        table.data = response.data;
+        table.pagination.totalPages = Math.ceil(response.total / response.take);
+        table.loading = false;
 
-      this.setState({ table });
-    }, error => {
-      this.setState({redirect: true})
+        this.setState({ table });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+    this.setState({
+      freeTrial: false,
+      freeTrialWeekBeforeExp: false,
+      dayAfter: 0,
+      dayBefore: 0
     });
-    this.setState({ freeTrial: false, freeTrialWeekBeforeExp: false, dayAfter: 0, dayBefore: 0 });
   }
 
   componentDidMount() {
+    let tableFilter = { ...this.state.tableFilter };
     const date = new Date();
     this.setState({ date: date, date2: date });
 
     this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
+    
+    if(JSON.parse(localStorage.getItem('filter')) === null){
+      localStorage.setItem('filter', JSON.stringify(this.state.tableFilter))
+    }
+    tableFilter = JSON.parse(localStorage.getItem('filter'));
+    this.setState({
+      tableFilter: tableFilter
+    })
   }
 
   handleFilterChange(event) {
+    const tableFilter = { ...this.state.tableFilter };
     const target = event.target;
     const value = target.checked;
     const name = target.name;
-
+    tableFilter[name] = value;
     this.setState({
-      [name]: value
+      tableFilter: tableFilter
     });
+    
+    localStorage.setItem('filter', JSON.stringify(tableFilter))
   }
 
   handleFilterDayChange(event) {
@@ -244,12 +256,12 @@ export default class Billing extends Component {
     const value = target.value;
     const name = target.name;
     const day = value.substr(1);
-    if(parseInt(value) < 0){
+    if (parseInt(value) < 0) {
       this.setState({
         dayAfter: 0,
         dayBefore: parseInt(day)
       });
-    }else{
+    } else {
       this.setState({
         dayBefore: 0,
         dayAfter: parseInt(value)
@@ -282,6 +294,7 @@ export default class Billing extends Component {
   }
 
   dataTable() {
+    const tableFilter = { ...this.state.tableFilter }
     return [
       {
         Header: "ID Tenant",
@@ -290,12 +303,6 @@ export default class Billing extends Component {
         width: 70,
         show: false,
         Cell: props => (
-          // <Button color="link" className="text-primary" onClick={() => {
-          //   this.toggle();
-          //   this.setState({ oneData: props.original });
-          // }}>
-          //   <p>{props.value}</p>
-          // </Button>
           <p>{props.value}</p>
         )
       },
@@ -322,14 +329,14 @@ export default class Billing extends Component {
       {
         Header: "Package",
         accessor: "subscriptionPlanName",
-        show: this.state.subscriptionPlanName,
+        show: tableFilter.subscriptionPlanName,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Expired Date Free Trial",
         accessor: "freeTrialEndDate",
         width: 150,
-        show: this.state.freeTrialEndDate,
+        show: tableFilter.freeTrialEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -342,7 +349,7 @@ export default class Billing extends Component {
         Header: "Tanggal Mulai",
         accessor: "billingPeriodStartDate",
         width: 150,
-        show: this.state.billingPeriodStartDate,
+        show: tableFilter.billingPeriodStartDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -355,7 +362,7 @@ export default class Billing extends Component {
         Header: "Tanggal Penagihan",
         accessor: "billingPeriodEndDate",
         width: 150,
-        show: this.state.billingPeriodEndDate,
+        show: tableFilter.billingPeriodEndDate,
         Cell: props => (
           <p>
             {props.value === null
@@ -367,21 +374,21 @@ export default class Billing extends Component {
       {
         Header: "Billing Cycle",
         accessor: "billingCycle",
-        show: this.state.billingCycle,
+        show: tableFilter.billingCycle,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Total Penagihan",
         accessor: "billingAmount",
         width: 130,
-        show: this.state.billingAmount,
+        show: tableFilter.billingAmount,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Status",
         accessor: "status",
         width: 200,
-        show: this.state.status,
+        show: tableFilter.status,
         Cell: props => (
           <Row>
             <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
@@ -389,11 +396,6 @@ export default class Billing extends Component {
                 className="float-right default"
                 color="secondary"
                 style={{ marginRight: 10 }}
-                // onClick={() => {
-                //   this.loadDetailTenant(props.original.tenantId);
-                //   this.loadRelatedData();
-                //   this.setState({ upgradeModal: true });
-                // }}
               >
                 Upgrade
               </Button>
@@ -402,9 +404,6 @@ export default class Billing extends Component {
               <Button
                 className="float-right default"
                 color="secondary"
-                // onClick={() => {
-                //   this.setState({ renewModal: true });
-                // }}
               >
                 Renew
               </Button>
@@ -457,27 +456,6 @@ export default class Billing extends Component {
     return price;
   }
 
-  _renderFilterColumns() {
-    let data = [];
-    for (let i = 0; i < tableColumnsData.length; i++) {
-      data.push(
-        <div>
-          <Checkbox
-            value={tableColumnsData[i]}
-            checked={
-              this.state.filterColumns.indexOf(tableColumnsData[i]) === -1
-            }
-            onChange={this.onFilterColumnChange}
-            style={filterColumnsStyle}
-          ></Checkbox>
-          {tableColumnsData[i]}
-        </div>
-      );
-    }
-
-    return data;
-  }
-
   oneData() {
     return (
       <div>
@@ -511,30 +489,14 @@ export default class Billing extends Component {
   }
 
   render() {
-    if(this.state.redirect === true){
-      this.setState({redirect: false});
-      return <Redirect to="/user/login" />
+    const tableFilter = { ...this.state.tableFilter }
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
     }
     if (this.state.freeTrial || this.state.freeTrialWeekBeforeExp) {
       this.loadData();
     }
-    const minimunDate = new Date();
-    minimunDate.setDate(minimunDate.getDate() - 1);
-
-    const minimunDate2 = new Date();
-    minimunDate2.setDate(minimunDate2.getDate() - 1);
-    const paket = [
-      { name: "Starter", code: "starter" },
-      { name: "Growing", code: "growing" },
-      { name: "Professional", code: "professional" }
-    ];
-
-    const billingCycle = [
-      { name: "1 Bulan", code: "1" },
-      { name: "3 Bulan", code: "3" },
-      { name: "6 Bulan", code: "6" },
-      { name: "12 Bulan", code: "12" }
-    ];
     return (
       <Fragment>
         <Row>
@@ -584,7 +546,9 @@ export default class Billing extends Component {
                   <div
                     className="col hover"
                     onClick={() => {
-                      this.loadData("starter");
+                      this.setState({packageFilter: "starter"}, () => {
+                        this.loadData()
+                      });
                     }}
                   >
                     <IconCard
@@ -605,7 +569,9 @@ export default class Billing extends Component {
                   <div
                     className="col hover"
                     onClick={() => {
-                      this.loadData("growing");
+                      this.setState({packageFilter: "growing"}, () => {
+                        this.loadData()
+                      });
                     }}
                   >
                     <IconCard
@@ -619,7 +585,9 @@ export default class Billing extends Component {
                   <div
                     className="col hover"
                     onClick={() => {
-                      this.loadData("professional");
+                      this.setState({packageFilter: "professional"}, () => {
+                        this.loadData()
+                      });
                     }}
                   >
                     <IconCard
@@ -633,7 +601,9 @@ export default class Billing extends Component {
                   <div
                     className="col hover"
                     onClick={() => {
-                      this.loadData("enterprise");
+                      this.setState({packageFilter: "enterprise"}, () => {
+                        this.loadData()
+                      });
                     }}
                   >
                     <IconCard
@@ -686,7 +656,7 @@ export default class Billing extends Component {
                       <Collapse isOpen={this.state.collapse}>
                         <Card style={{ width: 1000 }}>
                           <CardBody>
-                          Sisa Waktu Berlangganan
+                            Sisa Waktu Berlangganan
                             <div
                               onChange={this.handleFilterDayChange.bind(this)}
                             >
@@ -734,7 +704,7 @@ export default class Billing extends Component {
                               color="primary"
                               onClick={() => {
                                 this.loadData();
-                                this.setState({collapse: false});
+                                this.setState({ collapse: false });
                               }}
                             >
                               Apply
@@ -758,7 +728,8 @@ export default class Billing extends Component {
                     >
                       <i className="simple-icon-menu" />
                     </Button>
-                    <Popover
+                    <UncontrolledPopover
+                      trigger="legacy"
                       placement="bottom"
                       isOpen={this.state.popoverColumns}
                       target="Popover2"
@@ -769,7 +740,7 @@ export default class Billing extends Component {
                           <input
                             name="subscriptionPlanName"
                             type="checkbox"
-                            checked={this.state.subscriptionPlanName}
+                            checked={tableFilter.subscriptionPlanName}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Package
@@ -778,7 +749,7 @@ export default class Billing extends Component {
                           <input
                             name="freeTrialEndDate"
                             type="checkbox"
-                            checked={this.state.freeTrialEndDate}
+                            checked={tableFilter.freeTrialEndDate}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Expired Date Free Trial
@@ -787,7 +758,7 @@ export default class Billing extends Component {
                           <input
                             name="billingPeriodStartDate"
                             type="checkbox"
-                            checked={this.state.billingPeriodStartDate}
+                            checked={tableFilter.billingPeriodStartDate}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Tanggal Mulai
@@ -796,7 +767,7 @@ export default class Billing extends Component {
                           <input
                             name="billingPeriodEndDate"
                             type="checkbox"
-                            checked={this.state.billingPeriodEndDate}
+                            checked={tableFilter.billingPeriodEndDate}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Tanggal Penagihan
@@ -805,7 +776,7 @@ export default class Billing extends Component {
                           <input
                             name="billingCycle"
                             type="checkbox"
-                            checked={this.state.billingCycle}
+                            checked={tableFilter.billingCycle}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Billing Cycle
@@ -814,7 +785,7 @@ export default class Billing extends Component {
                           <input
                             name="billingAmount"
                             type="checkbox"
-                            checked={this.state.billingAmount}
+                            checked={tableFilter.billingAmount}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total Penagihan
@@ -823,19 +794,21 @@ export default class Billing extends Component {
                           <input
                             name="status"
                             type="checkbox"
-                            checked={this.state.status}
+                            checked={tableFilter.status}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Status
                         </div>
                       </PopoverBody>
-                    </Popover>
+                    </UncontrolledPopover>
                     <Button
                       className="float-right default"
                       color="primary"
                       onClick={() => {
-                        this.loadData(null);
-                        this.setState({collapse: false});
+                        this.setState({packageFilter: "", search: ""}, () => {
+                          this.loadData()
+                        })
+                        this.setState({ collapse: false });
                       }}
                       style={{
                         marginRight: 10
@@ -866,7 +839,15 @@ export default class Billing extends Component {
                     this.loadData();
                   }}
                 />
-                <Paginator first={this.state.table.pagination.skipSize} rows={this.state.table.pagination.pageSize} totalRecords={Math.ceil(this.state.table.pagination.totalPages) * this.state.table.pagination.pageSize}onPageChange={this.handleOnPageChange} />
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
+                />
               </CardBody>
             </Card>
           </Colxx>
