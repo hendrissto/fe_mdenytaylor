@@ -27,7 +27,7 @@ import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 import "./style.scss";
 
-export default class FormTenantSubscription extends Component {
+export default class FormTenantRenewSubscription extends Component {
   constructor(props) {
     super(props);
 
@@ -45,7 +45,6 @@ export default class FormTenantSubscription extends Component {
 
     this.state = {
       error: false,
-      type: this.props.match.params.type,
       data: [],
       relatedData: [],
       loading: true,
@@ -96,13 +95,31 @@ export default class FormTenantSubscription extends Component {
       .getTenantsSubscriptionsById(tenantId, {})
       .subscribe(response => {
         this.setState({ data: response, loading: false });
+        if (this.state.relatedData.subscriptionPlan !== undefined) {
+          let activePackage = [];
+          for (
+            let i = 0;
+            i < this.state.relatedData.subscriptionPlan.length;
+            i++
+          ) {
+            if (
+              response.subscriptionPlanId ===
+              this.state.relatedData.subscriptionPlan[i].id
+            ) {
+              activePackage.push({
+                subscriptionPlan: this.state.relatedData.subscriptionPlan[i]
+              });
+            }
+          }
+          this.setState({ packageActive: activePackage[0].subscriptionPlan });
+        }
       });
   }
 
   loadRelatedData() {
     this.billingRest.getRelatedData({}).subscribe(response => {
       this.setState({ relatedData: response }, () => {
-        this.loadData()
+        this.loadData();
       });
     });
   }
@@ -126,14 +143,6 @@ export default class FormTenantSubscription extends Component {
   }
 
   _renderPackage(props) {
-      const data = { ...this.state.data };
-      const options = { ...this.state.relatedData };
-      for (let i = options.subscriptionPlan.length - 1; i >= 0; i--) {
-        if (options.subscriptionPlan[i].id === data.subscriptionPlanId) {
-          options.subscriptionPlan.splice(i, 1);
-        }
-      }
-
     return (
       <Dropdown
         value={props.values.package}
@@ -142,6 +151,7 @@ export default class FormTenantSubscription extends Component {
         placeholder="Select a Package"
         name="package"
         optionLabel="name"
+        disabled
         style={{
           width: 204
         }}
@@ -401,7 +411,7 @@ export default class FormTenantSubscription extends Component {
         }}
       >
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -434,7 +444,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -522,7 +532,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -567,7 +577,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -607,7 +617,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -648,7 +658,7 @@ export default class FormTenantSubscription extends Component {
             </Col>
           </Row>
         </div>
-        <div class="d-flex flex-row-reverse bd-highlight">
+        <div className="d-flex flex-row-reverse bd-highlight">
           <Row
             style={{
               marginRight: 80
@@ -679,7 +689,7 @@ export default class FormTenantSubscription extends Component {
   }
 
   validateError(props) {
-    if (props.package.length === 0 || props.billingCycle === undefined || props.qty === "" || parseInt(props.qty) === 0) {
+    if (props.package.length === 0 || props.billingCycle === undefined) {
       return true;
     } else {
       return false;
@@ -705,7 +715,7 @@ export default class FormTenantSubscription extends Component {
 
       let data = {
         subscriptionPlanId: props.package.id,
-        subscriptionStartDate: moment(this.state.date).format("YYYY-MM-DD"),
+        subscriptionStartDate: "",
         invoiceNumber: props.invoiceNumber === "" ? null : props.invoiceNumber,
         invoiceDate: this.state.today,
         subtotal: props.prices,
@@ -748,9 +758,8 @@ export default class FormTenantSubscription extends Component {
           }
         ]
       };
-
       this.billingRest
-        .upgradeTenantsSubscriptions(
+        .renewTenantsSubscriptions(
           parseInt(this.props.match.params.tenantId),
           data
         )
@@ -768,7 +777,7 @@ export default class FormTenantSubscription extends Component {
       <>
         <Row>
           <Colxx xxs="12">
-            <h1>Upgrade</h1>
+            <h1>Renew</h1>
             <Separator className="mb-5" />
           </Colxx>
         </Row>
@@ -881,42 +890,6 @@ export default class FormTenantSubscription extends Component {
                               :
                             </Col>
                             <Col>{this._renderPackage(props)}</Col>
-                          </Row>
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              Tanggal Mulai
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col
-                              style={{
-                                width: 20
-                              }}
-                            >
-                              <Calendar
-                                value={this.state.date}
-                                onChange={e => {
-                                  this.setState({ date: e.value });
-                                }}
-                                showIcon={true}
-                              />
-                            </Col>
                           </Row>
                           <Row>
                             <Col className="responsive">

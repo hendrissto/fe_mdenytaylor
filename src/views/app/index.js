@@ -8,6 +8,7 @@ import CODReceiptNumber from "./cod-receipt-number";
 import Tenant from "./tenants";
 import Billing from "./billings";
 import FormTenantSubscription from "./billings/FormTenantSubscription";
+import FormTenantRenewSubscriptions from './billings/FormTenantRenewSubscriptions';
 import WithdrawFunds from "./request-withdraw-funds";
 import ReceiptOfFunds from "./receipt-of-funds";
 import DebitCod from './debit-cod'
@@ -31,7 +32,8 @@ class App extends Component {
           <Route path={`${match.url}/cod-receipt-number`} component={CODReceiptNumber} />
           <Route path={`${match.url}/tenants`} component={Tenant} />
           <Route path={`${match.url}/billing`} component={Billing} />
-          <Route path={`${match.url}/billings/:type/:tenantId`} component={FormTenantSubscription} />
+          <Route path={`${match.url}/billings/upgrade/:tenantId`} component={FormTenantSubscription} />
+          <Route path={`${match.url}/billings/renew/:tenantId`} component={FormTenantRenewSubscriptions} />
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
           <Route path={`${match.url}/debit-cod`} component={DebitCod} />
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
