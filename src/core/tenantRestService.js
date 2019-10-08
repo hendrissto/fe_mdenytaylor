@@ -15,4 +15,8 @@ export default class TenantRestService extends React.Component {
   getTenantsSummary(qParams) {
     return this.request.get('/admin/tenants-summary', qParams);
   }
+
+  activeCOD(id, status) {
+    return this.request.put(`/admin/tenants/${id}/sicepat-cod/${status}`);
+  }
 }

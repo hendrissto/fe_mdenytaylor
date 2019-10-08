@@ -6,7 +6,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
-import { Paginator } from 'primereact/paginator';
+import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -22,10 +22,11 @@ import {
   Row,
   Col,
   Popover,
-  PopoverBody,
+  PopoverBody
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
+import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
 import "./tenants.css";
 
@@ -37,6 +38,7 @@ export default class Tenant extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
+    this.editStatusCOD = this.editStatusCOD.bind(this);
 
     this.toggle = this.toggle.bind(this);
     this.state = {
@@ -69,6 +71,7 @@ export default class Tenant extends Component {
       oneData: "",
       search: "",
       redirect: false,
+      loading: false
     };
   }
 
@@ -98,7 +101,7 @@ export default class Tenant extends Component {
     });
   }
 
-  handleOnPageChange = (paginationEvent) => {
+  handleOnPageChange = paginationEvent => {
     const table = { ...this.state.table };
     table.loading = true;
     table.pagination.pageSize = paginationEvent.rows;
@@ -108,7 +111,7 @@ export default class Tenant extends Component {
     this.setState({ table }, () => {
       this.loadData();
     });
-  }
+  };
 
   handleOnPageSizeChange(newPageSize, newPage) {
     const table = { ...this.state.table };
@@ -137,21 +140,24 @@ export default class Tenant extends Component {
       "options.includeTotalCount": true
     };
 
-    this.tenantRest.getTenants({ params }).subscribe(response => {
-      const table = { ...this.state.table };
-      table.data = response.data;
-      table.pagination.totalPages = Math.ceil(response.total / response.take);
-      table.loading = false;
-      for (let i = 0; i < response.data.length; i++) {
-        if (response.data[i].siCepatCOD === true) {
-          this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
+    this.tenantRest.getTenants({ params }).subscribe(
+      response => {
+        const table = { ...this.state.table };
+        table.data = response.data;
+        table.pagination.totalPages = Math.ceil(response.total / response.take);
+        table.loading = false;
+        for (let i = 0; i < response.data.length; i++) {
+          if (response.data[i].siCepatCOD === true) {
+            this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
+          }
         }
+        this.setState({ totalTenants: response.total });
+        this.setState({ table });
+      },
+      error => {
+        this.setState({ redirect: true });
       }
-      this.setState({ totalTenants: response.total });
-      this.setState({ table });
-    }, error => {
-      this.setState({redirect: true})
-    });
+    );
   }
 
   componentDidMount() {
@@ -278,9 +284,54 @@ export default class Tenant extends Component {
         accessor: "status",
         show: this.state.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
+      },
+      {
+        Header: "Status",
+        width: 200,
+        Cell: props => {
+          if (props.original.siCepatCOD) {
+            return (
+              <Button
+                color="secondary"
+                style={{ width: 150 }}
+                onClick={() => {
+                  this.editStatusCOD(props.original);
+                }}
+              >
+                Nonaktifkan COD
+              </Button>
+            );
+          } else {
+            return (
+              <Button
+                color="secondary"
+                style={{ width: 150 }}
+                onClick={() => {
+                  this.editStatusCOD(props.original);
+                }}
+              >
+                Aktifkan COD
+              </Button>
+            );
+          }
+        }
       }
     ];
   }
+
+  editStatusCOD(data) {
+    const table = { ...this.state.table };
+
+    table.loading = true;
+    this.setState({ table }, () => {
+      this.tenantRest
+        .activeCOD(data.id, !data.siCepatCOD)
+        .subscribe(response => {
+          this.loadData();
+        });
+    });
+  }
+
   oneData() {
     let dataTable = [];
     const data = this.state.oneData.users;
@@ -310,9 +361,9 @@ export default class Tenant extends Component {
   }
 
   render() {
-    if(this.state.redirect === true){
-      this.setState({redirect: false});
-      return <Redirect to="/user/login" />
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
     }
     return (
       <Fragment>
@@ -474,6 +525,22 @@ export default class Tenant extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
+
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      onClick={() => {
+                        this.setState({ packageFilter: "", search: "" }, () => {
+                          this.loadData();
+                        });
+                        this.setState({ collapse: false });
+                      }}
+                      style={{
+                        marginRight: 10
+                      }}
+                    >
+                      <i className="simple-icon-refresh" />
+                    </Button>
                   </div>
                 </div>
 
@@ -497,10 +564,19 @@ export default class Tenant extends Component {
                     this.loadData();
                   }}
                 />
-                <Paginator first={this.state.table.pagination.skipSize} rows={this.state.table.pagination.pageSize} totalRecords={Math.ceil(this.state.table.pagination.totalPages) * this.state.table.pagination.pageSize}onPageChange={this.handleOnPageChange} />
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
+                />
               </CardBody>
             </Card>
           </Colxx>
+          {this.state.loading && <Spinner />}
         </Row>
 
         {this.state.oneData && (
