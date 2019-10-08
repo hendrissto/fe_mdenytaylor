@@ -14,7 +14,6 @@ export class HttpClientAxiosInterceptedService extends HttpClientAxiosService {
 
   handleRefreshToken(event) {
     // const { companyId } = event.data;
-    console.log(user);
     // if (!user) {
     //   return Observable.throw(new Error('User is not logged in.'));
     // }

@@ -21,6 +21,7 @@ import {
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import CODRestService from "../../../core/codRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+import { Paginator } from "primereact/paginator";
 
 const regex = /\[(.*?)\-/;
 export default class CODReceiptNumber extends Component {
@@ -100,16 +101,16 @@ export default class CODReceiptNumber extends Component {
     });
   }
 
-  handleOnPageChange(pageIndex) {
+  handleOnPageChange(paginationEvent) {
     const table = { ...this.state.table };
     table.loading = true;
-    table.pagination.skipSize = pageIndex * table.pagination.pageSize;
-    table.pagination.currentPage = pageIndex;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
 
-    console.log(table);
-
-    this.setState({ table });
-    this.loadData();
+    this.setState({ table }, () => {
+      this.loadData();
+    });
   }
 
   handleOnPageSizeChange(newPageSize, newPage) {
@@ -135,7 +136,7 @@ export default class CODReceiptNumber extends Component {
     let receiverName = [];
     this.codRest.getCODReceipts({ params }).subscribe(response => {
       table.data = response.data;
-      table.pagination.totalPages = response.total / table.pagination.pageSize;
+      table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       this.setState({ table });
     });
@@ -181,6 +182,12 @@ export default class CODReceiptNumber extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
+        Header: "Tenant ID",
+        accessor: "tenantId",
+        width: 130,
+        Cell: props => <p>{props.value}</p>
+      },
+      {
         Header: "Kurir",
         accessor: "courierChannelId",
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
@@ -195,18 +202,6 @@ export default class CODReceiptNumber extends Component {
         Header: "Note",
         accessor: "notes",
         Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
-      },
-      {
-        Header: "Total",
-        accessor: "amount",
-        show: this.state.amount,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
-      {
-        Header: "Fee COD",
-        accessor: "codValue",
-        show: this.state.codValue,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
       {
         Header: "Good Value",
@@ -504,18 +499,13 @@ export default class CODReceiptNumber extends Component {
 
                 <ReactTable
                   minRows={0}
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
                   data={this.state.table.data}
-                  pages={this.state.table.pagination.totalPages}
                   columns={this.dataTable()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
                   className="-striped"
                   loading={this.state.table.loading}
-                  showPagination={true}
+                  showPagination={false}
                   showPaginationTop={false}
-                  showPaginationBottom={true}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  showPaginationBottom={false}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
@@ -527,6 +517,15 @@ export default class CODReceiptNumber extends Component {
                     this.setState({ newState });
                     this.loadData();
                   }}
+                />
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
                 />
               </CardBody>
             </Card>

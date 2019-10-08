@@ -39,7 +39,8 @@ class TopNav extends Component {
 
     this.state = {
       isInFullScreen: false,
-      searchKeyword: ""
+      searchKeyword: "",
+      user: JSON.parse(localStorage.getItem("user"))
     };
   }
 
@@ -200,7 +201,10 @@ class TopNav extends Component {
     const { containerClassnames, menuClickCount, locale } = this.props;
     // const { messages } = this.props.intl;
     return (
-      <nav className="navbar fixed-top">
+      <nav className="navbar fixed-top" style={{
+        height: 55,
+        padding: 6,
+      }}>
         <div className="d-flex align-items-center navbar-left">
           <NavLink
             to="#"
@@ -235,7 +239,7 @@ class TopNav extends Component {
               <i className="simple-icon-magnifier" />
             </span>
           </div> */}
-
+          {/*
           <div className="d-inline-block">
             <UncontrolledDropdown className="ml-2">
               <DropdownToggle
@@ -260,6 +264,7 @@ class TopNav extends Component {
               </DropdownMenu>
             </UncontrolledDropdown>
           </div>
+           */}
           {/* <div className="position-relative d-none d-none d-lg-inline-block">
             <a
               className="btn btn-outline-primary btn-sm ml-2"
@@ -296,7 +301,7 @@ class TopNav extends Component {
           <div className="user d-inline-block">
             <UncontrolledDropdown className="dropdown-menu-right">
               <DropdownToggle className="p-0" color="empty">
-                <span className="name mr-1">Admin Name</span>
+                <span className="name mr-1">Admin</span>
                 <span>
                   <img alt="Profile" src="/assets/img/profile.jpg" />
                 </span>

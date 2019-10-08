@@ -298,11 +298,16 @@ class Sidebar extends Component {
   render() {
     const { selectedParentMenu, viewingParentMenu } = this.state;
     return (
-      <div className="sidebar">
+      <div className="sidebar" style={{
+        paddingTop: 55
+      }}>
         <div className="main-menu">
           <div className="scroll">
             <PerfectScrollbar
               options={{ suppressScrollX: true, wheelPropagation: false }}
+              style={{
+                backgroundColor: "#fff",
+              }}
             >
               <Nav vertical className="list-unstyled">
                 {menuItems &&
