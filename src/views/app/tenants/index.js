@@ -1,4 +1,5 @@
 import moment from "moment";
+import "moment/locale/id";
 import { Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
@@ -21,14 +22,24 @@ import {
   ModalFooter,
   Row,
   Col,
+  UncontrolledPopover,
   Popover,
-  PopoverBody
+  PopoverBody,
+  CustomInput
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
+import { InputSwitch } from "primereact/inputswitch";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
 import "./tenants.css";
+
+import Switch from "rc-switch";
+import "rc-switch/assets/index.css";
+
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
@@ -39,7 +50,7 @@ export default class Tenant extends Component {
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.editStatusCOD = this.editStatusCOD.bind(this);
-
+    this.toggleFilterPopOver = this.toggleFilterPopOver.bind(this);
     this.toggle = this.toggle.bind(this);
     this.state = {
       totalSku: true,
@@ -51,13 +62,16 @@ export default class Tenant extends Component {
       siCepatCOD: true,
       siCepatMemberId: true,
       status: true,
+      isRealColumn: true,
       popoverOpen: false,
+      filterPopover: false,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
       table: {
         loading: true,
         data: [],
+        sort: null,
         pagination: {
           currentPage: 0,
           totalPages: 0,
@@ -71,13 +85,24 @@ export default class Tenant extends Component {
       oneData: "",
       search: "",
       redirect: false,
-      loading: false
+      loading: false,
+      error: false,
+      errorMessage: null,
+      isReal: true,
+      isCod: "",
+      filterIsReal: true
     };
   }
 
   togglePopOver() {
     this.setState(prevState => ({
       popoverOpen: !prevState.popoverOpen
+    }));
+  }
+
+  toggleFilterPopOver() {
+    this.setState(prevState => ({
+      filterPopover: !prevState.filterPopover
     }));
   }
 
@@ -122,9 +147,14 @@ export default class Tenant extends Component {
   }
 
   handleSortedChange(newSorted, column, additive) {
-    console.log(newSorted);
-    console.log(column);
-    console.log(additive);
+    const sort = [];
+    sort.push({
+      field: newSorted[0].id,
+      dir: newSorted[0].desc === true ? "desc" : "asc"
+    });
+    // this.setState({sort: sort}, () => {
+    //   this.loadData()
+    // })
   }
 
   loadData() {
@@ -135,6 +165,8 @@ export default class Tenant extends Component {
 
     const params = {
       keyword: this.state.search || null,
+      isCod: this.state.isCod || null,
+      isReal: this.state.isReal || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -178,6 +210,7 @@ export default class Tenant extends Component {
   }
 
   dataTable() {
+    moment.locale("id");
     return [
       {
         Header: "ID Tenant",
@@ -220,58 +253,94 @@ export default class Tenant extends Component {
         accessor: "totalSku",
         width: 70,
         show: this.state.totalSku,
-        Cell: props => <p>{props.value}</p>
+        Cell: props => (
+          <p
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </p>
+        )
       },
       {
         Header: "Total Order",
         accessor: "totalOrder",
         width: 80,
         show: this.state.totalOrder,
-        Cell: props => <p>{props.value}</p>
+        Cell: props => (
+          <p
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </p>
+        )
       },
       {
         Header: "Total Receipt",
         accessor: "totalReceipt",
         width: 80,
         show: this.state.totalReceipt,
-        Cell: props => <p>{props.value}</p>
+        Cell: props => (
+          <p
+            style={{
+              textAlign: "center"
+            }}
+          >
+            {props.value}
+          </p>
+        )
       },
       {
         Header: "Total User",
         accessor: "totalUser",
+        width: 80,
         show: this.state.totalUser,
         Cell: props => (
-          <Button
+          <div
             color="link"
-            className="text-primary"
+            className="text-primary hover"
+            style={{
+              textAlign: "center"
+            }}
             onClick={() => {
               this.toggle();
               this.setState({ oneData: props.original });
             }}
           >
             <p>{props.value}</p>
-          </Button>
+          </div>
         )
       },
       {
         Header: "Last Login",
         accessor: "owner.lastLoginDateUtc",
-        width: 150,
+        width: 200,
         show: this.state.lastLoginDateUtc,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        Cell: props => <p>{moment(props.value).format("LL")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
-        width: 150,
+        width: 200,
         show: this.state.joinDateUtc,
-        Cell: props => <p>{moment(props.value).format("DD-MM-YYYY HH:mm")}</p>
+        Cell: props => <p>{moment(props.value).format("LL")}</p>
       },
       {
         Header: "Sicepat COD",
         accessor: "siCepatCOD",
         show: this.state.siCepatCOD,
-        Cell: props => <p>{props.value === false ? "Tidak Aktif" : "Aktif"}</p>
+        Cell: props => (
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.siCepatCOD}
+            onChange={() => {
+              this.editStatusCOD(props.original);
+            }}
+          />
+        )
       },
       {
         Header: "ID Sicepat",
@@ -280,42 +349,56 @@ export default class Tenant extends Component {
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
+        Header: "Is Real",
+        accessor: "isReal",
+        show: this.state.isRealColumn,
+        Cell: props => (
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isReal}
+            onChange={() => {
+              this.editIsReal(props.original);
+            }}
+          />
+        )
+      },
+      {
         Header: "Status",
         accessor: "status",
         show: this.state.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
-      },
-      {
-        Header: "Status",
-        width: 200,
-        Cell: props => {
-          if (props.original.siCepatCOD) {
-            return (
-              <Button
-                color="secondary"
-                style={{ width: 150 }}
-                onClick={() => {
-                  this.editStatusCOD(props.original);
-                }}
-              >
-                Nonaktifkan COD
-              </Button>
-            );
-          } else {
-            return (
-              <Button
-                color="secondary"
-                style={{ width: 150 }}
-                onClick={() => {
-                  this.editStatusCOD(props.original);
-                }}
-              >
-                Aktifkan COD
-              </Button>
-            );
-          }
-        }
       }
+      // {
+      //   Header: "Status",
+      //   width: 200,
+      //   Cell: props => {
+      //     if (props.original.siCepatCOD) {
+      //       return (
+      //         <Button
+      //           color="secondary"
+      //           style={{ width: 150 }}
+      //           onClick={() => {
+      //             this.editStatusCOD(props.original);
+      //           }}
+      //         >
+      //           Nonaktifkan COD
+      //         </Button>
+      //       );
+      //     } else {
+      //       return (
+      //         <Button
+      //           color="secondary"
+      //           style={{ width: 150 }}
+      //           onClick={() => {
+      //             this.editStatusCOD(props.original);
+      //           }}
+      //         >
+      //           Aktifkan COD
+      //         </Button>
+      //       );
+      //     }
+      //   }
+      // }
     ];
   }
 
@@ -324,11 +407,68 @@ export default class Tenant extends Component {
 
     table.loading = true;
     this.setState({ table }, () => {
-      this.tenantRest
-        .activeCOD(data.id, !data.siCepatCOD)
-        .subscribe(response => {
+      this.tenantRest.activeCOD(data.id, !data.siCepatCOD).subscribe(
+        response => {
           this.loadData();
-        });
+          this.loadTenantsSummmary();
+          if (!data.siCepatCOD) {
+            MySwal.fire({
+              type: "success",
+              title: "COD SiCepat telah diaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          } else {
+            MySwal.fire({
+              type: "success",
+              title: "COD SiCepat telah dinonaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          }
+        },
+        error => {
+          this.setState({
+            errorMessage: error.data[0].errorMessage,
+            error: true
+          });
+        }
+      );
+    });
+  }
+
+  editIsReal(data) {
+    const table = { ...this.state.table };
+
+    table.loading = true;
+    this.setState({ table }, () => {
+      this.tenantRest.isRealUser(data.id, !data.isReal).subscribe(
+        response => {
+          this.loadData();
+          this.loadTenantsSummmary();
+          MySwal.fire({
+            type: "success",
+            title: "Berhasil.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        },
+        error => {
+          this.setState({
+            errorMessage: error.data[0].errorMessage,
+            error: true
+          });
+        }
+      );
     });
   }
 
@@ -375,21 +515,46 @@ export default class Tenant extends Component {
         </Row>
         <Row>
           <Colxx xxs="12">
-            <Card className="mb-12 lg-12">
+            <Card
+              className="mb-12 lg-12"
+              style={{
+                borderRadius: 10
+              }}
+            >
               <CardBody>
                 <Row>
-                  <Colxx xxs="6">
+                  <Colxx
+                    xxs="6"
+                    onClick={() => {
+                      const table = { ...this.state.table };
+
+                      table.pagination.skipSize = 0;
+                      this.setState({ isCod: "", isReal: true, table }, () => {
+                        this.loadData();
+                      });
+                    }}
+                  >
                     <IconCard
                       title="Total Registered Tenants"
-                      value={this.state.tenantsSummary.totalTenant}
-                      className="mb-4"
+                      value={this.state.tenantsSummary.totalRealTenant}
+                      className="mb-4 hover"
                     />
                   </Colxx>
-                  <Colxx xxs="6">
+                  <Colxx
+                    xxs="6"
+                    onClick={() => {
+                      const table = { ...this.state.table };
+
+                      table.pagination.skipSize = 0;
+                      this.setState({ isCod: true, isReal: "", table }, () => {
+                        this.loadData();
+                      });
+                    }}
+                  >
                     <IconCard
                       title="Total Registered COD Tenants"
                       value={this.state.tenantsSummary.totalTenantRegisteredCOD}
-                      className="mb-4"
+                      className="mb-4 hover"
                     />
                   </Colxx>
                 </Row>
@@ -399,13 +564,18 @@ export default class Tenant extends Component {
         </Row>
         <Row style={{ marginTop: 20 }}>
           <Colxx xxs="12">
-            <Card className="mb-12 lg-12">
+            <Card
+              className="mb-12 lg-12"
+              style={{
+                borderRadius: 10
+              }}
+            >
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
                     <InputGroup>
                       <Input
-                        placeholder="Search Owner"
+                        placeholder="Search..."
                         name="search"
                         value={this.state.search}
                         onChange={this.handleInputChange}
@@ -414,28 +584,67 @@ export default class Tenant extends Component {
                             this.loadData();
                           }
                         }}
+                        style={{
+                          borderRadius: "6px 0px 0px 6px"
+                        }}
                       />
                       <Button
                         className="default"
                         color="primary"
                         onClick={() => this.loadData()}
+                        style={{
+                          borderRadius: "0px 6px 6px 0px"
+                        }}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
+                      <div
+                        style={{
+                          margin: "10px 0px 0px 20px"
+                        }}
+                      >
+                        <CustomInput
+                          type="checkbox"
+                          id="isReal"
+                          label="Is Real"
+                          checked={
+                            this.state.filterIsReal === "" ||
+                            this.state.filterIsReal === false
+                              ? false
+                              : true
+                          }
+                          onClick={e => {
+                            const isReal =
+                              e.target.checked === true ? e.target.checked : "";
+                            this.setState(
+                              {
+                                filterIsReal: e.target.checked,
+                                isReal: isReal
+                              },
+                              () => {
+                                this.loadData();
+                              }
+                            );
+                          }}
+                        />
+                      </div>
                     </InputGroup>
                   </div>
                   <div className="col-md-7">
                     <Button
                       className="float-right default"
+                      color="primary"
                       id="Popover1"
                       type="button"
                       style={{
-                        marginLeft: 10
+                        marginLeft: 10,
+                        borderRadius: 6
                       }}
                     >
                       <i className="simple-icon-menu mr-2" />
                     </Button>
-                    <Popover
+                    <UncontrolledPopover
+                      trigger="legacy"
                       placement="bottom"
                       isOpen={this.state.popoverOpen}
                       target="Popover1"
@@ -516,6 +725,15 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
+                            name="isRealColumn"
+                            type="checkbox"
+                            checked={this.state.isRealColumn}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Is Real
+                        </div>
+                        <div>
+                          <input
                             name="status"
                             type="checkbox"
                             checked={this.state.status}
@@ -524,19 +742,33 @@ export default class Tenant extends Component {
                           Status
                         </div>
                       </PopoverBody>
-                    </Popover>
+                    </UncontrolledPopover>
 
                     <Button
                       className="float-right default"
                       color="primary"
                       onClick={() => {
-                        this.setState({ packageFilter: "", search: "" }, () => {
-                          this.loadData();
-                        });
+                        const table = { ...this.state.table };
+
+                        table.pagination.skipSize = 0;
+                        this.setState(
+                          {
+                            packageFilter: "",
+                            search: "",
+                            isCod: "",
+                            isReal: "",
+                            table
+                          },
+                          () => {
+                            this.loadData();
+                            this.loadTenantsSummmary();
+                          }
+                        );
                         this.setState({ collapse: false });
                       }}
                       style={{
-                        marginRight: 10
+                        marginRight: 10,
+                        borderRadius: 6
                       }}
                     >
                       <i className="simple-icon-refresh" />
@@ -553,6 +785,9 @@ export default class Tenant extends Component {
                   columns={this.dataTable()}
                   className="-striped"
                   loading={this.state.table.loading}
+                  onSortedChange={(newSorted, column, additive) => {
+                    this.handleSortedChange(newSorted, column, additive);
+                  }}
                   manual // this would indicate that server side pagination has been enabled
                   onFetchData={(state, instance) => {
                     const newState = { ...this.state.table };
@@ -597,6 +832,37 @@ export default class Tenant extends Component {
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" outline onClick={this.toggle}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
+        )}
+
+        {this.state.error && (
+          <div
+            style={{
+              maxHeight: 580
+            }}
+          >
+            <Modal isOpen={this.state.error}>
+              <ModalHeader>Error</ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
+                }}
+              >
+                {this.state.errorMessage}
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  color="primary"
+                  outline
+                  onClick={() => {
+                    this.setState({ error: false });
+                  }}
+                >
                   Close
                 </Button>
               </ModalFooter>

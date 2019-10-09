@@ -335,7 +335,7 @@ class DebitCod extends Component {
                   <div className="mb-3 col-md-5">
                     <InputGroup>
                       <Input
-                        placeholder="Search Owner"
+                        placeholder="Search..."
                         name="search"
                         value={this.state.search}
                         onChange={this.handleInputChange}

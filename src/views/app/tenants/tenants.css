@@ -1,3 +1,12 @@
 .modalUser {
   max-height: 580px;
 }
+
+.hover:hover {
+  cursor: pointer;
+}
+
+.swal-height {
+  margin-top: 60px !important;
+  height: 50px !important;
+}
