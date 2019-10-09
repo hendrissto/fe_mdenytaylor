@@ -22,6 +22,7 @@ import {
   ModalFooter,
   Row,
   Col,
+  UncontrolledPopover,
   Popover,
   PopoverBody
 } from "reactstrap";
@@ -56,6 +57,7 @@ export default class Tenant extends Component {
       siCepatCOD: true,
       siCepatMemberId: true,
       status: true,
+      isRealColumn: true,
       popoverOpen: false,
       totalTenants: 0,
       totalCODTenants: 0,
@@ -367,7 +369,7 @@ export default class Tenant extends Component {
       {
         Header: "Is Real",
         accessor: "isReal",
-        show: this.state.siCepatCOD,
+        show: this.state.isRealColumn,
         Cell: props => (
           <Switch
             className="custom-switch custom-switch-secondary"
@@ -605,7 +607,8 @@ export default class Tenant extends Component {
                     >
                       <i className="simple-icon-menu mr-2" />
                     </Button>
-                    <Popover
+                    <UncontrolledPopover
+                      trigger="legacy"
                       placement="bottom"
                       isOpen={this.state.popoverOpen}
                       target="Popover1"
@@ -686,6 +689,15 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
+                            name="isRealColumn"
+                            type="checkbox"
+                            checked={this.state.isRealColumn}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Is Real
+                        </div>
+                        <div>
+                          <input
                             name="status"
                             type="checkbox"
                             checked={this.state.status}
@@ -694,7 +706,7 @@ export default class Tenant extends Component {
                           Status
                         </div>
                       </PopoverBody>
-                    </Popover>
+                    </UncontrolledPopover>
 
                     <Button
                       className="float-right default"
