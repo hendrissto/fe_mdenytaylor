@@ -19,4 +19,8 @@ export default class TenantRestService extends React.Component {
   activeCOD(id, status) {
     return this.request.put(`/admin/tenants/${id}/sicepat-cod/${status}`);
   }
+
+  isRealUser(id, status) {
+    return this.request.put(`/admin/tenants/${id}/mark-isreal/${status}`);
+  }
 }
