@@ -24,7 +24,8 @@ import {
   Col,
   UncontrolledPopover,
   Popover,
-  PopoverBody
+  PopoverBody,
+  CustomInput
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
@@ -36,6 +37,10 @@ import "./tenants.css";
 import Switch from "rc-switch";
 import "rc-switch/assets/index.css";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
+
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
@@ -45,7 +50,7 @@ export default class Tenant extends Component {
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.editStatusCOD = this.editStatusCOD.bind(this);
-
+    this.toggleFilterPopOver = this.toggleFilterPopOver.bind(this);
     this.toggle = this.toggle.bind(this);
     this.state = {
       totalSku: true,
@@ -59,6 +64,7 @@ export default class Tenant extends Component {
       status: true,
       isRealColumn: true,
       popoverOpen: false,
+      filterPopover: false,
       totalTenants: 0,
       totalCODTenants: 0,
       data: [],
@@ -82,14 +88,21 @@ export default class Tenant extends Component {
       loading: false,
       error: false,
       errorMessage: null,
-      isReal: "",
-      isCod: ""
+      isReal: true,
+      isCod: "",
+      filterIsReal: true
     };
   }
 
   togglePopOver() {
     this.setState(prevState => ({
       popoverOpen: !prevState.popoverOpen
+    }));
+  }
+
+  toggleFilterPopOver() {
+    this.setState(prevState => ({
+      filterPopover: !prevState.filterPopover
     }));
   }
 
@@ -165,37 +178,6 @@ export default class Tenant extends Component {
         table.data = response.data;
         table.pagination.totalPages = Math.ceil(response.total / response.take);
         table.loading = false;
-        for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i].siCepatCOD === true) {
-            this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
-          }
-        }
-        this.setState({ totalTenants: response.total });
-        this.setState({ table });
-      },
-      error => {
-        this.setState({ redirect: true });
-      }
-    );
-  }
-
-  loadDataWithoutRefresh() {
-    const table = { ...this.state.table };
-    this.setState({ table });
-    let total = this.state.totalCODTenants;
-
-    const params = {
-      keyword: this.state.search || null,
-      "options.take": this.state.table.pagination.pageSize,
-      "options.skip": this.state.table.pagination.skipSize,
-      "options.includeTotalCount": true
-    };
-
-    this.tenantRest.getTenants({ params }).subscribe(
-      response => {
-        const table = { ...this.state.table };
-        table.data = response.data;
-        table.pagination.totalPages = Math.ceil(response.total / response.take);
         for (let i = 0; i < response.data.length; i++) {
           if (response.data[i].siCepatCOD === true) {
             this.setState({ totalCODTenants: this.state.totalCODTenants + 1 });
@@ -337,14 +319,14 @@ export default class Tenant extends Component {
         accessor: "owner.lastLoginDateUtc",
         width: 200,
         show: this.state.lastLoginDateUtc,
-        Cell: props => <p>{moment(props.value).format("LLL")}</p>
+        Cell: props => <p>{moment(props.value).format("LL")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
         width: 200,
         show: this.state.joinDateUtc,
-        Cell: props => <p>{moment(props.value).format("LLL")}</p>
+        Cell: props => <p>{moment(props.value).format("LL")}</p>
       },
       {
         Header: "Sicepat COD",
@@ -428,6 +410,28 @@ export default class Tenant extends Component {
       this.tenantRest.activeCOD(data.id, !data.siCepatCOD).subscribe(
         response => {
           this.loadData();
+          this.loadTenantsSummmary();
+          if (!data.siCepatCOD) {
+            MySwal.fire({
+              type: "success",
+              title: "COD SiCepat telah diaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          } else {
+            MySwal.fire({
+              type: "success",
+              title: "COD SiCepat telah dinonaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          }
         },
         error => {
           this.setState({
@@ -447,6 +451,16 @@ export default class Tenant extends Component {
       this.tenantRest.isRealUser(data.id, !data.isReal).subscribe(
         response => {
           this.loadData();
+          this.loadTenantsSummmary();
+          MySwal.fire({
+            type: "success",
+            title: "Berhasil.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
         },
         error => {
           this.setState({
@@ -510,23 +524,29 @@ export default class Tenant extends Component {
               <CardBody>
                 <Row>
                   <Colxx
-                    xxs="4"
+                    xxs="6"
                     onClick={() => {
-                      this.setState({ isCod: "", isReal: "" }, () => {
+                      const table = { ...this.state.table };
+
+                      table.pagination.skipSize = 0;
+                      this.setState({ isCod: "", isReal: true, table }, () => {
                         this.loadData();
                       });
                     }}
                   >
                     <IconCard
                       title="Total Registered Tenants"
-                      value={this.state.tenantsSummary.totalTenant}
+                      value={this.state.tenantsSummary.totalRealTenant}
                       className="mb-4 hover"
                     />
                   </Colxx>
                   <Colxx
-                    xxs="4"
+                    xxs="6"
                     onClick={() => {
-                      this.setState({ isCod: true, isReal: "" }, () => {
+                      const table = { ...this.state.table };
+
+                      table.pagination.skipSize = 0;
+                      this.setState({ isCod: true, isReal: "", table }, () => {
                         this.loadData();
                       });
                     }}
@@ -534,20 +554,6 @@ export default class Tenant extends Component {
                     <IconCard
                       title="Total Registered COD Tenants"
                       value={this.state.tenantsSummary.totalTenantRegisteredCOD}
-                      className="mb-4 hover"
-                    />
-                  </Colxx>
-                  <Colxx
-                    xxs="4"
-                    onClick={() => {
-                      this.setState({ isCod: "", isReal: true }, () => {
-                        this.loadData();
-                      });
-                    }}
-                  >
-                    <IconCard
-                      title="Total Real User"
-                      value={this.state.tenantsSummary.totalRealTenant}
                       className="mb-4 hover"
                     />
                   </Colxx>
@@ -569,7 +575,7 @@ export default class Tenant extends Component {
                   <div className="mb-3 col-md-5">
                     <InputGroup>
                       <Input
-                        placeholder="Search Owner"
+                        placeholder="Search..."
                         name="search"
                         value={this.state.search}
                         onChange={this.handleInputChange}
@@ -579,7 +585,7 @@ export default class Tenant extends Component {
                           }
                         }}
                         style={{
-                          borderRadius: "10px 0px 0px 10px"
+                          borderRadius: "6px 0px 0px 6px"
                         }}
                       />
                       <Button
@@ -587,11 +593,41 @@ export default class Tenant extends Component {
                         color="primary"
                         onClick={() => this.loadData()}
                         style={{
-                          borderRadius: "0px 10px 10px 0px"
+                          borderRadius: "0px 6px 6px 0px"
                         }}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
+                      <div
+                        style={{
+                          margin: "10px 0px 0px 20px"
+                        }}
+                      >
+                        <CustomInput
+                          type="checkbox"
+                          id="isReal"
+                          label="Is Real"
+                          checked={
+                            this.state.filterIsReal === "" ||
+                            this.state.filterIsReal === false
+                              ? false
+                              : true
+                          }
+                          onClick={e => {
+                            const isReal =
+                              e.target.checked === true ? e.target.checked : "";
+                            this.setState(
+                              {
+                                filterIsReal: e.target.checked,
+                                isReal: isReal
+                              },
+                              () => {
+                                this.loadData();
+                              }
+                            );
+                          }}
+                        />
+                      </div>
                     </InputGroup>
                   </div>
                   <div className="col-md-7">
@@ -712,9 +748,22 @@ export default class Tenant extends Component {
                       className="float-right default"
                       color="primary"
                       onClick={() => {
-                        this.setState({ packageFilter: "", search: "" }, () => {
-                          this.loadData();
-                        });
+                        const table = { ...this.state.table };
+
+                        table.pagination.skipSize = 0;
+                        this.setState(
+                          {
+                            packageFilter: "",
+                            search: "",
+                            isCod: "",
+                            isReal: "",
+                            table
+                          },
+                          () => {
+                            this.loadData();
+                            this.loadTenantsSummmary();
+                          }
+                        );
                         this.setState({ collapse: false });
                       }}
                       style={{
