@@ -1330,6 +1330,7 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
+            {console.log(this.state.data)}
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
@@ -1391,9 +1392,9 @@ class ReceiptOfFunds extends Component {
                 defaultPageSize={this.state.table.pagination.pageSize}
                 className="-striped"
                 loading={this.state.table.loading}
-                showPagination={true}
+                showPagination={false}
                 showPaginationTop={false}
-                showPaginationBottom={true}
+                showPaginationBottom={false}
                 pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                 manual // this would indicate that server side pagination has been enabled
                 onFetchData={(state, instance) => {

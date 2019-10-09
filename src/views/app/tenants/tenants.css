@@ -1,3 +1,7 @@
 .modalUser {
   max-height: 580px;
 }
+
+.hover:hover {
+  cursor: pointer;
+}
