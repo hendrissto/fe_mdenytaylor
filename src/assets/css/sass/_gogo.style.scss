@@ -2028,13 +2028,15 @@ button {
 
   .main-menu {
     width: $main-menu-width;
-    height: calc(100% - #{$navbar-height});
+    // height: calc(100% - #{$navbar-height});
+    height: 100%;
     background: $foreground-color;
     z-index: 3;
     position: fixed;
     transition: transform $menu-collapse-time;
     padding-top: 2px;
     left: 0;
+    @include depth(2);
 
     .scroll {
       padding-right: unset;
@@ -2139,7 +2141,7 @@ button {
     position: fixed;
     left: $main-menu-width;
     border-left: 1px solid $separator-color-light;
-    @include depth(2);
+    // @include depth(2);
     transition: transform $menu-collapse-time;
     height: calc(100% - #{$navbar-height});
 

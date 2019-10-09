@@ -27,7 +27,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
 // import BaseAlert from "../../base/baseAlert";
-import { BaseAlert } from "../../../containers/pages/BaseAlert";
+// import { BaseAlert } from "../../../containers/pages/BaseAlert";
 import "./style.scss";
 const MySwal = withReactContent(Swal);
 
