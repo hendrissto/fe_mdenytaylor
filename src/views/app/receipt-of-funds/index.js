@@ -43,6 +43,10 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import BaseAlert from "../../base/baseAlert";
 import * as css from "../../base/baseCss";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
+
 const regex = /\[(.*?)\-/;
 const customStyles = {
   content: {
@@ -382,6 +386,9 @@ class ReceiptOfFunds extends Component {
             <Button
               onClick={() => {
                 this.loadDetailData(props.original.id);
+              }}
+              style={{
+                borderRadius: 6
               }}
             >
               Detail
@@ -845,6 +852,7 @@ class ReceiptOfFunds extends Component {
   }
 
   fileHandler = event => {
+    this.setState({ errorFile: false });
     let fileObj = event.target.files[0];
 
     if (
@@ -862,26 +870,29 @@ class ReceiptOfFunds extends Component {
       if (err) {
         console.log(err);
       } else {
+        let arr = [];
+        arr.push(resp.rows)
+        
         let excelData = resp.rows;
         excelData.splice(0, 2);
         excelData.shift();
-
+        
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
+        
         this.normalizeLines(newExcelData);
-
-        let data = _(newExcelData)
-          .groupBy("osName")
-          .map((newDataExcel, sellerName) => ({
-            osName: sellerName,
-            lines: newDataExcel,
-            package: newDataExcel.length,
-            totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
-            codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-            totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
-          }))
-          .value();
-        this.setState({ data: data });
+        // let data = _(newExcelData)
+        //   .groupBy("osName")
+        //   .map((newDataExcel, sellerName) => ({
+        //     osName: sellerName,
+        //     lines: newDataExcel,
+        //     package: newDataExcel.length,
+        //     totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
+        //     codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
+        //     totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+        //   }))
+        //   .value();
+        // this.setState({ data: data });
       }
     });
   }
@@ -970,6 +981,7 @@ class ReceiptOfFunds extends Component {
       );
       dataWithObject.push(concatValue);
     }
+    console.log(data)
     return dataWithObject;
   }
 
@@ -1020,6 +1032,28 @@ class ReceiptOfFunds extends Component {
       this.state.errorFile === true
     ) {
       this.setState({ error: true });
+      if(this.state.errorFile){
+        MySwal.fire({
+          type: "error",
+          title: "Hanya file excel yang bisa diupload.",
+          toast: true,
+          position: 'top-end',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: 'swal-height',
+        });
+
+      }else{
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan Semua Data Telah Terisi.",
+          toast: true,
+          position: 'top-end',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: 'swal-height',
+        });
+      }
     } else {
       this.setState({ error: false });
       this.excelProcess();
@@ -1051,6 +1085,7 @@ class ReceiptOfFunds extends Component {
     return data;
   }
   onShowModalAWBUpload() {
+    this.setState({ fileTemp: null })
     const defaultCourier = this.state.relatedData.courierChannel ?  _.find(this.state.relatedData.courierChannel, ['id', 'sicepat']) : [];
     this.setState({ selectedCourier: defaultCourier });
   }
@@ -1069,7 +1104,9 @@ class ReceiptOfFunds extends Component {
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
-            <Card className="mb-12 lg-12">
+            <Card className="mb-12 lg-12" style={{
+              borderRadius: 10
+            }}>
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
@@ -1084,11 +1121,17 @@ class ReceiptOfFunds extends Component {
                             this.loadData();
                           }
                         }}
+                        style={{
+                          borderRadius: "6px 0px 0px 6px"
+                        }}
                       />
                       <Button
                         className="default"
                         color="primary"
                         onClick={() => this.loadData()}
+                        style={{
+                          borderRadius: "0px 6px 6px 0px"
+                        }}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
@@ -1097,11 +1140,13 @@ class ReceiptOfFunds extends Component {
 
                   <div className="col-md-7">
                     <Button
-                      className="float-right default"
+                      className="float-right"
+                      color="primary"
                       id="Popover1"
                       type="button"
                       style={{
-                        marginLeft: 10
+                        marginLeft: 10,
+                        borderRadius: 6,
                       }}
                     >
                       <i className="simple-icon-menu mr-2" />
@@ -1152,9 +1197,12 @@ class ReceiptOfFunds extends Component {
                       </PopoverBody>
                     </Popover>
                     <Button
-                      className="float-right default"
-                      color="secondary"
+                      className="float-right"
+                      color="primary"
                       onClick={() => this.setState({ modal: true })}
+                      style={{
+                        borderRadius: 6
+                      }}
                     >
                       <i className="iconsminds-upload mr-2" />
                       <IntlMessages
@@ -1211,14 +1259,6 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.uploadReceiptTitle" />
             </ModalHeader>
             <ModalBody>
-              {this.state.error && (
-                <BaseAlert
-                  onClick={() => {
-                    this.setState({ error: false });
-                  }}
-                  text={"Semua data wajib diisi"}
-                />
-              )}
               <div>
                 <Row>
                   <Col
@@ -1253,14 +1293,6 @@ class ReceiptOfFunds extends Component {
                   onChange={this.fileHandler.bind(this)}
                   required
                 />
-                {this.state.errorFile && (
-                  <BaseAlert
-                    onClick={() => {
-                      this.setState({ errorFile: false });
-                    }}
-                    text={"Hanya file excel yang bisa diupload."}
-                  />
-                )}
               </div>
             </ModalBody>
             <ModalFooter>

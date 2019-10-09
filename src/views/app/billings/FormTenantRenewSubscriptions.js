@@ -19,6 +19,8 @@ import {
   DropdownItem
 } from "reactstrap";
 import moment from "moment";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -26,6 +28,7 @@ import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 import "./style.scss";
+const MySwal = withReactContent(Swal);
 
 export default class FormTenantRenewSubscription extends Component {
   constructor(props) {
@@ -399,8 +402,8 @@ export default class FormTenantRenewSubscription extends Component {
       props.values.total =
         props.values.total + parseInt(props.values.adjustmentAmount);
     }
-    
-    if(props.values.adjustmentAmount === "") {
+
+    if (props.values.adjustmentAmount === "") {
       props.values.adjustmentAmount = 0;
       props.values.total = props.values.prices;
     }
@@ -671,7 +674,7 @@ export default class FormTenantRenewSubscription extends Component {
                 width: "110px"
               }}
               onClick={() => {
-                this.setState({redirect: true})
+                this.setState({ redirect: true });
               }}
             >
               Cancel
@@ -698,7 +701,15 @@ export default class FormTenantRenewSubscription extends Component {
 
   handleSubmit(props) {
     if (this.validateError(props)) {
-      this.setState({ error: true });
+      MySwal.fire({
+        type: "error",
+        title: "Pastikan Semua Data Telah Terisi.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
     } else {
       this.setState({ loading: true });
       if (props.billingCycle.code === "monthlyPrice") {
@@ -735,7 +746,10 @@ export default class FormTenantRenewSubscription extends Component {
         taxRate:
           isNaN(parseInt(props.taxRate)) === true ? 0 : parseInt(props.taxRate),
         amountPaid: props.total,
-        adjustmentAmount: isNaN(parseInt(props.adjustmentAmount)) === true ? 0 : parseInt(props.adjustmentAmount),
+        adjustmentAmount:
+          isNaN(parseInt(props.adjustmentAmount)) === true
+            ? 0
+            : parseInt(props.adjustmentAmount),
         items: [
           {
             itemType: 0,
@@ -764,7 +778,17 @@ export default class FormTenantRenewSubscription extends Component {
           data
         )
         .subscribe(response => {
-          this.setState({ loading: false, modal: true });
+          this.setState({ loading: false, redirect: true }, () => {
+            MySwal.fire({
+              type: "success",
+              title: "Berhasil Renew tenant.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          });
         });
     }
   }
@@ -825,14 +849,6 @@ export default class FormTenantRenewSubscription extends Component {
                             width: "100%"
                           }}
                         >
-                          {this.state.error && (
-                            <BaseAlert
-                              onClick={() => {
-                                this.setState({ error: false });
-                              }}
-                              text={"Pastikan semua data telah terisi."}
-                            />
-                          )}
                           <Row
                             style={{
                               marginTop: 10,
