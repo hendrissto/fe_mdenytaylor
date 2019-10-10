@@ -344,6 +344,30 @@ export default class Billing extends Component {
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
+        Header: "Total Product",
+        accessor: "subscriptionPlanName",
+        show: tableFilter.subscriptionPlanName,
+        Cell: props => (
+          <p>
+            {props.original.totalProducts}
+            {' '} / {' '}
+            {props.original.maxNumOfProducts === null ? '∞' : props.original.maxNumOfProducts}
+          </p>
+        )
+      },
+      {
+        Header: "Total User",
+        accessor: "subscriptionPlanName",
+        show: tableFilter.subscriptionPlanName,
+        Cell: props => (
+          <p>
+            {props.original.totalUsers}
+            {' '} / {' '}
+            {props.original.maxNumOfUsers === null ? '∞' : props.original.maxNumOfUsers}
+          </p>
+        )
+      },
+      {
         Header: "Expired Date Free Trial",
         accessor: "freeTrialEndDate",
         width: 150,

@@ -11,7 +11,7 @@ import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
+// import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -23,13 +23,13 @@ import {
   Row,
   Col,
   UncontrolledPopover,
-  Popover,
+  // Popover,
   PopoverBody,
   CustomInput
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../core/tenantRestService";
-import { InputSwitch } from "primereact/inputswitch";
+// import { InputSwitch } from "primereact/inputswitch";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
 import "./tenants.css";
@@ -319,14 +319,14 @@ export default class Tenant extends Component {
         accessor: "owner.lastLoginDateUtc",
         width: 200,
         show: this.state.lastLoginDateUtc,
-        Cell: props => <p>{moment(props.value).format("LL")}</p>
+        Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
         width: 200,
         show: this.state.joinDateUtc,
-        Cell: props => <p>{moment(props.value).format("LL")}</p>
+        Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
         Header: "Sicepat COD",
