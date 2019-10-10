@@ -881,18 +881,18 @@ class ReceiptOfFunds extends Component {
         const newExcelData = this.createObjectExcel(excelValue);
         
         this.normalizeLines(newExcelData);
-        // let data = _(newExcelData)
-        //   .groupBy("osName")
-        //   .map((newDataExcel, sellerName) => ({
-        //     osName: sellerName,
-        //     lines: newDataExcel,
-        //     package: newDataExcel.length,
-        //     totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
-        //     codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-        //     totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
-        //   }))
-        //   .value();
-        // this.setState({ data: data });
+        let data = _(newExcelData)
+          .groupBy("osName")
+          .map((newDataExcel, sellerName) => ({
+            osName: sellerName,
+            lines: newDataExcel,
+            package: newDataExcel.length,
+            totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
+            codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
+            totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+          }))
+          .value();
+        this.setState({ data: data });
       }
     });
   }
@@ -949,7 +949,6 @@ class ReceiptOfFunds extends Component {
             errorMessage.push(error.data[i].errorMessage);
           }
         }
-        console.log(errorMessage)
         this.setState({
           resError: errorMessage,
           resiModal: false,
@@ -981,7 +980,6 @@ class ReceiptOfFunds extends Component {
       );
       dataWithObject.push(concatValue);
     }
-    console.log(data)
     return dataWithObject;
   }
 
@@ -1362,7 +1360,6 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-            {console.log(this.state.data)}
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
