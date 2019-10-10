@@ -53,7 +53,8 @@ class WithdrawFunds extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.submitData = this.submitData.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    
     this.state = {
       companyName: true,
       companyEmail: true,

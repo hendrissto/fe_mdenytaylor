@@ -40,9 +40,6 @@ import "./receipt-of-funds.scss";
 import { Dropdown } from "primereact/dropdown";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import BaseAlert from "../../base/baseAlert";
-import * as css from "../../base/baseCss";
-
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
@@ -74,7 +71,8 @@ class ReceiptOfFunds extends Component {
     this.showModal = this.showModalError.bind(this);
     this.loadDetailData = this.loadDetailData.bind(this);
     this.toggle = this.toggle.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    
     this.state = {
       uploadDateShow: true,
       idFileShow: true,
