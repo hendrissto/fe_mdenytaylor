@@ -50,7 +50,8 @@ class DebitCod extends Component {
     this.submitData = this.submitData.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    
     this.state = {
       deliveryDate: true,
       sellerName: true,

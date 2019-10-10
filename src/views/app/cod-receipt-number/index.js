@@ -4,7 +4,6 @@ import ReactTable from "react-table";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -31,7 +30,7 @@ export default class CODReceiptNumber extends Component {
     this.moneyFormat = new MoneyFormat();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
     // this.toggleDropDown = this.toggleDropDown.bind(this);
     // this.toggleSplit = this.toggleSplit.bind(this);
     // this.toggleDropDown1 = this.toggleDropDown1.bind(this);

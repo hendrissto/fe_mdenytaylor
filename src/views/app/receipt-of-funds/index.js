@@ -40,9 +40,6 @@ import "./receipt-of-funds.scss";
 import { Dropdown } from "primereact/dropdown";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import BaseAlert from "../../base/baseAlert";
-import * as css from "../../base/baseCss";
-
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
@@ -74,7 +71,8 @@ class ReceiptOfFunds extends Component {
     this.showModal = this.showModalError.bind(this);
     this.loadDetailData = this.loadDetailData.bind(this);
     this.toggle = this.toggle.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    
     this.state = {
       uploadDateShow: true,
       idFileShow: true,
@@ -881,18 +879,18 @@ class ReceiptOfFunds extends Component {
         const newExcelData = this.createObjectExcel(excelValue);
         
         this.normalizeLines(newExcelData);
-        // let data = _(newExcelData)
-        //   .groupBy("osName")
-        //   .map((newDataExcel, sellerName) => ({
-        //     osName: sellerName,
-        //     lines: newDataExcel,
-        //     package: newDataExcel.length,
-        //     totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
-        //     codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-        //     totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
-        //   }))
-        //   .value();
-        // this.setState({ data: data });
+        let data = _(newExcelData)
+          .groupBy("osName")
+          .map((newDataExcel, sellerName) => ({
+            osName: sellerName,
+            lines: newDataExcel,
+            package: newDataExcel.length,
+            totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
+            codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
+            totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+          }))
+          .value();
+        this.setState({ data: data });
       }
     });
   }
@@ -949,7 +947,6 @@ class ReceiptOfFunds extends Component {
             errorMessage.push(error.data[i].errorMessage);
           }
         }
-        console.log(errorMessage)
         this.setState({
           resError: errorMessage,
           resiModal: false,
@@ -981,7 +978,6 @@ class ReceiptOfFunds extends Component {
       );
       dataWithObject.push(concatValue);
     }
-    console.log(data)
     return dataWithObject;
   }
 
@@ -1362,7 +1358,6 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-            {console.log(this.state.data)}
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
