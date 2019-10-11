@@ -825,8 +825,15 @@ class ReceiptOfFunds extends Component {
     let receiver = [];
     let newReceiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
-      const resData = response.codCreditTransactions[0].lines;
-      const data = _(resData)
+      // const resData = response.codCreditTransactions[0].lines;
+      const resData = response.codCreditTransactions;
+      for(let i = 0; i < resData.length; i++){
+        for(let j = 0; j < resData[i].lines.length; j++){
+          receiver.push(resData[i].lines[j])
+        }
+      }
+      
+      const data = _(receiver)
         .groupBy("sellerName")
         .map((value, index) => ({
           osName: index,
