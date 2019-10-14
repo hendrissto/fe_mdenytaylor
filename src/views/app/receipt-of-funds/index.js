@@ -781,6 +781,11 @@ class ReceiptOfFunds extends Component {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
+    for(let j = 0; j < data.lines.length; j++ ){
+      Math.round(data.lines[j].codFeeRp);
+      Math.round(data.lines[j].totAmountCodFee);
+    }
+
     let finish = data.lines;
     this.setState({ oneData: finish, resiModalSeller: true });
   }
@@ -827,23 +832,39 @@ class ReceiptOfFunds extends Component {
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
       const resData = response.codCreditTransactions;
+      // console.log('RES DATA', resData)
       for(let i = 0; i < resData.length; i++){
         for(let j = 0; j < resData[i].lines.length; j++){
           receiver.push(resData[i].lines[j])
         }
       }
-      
-      const data = _(receiver)
-        .groupBy("sellerName")
-        .map((value, index) => ({
-          osName: index,
-          package: value.length,
-          lines: value,
-          totalAmount: Math.round(_.sumBy(value, "totalAmount")),
-          codFeeRp: Math.round(_.sumBy(value, "codFeeValue")),
-          totalReceive: Math.round(_.sumBy(value, "subTotalAmount"))
-        }))
-        .value();
+      // console.log('RECEIVER', receiver)
+      // const data = _(receiver)
+      //   .groupBy("tenantId")
+      //   .map((value, index) => ({
+      //     osName: value.sellerName,
+      //     package: value.length,
+      //     lines: value,
+      //     totalAmount: Math.round(_.sumBy(value, "goodValue")),
+      //     codFeeRp: Math.round(_.sumBy(value, "codFeeValue")),
+      //     totalReceive: Math.round(_.sumBy(value, "subTotalAmount"))
+      //   }))
+      //   .value();
+      const data =  [];
+
+      for(let index = 0; index < resData.length; index++) {
+        data.push({
+          osName: resData[index].sellerName,
+          //tenantId: resData[index].lines[0].tenantId,
+          package: resData[index].lineCount,
+          totalAmount: resData[index].total,
+          codFeeRp: resData[index].codFeeValue,
+          totalReceive: resData[index].receiveAmount,
+          lines: resData[index].lines,
+        })
+      }
+
+        // console.log('DATA', data)
       this.setState({ data: data, resiModalDetail: true });
     });
   }
@@ -881,9 +902,13 @@ class ReceiptOfFunds extends Component {
         let excelData = resp.rows;
         excelData.splice(0, 2);
         excelData.shift();
-        
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
+        
+        for(let i = 0; i < newExcelData.length; i++){
+          newExcelData[i].codFeeRp = Math.round(newExcelData[i].codFeeRp);
+          newExcelData[i].totAmountCodFee = Math.round(newExcelData[i].totAmountCodFee)
+        }
         
         this.normalizeLines(newExcelData);
         let data = _(newExcelData)
@@ -897,6 +922,7 @@ class ReceiptOfFunds extends Component {
             totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
+          
         this.setState({ data: data });
       }
     });
@@ -1334,7 +1360,7 @@ class ReceiptOfFunds extends Component {
                   dataField="totalAmount"
                   dataFormat={this.currencyFormat.bind(this)}
                 >
-                  Nilai Paket
+                  Total
                 </TableHeaderColumn>
                 <TableHeaderColumn
                   dataField="codFeeRp"
@@ -1469,9 +1495,9 @@ class ReceiptOfFunds extends Component {
                 defaultPageSize={this.state.table.pagination.pageSize}
                 className="-striped"
                 loading={this.state.table.loading}
-                showPagination={true}
+                showPagination={false}
                 showPaginationTop={false}
-                showPaginationBottom={true}
+                showPaginationBottom={false}
                 pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                 manual // this would indicate that server side pagination has been enabled
                 onFetchData={(state, instance) => {

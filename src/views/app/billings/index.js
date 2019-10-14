@@ -11,37 +11,37 @@ import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
+// import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
   Input,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
+  // Modal,
+  // ModalHeader,
+  // ModalBody,
+  // ModalFooter,
   Row,
   Col,
   Collapse,
   CardFooter,
   UncontrolledPopover,
-  Popover,
-  PopoverHeader,
+  // Popover,
+  // PopoverHeader,
   PopoverBody,
-  Dropdown,
-  DropdownToggle,
-  DropdownItem,
-  DropdownMenu,
-  ButtonDropdown
+  // Dropdown,
+  // DropdownToggle,
+  // DropdownItem,
+  // DropdownMenu,
+  // ButtonDropdown
 } from "reactstrap";
 
 import BillingRestService from "../../../core/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import { Checkbox } from "primereact/checkbox";
+// import { Checkbox } from "primereact/checkbox";
 // import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
+// import { Calendar } from "primereact/calendar";
 import "./style.scss";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
@@ -94,6 +94,8 @@ export default class Billing extends Component {
         billingPeriodEndDate: true,
         billingCycle: true,
         billingAmount: true,
+        maxUser: true,
+        maxProducts: true,
       },
       totalTenants: 0,
       totalCODTenants: 0,
@@ -346,7 +348,7 @@ export default class Billing extends Component {
       {
         Header: "Total Product",
         accessor: "subscriptionPlanName",
-        show: tableFilter.subscriptionPlanName,
+        show: tableFilter.maxProducts,
         Cell: props => (
           <p>
             {props.original.totalProducts}
@@ -358,7 +360,7 @@ export default class Billing extends Component {
       {
         Header: "Total User",
         accessor: "subscriptionPlanName",
-        show: tableFilter.subscriptionPlanName,
+        show: tableFilter.maxUser,
         Cell: props => (
           <p>
             {props.original.totalUsers}
@@ -541,16 +543,16 @@ export default class Billing extends Component {
             >
               <CardBody
                 style={{
-                  height: 290
+                  minHeight: 290
                 }}
               >
                 <Row
                   style={{
-                    height: 70
+                    minHeight: 70
                   }}
                 >
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       this.setState({ freeTrial: true });
                     }}
@@ -564,7 +566,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       this.setState({ freeTrialWeekBeforeExp: true });
                     }}
@@ -579,7 +581,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -598,14 +600,9 @@ export default class Billing extends Component {
                     />
                   </div>
                 </Row>
-                <Row
-                  style={{
-                    marginTop: 60,
-                    height: 70
-                  }}
-                >
+                <Row>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -624,7 +621,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -646,7 +643,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -780,11 +777,7 @@ export default class Billing extends Component {
                     </InputGroup>
                   </div>
 
-                  <div
-                    style={{
-                      marginLeft: 550
-                    }}
-                  >
+                  <div>
                     <Button
                       className="float-right default"
                       color="primary"
@@ -812,6 +805,24 @@ export default class Billing extends Component {
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Package
+                        </div>
+                        <div>
+                          <input
+                            name="maxProducts"
+                            type="checkbox"
+                            checked={tableFilter.maxProducts}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Product
+                        </div>
+                        <div>
+                          <input
+                            name="maxUser"
+                            type="checkbox"
+                            checked={tableFilter.maxUser}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total User
                         </div>
                         <div>
                           <input
