@@ -912,9 +912,9 @@ class ReceiptOfFunds extends Component {
         
         this.normalizeLines(newExcelData);
         let data = _(newExcelData)
-          .groupBy("osName")
+          .groupBy("tenantId")
           .map((newDataExcel, sellerName) => ({
-            osName: sellerName,
+            osName: newDataExcel[0].osName,
             lines: newDataExcel,
             package: newDataExcel.length,
             totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
@@ -922,7 +922,6 @@ class ReceiptOfFunds extends Component {
             totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
           }))
           .value();
-          
         this.setState({ data: data });
       }
     });
