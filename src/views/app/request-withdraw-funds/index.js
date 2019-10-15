@@ -26,9 +26,9 @@ import IntlMessages from "../../../helpers/IntlMessages";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 
-import WithdrawRestService from "../../../core/requestWithdrawRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
-import PictureRestService from "../../../core/pictureRestService";
+import WithdrawRestService from "../../../api/requestWithdrawRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
+import PictureRestService from "../../../api/pictureRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import { InputSwitch } from "primereact/inputswitch";

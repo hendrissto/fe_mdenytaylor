@@ -24,9 +24,9 @@ import { Paginator } from "primereact/paginator";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 
-import DebitRestService from "../../../core/debitRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
-import PictureRestService from "../../../core/pictureRestService";
+import DebitRestService from "../../../api/debitRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
+import PictureRestService from "../../../api/pictureRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
 import { Dropdown } from "primereact/dropdown";

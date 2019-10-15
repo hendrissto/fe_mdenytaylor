@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { loginUser } from "../../redux/actions";
 import { Colxx } from "../../components/common/CustomBootstrap";
 import IntlMessages from "../../helpers/IntlMessages";
-import AuthRestService from "../../core/authRestService";
+import AuthRestService from "../../api/authRestService";
 import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";

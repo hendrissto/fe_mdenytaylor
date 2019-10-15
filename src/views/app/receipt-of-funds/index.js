@@ -28,8 +28,8 @@ import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
-import CODRestService from "../../../core/codRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
+import CODRestService from "../../../api/codRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
 import * as moment from "moment";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";

@@ -6,7 +6,7 @@ import CODFee from "./cod-fee";
 import FundReimbursement from "./fund-reimbursement";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DashboardRestService from "../../../core/dashboardRestService";
+import DashboardRestService from "../../../api/dashboardRestService";
 
 import Loading from "../../../containers/pages/Spinner";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat"

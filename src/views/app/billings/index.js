@@ -35,7 +35,7 @@ import {
   // ButtonDropdown
 } from "reactstrap";
 
-import BillingRestService from "../../../core/billingRestService";
+import BillingRestService from "../../../api/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Formik } from "formik";
 import { Redirect } from "react-router-dom";
-import BillingRestService from "../../../core/billingRestService";
+import BillingRestService from "../../../api/billingRestService";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Card, CardBody } from "reactstrap";
 import {

@@ -28,7 +28,7 @@ import {
   CustomInput
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
-import TenantRestService from "../../../core/tenantRestService";
+import TenantRestService from "../../../api/tenantRestService";
 // import { InputSwitch } from "primereact/inputswitch";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
