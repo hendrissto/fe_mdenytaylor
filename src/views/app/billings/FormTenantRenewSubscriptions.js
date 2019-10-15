@@ -24,9 +24,9 @@ import withReactContent from "sweetalert2-react-content";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
+// import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
-import BaseAlert from "../../base/baseAlert";
+// import BaseAlert from "../../base/baseAlert";
 import "./style.scss";
 const MySwal = withReactContent(Swal);
 
@@ -65,7 +65,8 @@ export default class FormTenantRenewSubscription extends Component {
       packageActive: [],
       modal: false,
       redirect: false,
-      date: today
+      date: today,
+      paymentMethod: null
     };
   }
 
@@ -121,7 +122,16 @@ export default class FormTenantRenewSubscription extends Component {
 
   loadRelatedData() {
     this.billingRest.getRelatedData({}).subscribe(response => {
-      this.setState({ relatedData: response }, () => {
+      const data = response.paymentMethodStr;
+      const options = [];
+
+      for (let i = 0; i < data.length; i++) {
+        options.push({
+          id: i,
+          paymentMethod: data[i]
+        });
+      }
+      this.setState({ relatedData: response, paymentMethod: options }, () => {
         this.loadData();
       });
     });
@@ -135,11 +145,16 @@ export default class FormTenantRenewSubscription extends Component {
     if (this.state.loading === false) {
       const data = this.state.data;
 
+      const subscriptionPlan = data.subscriptionPlanId;
+      const subscriptionPlanCapitalized =
+        subscriptionPlan.charAt(0).toUpperCase() +
+        subscriptionPlan.slice(1) +
+        " Plan.";
       return (
         <h3>
-          {data.companyInfo.name +
-            " sedang aktif dipaket " +
-            data.subscriptionPlanId}
+          <b>{data.companyInfo.name}</b>
+          {" sedang aktif di paket "}
+          <b>{subscriptionPlanCapitalized}</b>
         </h3>
       );
     }
@@ -692,7 +707,8 @@ export default class FormTenantRenewSubscription extends Component {
   }
 
   validateError(props) {
-    if (props.package.length === 0 || props.billingCycle === undefined) {
+    console.log(props)
+    if (props.package.length === 0 || props.billingCycle === undefined || props.paymentMethod === undefined) {
       return true;
     } else {
       return false;
@@ -750,6 +766,7 @@ export default class FormTenantRenewSubscription extends Component {
           isNaN(parseInt(props.adjustmentAmount)) === true
             ? 0
             : parseInt(props.adjustmentAmount),
+        paymentMethod: props.paymentMethod.paymentMethod,
         items: [
           {
             itemType: 0,
@@ -880,6 +897,44 @@ export default class FormTenantRenewSubscription extends Component {
                                   width: 204
                                 }}
                                 placeholder="- Auto -"
+                              />
+                            </Col>
+                          </Row>
+
+                          <Row
+                            style={{
+                              marginTop: 10,
+                              width: "50%"
+                            }}
+                          >
+                            <Col
+                              xs="3"
+                              className="col-12 col-md-3"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              Paymend Method
+                            </Col>
+                            <Col
+                              xs="1"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              :
+                            </Col>
+                            <Col>
+                              <Dropdown
+                                value={props.values.paymentMethod}
+                                options={this.state.paymentMethod}
+                                onChange={props.handleChange}
+                                placeholder="Select a Method"
+                                name="paymentMethod"
+                                optionLabel="paymentMethod"
+                                style={{
+                                  width: 204
+                                }}
                               />
                             </Col>
                           </Row>
