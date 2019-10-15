@@ -8,7 +8,7 @@ import CODReceiptNumber from "./cod-receipt-number";
 import Tenant from "./tenants";
 import Billing from "./billings";
 import FormTenantSubscription from "./billings/form-tenant-subscription";
-import FormTenantRenewSubscriptions from './billings/form-tenant-tenew-subscriptions';
+import FormTenantRenewSubscriptions from './billings/form-tenant-renew-subscriptions';
 import WithdrawFunds from "./request-withdraw-funds";
 import ReceiptOfFunds from "./receipt-of-funds";
 import DebitCod from './debit-cod'

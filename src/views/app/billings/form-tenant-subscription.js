@@ -66,7 +66,8 @@ export default class FormTenantSubscription extends Component {
       packageActive: [],
       modal: false,
       redirect: false,
-      date: today
+      date: today,
+      paymentMethod: null,
     };
   }
 
@@ -104,7 +105,17 @@ export default class FormTenantSubscription extends Component {
 
   loadRelatedData() {
     this.billingRest.getRelatedData({}).subscribe(response => {
-      this.setState({ relatedData: response }, () => {
+      const data = response.paymentMethodStr;
+      const options = [];
+
+      for (let i = 0; i < data.length; i++) {
+        options.push({
+          id: i,
+          paymentMethod: data[i]
+        });
+      }
+
+      this.setState({ relatedData: response, paymentMethod: options }, () => {
         this.loadData();
       });
     });
@@ -118,11 +129,16 @@ export default class FormTenantSubscription extends Component {
     if (this.state.loading === false) {
       const data = this.state.data;
 
+      const subscriptionPlan = data.subscriptionPlanId;
+      const subscriptionPlanCapitalized =
+        subscriptionPlan.charAt(0).toUpperCase() +
+        subscriptionPlan.slice(1) +
+        " Plan.";
       return (
         <h3>
-          {data.companyInfo.name +
-            " sedang aktif dipaket " +
-            data.subscriptionPlanId}
+          <b>{data.companyInfo.name}</b>
+          {" sedang aktif di paket "}
+          <b>{subscriptionPlanCapitalized}</b>
         </h3>
       );
     }
@@ -404,7 +420,7 @@ export default class FormTenantSubscription extends Component {
         }}
       >
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -437,7 +453,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -525,7 +541,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -570,7 +586,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -610,7 +626,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -651,7 +667,7 @@ export default class FormTenantSubscription extends Component {
             </Col>
           </Row>
         </div>
-        <div class="d-flex flex-row-reverse bd-highlight">
+        <div className="d-flex flex-row-reverse bd-highlight">
           <Row
             style={{
               marginRight: 80
@@ -686,7 +702,8 @@ export default class FormTenantSubscription extends Component {
       props.package.length === 0 ||
       props.billingCycle === undefined ||
       props.qty === "" ||
-      parseInt(props.qty) === 0
+      parseInt(props.qty) === 0 ||
+      props.paymentMethod === undefined
     ) {
       return true;
     } else {
@@ -700,10 +717,10 @@ export default class FormTenantSubscription extends Component {
         type: "error",
         title: "Pastikan Semua Data Telah Terisi.",
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         timer: 2000,
         showConfirmButton: false,
-        customClass: 'swal-height',
+        customClass: "swal-height"
       });
     } else {
       this.setState({ loading: true });
@@ -745,6 +762,7 @@ export default class FormTenantSubscription extends Component {
           isNaN(parseInt(props.adjustmentAmount)) === true
             ? 0
             : parseInt(props.adjustmentAmount),
+        paymentMethod: props.paymentMethod.paymentMethod,
         items: [
           {
             itemType: 0,
@@ -767,7 +785,7 @@ export default class FormTenantSubscription extends Component {
           }
         ]
       };
-
+      
       this.billingRest
         .upgradeTenantsSubscriptions(
           parseInt(this.props.match.params.tenantId),
@@ -779,12 +797,12 @@ export default class FormTenantSubscription extends Component {
               type: "success",
               title: "Berhasil Upgrade tenant.",
               toast: true,
-              position: 'top-end',
+              position: "top-end",
               timer: 2000,
               showConfirmButton: false,
-              customClass: 'swal-height',
+              customClass: "swal-height"
             });
-          }); 
+          });
         });
     }
   }
@@ -853,6 +871,7 @@ export default class FormTenantSubscription extends Component {
                           >
                             <Col
                               xs="3"
+                              className="col-12 col-md-3"
                               style={{
                                 marginTop: 5
                               }}
@@ -887,6 +906,46 @@ export default class FormTenantSubscription extends Component {
                           >
                             <Col
                               xs="3"
+                              className="col-12 col-md-3"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              Paymend Method
+                            </Col>
+                            <Col
+                              xs="1"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              :
+                            </Col>
+                            <Col>
+                              <Dropdown
+                                value={props.values.paymentMethod}
+                                options={
+                                  this.state.paymentMethod
+                                }
+                                onChange={props.handleChange}
+                                placeholder="Select a Method"
+                                name="paymentMethod"
+                                optionLabel="paymentMethod"
+                                style={{
+                                  width: 204
+                                }}
+                              />
+                            </Col>
+                          </Row>
+                          <Row
+                            style={{
+                              marginTop: 10,
+                              width: "50%"
+                            }}
+                          >
+                            <Col
+                              xs="3"
+                              className="col-12 col-md-3"
                               style={{
                                 marginTop: 5
                               }}
@@ -911,6 +970,7 @@ export default class FormTenantSubscription extends Component {
                           >
                             <Col
                               xs="3"
+                              className="col-12 col-md-3"
                               style={{
                                 marginTop: 5
                               }}
