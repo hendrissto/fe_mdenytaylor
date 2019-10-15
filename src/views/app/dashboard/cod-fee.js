@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
 class CODFee extends Component {
-  constructor(props){
+  constructor(...props){
     super(props);
   }
 

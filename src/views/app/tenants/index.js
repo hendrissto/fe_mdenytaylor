@@ -161,7 +161,6 @@ export default class Tenant extends Component {
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
-    let total = this.state.totalCODTenants;
 
     const params = {
       keyword: this.state.search || null,

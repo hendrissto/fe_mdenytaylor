@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Formik } from "formik";
 import { Redirect } from "react-router-dom";
 import BillingRestService from "../../../core/billingRestService";
-import { NotificationManager } from "../../../components/common/react-notifications";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Card, CardBody } from "reactstrap";
 import {

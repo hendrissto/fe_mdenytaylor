@@ -38,7 +38,7 @@ class ColorSwitcher extends Component {
     }, 500);
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.removeEvents();
   }
 

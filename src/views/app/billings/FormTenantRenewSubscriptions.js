@@ -24,9 +24,7 @@ import withReactContent from "sweetalert2-react-content";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
-import BaseAlert from "../../base/baseAlert";
 import "./style.scss";
 const MySwal = withReactContent(Swal);
 

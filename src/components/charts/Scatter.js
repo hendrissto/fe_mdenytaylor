@@ -4,7 +4,7 @@ import ChartComponent, { Chart } from "react-chartjs-2";
 import { scatterChartOptions } from "./config";
 
 export default class Scatter extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     if (this.props.shadow) {
       Chart.defaults.scatterWithShadow = Chart.defaults.scatter;
       Chart.controllers.scatterWithShadow = Chart.controllers.scatter.extend({

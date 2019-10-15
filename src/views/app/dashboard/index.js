@@ -11,7 +11,6 @@ import DashboardRestService from "../../../core/dashboardRestService";
 import Loading from "../../../containers/pages/Spinner";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat"
 
-const user = JSON.parse(localStorage.getItem("user"));
 export default class Dashboard extends Component {
   constructor(props) {
     super(props);

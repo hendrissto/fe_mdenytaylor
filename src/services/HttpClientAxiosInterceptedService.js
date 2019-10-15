@@ -3,7 +3,6 @@ import Axios from 'axios';
 import * as _ from "lodash";
 
 import { HttpClientAxiosService } from './HttpClientAxiosService';
-const user = JSON.parse(localStorage.getItem('user'));
 export class HttpClientAxiosInterceptedService extends HttpClientAxiosService {
   constructor(baseURL, headers) {
     const axios = Axios.create({headers: headers});

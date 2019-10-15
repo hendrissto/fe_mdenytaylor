@@ -16,7 +16,6 @@ import {
   PopoverBody
 } from "reactstrap";
 import { ExcelRenderer } from "react-excel-renderer";
-import Loader from "react-loader-spinner";
 import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
 
@@ -43,18 +42,6 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
-
-const regex = /\[(.*?)\-/;
-const customStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)"
-  }
-};
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -828,7 +815,6 @@ class ReceiptOfFunds extends Component {
 
   loadDetailData(id) {
     let receiver = [];
-    let newReceiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
       const resData = response.codCreditTransactions;
@@ -1020,7 +1006,7 @@ class ReceiptOfFunds extends Component {
   button(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         // onClick={() => this.dataTableCODSeller(cell)}
         className="button"
       >
@@ -1032,7 +1018,7 @@ class ReceiptOfFunds extends Component {
   buttonResiCod(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         onClick={() => this.dataTableCODSeller(cell)}
         className="button"
       >
@@ -1044,7 +1030,7 @@ class ReceiptOfFunds extends Component {
   buttonResiCodDetail(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         onClick={() => this.dataTableCODSellerDetail(cell)}
         className="button"
       >

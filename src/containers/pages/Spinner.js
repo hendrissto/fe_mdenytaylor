@@ -15,8 +15,8 @@ const customStyles = {
 };
 
 const Loading = props => (
-  <Modal isOpen={true} style={customStyles}>
-    <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+  <Modal isOpen={true} style={customStyles} ariaHideApp={false}>
+    <Loader type="Oval" color="#51BEEA" height={80} width={80}/>
   </Modal>
 );
 

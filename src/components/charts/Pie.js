@@ -4,7 +4,7 @@ import ChartComponent, { Chart } from "react-chartjs-2";
 import { pieChartOptions } from "./config";
 
 export default class Pie extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     if (this.props.shadow) {
       Chart.defaults.pieWithShadow = Chart.defaults.pie;
       Chart.controllers.pieWithShadow = Chart.controllers.pie.extend({

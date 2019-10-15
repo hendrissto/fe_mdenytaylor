@@ -51,10 +51,6 @@ const filterStyle = {
   marginTop: 10
 };
 
-const filterColumnsStyle = {
-  marginBottom: 7
-};
-
 export default class Billing extends Component {
   constructor(props) {
     super(props);
@@ -268,7 +264,6 @@ export default class Billing extends Component {
   handleFilterDayChange(event) {
     const target = event.target;
     const value = target.value;
-    const name = target.name;
     const day = value.substr(1);
     if (parseInt(value) < 0) {
       this.setState({
@@ -463,16 +458,16 @@ export default class Billing extends Component {
     let price;
     if (selectedPackage.length !== [] && billingCycle !== undefined) {
       let code = billingCycle.code;
-      if (code == 1) {
+      if (code === 1) {
         console.log(selectedPackage.monthlyPrice);
         price = selectedPackage.monthlyPrice;
-      } else if (code == 3) {
+      } else if (code === 3) {
         console.log(selectedPackage.quaterlyPrice);
         price = selectedPackage.quaterlyPrice;
-      } else if (code == 6) {
+      } else if (code === 6) {
         console.log(selectedPackage.semesterlyPrice);
         price = selectedPackage.semesterlyPrice;
-      } else if (code == 12) {
+      } else if (code === 12) {
         console.log(selectedPackage.yearlyPrice);
         price = selectedPackage.yearlyPrice;
       } else {
@@ -707,7 +702,6 @@ export default class Billing extends Component {
                       </Button>
                       <Button
                         className="default"
-                        color="primary"
                         color="primary"
                         onClick={this.toggleCollapse}
                         style={{ marginLeft: 50, width: 100, borderRadius: 6 }}

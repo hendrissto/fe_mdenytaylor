@@ -22,7 +22,6 @@ import CODRestService from "../../../core/codRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { Paginator } from "primereact/paginator";
 
-const regex = /\[(.*?)\-/;
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
@@ -132,7 +131,6 @@ export default class CODReceiptNumber extends Component {
       "options.includeTotalCount": true
     };
 
-    let receiverName = [];
     this.codRest.getCODReceipts({ params }).subscribe(response => {
       table.data = response.data;
       table.pagination.totalPages = Math.ceil(response.total / response.take);
