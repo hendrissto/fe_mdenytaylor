@@ -903,17 +903,7 @@ class ReceiptOfFunds extends Component {
           );
         }
 
-        if (this.validate(newExcelData)) {
-          MySwal.fire({
-            type: "error",
-            title: "Pastikan semua resi telah diisi.",
-            toast: true,
-            position: "top-end",
-            timer: 2000,
-            showConfirmButton: false,
-            customClass: "swal-height"
-          });
-        } else {
+        if (!(this.validate(newExcelData))) {
           this.normalizeLines(newExcelData);
           let data = _(newExcelData)
             .groupBy("tenantId")
@@ -934,16 +924,42 @@ class ReceiptOfFunds extends Component {
 
   validate(data) {
     let isFound = false;
-
-    for (let i = 0; i < data.length && !isFound; i++) {
+    for (let i = 0; i < data.length; i++) {
       if (data[i].airwaybill === undefined) {
-        isFound = true;
-        return true;
-      }else{
-        isFound = false;
-        return false;
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua resi telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        isFound = true
+      }else if(data[i].tenantId === undefined){
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua tenantId telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        isFound = true
       }
+
+      // _.mapValues(data[i], function(val, key) {
+      //   console.log(['tax', 'discount'].includes(key))
+      //   if (val === undefined && ['tax', 'discount'].includes(key)) {
+      //     console.log(val)
+      //     return 0;
+      //   }
+      //   return val;
+      // });
     }
+
+    return isFound;
   }
 
   normalizeLines(array) {
@@ -1013,7 +1029,7 @@ class ReceiptOfFunds extends Component {
     data = _.pull(data, []);
     for (let i = 0; i < data.length - 1; i++) {
       // we should getting true data
-      if (data[i].length > 10) {
+      if (data[i].length > 27) {
         excelData.push(data[i]);
       }
     }
