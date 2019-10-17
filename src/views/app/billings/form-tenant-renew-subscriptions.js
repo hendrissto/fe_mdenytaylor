@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Formik } from "formik";
 import { Redirect } from "react-router-dom";
-import BillingRestService from "../../../core/billingRestService";
+import BillingRestService from "../../../api/billingRestService";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Card, CardBody } from "reactstrap";
@@ -24,9 +24,7 @@ import withReactContent from "sweetalert2-react-content";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-// import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
-// import BaseAlert from "../../base/baseAlert";
 import "./style.scss";
 const MySwal = withReactContent(Swal);
 

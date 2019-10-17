@@ -25,14 +25,12 @@ import IntlMessages from "../../../helpers/IntlMessages";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 
-import WithdrawRestService from "../../../core/requestWithdrawRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
-import PictureRestService from "../../../core/pictureRestService";
+import WithdrawRestService from "../../../api/requestWithdrawRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
+import PictureRestService from "../../../api/pictureRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
-import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
@@ -777,10 +775,7 @@ class WithdrawFunds extends Component {
                   {this.state.loading && (
                     <tr>
                       <td colSpan="3">
-                        <img
-                          src={this.state.imageUrl}
-                          height="150"
-                          width="150"
+                        <img src={this.state.imageUrl} height="150" width="150" alt="'name'"
                         />
                       </td>
                     </tr>

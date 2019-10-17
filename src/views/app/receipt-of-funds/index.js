@@ -17,7 +17,6 @@ import {
 } from "reactstrap";
 import { Redirect } from "react-router-dom";
 import { ExcelRenderer } from "react-excel-renderer";
-import Loader from "react-loader-spinner";
 import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
 
@@ -30,8 +29,8 @@ import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
-import CODRestService from "../../../core/codRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
+import CODRestService from "../../../api/codRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
 import * as moment from "moment";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -44,18 +43,6 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
-
-const regex = /\[(.*?)\-/;
-const customStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)"
-  }
-};
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -833,7 +820,6 @@ class ReceiptOfFunds extends Component {
 
   loadDetailData(id) {
     let receiver = [];
-    let newReceiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
       const resData = response.codCreditTransactions;
@@ -901,8 +887,16 @@ class ReceiptOfFunds extends Component {
           newExcelData[i].totAmountCodFee = Math.round(
             newExcelData[i].totAmountCodFee
           );
-        }
 
+          // this condition for convert undefined value to be number 0
+          _.mapValues(newExcelData[i], function(val, key) {
+            if (val === undefined && ['tax', 'discount', 'codFee', 'codFeeRp', 'adjustment', 'goodsValue', 'shippingCharge', 'subTotalAmount', 'totAmountCodFee', 'total', 'totalAmount'].includes(key)) {
+              newExcelData[i][key] = 0;
+              // return 0;
+            }
+            // return val;
+          });
+        }
         if (!(this.validate(newExcelData))) {
           this.normalizeLines(newExcelData);
           let data = _(newExcelData)
@@ -924,6 +918,7 @@ class ReceiptOfFunds extends Component {
 
   validate(data) {
     let isFound = false;
+    
     for (let i = 0; i < data.length; i++) {
       if (data[i].airwaybill === undefined) {
         MySwal.fire({
@@ -936,7 +931,8 @@ class ReceiptOfFunds extends Component {
           customClass: "swal-height"
         });
         isFound = true
-      }else if(data[i].tenantId === undefined){
+
+      } else if(data[i].tenantId === undefined) {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua tenantId telah diisi.",
@@ -948,17 +944,8 @@ class ReceiptOfFunds extends Component {
         });
         isFound = true
       }
-
-      // _.mapValues(data[i], function(val, key) {
-      //   console.log(['tax', 'discount'].includes(key))
-      //   if (val === undefined && ['tax', 'discount'].includes(key)) {
-      //     console.log(val)
-      //     return 0;
-      //   }
-      //   return val;
-      // });
     }
-
+    
     return isFound;
   }
 
@@ -1024,20 +1011,32 @@ class ReceiptOfFunds extends Component {
     );
   }
 
-  extractExcelData(data) {
+  extractExcelData(data2) {
     let excelData = [];
-    data = _.pull(data, []);
-    for (let i = 0; i < data.length - 1; i++) {
-      // we should getting true data
-      if (data[i].length > 27) {
-        excelData.push(data[i]);
+    let datawithoutEmptyArray = [];
+    const data = _.pull(data2, []);
+
+    for(let i = 0; i < data.length - 1; i++){
+      if(data[i].length > 5){
+        datawithoutEmptyArray.push(data[i]);
       }
     }
+
+    for (let i = 0; i < datawithoutEmptyArray.length - 1; i++) {
+      // we should getting true data
+      if(data[i] && data[i].length) {
+        if (data[i].length > 10) {
+          excelData.push(data[i]);
+        }
+      }
+    }
+    
     return excelData;
   }
 
   createObjectExcel(data) {
     let dataWithObject = [];
+
     for (let i = 1; i < data.length; i++) {
       let concatValue = _.zipObject(
         _.map(data[0], (header, i) => _.camelCase(header)),
@@ -1055,7 +1054,7 @@ class ReceiptOfFunds extends Component {
   button(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         // onClick={() => this.dataTableCODSeller(cell)}
         className="button"
       >
@@ -1067,7 +1066,7 @@ class ReceiptOfFunds extends Component {
   buttonResiCod(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         onClick={() => this.dataTableCODSeller(cell)}
         className="button"
       >
@@ -1079,7 +1078,7 @@ class ReceiptOfFunds extends Component {
   buttonResiCodDetail(cell, row) {
     return (
       <a
-        href="#"
+        href="/#"
         onClick={() => this.dataTableCODSellerDetail(cell)}
         className="button"
       >

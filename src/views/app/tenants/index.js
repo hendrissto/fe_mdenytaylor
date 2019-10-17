@@ -28,7 +28,7 @@ import {
   CustomInput
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
-import TenantRestService from "../../../core/tenantRestService";
+import TenantRestService from "../../../api/tenantRestService";
 // import { InputSwitch } from "primereact/inputswitch";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
@@ -161,7 +161,6 @@ export default class Tenant extends Component {
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
-    let total = this.state.totalCODTenants;
 
     const params = {
       keyword: this.state.search || null,

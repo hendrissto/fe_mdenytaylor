@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { loginUser } from "../../redux/actions";
 import { Colxx } from "../../components/common/CustomBootstrap";
 import IntlMessages from "../../helpers/IntlMessages";
-import AuthRestService from "../../core/authRestService";
+import AuthRestService from "../../api/authRestService";
 import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";
@@ -98,7 +98,7 @@ class Login extends Component {
                 validationSchema={validate}
               >
                 {props => (
-                  <Form>
+                  <Form onSubmit={props.handleSubmit}>
                     <Label className="form-group has-float-label mb-4">
                       <Input
                         name="username"
@@ -127,8 +127,9 @@ class Login extends Component {
                         color="primary"
                         className="btn-shadow"
                         size="lg"
-                        onClick={props.handleSubmit}
-                      >
+                        type="submit"
+                        >
+                        {/* onClick={props.handleSubmit} */}
                         <IntlMessages id="user.login-button" />
                       </Button>
                     </div>
