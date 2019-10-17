@@ -887,6 +887,15 @@ class ReceiptOfFunds extends Component {
           newExcelData[i].totAmountCodFee = Math.round(
             newExcelData[i].totAmountCodFee
           );
+
+          // this condition for convert undefined value to be number 0
+          _.mapValues(newExcelData[i], function(val, key) {
+            if (val === undefined && ['tax', 'discount', 'codFee', 'codFeeRp', 'adjustment', 'goodsValue', 'shippingCharge', 'subTotalAmount', 'totAmountCodFee', 'total', 'totalAmount'].includes(key)) {
+              newExcelData[i][key] = 0;
+              // return 0;
+            }
+            // return val;
+          });
         }
 
         if (!(this.validate(newExcelData))) {
@@ -922,7 +931,8 @@ class ReceiptOfFunds extends Component {
           customClass: "swal-height"
         });
         isFound = true
-      }else if(data[i].tenantId === undefined){
+
+      } else if(data[i].tenantId === undefined) {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua tenantId telah diisi.",
@@ -934,15 +944,6 @@ class ReceiptOfFunds extends Component {
         });
         isFound = true
       }
-
-      // _.mapValues(data[i], function(val, key) {
-      //   console.log(['tax', 'discount'].includes(key))
-      //   if (val === undefined && ['tax', 'discount'].includes(key)) {
-      //     console.log(val)
-      //     return 0;
-      //   }
-      //   return val;
-      // });
     }
 
     return isFound;
