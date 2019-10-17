@@ -897,7 +897,6 @@ class ReceiptOfFunds extends Component {
             // return val;
           });
         }
-
         if (!(this.validate(newExcelData))) {
           this.normalizeLines(newExcelData);
           let data = _(newExcelData)
@@ -919,6 +918,7 @@ class ReceiptOfFunds extends Component {
 
   validate(data) {
     let isFound = false;
+    
     for (let i = 0; i < data.length; i++) {
       if (data[i].airwaybill === undefined) {
         MySwal.fire({
@@ -945,7 +945,7 @@ class ReceiptOfFunds extends Component {
         isFound = true
       }
     }
-
+    
     return isFound;
   }
 
@@ -1011,20 +1011,32 @@ class ReceiptOfFunds extends Component {
     );
   }
 
-  extractExcelData(data) {
+  extractExcelData(data2) {
     let excelData = [];
-    data = _.pull(data, []);
-    for (let i = 0; i < data.length - 1; i++) {
-      // we should getting true data
-      if (data[i].length > 27) {
-        excelData.push(data[i]);
+    let datawithoutEmptyArray = [];
+    const data = _.pull(data2, []);
+
+    for(let i = 0; i < data.length - 1; i++){
+      if(data[i].length > 5){
+        datawithoutEmptyArray.push(data[i]);
       }
     }
+
+    for (let i = 0; i < datawithoutEmptyArray.length - 1; i++) {
+      // we should getting true data
+      if(data[i] && data[i].length) {
+        if (data[i].length > 10) {
+          excelData.push(data[i]);
+        }
+      }
+    }
+    
     return excelData;
   }
 
   createObjectExcel(data) {
     let dataWithObject = [];
+
     for (let i = 1; i < data.length; i++) {
       let concatValue = _.zipObject(
         _.map(data[0], (header, i) => _.camelCase(header)),
