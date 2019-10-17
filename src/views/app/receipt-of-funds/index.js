@@ -15,6 +15,7 @@ import {
   Popover,
   PopoverBody
 } from "reactstrap";
+import { Redirect } from "react-router-dom";
 import { ExcelRenderer } from "react-excel-renderer";
 import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
@@ -59,7 +60,7 @@ class ReceiptOfFunds extends Component {
     this.loadDetailData = this.loadDetailData.bind(this);
     this.toggle = this.toggle.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-    
+
     this.state = {
       uploadDateShow: true,
       idFileShow: true,
@@ -92,6 +93,7 @@ class ReceiptOfFunds extends Component {
       modalError: false,
       data: [],
       oneData: [],
+      redirect: false,
       footerData: [
         [
           {
@@ -768,7 +770,7 @@ class ReceiptOfFunds extends Component {
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
-    for(let j = 0; j < data.lines.length; j++ ){
+    for (let j = 0; j < data.lines.length; j++) {
       Math.round(data.lines[j].codFeeRp);
       Math.round(data.lines[j].totAmountCodFee);
     }
@@ -792,19 +794,22 @@ class ReceiptOfFunds extends Component {
 
     const params = {
       keyword: this.state.search || null,
-      subscriptionPlan : this.state.subscriptions || null,
+      subscriptionPlan: this.state.subscriptions || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
 
-    this.codRest.getReceiptFunds({ params }).subscribe(response => {
-      const table = { ...this.state.table };
-      table.data = response.data;
-      table.pagination.totalPages = Math.ceil(response.total / response.take);
-      table.loading = false;
-      this.setState({ table });
-    });
+    this.codRest.getReceiptFunds({ params }).subscribe(
+      response => {
+        const table = { ...this.state.table };
+        table.data = response.data;
+        table.pagination.totalPages = Math.ceil(response.total / response.take);
+        table.loading = false;
+        this.setState({ table });
+      },
+      err => {}
+    );
   }
 
   loadRelatedData() {
@@ -818,27 +823,14 @@ class ReceiptOfFunds extends Component {
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
       const resData = response.codCreditTransactions;
-      // console.log('RES DATA', resData)
-      for(let i = 0; i < resData.length; i++){
-        for(let j = 0; j < resData[i].lines.length; j++){
-          receiver.push(resData[i].lines[j])
+      for (let i = 0; i < resData.length; i++) {
+        for (let j = 0; j < resData[i].lines.length; j++) {
+          receiver.push(resData[i].lines[j]);
         }
       }
-      // console.log('RECEIVER', receiver)
-      // const data = _(receiver)
-      //   .groupBy("tenantId")
-      //   .map((value, index) => ({
-      //     osName: value.sellerName,
-      //     package: value.length,
-      //     lines: value,
-      //     totalAmount: Math.round(_.sumBy(value, "goodValue")),
-      //     codFeeRp: Math.round(_.sumBy(value, "codFeeValue")),
-      //     totalReceive: Math.round(_.sumBy(value, "subTotalAmount"))
-      //   }))
-      //   .value();
-      const data =  [];
+      const data = [];
 
-      for(let index = 0; index < resData.length; index++) {
+      for (let index = 0; index < resData.length; index++) {
         data.push({
           osName: resData[index].sellerName,
           //tenantId: resData[index].lines[0].tenantId,
@@ -846,11 +838,10 @@ class ReceiptOfFunds extends Component {
           totalAmount: resData[index].total,
           codFeeRp: resData[index].codFeeValue,
           totalReceive: resData[index].receiveAmount,
-          lines: resData[index].lines,
-        })
+          lines: resData[index].lines
+        });
       }
 
-        // console.log('DATA', data)
       this.setState({ data: data, resiModalDetail: true });
     });
   }
@@ -883,34 +874,78 @@ class ReceiptOfFunds extends Component {
         console.log(err);
       } else {
         let arr = [];
-        arr.push(resp.rows)
-        
+        arr.push(resp.rows);
+
         let excelData = resp.rows;
         excelData.splice(0, 2);
         excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
-        
-        for(let i = 0; i < newExcelData.length; i++){
+
+        for (let i = 0; i < newExcelData.length; i++) {
           newExcelData[i].codFeeRp = Math.round(newExcelData[i].codFeeRp);
-          newExcelData[i].totAmountCodFee = Math.round(newExcelData[i].totAmountCodFee)
+          newExcelData[i].totAmountCodFee = Math.round(
+            newExcelData[i].totAmountCodFee
+          );
         }
-        
-        this.normalizeLines(newExcelData);
-        let data = _(newExcelData)
-          .groupBy("tenantId")
-          .map((newDataExcel, sellerName) => ({
-            osName: newDataExcel[0].osName,
-            lines: newDataExcel,
-            package: newDataExcel.length,
-            totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
-            codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-            totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
-          }))
-          .value();
-        this.setState({ data: data });
+
+        if (!(this.validate(newExcelData))) {
+          this.normalizeLines(newExcelData);
+          let data = _(newExcelData)
+            .groupBy("tenantId")
+            .map((newDataExcel, sellerName) => ({
+              osName: newDataExcel[0].osName,
+              lines: newDataExcel,
+              package: newDataExcel.length,
+              totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
+              codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
+              totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+            }))
+            .value();
+          this.setState({ data: data, resiModal: true });
+        }
       }
     });
+  }
+
+  validate(data) {
+    let isFound = false;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].airwaybill === undefined) {
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua resi telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        isFound = true
+      }else if(data[i].tenantId === undefined){
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua tenantId telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        isFound = true
+      }
+
+      // _.mapValues(data[i], function(val, key) {
+      //   console.log(['tax', 'discount'].includes(key))
+      //   if (val === undefined && ['tax', 'discount'].includes(key)) {
+      //     console.log(val)
+      //     return 0;
+      //   }
+      //   return val;
+      // });
+    }
+
+    return isFound;
   }
 
   normalizeLines(array) {
@@ -960,8 +995,8 @@ class ReceiptOfFunds extends Component {
       },
       error => {
         let errorMessage = [];
-        if(error.data.length > 0){
-          for(let i = 0; i < error.data.length; i++){
+        if (error.data.length > 0) {
+          for (let i = 0; i < error.data.length; i++) {
             errorMessage.push(error.data[i].errorMessage);
           }
         }
@@ -980,7 +1015,7 @@ class ReceiptOfFunds extends Component {
     data = _.pull(data, []);
     for (let i = 0; i < data.length - 1; i++) {
       // we should getting true data
-      if (data[i].length > 10) {
+      if (data[i].length > 27) {
         excelData.push(data[i]);
       }
     }
@@ -1046,32 +1081,30 @@ class ReceiptOfFunds extends Component {
       this.state.errorFile === true
     ) {
       this.setState({ error: true });
-      if(this.state.errorFile){
+      if (this.state.errorFile) {
         MySwal.fire({
           type: "error",
           title: "Hanya file excel yang bisa diupload.",
           toast: true,
-          position: 'top-end',
+          position: "top-end",
           timer: 2000,
           showConfirmButton: false,
-          customClass: 'swal-height',
+          customClass: "swal-height"
         });
-
-      }else{
+      } else {
         MySwal.fire({
           type: "error",
           title: "Pastikan Semua Data Telah Terisi.",
           toast: true,
-          position: 'top-end',
+          position: "top-end",
           timer: 2000,
           showConfirmButton: false,
-          customClass: 'swal-height',
+          customClass: "swal-height"
         });
       }
     } else {
       this.setState({ error: false });
       this.excelProcess();
-      this.setState({ resiModal: true });
     }
   }
 
@@ -1087,26 +1120,28 @@ class ReceiptOfFunds extends Component {
 
   _renderError() {
     let data = [];
-    if(this.state.resError !== null){
-      for(let i = 0; i < this.state.resError.length; i++){
-        data.push(
-          <p>
-            {this.state.resError[i]}
-          </p>
-        )
+    if (this.state.resError !== null) {
+      for (let i = 0; i < this.state.resError.length; i++) {
+        data.push(<p>{this.state.resError[i]}</p>);
       }
     }
     return data;
   }
   onShowModalAWBUpload() {
-    this.setState({ fileTemp: null })
-    const defaultCourier = this.state.relatedData.courierChannel ?  _.find(this.state.relatedData.courierChannel, ['id', 'sicepat']) : [];
+    this.setState({ fileTemp: null });
+    const defaultCourier = this.state.relatedData.courierChannel
+      ? _.find(this.state.relatedData.courierChannel, ["id", "sicepat"])
+      : [];
     this.setState({ selectedCourier: defaultCourier });
   }
 
   render() {
     const option = this.state.relatedData.courierChannel;
-    
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
+    }
+
     return (
       <Fragment>
         <Row>
@@ -1118,9 +1153,12 @@ class ReceiptOfFunds extends Component {
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
-            <Card className="mb-12 lg-12" style={{
-              borderRadius: 10
-            }}>
+            <Card
+              className="mb-12 lg-12"
+              style={{
+                borderRadius: 10
+              }}
+            >
               <CardBody>
                 <div className="row">
                   <div className="mb-3 col-md-5">
@@ -1160,7 +1198,7 @@ class ReceiptOfFunds extends Component {
                       type="button"
                       style={{
                         marginLeft: 10,
-                        borderRadius: 6,
+                        borderRadius: 6
                       }}
                     >
                       <i className="simple-icon-menu mr-2" />
