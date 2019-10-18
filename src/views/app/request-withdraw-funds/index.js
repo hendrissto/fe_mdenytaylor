@@ -242,26 +242,26 @@ class WithdrawFunds extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Ballance Transactions",
-        accessor: "balanceTransaction",
+        Header: "Ballance Amount",
+        accessor: "balanceAmount",
         width: 150,
         show: this.state.balanceTransaction,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
-      {
-        Header: "COD Balance",
-        accessor: "codBalance",
-        width: 120,
-        show: this.state.codBalance,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
-      {
-        Header: "Ballance Amount",
-        accessor: "balanceAmount",
-        width: 150,
-        show: this.state.balanceAmount,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
+      // {
+      //   Header: "Wallet Balance",
+      //   accessor: "walletBalance",
+      //   width: 120,
+      //   show: this.state.codBalance,
+      //   Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      // },
+      // {
+      //   Header: "Ballance Amount",
+      //   accessor: "balanceAmount",
+      //   width: 150,
+      //   show: this.state.balanceAmount,
+      //   Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      // },
       {
         Header: "Upload Bukti",
         width: 200,
@@ -725,7 +725,7 @@ class WithdrawFunds extends Component {
                   <tr>
                     <td>Balance Amount</td>
                     <td>:</td>
-                    <td>{this.state.oneData.balanceAmount}</td>
+                    <td>{this.moneyFormat.numberFormat(this.state.oneData.balanceAmount) || 0}</td>
                   </tr>
                   <tr>
                     <td>Total Bayar</td>

@@ -389,7 +389,7 @@ class ReceiptOfFunds extends Component {
   dataTableDetail() {
     return [
       {
-        Header: "No Resi",
+        Header: "No Resi a",
         accessor: "airwaybill",
         width: 130,
         Footer: <p>Total</p>,
@@ -1027,16 +1027,15 @@ class ReceiptOfFunds extends Component {
 
   extractExcelData(data2) {
     let excelData = [];
-    let datawithoutEmptyArray = [];
+    // let datawithoutEmptyArray = [];
     const data = _.pull(data2, []);
+    // for (let i = 0; i < data.length - 1; i++) {
+    //   if (data[i].length > 5) {
+    //     datawithoutEmptyArray.push(data[i]);
+    //   }
+    // }
 
     for (let i = 0; i < data.length - 1; i++) {
-      if (data[i].length > 5) {
-        datawithoutEmptyArray.push(data[i]);
-      }
-    }
-
-    for (let i = 0; i < datawithoutEmptyArray.length - 1; i++) {
       // we should getting true data
       if (data[i] && data[i].length) {
         if (data[i].length > 10) {
@@ -1044,7 +1043,7 @@ class ReceiptOfFunds extends Component {
         }
       }
     }
-
+    
     return excelData;
   }
 
@@ -1080,7 +1079,16 @@ class ReceiptOfFunds extends Component {
 
   buttonResiCod(cell, row) {
     return (
-      <Button color="link" onClick={() => this.dataTableCODSeller(cell)}>
+      <Button
+        color="link"
+        onClick={() => this.dataTableCODSeller(cell)}
+        className="text-primary hover"
+        style={{
+          textAlign: "center",
+          marginLeft: "-15px",
+          marginTop: "-14px"
+        }}
+      >
         {cell}
       </Button>
       // <a
@@ -1102,7 +1110,7 @@ class ReceiptOfFunds extends Component {
         style={{
           textAlign: "center",
           marginLeft: "-15px",
-          marginTop: "-14px",
+          marginTop: "-14px"
         }}
       >
         {cell}
@@ -1503,45 +1511,58 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
-          <Modal isOpen={this.state.resiModalSeller} size="lg">
-            <ModalHeader>
-              <IntlMessages id="modal.receiptDataCOD" />
-            </ModalHeader>
-            <ModalBody>
-              <ReactTable
-                minRows={0}
-                page={this.state.table.pagination.currentPage}
-                PaginationComponent={DataTablePagination}
-                data={this.state.oneData}
-                pages={this.state.table.pagination.totalPages}
-                columns={this.dataTableDetail()}
-                defaultPageSize={this.state.table.pagination.pageSize}
-                className="-striped"
-                loading={this.state.table.loading}
-                showPagination={false}
-                showPaginationTop={false}
-                showPaginationBottom={false}
-                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                manual // this would indicate that server side pagination has been enabled
-                onFetchData={(state, instance) => {
-                  const newState = { ...this.state.table };
-
-                  newState.pagination.currentPage = state.page;
-                  newState.pagination.pageSize = state.pageSize;
-                  newState.pagination.skipSize = state.pageSize * state.page;
-
-                  this.setState({ newState });
-                  this.loadData();
+          <div
+            style={{
+              maxHeight: 580
+            }}
+          >
+            <Modal isOpen={this.state.resiModalSeller} size="lg">
+              <ModalHeader>
+                <IntlMessages id="modal.receiptDataCOD" />
+              </ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
                 }}
-              />
-            </ModalBody>
+              >
+                <ReactTable
+                  minRows={0}
+                  page={this.state.table.pagination.currentPage}
+                  PaginationComponent={DataTablePagination}
+                  data={this.state.oneData}
+                  pages={this.state.table.pagination.totalPages}
+                  columns={this.dataTableDetail()}
+                  defaultPageSize={this.state.table.pagination.pageSize}
+                  className="-striped"
+                  loading={this.state.table.loading}
+                  showPagination={false}
+                  showPaginationTop={false}
+                  showPaginationBottom={false}
+                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                  manual // this would indicate that server side pagination has been enabled
+                  onFetchData={(state, instance) => {
+                    const newState = { ...this.state.table };
 
-            <ModalFooter>
-              <Button onClick={() => this.setState({ resiModalSeller: false })}>
-                Back
-              </Button>
-            </ModalFooter>
-          </Modal>
+                    newState.pagination.currentPage = state.page;
+                    newState.pagination.pageSize = state.pageSize;
+                    newState.pagination.skipSize = state.pageSize * state.page;
+
+                    this.setState({ newState });
+                    this.loadData();
+                  }}
+                />
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  onClick={() => this.setState({ resiModalSeller: false })}
+                >
+                  Back
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
         )}
 
         {/* MODAL DATA RESI SELLER DETAIL */}
@@ -1575,6 +1596,9 @@ class ReceiptOfFunds extends Component {
 
                   this.setState({ newState });
                   this.loadData();
+                }}
+                style={{
+                  overflow: "inherit !important"
                 }}
               />
             </ModalBody>
