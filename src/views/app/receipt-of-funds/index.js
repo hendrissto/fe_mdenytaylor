@@ -957,6 +957,17 @@ class ReceiptOfFunds extends Component {
           customClass: "swal-height"
         });
         isFound = true;
+      }else if (data[i].osName === undefined) {
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua Seller Name telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        isFound = true;
       }
     }
 
