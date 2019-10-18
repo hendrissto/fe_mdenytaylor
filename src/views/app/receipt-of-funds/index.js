@@ -890,14 +890,29 @@ class ReceiptOfFunds extends Component {
 
           // this condition for convert undefined value to be number 0
           _.mapValues(newExcelData[i], function(val, key) {
-            if (val === undefined && ['tax', 'discount', 'codFee', 'codFeeRp', 'adjustment', 'goodsValue', 'shippingCharge', 'subTotalAmount', 'totAmountCodFee', 'total', 'totalAmount'].includes(key)) {
+            if (
+              val === undefined &&
+              [
+                "tax",
+                "discount",
+                "codFee",
+                "codFeeRp",
+                "adjustment",
+                "goodsValue",
+                "shippingCharge",
+                "subTotalAmount",
+                "totAmountCodFee",
+                "total",
+                "totalAmount"
+              ].includes(key)
+            ) {
               newExcelData[i][key] = 0;
               // return 0;
             }
             // return val;
           });
         }
-        if (!(this.validate(newExcelData))) {
+        if (!this.validate(newExcelData)) {
           this.normalizeLines(newExcelData);
           let data = _(newExcelData)
             .groupBy("tenantId")
@@ -918,7 +933,7 @@ class ReceiptOfFunds extends Component {
 
   validate(data) {
     let isFound = false;
-    
+
     for (let i = 0; i < data.length; i++) {
       if (data[i].airwaybill === undefined) {
         MySwal.fire({
@@ -930,9 +945,8 @@ class ReceiptOfFunds extends Component {
           showConfirmButton: false,
           customClass: "swal-height"
         });
-        isFound = true
-
-      } else if(data[i].tenantId === undefined) {
+        isFound = true;
+      } else if (data[i].tenantId === undefined) {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua tenantId telah diisi.",
@@ -942,10 +956,10 @@ class ReceiptOfFunds extends Component {
           showConfirmButton: false,
           customClass: "swal-height"
         });
-        isFound = true
+        isFound = true;
       }
     }
-    
+
     return isFound;
   }
 
@@ -1016,21 +1030,21 @@ class ReceiptOfFunds extends Component {
     let datawithoutEmptyArray = [];
     const data = _.pull(data2, []);
 
-    for(let i = 0; i < data.length - 1; i++){
-      if(data[i].length > 5){
+    for (let i = 0; i < data.length - 1; i++) {
+      if (data[i].length > 5) {
         datawithoutEmptyArray.push(data[i]);
       }
     }
 
     for (let i = 0; i < datawithoutEmptyArray.length - 1; i++) {
       // we should getting true data
-      if(data[i] && data[i].length) {
+      if (data[i] && data[i].length) {
         if (data[i].length > 10) {
           excelData.push(data[i]);
         }
       }
     }
-    
+
     return excelData;
   }
 
@@ -1053,37 +1067,53 @@ class ReceiptOfFunds extends Component {
 
   button(cell, row) {
     return (
-      <a
-        href="/#"
-        // onClick={() => this.dataTableCODSeller(cell)}
-        className="button"
-      >
-        {cell}
-      </a>
+      <Button color="link">{cell}</Button>
+      // <a
+      //   href="/#"
+      //   // onClick={() => this.dataTableCODSeller(cell)}
+      //   className="button"
+      // >
+      //   {cell}
+      // </a>
     );
   }
 
   buttonResiCod(cell, row) {
     return (
-      <a
-        href="/#"
-        onClick={() => this.dataTableCODSeller(cell)}
-        className="button"
-      >
+      <Button color="link" onClick={() => this.dataTableCODSeller(cell)}>
         {cell}
-      </a>
+      </Button>
+      // <a
+      //   href="/#"
+      //   onClick={() => this.dataTableCODSeller(cell)}
+      //   className="button"
+      // >
+      //   {cell}
+      // </a>
     );
   }
 
   buttonResiCodDetail(cell, row) {
     return (
-      <a
-        href="/#"
+      <Button
+        color="link"
         onClick={() => this.dataTableCODSellerDetail(cell)}
-        className="button"
+        className="text-primary hover"
+        style={{
+          textAlign: "center",
+          marginLeft: "-15px",
+          marginTop: "-14px",
+        }}
       >
         {cell}
-      </a>
+      </Button>
+      // <a
+      //   href="/#"
+      //   onClick={() => this.dataTableCODSellerDetail(cell)}
+      //   className="button"
+      // >
+      //   {cell}
+      // </a>
     );
   }
 
@@ -1387,7 +1417,7 @@ class ReceiptOfFunds extends Component {
                   isKey
                   dataFormat={this.buttonResiCodDetail.bind(this)}
                 >
-                  Nama Seller
+                  Nama Seller a
                 </TableHeaderColumn>
                 <TableHeaderColumn dataField="package">
                   Jumlah Paket
