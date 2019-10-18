@@ -1417,7 +1417,7 @@ class ReceiptOfFunds extends Component {
                   isKey
                   dataFormat={this.buttonResiCodDetail.bind(this)}
                 >
-                  Nama Seller a
+                  Nama Seller
                 </TableHeaderColumn>
                 <TableHeaderColumn dataField="package">
                   Jumlah Paket
