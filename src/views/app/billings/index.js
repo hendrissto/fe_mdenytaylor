@@ -11,37 +11,37 @@ import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
+// import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
   Input,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
+  // Modal,
+  // ModalHeader,
+  // ModalBody,
+  // ModalFooter,
   Row,
   Col,
   Collapse,
   CardFooter,
   UncontrolledPopover,
-  Popover,
-  PopoverHeader,
+  // Popover,
+  // PopoverHeader,
   PopoverBody,
-  Dropdown,
-  DropdownToggle,
-  DropdownItem,
-  DropdownMenu,
-  ButtonDropdown
+  // Dropdown,
+  // DropdownToggle,
+  // DropdownItem,
+  // DropdownMenu,
+  // ButtonDropdown
 } from "reactstrap";
 
-import BillingRestService from "../../../core/billingRestService";
+import BillingRestService from "../../../api/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import { Checkbox } from "primereact/checkbox";
+// import { Checkbox } from "primereact/checkbox";
 // import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
+// import { Calendar } from "primereact/calendar";
 import "./style.scss";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
@@ -49,10 +49,6 @@ const ReactTableFixedColumn = withFixedColumns(ReactTable);
 const filterStyle = {
   marginLeft: 30,
   marginTop: 10
-};
-
-const filterColumnsStyle = {
-  marginBottom: 7
 };
 
 export default class Billing extends Component {
@@ -94,6 +90,8 @@ export default class Billing extends Component {
         billingPeriodEndDate: true,
         billingCycle: true,
         billingAmount: true,
+        maxUser: true,
+        maxProducts: true,
       },
       totalTenants: 0,
       totalCODTenants: 0,
@@ -266,7 +264,6 @@ export default class Billing extends Component {
   handleFilterDayChange(event) {
     const target = event.target;
     const value = target.value;
-    const name = target.name;
     const day = value.substr(1);
     if (parseInt(value) < 0) {
       this.setState({
@@ -342,6 +339,30 @@ export default class Billing extends Component {
         accessor: "subscriptionPlanName",
         show: tableFilter.subscriptionPlanName,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
+      },
+      {
+        Header: "Total Product",
+        accessor: "subscriptionPlanName",
+        show: tableFilter.maxProducts,
+        Cell: props => (
+          <p>
+            {props.original.totalProducts}
+            {' '} / {' '}
+            {props.original.maxNumOfProducts === null ? '∞' : props.original.maxNumOfProducts}
+          </p>
+        )
+      },
+      {
+        Header: "Total User",
+        accessor: "subscriptionPlanName",
+        show: tableFilter.maxUser,
+        Cell: props => (
+          <p>
+            {props.original.totalUsers}
+            {' '} / {' '}
+            {props.original.maxNumOfUsers === null ? '∞' : props.original.maxNumOfUsers}
+          </p>
+        )
       },
       {
         Header: "Expired Date Free Trial",
@@ -437,16 +458,16 @@ export default class Billing extends Component {
     let price;
     if (selectedPackage.length !== [] && billingCycle !== undefined) {
       let code = billingCycle.code;
-      if (code == 1) {
+      if (code === 1) {
         console.log(selectedPackage.monthlyPrice);
         price = selectedPackage.monthlyPrice;
-      } else if (code == 3) {
+      } else if (code === 3) {
         console.log(selectedPackage.quaterlyPrice);
         price = selectedPackage.quaterlyPrice;
-      } else if (code == 6) {
+      } else if (code === 6) {
         console.log(selectedPackage.semesterlyPrice);
         price = selectedPackage.semesterlyPrice;
-      } else if (code == 12) {
+      } else if (code === 12) {
         console.log(selectedPackage.yearlyPrice);
         price = selectedPackage.yearlyPrice;
       } else {
@@ -517,16 +538,16 @@ export default class Billing extends Component {
             >
               <CardBody
                 style={{
-                  height: 290
+                  minHeight: 290
                 }}
               >
                 <Row
                   style={{
-                    height: 70
+                    minHeight: 70
                   }}
                 >
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       this.setState({ freeTrial: true });
                     }}
@@ -540,7 +561,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       this.setState({ freeTrialWeekBeforeExp: true });
                     }}
@@ -555,7 +576,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -574,14 +595,9 @@ export default class Billing extends Component {
                     />
                   </div>
                 </Row>
-                <Row
-                  style={{
-                    marginTop: 60,
-                    height: 70
-                  }}
-                >
+                <Row>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -600,7 +616,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -622,7 +638,7 @@ export default class Billing extends Component {
                     />
                   </div>
                   <div
-                    className="col hover"
+                    className="col-12 col-md-4 hover"
                     onClick={() => {
                       const table = { ...this.state.table };
 
@@ -686,7 +702,6 @@ export default class Billing extends Component {
                       </Button>
                       <Button
                         className="default"
-                        color="primary"
                         color="primary"
                         onClick={this.toggleCollapse}
                         style={{ marginLeft: 50, width: 100, borderRadius: 6 }}
@@ -756,11 +771,7 @@ export default class Billing extends Component {
                     </InputGroup>
                   </div>
 
-                  <div
-                    style={{
-                      marginLeft: 550
-                    }}
-                  >
+                  <div>
                     <Button
                       className="float-right default"
                       color="primary"
@@ -788,6 +799,24 @@ export default class Billing extends Component {
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Package
+                        </div>
+                        <div>
+                          <input
+                            name="maxProducts"
+                            type="checkbox"
+                            checked={tableFilter.maxProducts}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total Product
+                        </div>
+                        <div>
+                          <input
+                            name="maxUser"
+                            type="checkbox"
+                            checked={tableFilter.maxUser}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Total User
                         </div>
                         <div>
                           <input

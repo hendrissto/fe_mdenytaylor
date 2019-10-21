@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
 class CreditBalance extends Component {
-  constructor(props){
+  constructor(...props){
     super(props);
   }
 

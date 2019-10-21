@@ -4,7 +4,7 @@ import ChartComponent, { Chart } from "react-chartjs-2";
 import { lineChartOptions } from "./config";
 
 export default class Line extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     if (this.props.shadow) {
       Chart.defaults.lineWithShadow = Chart.defaults.line;
       Chart.controllers.lineWithShadow = Chart.controllers.line.extend({
