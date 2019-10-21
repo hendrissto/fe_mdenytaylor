@@ -109,6 +109,11 @@ class DebitCod extends Component {
 
   toggle() {
     this.setState({
+      loading: false,
+      oneData: null,
+      selectedBank: [],
+      imageUrl: null,
+      image: null,
       modal: !this.state.modal
     });
   }
