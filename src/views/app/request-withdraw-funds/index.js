@@ -35,7 +35,11 @@ import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
-import BaseAlert from "../../base/baseAlert";
+import NumberFormat from 'react-number-format';
+
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 class WithdrawFunds extends Component {
   constructor(props) {
@@ -52,7 +56,7 @@ class WithdrawFunds extends Component {
     this.submitData = this.submitData.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-    
+
     this.state = {
       companyName: true,
       companyEmail: true,
@@ -318,6 +322,14 @@ class WithdrawFunds extends Component {
   }
 
   toggle() {
+    this.setState({
+      isDraft: false,
+      loading: false,
+      oneData: null,
+      selectedBank: [],
+      imageUrl: null,
+      image: null,
+    })
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
@@ -407,7 +419,7 @@ class WithdrawFunds extends Component {
       this.state.isDraft === false ||
       this.state.amount === null ||
       this.state.amount === undefined ||
-      this.state.selectedBank === []
+      this.state.selectedBank.length === 0
     ) {
       if (this.state.image === null) {
         return true;
@@ -421,19 +433,28 @@ class WithdrawFunds extends Component {
 
   submitData() {
     if (this.validateError()) {
-      this.setState({ error: true });
+      // this.setState({ error: true });
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua data telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
     } else {
       this.setState({ modal: false, loadingSubmit: true, errorData: "" });
-
+      
       let lines = {
         fileId: this.state.isDraft === true ? undefined : this.state.image.id,
-        amount: parseInt(this.state.amount),
+        amount: parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
         isDraft: this.state.isDraft
       };
-      console.log(lines);
+      
       this.requestWithdrawRest.postBallance(lines).subscribe(
         response => {
           this.setState({
@@ -668,14 +689,6 @@ class WithdrawFunds extends Component {
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
             <ModalBody>
-              {this.state.error && (
-                <BaseAlert
-                  onClick={() => {
-                    this.setState({ error: false });
-                  }}
-                  text={"Pastikan semua data telah terisi."}
-                />
-              )}
               <Table>
                 <tbody>
                   <tr>
@@ -731,11 +744,7 @@ class WithdrawFunds extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <input
-                        type="text"
-                        value={this.state.amount}
-                        onChange={this.handleChange}
-                      />
+                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange}/>
                     </td>
                   </tr>
                   <tr>
