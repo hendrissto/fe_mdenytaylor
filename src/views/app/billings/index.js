@@ -239,7 +239,7 @@ export default class Billing extends Component {
     this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
 
-    if (JSON.parse(localStorage.getItem("filter")) === null) {
+    if (JSON.parse(localStorage.getItem("filter")) === null || JSON.parse(localStorage.getItem("filter")) !== this.state.tableFilter) {
       localStorage.setItem("filter", JSON.stringify(this.state.tableFilter));
     }
     tableFilter = JSON.parse(localStorage.getItem("filter"));
@@ -517,9 +517,7 @@ export default class Billing extends Component {
       this.setState({ redirect: false });
       return <Redirect to="/user/login" />;
     }
-    if (this.state.freeTrial || this.state.freeTrialWeekBeforeExp) {
-      this.loadData();
-    }
+    
     return (
       <Fragment>
         <Row>
@@ -549,7 +547,9 @@ export default class Billing extends Component {
                   <div
                     className="col-12 col-md-4 hover"
                     onClick={() => {
-                      this.setState({ freeTrial: true });
+                      this.setState({ freeTrial: true, freeTrialWeekBeforeExp: false, packageFilter: "" }, () => {
+                        this.loadData();
+                      });
                     }}
                   >
                     <IconCard
@@ -563,7 +563,9 @@ export default class Billing extends Component {
                   <div
                     className="col-12 col-md-4 hover"
                     onClick={() => {
-                      this.setState({ freeTrialWeekBeforeExp: true });
+                      this.setState({ freeTrialWeekBeforeExp: true, freeTrial: false, packageFilter: "" }, () => {
+                        this.loadData();
+                      });
                     }}
                   >
                     <IconCard
