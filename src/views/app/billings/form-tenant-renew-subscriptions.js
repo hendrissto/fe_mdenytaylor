@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Formik } from "formik";
 import { Redirect } from "react-router-dom";
-import BillingRestService from "../../../core/billingRestService";
-import { NotificationManager } from "../../../components/common/react-notifications";
+import BillingRestService from "../../../api/billingRestService";
+
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Card, CardBody } from "reactstrap";
 import {
@@ -24,14 +24,11 @@ import withReactContent from "sweetalert2-react-content";
 
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
-// import BaseAlert from "../../base/baseAlert";
-// import { BaseAlert } from "../../../containers/pages/BaseAlert";
 import "./style.scss";
 const MySwal = withReactContent(Swal);
 
-export default class FormTenantSubscription extends Component {
+export default class FormTenantRenewSubscription extends Component {
   constructor(props) {
     super(props);
 
@@ -49,7 +46,6 @@ export default class FormTenantSubscription extends Component {
 
     this.state = {
       error: false,
-      type: this.props.match.params.type,
       data: [],
       relatedData: [],
       loading: true,
@@ -67,7 +63,8 @@ export default class FormTenantSubscription extends Component {
       packageActive: [],
       modal: false,
       redirect: false,
-      date: today
+      date: today,
+      paymentMethod: null
     };
   }
 
@@ -100,12 +97,39 @@ export default class FormTenantSubscription extends Component {
       .getTenantsSubscriptionsById(tenantId, {})
       .subscribe(response => {
         this.setState({ data: response, loading: false });
+        if (this.state.relatedData.subscriptionPlan !== undefined) {
+          let activePackage = [];
+          for (
+            let i = 0;
+            i < this.state.relatedData.subscriptionPlan.length;
+            i++
+          ) {
+            if (
+              response.subscriptionPlanId ===
+              this.state.relatedData.subscriptionPlan[i].id
+            ) {
+              activePackage.push({
+                subscriptionPlan: this.state.relatedData.subscriptionPlan[i]
+              });
+            }
+          }
+          this.setState({ packageActive: activePackage[0].subscriptionPlan });
+        }
       });
   }
 
   loadRelatedData() {
     this.billingRest.getRelatedData({}).subscribe(response => {
-      this.setState({ relatedData: response }, () => {
+      const data = response.paymentMethodStr;
+      const options = [];
+
+      for (let i = 0; i < data.length; i++) {
+        options.push({
+          id: i,
+          paymentMethod: data[i]
+        });
+      }
+      this.setState({ relatedData: response, paymentMethod: options }, () => {
         this.loadData();
       });
     });
@@ -119,25 +143,22 @@ export default class FormTenantSubscription extends Component {
     if (this.state.loading === false) {
       const data = this.state.data;
 
+      const subscriptionPlan = data.subscriptionPlanId;
+      const subscriptionPlanCapitalized =
+        subscriptionPlan.charAt(0).toUpperCase() +
+        subscriptionPlan.slice(1) +
+        " Plan.";
       return (
         <h3>
-          {data.companyInfo.name +
-            " sedang aktif dipaket " +
-            data.subscriptionPlanId}
+          <b>{data.companyInfo.name}</b>
+          {" sedang aktif di paket "}
+          <b>{subscriptionPlanCapitalized}</b>
         </h3>
       );
     }
   }
 
   _renderPackage(props) {
-    const data = { ...this.state.data };
-    const options = { ...this.state.relatedData };
-    for (let i = options.subscriptionPlan.length - 1; i >= 0; i--) {
-      if (options.subscriptionPlan[i].id === data.subscriptionPlanId) {
-        options.subscriptionPlan.splice(i, 1);
-      }
-    }
-
     return (
       <Dropdown
         value={props.values.package}
@@ -146,6 +167,7 @@ export default class FormTenantSubscription extends Component {
         placeholder="Select a Package"
         name="package"
         optionLabel="name"
+        disabled
         style={{
           width: 204
         }}
@@ -405,7 +427,7 @@ export default class FormTenantSubscription extends Component {
         }}
       >
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -438,7 +460,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -526,7 +548,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -571,7 +593,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -611,7 +633,7 @@ export default class FormTenantSubscription extends Component {
           </Row>
         </div>
         <div
-          class="d-flex flex-row-reverse bd-highlight"
+          className="d-flex flex-row-reverse bd-highlight"
           style={{ marginRight: 85 }}
         >
           <Row
@@ -652,7 +674,7 @@ export default class FormTenantSubscription extends Component {
             </Col>
           </Row>
         </div>
-        <div class="d-flex flex-row-reverse bd-highlight">
+        <div className="d-flex flex-row-reverse bd-highlight">
           <Row
             style={{
               marginRight: 80
@@ -683,12 +705,8 @@ export default class FormTenantSubscription extends Component {
   }
 
   validateError(props) {
-    if (
-      props.package.length === 0 ||
-      props.billingCycle === undefined ||
-      props.qty === "" ||
-      parseInt(props.qty) === 0
-    ) {
+    console.log(props)
+    if (props.package.length === 0 || props.billingCycle === undefined || props.paymentMethod === undefined) {
       return true;
     } else {
       return false;
@@ -701,10 +719,10 @@ export default class FormTenantSubscription extends Component {
         type: "error",
         title: "Pastikan Semua Data Telah Terisi.",
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         timer: 2000,
         showConfirmButton: false,
-        customClass: 'swal-height',
+        customClass: "swal-height"
       });
     } else {
       this.setState({ loading: true });
@@ -722,7 +740,7 @@ export default class FormTenantSubscription extends Component {
 
       let data = {
         subscriptionPlanId: props.package.id,
-        subscriptionStartDate: moment(this.state.date).format("YYYY-MM-DD"),
+        subscriptionStartDate: "",
         invoiceNumber: props.invoiceNumber === "" ? null : props.invoiceNumber,
         invoiceDate: this.state.today,
         subtotal: props.prices,
@@ -746,6 +764,7 @@ export default class FormTenantSubscription extends Component {
           isNaN(parseInt(props.adjustmentAmount)) === true
             ? 0
             : parseInt(props.adjustmentAmount),
+        paymentMethod: props.paymentMethod.paymentMethod,
         items: [
           {
             itemType: 0,
@@ -768,9 +787,8 @@ export default class FormTenantSubscription extends Component {
           }
         ]
       };
-
       this.billingRest
-        .upgradeTenantsSubscriptions(
+        .renewTenantsSubscriptions(
           parseInt(this.props.match.params.tenantId),
           data
         )
@@ -778,14 +796,14 @@ export default class FormTenantSubscription extends Component {
           this.setState({ loading: false, redirect: true }, () => {
             MySwal.fire({
               type: "success",
-              title: "Berhasil Upgrade tenant.",
+              title: "Berhasil Renew tenant.",
               toast: true,
-              position: 'top-end',
+              position: "top-end",
               timer: 2000,
               showConfirmButton: false,
-              customClass: 'swal-height',
+              customClass: "swal-height"
             });
-          }); 
+          });
         });
     }
   }
@@ -798,7 +816,7 @@ export default class FormTenantSubscription extends Component {
       <>
         <Row>
           <Colxx xxs="12">
-            <h1>Upgrade</h1>
+            <h1>Renew</h1>
             <Separator className="mb-5" />
           </Colxx>
         </Row>
@@ -880,6 +898,44 @@ export default class FormTenantSubscription extends Component {
                               />
                             </Col>
                           </Row>
+
+                          <Row
+                            style={{
+                              marginTop: 10,
+                              width: "50%"
+                            }}
+                          >
+                            <Col
+                              xs="3"
+                              className="col-12 col-md-3"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              Paymend Method
+                            </Col>
+                            <Col
+                              xs="1"
+                              style={{
+                                marginTop: 5
+                              }}
+                            >
+                              :
+                            </Col>
+                            <Col>
+                              <Dropdown
+                                value={props.values.paymentMethod}
+                                options={this.state.paymentMethod}
+                                onChange={props.handleChange}
+                                placeholder="Select a Method"
+                                name="paymentMethod"
+                                optionLabel="paymentMethod"
+                                style={{
+                                  width: 204
+                                }}
+                              />
+                            </Col>
+                          </Row>
                           <Row
                             style={{
                               marginTop: 10,
@@ -903,42 +959,6 @@ export default class FormTenantSubscription extends Component {
                               :
                             </Col>
                             <Col>{this._renderPackage(props)}</Col>
-                          </Row>
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              Tanggal Mulai
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col
-                              style={{
-                                width: 20
-                              }}
-                            >
-                              <Calendar
-                                value={this.state.date}
-                                onChange={e => {
-                                  this.setState({ date: e.value });
-                                }}
-                                showIcon={true}
-                              />
-                            </Col>
                           </Row>
                           <Row>
                             <Col className="responsive">

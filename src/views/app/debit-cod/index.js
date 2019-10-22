@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import ReactTable from "react-table";
 import {
   Row,
@@ -23,14 +23,12 @@ import { Paginator } from "primereact/paginator";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 
-import DebitRestService from "../../../core/debitRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
-import PictureRestService from "../../../core/pictureRestService";
+import DebitRestService from "../../../api/debitRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
+import PictureRestService from "../../../api/pictureRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
@@ -50,7 +48,8 @@ class DebitCod extends Component {
     this.submitData = this.submitData.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    
     this.state = {
       deliveryDate: true,
       sellerName: true,
@@ -110,6 +109,11 @@ class DebitCod extends Component {
 
   toggle() {
     this.setState({
+      loading: false,
+      oneData: null,
+      selectedBank: [],
+      imageUrl: null,
+      image: null,
       modal: !this.state.modal
     });
   }
@@ -565,7 +569,7 @@ class DebitCod extends Component {
               {this.state.loading && (
                 <tr>
                   <td colSpan="3">
-                    <img src={this.state.imageUrl} height="150" width="150" />
+                    <img src={this.state.imageUrl} height="150" width="150" alt="'name'" />
                   </td>
                 </tr>
               )}
@@ -625,12 +629,8 @@ class DebitCod extends Component {
                   </tr>
                   <tr>
                     <td colSpan="3">
-                      <a target="_blank" href={this.state.oneData.file.fileUrl}>
-                        <img
-                          src={this.state.oneData.file.fileUrl}
-                          height="150"
-                          width="150"
-                        />
+                      <a target="_blank" href={this.state.oneData.file.fileUrl} rel="noopener noreferrer">
+                        <img src={this.state.oneData.file.fileUrl} height="150" width="150" alt="'name'"/>
                       </a>
                     </td>
                   </tr>

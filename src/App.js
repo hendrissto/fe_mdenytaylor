@@ -5,7 +5,6 @@ import {
   Route,
   Switch,
   Redirect,
-  HashRouter
 } from "react-router-dom";
 import { IntlProvider } from "react-intl";
 import "./helpers/Firebase";
@@ -41,7 +40,7 @@ const AuthRoute = ({ component: Component, authUser, ...rest }) => (
 );
 
 class App extends Component {
-  componentWillMount() {
+  componentDidMount() {
     const direction = getDirection();
     if (direction.isRtl) {
       document.body.classList.add("rtl");

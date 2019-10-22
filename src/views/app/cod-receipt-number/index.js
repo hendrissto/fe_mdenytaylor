@@ -4,7 +4,6 @@ import ReactTable from "react-table";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -19,11 +18,10 @@ import {
   PopoverBody
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
-import CODRestService from "../../../core/codRestService";
+import CODRestService from "../../../api/codRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { Paginator } from "primereact/paginator";
 
-const regex = /\[(.*?)\-/;
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +29,7 @@ export default class CODReceiptNumber extends Component {
     this.moneyFormat = new MoneyFormat();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
     // this.toggleDropDown = this.toggleDropDown.bind(this);
     // this.toggleSplit = this.toggleSplit.bind(this);
     // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
@@ -133,7 +131,6 @@ export default class CODReceiptNumber extends Component {
       "options.includeTotalCount": true
     };
 
-    let receiverName = [];
     this.codRest.getCODReceipts({ params }).subscribe(response => {
       table.data = response.data;
       table.pagination.totalPages = Math.ceil(response.total / response.take);

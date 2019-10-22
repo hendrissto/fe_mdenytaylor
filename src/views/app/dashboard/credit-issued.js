@@ -11,7 +11,7 @@ import IconCard from "../../../components/cards/IconCard";
 // };
 
 class CreditIssued extends Component {
-  constructor(props){
+  constructor(...props){
     super(props);
   }
 

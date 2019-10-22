@@ -23,8 +23,6 @@ import {
 import {
   menuHiddenBreakpoint,
   searchPath,
-  localeOptions,
-  // isDarkSwitchActive
 } from "../../constants/defaultValues";
 
 import { MobileMenuIcon, MenuIcon } from "../../components/svg";
@@ -198,7 +196,7 @@ class TopNav extends Component {
   };
 
   render() {
-    const { containerClassnames, menuClickCount, locale } = this.props;
+    const { containerClassnames, menuClickCount } = this.props;
     // const { messages } = this.props.intl;
     return (
       <nav className="navbar fixed-top" style={{

@@ -25,19 +25,21 @@ import IntlMessages from "../../../helpers/IntlMessages";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 
-import WithdrawRestService from "../../../core/requestWithdrawRestService";
-import RelatedDataRestService from "../../../core/relatedDataRestService";
-import PictureRestService from "../../../core/pictureRestService";
+import WithdrawRestService from "../../../api/requestWithdrawRestService";
+import RelatedDataRestService from "../../../api/relatedDataRestService";
+import PictureRestService from "../../../api/pictureRestService";
 // import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 // import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
-import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
-import BaseAlert from "../../base/baseAlert";
+import NumberFormat from 'react-number-format';
+
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 class WithdrawFunds extends Component {
   constructor(props) {
@@ -53,6 +55,7 @@ class WithdrawFunds extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.submitData = this.submitData.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
 
     this.state = {
       companyName: true,
@@ -243,26 +246,26 @@ class WithdrawFunds extends Component {
         Cell: props => <p>{props.value}</p>
       },
       {
-        Header: "Ballance Transactions",
-        accessor: "balanceTransaction",
+        Header: "Ballance Amount",
+        accessor: "balanceAmount",
         width: 150,
         show: this.state.balanceTransaction,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
       },
-      {
-        Header: "COD Balance",
-        accessor: "codBalance",
-        width: 120,
-        show: this.state.codBalance,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
-      {
-        Header: "Ballance Amount",
-        accessor: "balanceAmount",
-        width: 150,
-        show: this.state.balanceAmount,
-        Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      },
+      // {
+      //   Header: "Wallet Balance",
+      //   accessor: "walletBalance",
+      //   width: 120,
+      //   show: this.state.codBalance,
+      //   Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      // },
+      // {
+      //   Header: "Ballance Amount",
+      //   accessor: "balanceAmount",
+      //   width: 150,
+      //   show: this.state.balanceAmount,
+      //   Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
+      // },
       {
         Header: "Upload Bukti",
         width: 200,
@@ -319,6 +322,14 @@ class WithdrawFunds extends Component {
   }
 
   toggle() {
+    this.setState({
+      isDraft: false,
+      loading: false,
+      oneData: null,
+      selectedBank: [],
+      imageUrl: null,
+      image: null,
+    })
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
@@ -408,7 +419,7 @@ class WithdrawFunds extends Component {
       this.state.isDraft === false ||
       this.state.amount === null ||
       this.state.amount === undefined ||
-      this.state.selectedBank === []
+      this.state.selectedBank.length === 0
     ) {
       if (this.state.image === null) {
         return true;
@@ -422,19 +433,28 @@ class WithdrawFunds extends Component {
 
   submitData() {
     if (this.validateError()) {
-      this.setState({ error: true });
+      // this.setState({ error: true });
+        MySwal.fire({
+          type: "error",
+          title: "Pastikan semua data telah diisi.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
     } else {
       this.setState({ modal: false, loadingSubmit: true, errorData: "" });
-
+      
       let lines = {
         fileId: this.state.isDraft === true ? undefined : this.state.image.id,
-        amount: parseInt(this.state.amount),
+        amount: parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
         isDraft: this.state.isDraft
       };
-      console.log(lines);
+      
       this.requestWithdrawRest.postBallance(lines).subscribe(
         response => {
           this.setState({
@@ -669,14 +689,6 @@ class WithdrawFunds extends Component {
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
             <ModalBody>
-              {this.state.error && (
-                <BaseAlert
-                  onClick={() => {
-                    this.setState({ error: false });
-                  }}
-                  text={"Pastikan semua data telah terisi."}
-                />
-              )}
               <Table>
                 <tbody>
                   <tr>
@@ -726,17 +738,13 @@ class WithdrawFunds extends Component {
                   <tr>
                     <td>Balance Amount</td>
                     <td>:</td>
-                    <td>{this.state.oneData.balanceAmount}</td>
+                    <td>{this.moneyFormat.numberFormat(this.state.oneData.balanceAmount) || 0}</td>
                   </tr>
                   <tr>
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <input
-                        type="text"
-                        value={this.state.amount}
-                        onChange={this.handleChange}
-                      />
+                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange}/>
                     </td>
                   </tr>
                   <tr>
@@ -776,10 +784,7 @@ class WithdrawFunds extends Component {
                   {this.state.loading && (
                     <tr>
                       <td colSpan="3">
-                        <img
-                          src={this.state.imageUrl}
-                          height="150"
-                          width="150"
+                        <img src={this.state.imageUrl} height="150" width="150" alt="'name'"
                         />
                       </td>
                     </tr>
