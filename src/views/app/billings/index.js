@@ -239,7 +239,7 @@ export default class Billing extends Component {
     this.loadData(null);
     this.loadTenantsSubscriptionsSummary();
 
-    if (JSON.parse(localStorage.getItem("filter")) === null) {
+    if (JSON.parse(localStorage.getItem("filter")) === null || JSON.parse(localStorage.getItem("filter")) !== this.state.tableFilter) {
       localStorage.setItem("filter", JSON.stringify(this.state.tableFilter));
     }
     tableFilter = JSON.parse(localStorage.getItem("filter"));
