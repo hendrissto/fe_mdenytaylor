@@ -174,8 +174,8 @@ class TopNav extends Component {
     });
   };
 
-  handleLogout = () => {
-    this.setState({redirect: true});
+  handleLogout() {
+    window.location = '/user/login'
   };
 
   menuButtonClick = (e, menuClickCount, containerClassnames) => {
@@ -199,10 +199,10 @@ class TopNav extends Component {
 
   render() {
     const { containerClassnames, menuClickCount } = this.props;
-    if (this.state.redirect === true) {
-      this.setState({ redirect: false });
-      return <Redirect to="/user/login" />;
-    }
+    // if (this.state.redirect === true) {
+    //   this.setState({ redirect: false });
+    //   return <Redirect to="/user/login" />;
+    // }
     // const { messages } = this.props.intl;
     return (
       <nav className="navbar fixed-top" style={{
