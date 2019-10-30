@@ -871,14 +871,7 @@ class ReceiptOfFunds extends Component {
     this.setState({ errorFile: false });
     let fileObj = event.target.files[0];
 
-    if (
-      fileObj.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    ) {
-      this.setState({ fileTemp: fileObj });
-    } else {
-      this.setState({ errorFile: true });
-    }
+    this.setState({ fileTemp: fileObj });
   };
 
   excelProcess() {
