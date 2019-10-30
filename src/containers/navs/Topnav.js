@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { injectIntl } from "react-intl";
-import { Redirect } from "react-router-dom";
 
 import {
   UncontrolledDropdown,
