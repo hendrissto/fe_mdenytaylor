@@ -25,7 +25,7 @@ export default class SmallLine extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     Chart.defaults.lineWithLine = Chart.defaults.line;
     Chart.controllers.lineWithLine = Chart.controllers.line.extend({
       draw: function(ease) {

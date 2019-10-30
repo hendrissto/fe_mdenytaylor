@@ -11,3 +11,22 @@
 .hover:hover {
   cursor: pointer;
 }
+
+.swal-height {
+  margin-top: 60px !important;
+  height: 50px !important;
+}
+
+.p-paginator {
+  background-color: transparent!important;
+  border: 0px!important;
+  padding-top:15px!important;
+  .p-paginator-element {
+    border-radius:50px!important;
+  }
+  .p-paginator-pages {
+    .p-paginator-page {
+      border-radius:50px!important;
+    }
+  }
+}

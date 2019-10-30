@@ -5,7 +5,7 @@ import { centerTextPlugin } from "./util";
 import { doughnutChartOptions } from "./config";
 
 export default class Doughnut extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     if (this.props.shadow) {
       Chart.defaults.doughnutWithShadow = Chart.defaults.doughnut;
       Chart.controllers.doughnutWithShadow = Chart.controllers.doughnut.extend({

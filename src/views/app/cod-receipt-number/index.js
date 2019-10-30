@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
+import { Redirect } from "react-router-dom";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -19,11 +19,14 @@ import {
   PopoverBody
 } from "reactstrap";
 // import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
-import CODRestService from "../../../core/codRestService";
+import CODRestService from "../../../api/codRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { Paginator } from "primereact/paginator";
 
-const regex = /\[(.*?)\-/;
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
+
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +34,7 @@ export default class CODReceiptNumber extends Component {
     this.moneyFormat = new MoneyFormat();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
-
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
     // this.toggleDropDown = this.toggleDropDown.bind(this);
     // this.toggleSplit = this.toggleSplit.bind(this);
     // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
@@ -60,6 +63,7 @@ export default class CODReceiptNumber extends Component {
       receiveAmount: true,
       popoverOpen: false,
       data: [],
+      redirect: false,
       table: {
         loading: true,
         data: [],
@@ -133,12 +137,24 @@ export default class CODReceiptNumber extends Component {
       "options.includeTotalCount": true
     };
 
-    let receiverName = [];
     this.codRest.getCODReceipts({ params }).subscribe(response => {
       table.data = response.data;
       table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       this.setState({ table });
+    }, err => {
+      if(err.response.status === 401){
+        this.setState({redirect: true});
+        MySwal.fire({
+          type: "error",
+          title: "Unauthorized.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      }
     });
   }
 
@@ -318,6 +334,10 @@ export default class CODReceiptNumber extends Component {
     );
   }
   render() {
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
+    }
     return (
       <Fragment>
         <Row>
