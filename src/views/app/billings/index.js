@@ -2,7 +2,7 @@ import moment from "moment";
 import "moment/locale/id";
 import { NavLink, Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody } from "reactstrap";
+import { Card, CardBody, UncontrolledTooltip } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
@@ -318,7 +318,44 @@ export default class Billing extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 150
+        width: 150,
+        Cell: props => (
+          <div>
+           <p href="#" id={`UncontrolledTooltipExample${props.index}`} style={{
+             color: 'blue',
+             textDecoration: 'underline',
+             cursor: 'pointer'
+            }}>{props.value}</p>
+            <UncontrolledTooltip placement="bottom" target={`UncontrolledTooltipExample${props.index}`} style={{
+              maxWidth: 1000
+            }}>
+            <table>
+              <tbody>
+                <tr>
+                  <td style={{ textAlign: 'left' }}>Nama Owner</td>
+                  <td> : </td>
+                  <td style={{ textAlign: 'left' }}>{props.original.ownerUser.fullName}</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: 'left' }}>Email</td>
+                  <td> : </td>
+                  <td style={{ textAlign: 'left' }}>{props.original.ownerUser.email}</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: 'left' }}>No Telepon</td>
+                  <td> : </td>
+                  <td style={{ textAlign: 'left' }}>{props.original.ownerUser.phoneNumber}</td>
+                </tr>
+              </tbody>
+            </table>
+            {/*
+              Full Name: {props.original.ownerUser.fullName} <br />
+              Email : {props.original.ownerUser.email} <br />
+              Phone Number : {props.original.ownerUser.phoneNumber}
+             */}
+            </UncontrolledTooltip>
+          </div>
+        )
       },
       {
         Header: "Email",
