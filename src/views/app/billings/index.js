@@ -8,7 +8,6 @@ import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
-import ReactTooltip from "react-tooltip";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -890,7 +889,6 @@ export default class Billing extends Component {
                   onPageChange={this.handleOnPageChange}
                 />
 
-                <ReactTooltip place="top" type="dark" effect="solid"/>
               </CardBody>
             </Card>
           </Colxx>
