@@ -8,6 +8,7 @@ import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
+import ReactTooltip from "react-tooltip";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -16,10 +17,10 @@ import {
   InputGroup,
   Button,
   Input,
-  // Modal,
-  // ModalHeader,
-  // ModalBody,
-  // ModalFooter,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Row,
   Col,
   Collapse,
@@ -58,13 +59,11 @@ export default class Billing extends Component {
     this.moneyFormat = new MoneyFormat();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
-    this.loadDetailTenant = this.loadDetailTenant.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
     this.toggle = this.toggle.bind(this);
     this.toggleRenew = this.toggleRenew.bind(this);
-    this.toggleUpgrade = this.toggleUpgrade.bind(this);
     this.togglePopoverColumns = this.togglePopoverColumns.bind(this);
     this.onPackageChange = this.onPackageChange.bind(this);
     this.onBillingCycleChange = this.onBillingCycleChange.bind(this);
@@ -125,7 +124,8 @@ export default class Billing extends Component {
       subscriptionPlan: null,
       freeTrial: false,
       freeTrialWeekBeforeExp: false,
-      packageFilter: ""
+      packageFilter: "",
+      oneData: null,
     };
   }
 
@@ -191,6 +191,10 @@ export default class Billing extends Component {
 
   onBillingCycleChange2(e) {
     this.setState({ billingCycle2: e.value });
+  }
+
+  toggleModal() {
+
   }
 
   loadData() {
@@ -296,12 +300,6 @@ export default class Billing extends Component {
     }));
   }
 
-  toggleUpgrade() {
-    this.setState(prevState => ({
-      upgradeModal: false
-    }));
-  }
-
   dataTable() {
     moment.locale("id");
     const tableFilter = { ...this.state.tableFilter };
@@ -324,10 +322,10 @@ export default class Billing extends Component {
            <p href="#" id={`UncontrolledTooltipExample${props.index}`} style={{
              color: 'blue',
              textDecoration: 'underline',
-             cursor: 'pointer'
+             cursor: 'pointer',
             }}>{props.value}</p>
-            <UncontrolledTooltip placement="bottom" target={`UncontrolledTooltipExample${props.index}`} style={{
-              maxWidth: 1000
+            <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
+              maxWidth: 1000,
             }}>
             <table>
               <tbody>
@@ -355,6 +353,7 @@ export default class Billing extends Component {
              */}
             </UncontrolledTooltip>
           </div>
+
         )
       },
       {
@@ -481,71 +480,6 @@ export default class Billing extends Component {
         upgradeModal: true
       });
     });
-  }
-
-  loadDetailTenant(id) {
-    this.billingRest.getTenantsSubscriptionsById(id, {}).subscribe(response => {
-      console.log(response);
-    });
-  }
-
-  _renderPrice() {
-    const selectedPackage = this.state.package;
-    const billingCycle = this.state.billingCycle;
-    let price;
-    if (selectedPackage.length !== [] && billingCycle !== undefined) {
-      let code = billingCycle.code;
-      if (code === 1) {
-        console.log(selectedPackage.monthlyPrice);
-        price = selectedPackage.monthlyPrice;
-      } else if (code === 3) {
-        console.log(selectedPackage.quaterlyPrice);
-        price = selectedPackage.quaterlyPrice;
-      } else if (code === 6) {
-        console.log(selectedPackage.semesterlyPrice);
-        price = selectedPackage.semesterlyPrice;
-      } else if (code === 12) {
-        console.log(selectedPackage.yearlyPrice);
-        price = selectedPackage.yearlyPrice;
-      } else {
-        price = 0;
-      }
-    } else {
-      price = 0;
-    }
-    return price;
-  }
-
-  oneData() {
-    return (
-      <div>
-        <Row>
-          <Col xs="3"> No. Receipt </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.receiptNumber} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Sender </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.sender} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Receiver </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.receiver} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Total </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.amount} </Col>
-        </Row>
-        <Row>
-          <Col xs="3"> Status </Col>
-          <Col xs="1">:</Col>
-          <Col> {this.state.oneData.status} </Col>
-        </Row>
-      </div>
-    );
   }
 
   render() {
@@ -925,7 +859,6 @@ export default class Billing extends Component {
                     </Button>
                   </div>
                 </div>
-
                 <ReactTableFixedColumn
                   minRows={0}
                   showPagination={false}
@@ -956,9 +889,51 @@ export default class Billing extends Component {
                   }
                   onPageChange={this.handleOnPageChange}
                 />
+
+                <ReactTooltip place="top" type="dark" effect="solid"/>
               </CardBody>
             </Card>
           </Colxx>
+
+
+          {this.state.oneData && (
+            <div
+              style={{
+                maxHeight: 580
+              }}
+            >
+              <Modal isOpen={this.state.modal} toggle={this.toggle}>
+                <ModalHeader toggle={this.toggle}>Detail Owner</ModalHeader>
+                <ModalBody
+                  style={{
+                    maxHeight: 380,
+                    overflow: "auto"
+                  }}
+                >
+                  <Row>
+                  <Col xs="3"> Nama Owner </Col>
+                  <Col xs="1">:</Col>
+                  <Col> {this.state.oneData.ownerUser.fullName || "-" } </Col>
+                </Row>
+                <Row>
+                  <Col xs="3"> Email Owner </Col>
+                  <Col xs="1">:</Col>
+                  <Col> {this.state.oneData.ownerUser.email || "-" } </Col>
+                </Row>
+                <Row>
+                  <Col xs="3"> No Telepon </Col>
+                  <Col xs="1">:</Col>
+                  <Col> {this.state.oneData.ownerUser.phoneNumber || "-" } </Col>
+                </Row>
+                </ModalBody>
+                <ModalFooter>
+                  <Button color="primary" outline onClick={this.toggle}>
+                    Close
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            </div>
+          )}
         </Row>
       </Fragment>
     );
