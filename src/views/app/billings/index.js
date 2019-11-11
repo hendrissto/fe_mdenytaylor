@@ -2,7 +2,11 @@ import moment from "moment";
 import "moment/locale/id";
 import { NavLink, Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody, UncontrolledTooltip } from "reactstrap";
+import { 
+  Card, 
+  CardBody, 
+  UncontrolledTooltip 
+} from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
