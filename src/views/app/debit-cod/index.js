@@ -20,6 +20,7 @@ import {
 
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
+import { Redirect } from "react-router-dom";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -28,12 +29,16 @@ import DebitRestService from "../../../api/debitRestService";
 import RelatedDataRestService from "../../../api/relatedDataRestService";
 import PictureRestService from "../../../api/pictureRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+import NumberFormat from 'react-number-format';
 
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 class DebitCod extends Component {
   constructor(props) {
     super(props);
@@ -83,7 +88,8 @@ class DebitCod extends Component {
       modal2: false,
       modal3: false,
       errorData: "",
-      oneData: null
+      oneData: null,
+      redirect: false,
     };
   }
 
@@ -159,12 +165,24 @@ class DebitCod extends Component {
       table.pagination.totalPages = Math.ceil(response.total / response.take);
       table.loading = false;
       this.setState({ table });
+    }, err => {
+      if(err.response.status === 401){
+        this.setState({redirect: true});
+        MySwal.fire({
+          type: "error",
+          title: "Unauthorized.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      }
     });
   }
 
   loadRelatedData(id) {
     this.relatedData.getTenantBank(id, {}).subscribe(response => {
-      console.log(response);
       this.setState({ tenantBank: response.data });
     });
   }
@@ -242,8 +260,11 @@ class DebitCod extends Component {
                   onClick={() => {
                     this.loadRelatedData(props.original.tenantId);
                     this.setState({ modal: true });
-                    console.log(props.original);
                     this.setState({
+                      selectedBank: [],
+                      image: null,
+                      imageUrl: null,
+                      loading: false,
                       oneData: props.original,
                       amount: props.original.amount
                     });
@@ -298,7 +319,7 @@ class DebitCod extends Component {
       let lines = {
         id: this.state.oneData.id,
         fileId: this.state.image.id,
-        amount: parseInt(this.state.amount),
+        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id
@@ -325,6 +346,10 @@ class DebitCod extends Component {
   }
 
   render() {
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
+    }
     return (
       <>
         <Row>
@@ -547,17 +572,13 @@ class DebitCod extends Component {
                       <IntlMessages id="modal.total" />
                     </td>
                     <td>:</td>
-                    <td>{this.state.oneData.amount}</td>
+                    <td>{this.moneyFormat.numberFormat(this.state.oneData.amount) || 0}</td>
                   </tr>
                   <tr>
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <input
-                        type="text"
-                        value={this.state.amount}
-                        onChange={this.handleChange}
-                      />
+                    <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange}/>
                     </td>
                   </tr>
                 </tbody>

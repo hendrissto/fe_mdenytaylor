@@ -38,7 +38,8 @@ class TopNav extends Component {
     this.state = {
       isInFullScreen: false,
       searchKeyword: "",
-      user: JSON.parse(localStorage.getItem("user"))
+      user: JSON.parse(localStorage.getItem("user")),
+      redirect: true,
     };
   }
 
@@ -172,8 +173,8 @@ class TopNav extends Component {
     });
   };
 
-  handleLogout = () => {
-    this.props.logoutUser(this.props.history);
+  handleLogout() {
+    window.location = '/user/login'
   };
 
   menuButtonClick = (e, menuClickCount, containerClassnames) => {
@@ -197,6 +198,10 @@ class TopNav extends Component {
 
   render() {
     const { containerClassnames, menuClickCount } = this.props;
+    // if (this.state.redirect === true) {
+    //   this.setState({ redirect: false });
+    //   return <Redirect to="/user/login" />;
+    // }
     // const { messages } = this.props.intl;
     return (
       <nav className="navbar fixed-top" style={{

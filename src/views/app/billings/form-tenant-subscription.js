@@ -991,6 +991,7 @@ export default class FormTenantSubscription extends Component {
                               }}
                             >
                               <Calendar
+                                dateFormat="dd/mm/yy"
                                 value={this.state.date}
                                 onChange={e => {
                                   this.setState({ date: e.value });

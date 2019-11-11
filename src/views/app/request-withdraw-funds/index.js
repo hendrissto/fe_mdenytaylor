@@ -72,6 +72,7 @@ class WithdrawFunds extends Component {
       fileAttach: true,
       popoverOpen: false,
       error: false,
+      redirectLogin: false,
       table: {
         loading: true,
         loadingSubmit: false,
@@ -168,6 +169,19 @@ class WithdrawFunds extends Component {
       table.loading = false;
 
       this.setState({ table });
+    }, err => {
+      if(err.response.status === 401){
+        this.setState({redirectLogin: true});
+        MySwal.fire({
+          type: "error",
+          title: "Unauthorized.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      }
     });
   }
 
@@ -448,7 +462,7 @@ class WithdrawFunds extends Component {
       
       let lines = {
         fileId: this.state.isDraft === true ? undefined : this.state.image.id,
-        amount: parseFloat(this.state.amount.replace(/,/g, '')),
+        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
@@ -478,6 +492,12 @@ class WithdrawFunds extends Component {
   render() {
     if (this.state.redirect === true) {
       return <Redirect to="/app/request-withdraw-funds/" />;
+    }
+
+    if(this.state.redirectLogin === true) {
+      this.setState({redirectLogin: false});
+      return <Redirect to="/user/login" />;
+
     }
     return (
       <Fragment>
