@@ -1,0 +1,56 @@
+.filter {
+  .btn-filter {
+    border: 0;
+    border-radius: 6px 0px 0px 6px;
+    background-color: #145388;
+  }
+
+  .list-filter {
+    border-radius: 0px 0px 6px 6px;
+  }
+
+  .btn-search {
+    border-radius: 0px 6px 6px 0px;
+  }
+}
+
+.isDropship {
+	background-color: #757a89;
+	text-align: center;
+	width: 65px;
+	border-radius: 10px;
+  letter-spacing: normal;
+  color: #ffffff;
+}
+
+.isCOD {
+	background-color: #757a89;
+	text-align: center;
+	width: 37px;
+	border-radius: 10px;
+  letter-spacing: normal;
+  color: #ffffff;
+}
+
+.isInactive {
+	background-color: #cc5d59;
+	text-align: center;
+	width: 60px;
+	border-radius: 10px;
+  letter-spacing: normal;
+  color: #ffffff;
+}
+
+.isActive {
+	background-color: rgb(42, 178, 123);
+	text-align: center;
+	width: 60px;
+	border-radius: 10px;
+  letter-spacing: normal;
+  color: #ffffff;
+}
+
+.link-text {
+  cursor: pointer;
+  color: blue;
+}

@@ -70,6 +70,7 @@ module.exports = {
   "menu.content": "Content",
   "menu.pages": "Pages",
   "menu.billing": "Subscription",
+  "menu.list-transactions": "List Transactions",
   "menu.data-list": "Data List",
   "menu.thumb-list": "Thumb List",
   "menu.image-list": "Image List",

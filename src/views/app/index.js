@@ -19,6 +19,7 @@ import applications from "../gogo/applications";
 import ui from "../gogo/ui";
 import menu from "../gogo/menu";
 import blankPage from "./blank-page";
+import ListTransactions from "./list-transactions";
 
 class App extends Component {
   render() {
@@ -37,6 +38,7 @@ class App extends Component {
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
           <Route path={`${match.url}/debit-cod`} component={DebitCod} />
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
+          <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
          
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />
@@ -44,10 +46,8 @@ class App extends Component {
           <Route path={`${match.url}/pages`} component={pages} />
           <Route path={`${match.url}/ui`} component={ui} />
           <Route path={`${match.url}/menu`} component={menu} />
-          <Route path={`${match.url}/blank-page`} component={blankPage} />
-          {/*
+          <Route path={`${match.url}/blank-page`} component={blankPage} />\
           <Redirect to="/error" />
-           */}
         </Switch>
       </AppLayout>
     );
