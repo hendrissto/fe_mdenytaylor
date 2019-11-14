@@ -236,14 +236,14 @@ export default class Tenant extends Component {
       {
         Header: "Email",
         accessor: "email",
-        fixed: "left",
+        // fixed: "left",
         width: 170,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "No Telp",
         accessor: "phone",
-        fixed: "left",
+        // fixed: "left",
         width: 140,
         Cell: props => <p>{props.value}</p>
       },

@@ -2,7 +2,11 @@ import moment from "moment";
 import "moment/locale/id";
 import { NavLink, Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody, UncontrolledTooltip } from "reactstrap";
+import { 
+  Card, 
+  CardBody, 
+  UncontrolledTooltip 
+} from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
@@ -345,11 +349,6 @@ export default class Billing extends Component {
                 </tr>
               </tbody>
             </table>
-            {/*
-              Full Name: {props.original.ownerUser.fullName} <br />
-              Email : {props.original.ownerUser.email} <br />
-              Phone Number : {props.original.ownerUser.phoneNumber}
-             */}
             </UncontrolledTooltip>
           </div>
 
