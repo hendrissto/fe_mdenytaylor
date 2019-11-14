@@ -5,7 +5,7 @@ import React, { Component, Fragment } from "react";
 import { 
   Card, 
   CardBody, 
-  // UncontrolledTooltip 
+  UncontrolledTooltip 
 } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -322,8 +322,6 @@ export default class Billing extends Component {
         width: 150,
         Cell: props => (
           <div>
-          <p>{props.value}</p>
-          {/*
            <p href="#" id={`UncontrolledTooltipExample${props.index}`} style={{
              color: 'blue',
              textDecoration: 'underline',
@@ -352,7 +350,6 @@ export default class Billing extends Component {
               </tbody>
             </table>
             </UncontrolledTooltip>
-          */}
           </div>
 
         )
