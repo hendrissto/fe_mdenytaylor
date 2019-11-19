@@ -887,6 +887,7 @@ export default class Billing extends Component {
                   }
                   onPageChange={this.handleOnPageChange}
                 />
+
               </CardBody>
             </Card>
           </Colxx>
