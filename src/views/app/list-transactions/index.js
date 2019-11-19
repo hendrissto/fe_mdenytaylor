@@ -313,6 +313,7 @@ export default class ListTransactions extends Component {
             onClick={() => {
               this.dataTotal(props.original);
             }}
+            className="link-text"
           >
             {this._moneyFormat.numberFormat(props.value) || "-"}
           </div>
