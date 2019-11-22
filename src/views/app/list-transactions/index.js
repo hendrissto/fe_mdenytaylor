@@ -20,18 +20,25 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Paginator } from "primereact/paginator";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import ModalComponent from "../../../components/shared/modal.js";
+import ListTransactionsService from "../../../api/listTransactionsRestService";
 import "./list-transactions.style.scss";
+
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 export default class ListTransactions extends Component {
   constructor(props) {
     super(props);
 
     this._moneyFormat = new MoneyFormat();
+    this._listTransactionsService = new ListTransactionsService();
 
     this.toogleDropdownSearch = this.toogleDropdownSearch.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.checkAWB = this.checkAWB.bind(this);
     this.dataTransactions = this.dataTransactions.bind(this);
 
     this.state = {
@@ -62,7 +69,7 @@ export default class ListTransactions extends Component {
       modalCompany: false,
       modalTotal: false,
       modalReceipt: false,
-      resetPaginations: false,
+      resetPaginations: false
     };
   }
 
@@ -184,9 +191,9 @@ export default class ListTransactions extends Component {
         : table.pagination.currentPage * 10 - 10;
     this.setState({ table });
 
-    if(this.state.resetPaginations) {
+    if (this.state.resetPaginations) {
       page = 0;
-      this.setState({resetPaginations: false});
+      this.setState({ resetPaginations: false });
     }
 
     Axios.get(
@@ -330,11 +337,6 @@ export default class ListTransactions extends Component {
         width: 130,
         Cell: props => <div>{props.value || "-"}</div>
       },
-      // {
-      //   Header: "No Resi",
-      //   accessor: "ShippingTrackingNumber",
-      //   Cell: props => <div>{props.value}</div>
-      // },
       {
         Header: "Kurir",
         accessor: "Shipping_Name",
@@ -342,7 +344,12 @@ export default class ListTransactions extends Component {
         Cell: props => (
           <div>
             {props.value || "-"} <br />
-            {props.original.ShippingTrackingNumber}
+            <div
+              className="link-text"
+              onClick={() => this.checkAWB(props.original)}
+            >
+              {props.original.ShippingTrackingNumber}
+            </div>
           </div>
         )
       },
@@ -546,6 +553,161 @@ export default class ListTransactions extends Component {
     this.setState({ dataModal, modal: true });
   }
 
+  checkAWB(data) {
+    let params = {};
+    if (data.Shipping_Name && data.Shipping_Name.toString().toLowerCase() !== "sicepat") {
+      MySwal.fire({
+        type: "error",
+        title: "Cek resi hanya tersedia untuk SiCepat.",
+        toast: true,
+        position: "top-end",
+        timer: 5000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+    } else if (data.Shipping_Name) {
+      params = {
+        courierCode: data.Shipping_Name.toString().toLowerCase(),
+        waybill: data.ShippingTrackingNumber
+      };
+
+      this._listTransactionsService.getAWBDetail(params).subscribe(res => {
+        this.dataAWB(res.data);
+      });
+    } else {
+      MySwal.fire({
+        type: "error",
+        title: "Kurir tidak ditemukan.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+    }
+  }
+
+  dataAWB(data) {
+    const dataModal = this.state.dataModal;
+
+    dataModal.header = "Rincian Pengiriman";
+    dataModal.body = (
+      <div className="modal-awb">
+        <div className="header-awb">
+          <div className="courier">{data.summary.courierName || "-"}</div>
+          <div className="title">No Resi</div>
+          <div className="airwaybill">
+            #{data.summary.trackingNumber || "-"}
+          </div>
+        </div>
+
+        <div>
+          <table className="data-awb">
+            <tr>
+              <th>Tanggal dikirim</th>
+              <th>Tanggal diterima</th>
+            </tr>
+            <tr>
+              <td>
+                {moment(data.summary.shipDate, "YYYY-MM-DD hh:mm:ss").format(
+                  "DD-MM-YYYY hh:mm"
+                ) || "-"}
+              </td>
+              <td>
+                {moment(
+                  data.summary.deliveryDate,
+                  "YYYY-MM-DD hh:mm:ss"
+                ).format("YYYY-MM-DD hh:mm") || "-"}
+              </td>
+            </tr>
+            <tr>
+              <th>Asal</th>
+              <th>Tujuan</th>
+            </tr>
+            <tr>
+              <td>{data.summary.origin || "-"}</td>
+              <td>{data.summary.destination || "-"}</td>
+            </tr>
+            <tr>
+              <th>Pengirim</th>
+              <th>Penerima</th>
+            </tr>
+            <tr>
+              <td>{data.summary.shipperName || "-"}</td>
+              <td>{data.summary.receiverName || "-"}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div className="status-shipping">
+          <div className="title2">Status Pengiriman</div>
+
+          <div>
+            <table className="outbond">
+              <tr>
+                <th colSpan="3">Outbond</th>
+              </tr>
+              {this._renderOutbond(data)}
+            </table>
+          </div>
+
+          <div>
+            <table className="time-shipping">
+              <tr>
+                <th colSpan="3">Waktu Pengiriman</th>
+              </tr>
+              <tr>
+                <td>
+                  {moment(
+                    data.deliveryStatus.podDate,
+                    "YYYY-MM-DD hh:mm"
+                  ).format("DD-MM-YYYY hh:mm") || "-"}
+                </td>
+                <td>{data.deliveryStatus.podReceiver || "-"}</td>
+                <td>{data.deliveryStatus.status || "-"}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+    dataModal.footer = (
+      <div>
+        <Button
+          className="default btn-search"
+          color="primary"
+          style={{
+            borderRadius: 6
+          }}
+        >
+          Close
+        </Button>
+      </div>
+    );
+
+    this.setState({ dataModal, modal: true });
+  }
+
+  _renderOutbond(data) {
+    const list = [];
+
+    for (let i = 0; i < data.outbounds.length; i++) {
+      list.push(
+        <tr>
+          <td>{data.outbounds[i].outboundDate}</td>
+          <td>
+            {data.outbounds[i].cityName === null
+              ? ""
+              : data.outbounds[i].cityName}
+          </td>
+          <td>{data.outbounds[i].outboundCode}</td>
+        </tr>
+      );
+    }
+
+    return list;
+  }
+
   handleOnPageChange(paginationEvent) {
     const table = { ...this.state.table };
     table.loading = true;
@@ -622,9 +784,9 @@ export default class ListTransactions extends Component {
                 const table = this.state.table;
 
                 table.pagination.skipSize = 0;
-                this.setState({table, resetPaginations: true}, () => {
+                this.setState({ table, resetPaginations: true }, () => {
                   this.loadData();
-                })
+                });
               }
             }}
           />
@@ -635,9 +797,9 @@ export default class ListTransactions extends Component {
               const table = this.state.table;
 
               table.pagination.skipSize = 0;
-              this.setState({table, resetPaginations: true}, () => {
+              this.setState({ table, resetPaginations: true }, () => {
                 this.loadData();
-              })
+              });
             }}
           >
             <i className="simple-icon-magnifier" />
@@ -683,14 +845,6 @@ export default class ListTransactions extends Component {
       </div>
     );
   }
-
-  _renderModalTransactions() {}
-
-  _renderModalCustomer() {}
-
-  _renderModalCompany() {}
-
-  _renderModalTotal() {}
 
   render() {
     return (
