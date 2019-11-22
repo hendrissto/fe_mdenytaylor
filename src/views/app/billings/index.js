@@ -210,8 +210,7 @@ export default class Billing extends Component {
       subscriptionPlan: this.state.packageFilter || null,
       freeTrial: this.state.freeTrial || null,
       freeTrialWeekBeforeExp: this.state.freeTrialWeekBeforeExp || null,
-      daysBeforeExpDate:
-        this.state.dayBefore === 0 ? null : this.state.dayBefore,
+      daysBeforeExpDate: this.state.dayBefore || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -230,12 +229,12 @@ export default class Billing extends Component {
         this.setState({ redirect: true });
       }
     );
-    this.setState({
-      freeTrial: false,
-      freeTrialWeekBeforeExp: false,
-      dayAfter: 0,
-      dayBefore: 0
-    });
+    // this.setState({
+    //   freeTrial: false,
+    //   freeTrialWeekBeforeExp: false,
+    //   dayAfter: 0,
+    //   dayBefore: 0
+    // });
   }
 
   componentDidMount() {
@@ -322,7 +321,7 @@ export default class Billing extends Component {
         width: 150,
         Cell: props => (
           <div>
-           <p href="#" id={`UncontrolledTooltipExample${props.index}`} style={{
+           <p id={`UncontrolledTooltipExample${props.index}`} style={{
              color: 'blue',
              textDecoration: 'underline',
              cursor: 'pointer',
@@ -680,7 +679,7 @@ export default class Billing extends Component {
                         Filter
                       </Button>
                       <Collapse isOpen={this.state.collapse}>
-                        <Card style={{ width: 1000 }}>
+                        <Card style={{ width: '100%' }}>
                           <CardBody>
                             Sisa Waktu Berlangganan
                             <div
@@ -692,6 +691,7 @@ export default class Billing extends Component {
                                     name="dayBefore"
                                     value="-7"
                                     type="radio"
+                                    checked={this.state.dayBefore === 7 ? true : false}
                                   />
                                   7 Hari
                                 </div>
@@ -700,6 +700,7 @@ export default class Billing extends Component {
                                     name="dayBefore"
                                     value="-3"
                                     type="radio"
+                                    checked={this.state.dayBefore === 3 ? true : false}
                                   />
                                   3 Hari
                                 </div>
@@ -708,6 +709,7 @@ export default class Billing extends Component {
                                     name="dayBefore"
                                     value="-1"
                                     type="radio"
+                                    checked={this.state.dayBefore === 1 ? true : false}
                                   />
                                   1 Hari
                                 </div>
@@ -843,7 +845,7 @@ export default class Billing extends Component {
                         const table = { ...this.state.table };
 
                         table.pagination.skipSize = 0;
-                        this.setState({ packageFilter: "", search: "" }, () => {
+                        this.setState({ packageFilter: "", search: "", dayBefore: null }, () => {
                           this.loadData();
                         });
                         this.setState({ collapse: false });
