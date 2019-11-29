@@ -586,6 +586,7 @@ export default class ListTransactions extends Component {
           this.dataAWB(res.data);
         })
       }, err => {
+        this.setState({loading: false})
         MySwal.fire({
           type: "error",
           title: err.data.errors[0].error_message,
@@ -597,7 +598,8 @@ export default class ListTransactions extends Component {
         });
       });
     } else {
-      MySwal.fire({
+        this.setState({loading: false})
+        MySwal.fire({
         type: "error",
         title: "Kurir tidak ditemukan.",
         toast: true,
