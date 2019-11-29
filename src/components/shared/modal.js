@@ -1,20 +1,27 @@
-import React, { Component, Fragment } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import React, { Component, Fragment } from "react";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 
 class ModalComponent extends Component {
-    render() {
-      return (
-        <Fragment>
-          <Modal
-            isOpen={true}
+  render() {
+    return (
+      <Fragment>
+        <Modal isOpen={true} size="lg">
+          <ModalHeader>{this.props.header}</ModalHeader>
+          <ModalBody
+            style={{
+              maxHeight: 400,
+              overflow: "auto"
+            }}
           >
-            <ModalHeader>{this.props.header}</ModalHeader>
-            <ModalBody>{this.props.body}</ModalBody>
-            <ModalFooter><div onClick={() => this.props.close()}>{this.props.footer}</div></ModalFooter>
-          </Modal>
-        </Fragment>
-      )
-    }
+            {this.props.body}
+          </ModalBody>
+          <ModalFooter>
+            <div onClick={() => this.props.close()}>{this.props.footer}</div>
+          </ModalFooter>
+        </Modal>
+      </Fragment>
+    );
+  }
 }
 
 export default ModalComponent;
