@@ -8,10 +8,10 @@ import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
+import ExportTenants from "../../../core/export/ExportTenants";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-// import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -23,13 +23,10 @@ import {
   Row,
   Col,
   UncontrolledPopover,
-  // Popover,
   PopoverBody,
   CustomInput
 } from "reactstrap";
-// import { InputGroup, Button, InputGroupButtonDropdown, Input, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col } from 'reactstrap';
 import TenantRestService from "../../../api/tenantRestService";
-// import { InputSwitch } from "primereact/inputswitch";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
 import "./tenants.css";
@@ -42,16 +39,21 @@ import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
+
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
     this.tenantRest = new TenantRestService();
+    this.exportService = new ExportTenants();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.editStatusCOD = this.editStatusCOD.bind(this);
     this.toggleFilterPopOver = this.toggleFilterPopOver.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.exportData = this.exportData.bind(this);
+    this.loadAllData = this.loadAllData.bind(this);
+
     this.state = {
       totalSku: true,
       totalOrder: true,
@@ -79,6 +81,7 @@ export default class Tenant extends Component {
           pageSize: 10
         }
       },
+      allData: null,
       tenantsSummary: [],
       dropdownOpen: false,
       modal: false,
@@ -90,7 +93,8 @@ export default class Tenant extends Component {
       errorMessage: null,
       isReal: true,
       isCod: "",
-      filterIsReal: true
+      filterIsReal: true,
+      totalData: 0
     };
   }
 
@@ -499,6 +503,36 @@ export default class Tenant extends Component {
     return dataTable;
   }
 
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Tenants");
+      this.setState({ loading: false });
+    });
+  }
+
   render() {
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
@@ -766,11 +800,21 @@ export default class Tenant extends Component {
                         this.setState({ collapse: false });
                       }}
                       style={{
-                        marginRight: 10,
                         borderRadius: 6
                       }}
                     >
                       <i className="simple-icon-refresh" />
+                    </Button>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
                     </Button>
                   </div>
                 </div>
