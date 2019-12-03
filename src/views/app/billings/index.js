@@ -5,17 +5,17 @@ import React, { Component, Fragment } from "react";
 import { 
   Card, 
   CardBody, 
-  // UncontrolledTooltip 
 } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
+import ExportSubscriptions from "../../../core/export/ExportSubscriptions";
+import Spinner from "../../../containers/pages/Spinner";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-// import DataTablePagination from "../../../components/DatatablePagination";
 import {
   InputGroup,
   Button,
@@ -29,23 +29,13 @@ import {
   Collapse,
   CardFooter,
   UncontrolledPopover,
-  // Popover,
-  // PopoverHeader,
   PopoverBody,
-  // Dropdown,
-  // DropdownToggle,
-  // DropdownItem,
-  // DropdownMenu,
-  // ButtonDropdown
 } from "reactstrap";
 
 import BillingRestService from "../../../api/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
-// import { Checkbox } from "primereact/checkbox";
-// import { Dropdown } from "primereact/dropdown";
-// import { Calendar } from "primereact/calendar";
 import "./style.scss";
 
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
@@ -59,6 +49,7 @@ export default class Billing extends Component {
   constructor(props) {
     super(props);
     this.billingRest = new BillingRestService();
+    this.exportService = new ExportSubscriptions();
     this.moneyFormat = new MoneyFormat();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
@@ -74,6 +65,8 @@ export default class Billing extends Component {
     this.loadTenantsSubscriptionsSummary = this.loadTenantsSubscriptionsSummary.bind(
       this
     );
+    this.exportData = this.exportData.bind(this);
+    this.loadAllData = this.loadAllData.bind(this);
 
     let today = new Date();
     today.setDate(today.getDate() - 1);
@@ -129,6 +122,7 @@ export default class Billing extends Component {
       freeTrialWeekBeforeExp: false,
       packageFilter: "",
       oneData: null,
+      totalData: 0,
     };
   }
 
@@ -473,6 +467,36 @@ export default class Billing extends Component {
       }
     ];
   }
+  
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Subscriptions");
+      this.setState({ loading: false });
+    });
+  }
 
   loadRelatedData() {
     this.billingRest.getRelatedData({}).subscribe(response => {
@@ -714,16 +738,6 @@ export default class Billing extends Component {
                                   />
                                   1 Hari
                                 </div>
-                                {/*
-                                <div style={filterStyle}>
-                                  <input
-                                    name="dayBefore"
-                                    value="+3"
-                                    type="radio"
-                                  />
-                                  3 Hari Setelah Jatuh Tempo
-                                </div>
-                                 */}
                               </Row>
                             </div>
                           </CardBody>
@@ -745,7 +759,7 @@ export default class Billing extends Component {
                     </InputGroup>
                   </div>
 
-                  <div>
+                  <div className="col-md-7">
                     <Button
                       className="float-right default"
                       color="primary"
@@ -858,6 +872,17 @@ export default class Billing extends Component {
                     >
                       <i className="simple-icon-refresh" />
                     </Button>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
+                    </Button>
                   </div>
                 </div>
                 <ReactTableFixedColumn
@@ -893,6 +918,7 @@ export default class Billing extends Component {
               </CardBody>
             </Card>
           </Colxx>
+          {this.state.loading && <Spinner />}
 
 
           {this.state.oneData && (
