@@ -25,6 +25,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import Spinner from "../../../containers/pages/Spinner";
+import { Checkbox } from 'primereact/checkbox';
 // import BaseAlert from "../../base/baseAlert";
 // import { BaseAlert } from "../../../containers/pages/BaseAlert";
 import "./style.scss";
@@ -68,6 +69,8 @@ export default class FormTenantSubscription extends Component {
       redirect: false,
       date: today,
       paymentMethod: null,
+      isActivateProduct: false,
+      isActivateUser: false,
     };
   }
 
@@ -414,87 +417,35 @@ export default class FormTenantSubscription extends Component {
       props.values.total = props.values.prices;
     }
     return (
-      <div
-        style={{
-          width: "100%"
-        }}
-      >
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
+      <div style={{ width: "100%" }} >
+        <div className="d-flex flex-row-reverse bd-highlight" style={{ marginRight: 85 }} >
+          <Row style={{ width: 420 }} >
+            <Col md="5" style={{ marginTop: 5 }}>
+              <span style={{ marginLeft: 30 }} >
                 Subtotal
               </span>
             </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
+            <Col style={{ marginTop: 5, textAlign: "right" }} >
               {props.values.prices}
             </Col>
           </Row>
         </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 15
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
+        <div className="d-flex flex-row-reverse bd-highlight" style={{ marginRight: 85 }} >
+          <Row style={{ width: 420 }} >
+            <Col md="5" style={{ marginTop: 15 }} >
+              <span style={{ marginLeft: 30 }} >
                 Discount
               </span>
             </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                width: 500
-              }}
-            >
+            <Col style={{ marginTop: 5, width: 500 }} >
               <Row>
-                <ButtonDropdown
-                  isOpen={this.state.dropdownOpenAll}
-                  toggle={this.toggleAll}
-                >
-                  <DropdownToggle
-                    caret
-                    style={{
+                <ButtonDropdown isOpen={this.state.dropdownOpenAll} toggle={this.toggleAll} >
+                  <DropdownToggle caret style={{
                       borderRadius: 0,
                       backgroundColor: "#848484",
                       border: 0,
                       width: 60
-                    }}
-                  >
+                    }}>
                     {this.state.discountAll}
                   </DropdownToggle>
                   <DropdownMenu>
@@ -532,43 +483,20 @@ export default class FormTenantSubscription extends Component {
                       ? props.values.discountTotalAmount
                       : props.values.discountTotalPercent
                   }
-                  style={{
-                    textAlign: "right"
-                  }}
+                  style={{ textAlign: "right" }}
                 />
               </Row>
             </Col>
           </Row>
         </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
+        <div className="d-flex flex-row-reverse bd-highlight" style={{ marginRight: 85 }}>
+          <Row style={{ width: 420 }}>
+            <Col md="5" style={{ marginTop: 5 }}>
+              <span style={{ marginLeft: 30 }}>
                 Tax
               </span>
             </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
+            <Col style={{ marginTop: 5, textAlign: "right" }}>
               <InputText
                 style={{
                   width: "45px",
@@ -585,61 +513,26 @@ export default class FormTenantSubscription extends Component {
             </Col>
           </Row>
         </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
+        <div className="d-flex flex-row-reverse bd-highlight" style={{ marginRight: 85 }} >
+          <Row style={{ width: 420 }}>
+            <Col md="5" style={{ marginTop: 5 }}>
+              <span style={{ marginLeft: 30 }}>
                 Adjustment
               </span>
             </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
+            <Col style={{ marginTop: 5, textAlign: "right" }}>
               <InputText
                 name="adjustmentAmount"
                 value={props.values.adjustmentAmount}
                 onChange={props.handleChange}
-                style={{
-                  textAlign: "right"
-                }}
+                style={{ textAlign: "right" }}
               />
             </Col>
           </Row>
         </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
+        <div className="d-flex flex-row-reverse bd-highlight" style={{ marginRight: 85 }} >
+          <Row style={{ width: 420 }}>
+            <Col md="5" style={{ marginTop: 5 }}>
               <span
                 style={{
                   marginLeft: 30,
@@ -650,29 +543,15 @@ export default class FormTenantSubscription extends Component {
                 Total
               </span>
             </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 20,
-                  color: "#848484"
-                }}
-              >
+            <Col style={{ marginTop: 5, textAlign: "right" }}>
+              <span style={{ fontSize: 20, color: "#848484" }} >
                 {props.values.total}
               </span>
             </Col>
           </Row>
         </div>
         <div className="d-flex flex-row-reverse bd-highlight">
-          <Row
-            style={{
-              marginRight: 80
-            }}
-          >
+          <Row style={{ marginRight: 80 }}>
             <Button
               style={{
                 borderRadius: "5px",
@@ -739,6 +618,8 @@ export default class FormTenantSubscription extends Component {
       let data = {
         subscriptionPlanId: props.package.id,
         subscriptionStartDate: moment(this.state.date).format("YYYY-MM-DD"),
+        isActivateProduct: this.state.isActivateProduct,
+        isActivateUser: this.state.isActivateUser,
         invoiceNumber: props.invoiceNumber === "" ? null : props.invoiceNumber,
         invoiceDate: this.state.today,
         subtotal: props.prices,
@@ -1005,9 +886,22 @@ export default class FormTenantSubscription extends Component {
                               {this._renderTable(props)}
                             </Col>
                           </Row>
-                          <Row>
-                            <Col>{this._renderPrice(props)}</Col>
-                          </Row>
+                          <div className="container">
+                            <div className="row">
+                              <div className="col align-self-end">
+                                <div className="row">
+                                  <Checkbox inputId="isActiveProduct" onChange={e => this.setState({isActivateProduct: e.checked})} checked={this.state.isActivateProduct}></Checkbox>
+                                  <label htmlFor="isActiveProduct" className="p-checkbox-label" style={{ marginRight: 10, marginTop: 3 }}>Aktifkan Produk</label>
+
+                                  <Checkbox inputId="isActiveUser" onChange={e => this.setState({isActivateUser: e.checked})} checked={this.state.isActivateUser}></Checkbox>
+                                  <label htmlFor="isActiveUser" className="p-checkbox-label" style={{marginTop: 3}}>Aktifkan User</label>
+                                </div>
+                              </div>
+                              <div className="col align-self-start">
+                                {this._renderPrice(props)}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </Formik>
