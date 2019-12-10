@@ -36,6 +36,7 @@ import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
 import NumberFormat from 'react-number-format';
+import ExportWithdrawFunds from "../../../core/export/ExportWithdrawFunds";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -47,6 +48,7 @@ class WithdrawFunds extends Component {
     this.requestWithdrawRest = new WithdrawRestService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
+    this.exportService = new ExportWithdrawFunds();
     this.moneyFormat = new MoneyFormat();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantBank = this.loadTenantBank.bind(this);
@@ -102,7 +104,8 @@ class WithdrawFunds extends Component {
       loading: false,
       imageUrl: null,
       redirect: false,
-      errorData: ""
+      errorData: "",
+      totalData: 0,
     };
 
     this.loadData = this.loadData.bind(this);
@@ -488,6 +491,36 @@ class WithdrawFunds extends Component {
       );
     }
   }
+  
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.requestWithdrawRest.getBallance({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.requestWithdrawRest.getBallance({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Withdraw Funds");
+      this.setState({ loading: false });
+    });
+  }
 
   render() {
     if (this.state.redirect === true) {
@@ -663,6 +696,17 @@ class WithdrawFunds extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
+                    </Button>
                   </div>
                 </div>
                 <ReactTable
