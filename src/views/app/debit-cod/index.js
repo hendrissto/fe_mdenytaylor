@@ -35,6 +35,7 @@ import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
 import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
+import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -45,6 +46,7 @@ class DebitCod extends Component {
 
     this.debitRestService = new DebitRestService();
     this.relatedData = new RelatedDataRestService();
+    this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
     this.moneyFormat = new MoneyFormat();
     this.toggle = this.toggle.bind(this);
@@ -345,6 +347,36 @@ class DebitCod extends Component {
     }
   }
 
+  exportData() {
+    this.setState({ loadingSubmit: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.debitRestService.getDebitCod({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.debitRestService.getDebitCod({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Withdraw Funds");
+      this.setState({ loadingSubmit: false });
+    });
+  }
+
   render() {
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
@@ -467,6 +499,17 @@ class DebitCod extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
+                    </Button>
                   </div>
                 </div>
 
