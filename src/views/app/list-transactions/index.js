@@ -20,6 +20,7 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import { Paginator } from "primereact/paginator";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import ModalComponent from "../../../components/shared/modal.js";
+import Loading from "../../../containers/pages/Spinner";
 import ListTransactionsService from "../../../api/listTransactionsRestService";
 import "./list-transactions.style.scss";
 
@@ -69,7 +70,8 @@ export default class ListTransactions extends Component {
       modalCompany: false,
       modalTotal: false,
       modalReceipt: false,
-      resetPaginations: false
+      resetPaginations: false,
+      loading: false,
     };
   }
 
@@ -153,6 +155,23 @@ export default class ListTransactions extends Component {
         return "Received";
       default:
         return "Invalid Code";
+    }
+  }
+
+  typeShipmentCourier(code) {
+    switch (code) {
+      case 1:
+        return "Telah Diambil";
+      case 2:
+        return "Telah Berangkat";
+      case 3:
+        return "Telah Tiba";
+      case 4:
+        return "Sedang Diantar";
+      case 5:
+        return "Terkirim";
+      default:
+        return "Invalid.";
     }
   }
 
@@ -554,28 +573,33 @@ export default class ListTransactions extends Component {
   }
 
   checkAWB(data) {
+    this.setState({loading: true})
     let params = {};
-    if (data.Shipping_Name && data.Shipping_Name.toString().toLowerCase() !== "sicepat") {
-      MySwal.fire({
-        type: "error",
-        title: "Cek resi hanya tersedia untuk SiCepat.",
-        toast: true,
-        position: "top-end",
-        timer: 5000,
-        showConfirmButton: false,
-        customClass: "swal-height"
-      });
-    } else if (data.Shipping_Name) {
+    if (data.Shipping_Name) {
       params = {
-        courierCode: data.Shipping_Name.toString().toLowerCase(),
+        courierCode: data.Shipping_Name.toString().toLowerCase() === 'j&t' ? 'jnt' : data.Shipping_Name.toString().toLowerCase(),
         waybill: data.ShippingTrackingNumber
       };
 
       this._listTransactionsService.getAWBDetail(params).subscribe(res => {
-        this.dataAWB(res.data);
+        this.setState({loading: false}, () => {
+          this.dataAWB(res.data);
+        })
+      }, err => {
+        this.setState({loading: false})
+        MySwal.fire({
+          type: "error",
+          title: err.data.errors[0].error_message,
+          toast: true,
+          position: "top-end",
+          timer: 4000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
       });
     } else {
-      MySwal.fire({
+        this.setState({loading: false})
+        MySwal.fire({
         type: "error",
         title: "Kurir tidak ditemukan.",
         toast: true,
@@ -609,15 +633,14 @@ export default class ListTransactions extends Component {
             </tr>
             <tr>
               <td>
-                {moment(data.summary.shipDate, "YYYY-MM-DD hh:mm:ss").format(
-                  "DD-MM-YYYY hh:mm"
-                ) || "-"}
+                {data.summary.shipDate === "" || data.summary.shipDate === null ? '-' : moment(data.summary.shipDate).format(
+                  "DD-MM-YYYY"
+                )}
               </td>
               <td>
-                {moment(
-                  data.summary.deliveryDate,
-                  "YYYY-MM-DD hh:mm:ss"
-                ).format("YYYY-MM-DD hh:mm") || "-"}
+                {data.summary.deliveryDate === "" || data.summary.deliveryDate === null ? '-' : moment(
+                  data.summary.deliveryDate
+                ).format("YYYY-MM-DD")}
               </td>
             </tr>
             <tr>
@@ -691,6 +714,35 @@ export default class ListTransactions extends Component {
   _renderOutbond(data) {
     const list = [];
 
+    if(data.summary.courierCode === 'jne') {
+      for (let i = 0; i < data.outbounds.length; i++) {
+        list.push(
+          <tr>
+            <td>{data.outbounds[i].outboundDate}</td>
+            <td>
+              {data.outbounds[i].outboundDescription === null
+                ? ""
+                : data.outbounds[i].outboundDescription}
+            </td>
+            <td>{data.outbounds[i].outboundCode}</td>
+          </tr>
+        );
+      }
+    } else if (data.summary.courierCode === 'J&T') {
+      for (let i = 0; i < data.outbounds.length; i++) {
+        list.push(
+          <tr>
+            <td>{data.outbounds[i].outboundDate}</td>
+            <td>
+              {data.outbounds[i].outboundDescription === null
+                ? ""
+                : data.outbounds[i].cityName}
+            </td>
+            <td>{data.outbounds[i].outboundDescription}</td>
+          </tr>
+        );
+    }
+  } else {
     for (let i = 0; i < data.outbounds.length; i++) {
       list.push(
         <tr>
@@ -704,6 +756,7 @@ export default class ListTransactions extends Component {
         </tr>
       );
     }
+  }
 
     return list;
   }
@@ -871,6 +924,7 @@ export default class ListTransactions extends Component {
               <CardBody>{this._renderTable()}</CardBody>
             </Card>
           </Colxx>
+          {this.state.loading && <Loading />}
         </Row>
 
         {this.state.modal && (
