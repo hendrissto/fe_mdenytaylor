@@ -14,6 +14,7 @@ import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
 import ExportSubscriptions from "../../../core/export/ExportSubscriptions";
 import Spinner from "../../../containers/pages/Spinner";
+import NormalizeData from "../../../core/export/NormalizeData";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -31,6 +32,10 @@ import {
   CardFooter,
   UncontrolledPopover,
   PopoverBody,
+  ButtonDropdown, 
+  DropdownToggle, 
+  DropdownMenu, 
+  DropdownItem
 } from "reactstrap";
 
 import BillingRestService from "../../../api/billingRestService";
@@ -51,6 +56,7 @@ export default class Billing extends Component {
     super(props);
     this.billingRest = new BillingRestService();
     this.exportService = new ExportSubscriptions();
+    this.normalize = new NormalizeData();
     this.moneyFormat = new MoneyFormat();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
@@ -67,7 +73,9 @@ export default class Billing extends Component {
       this
     );
     this.exportData = this.exportData.bind(this);
+    this.loadFilterData = this.loadFilterData.bind(this);
     this.loadAllData = this.loadAllData.bind(this);
+    this.toggleExport = this.toggleExport.bind(this);
 
     let today = new Date();
     today.setDate(today.getDate() - 1);
@@ -80,6 +88,8 @@ export default class Billing extends Component {
       dayBefore: 0,
       dayAfter: 0,
       tableFilter: {
+        tenantId: true,
+        companyInfo: true,
         subscriptionPlanName: true,
         freeTrialEndDate: true,
         billingPeriodStartDate: true,
@@ -87,7 +97,7 @@ export default class Billing extends Component {
         billingCycle: true,
         billingAmount: true,
         maxUser: true,
-        maxProducts: true,
+        totalProducts: true,
       },
       totalTenants: 0,
       totalCODTenants: 0,
@@ -124,6 +134,8 @@ export default class Billing extends Component {
       packageFilter: "",
       oneData: null,
       totalData: 0,
+      exportButton: false,
+      allData: false
     };
   }
 
@@ -371,7 +383,7 @@ export default class Billing extends Component {
       {
         Header: "Total Product",
         accessor: "subscriptionPlanName",
-        show: tableFilter.maxProducts,
+        show: tableFilter.totalProducts,
         Cell: props => (
           <p>
             {props.original.totalProducts}
@@ -474,7 +486,11 @@ export default class Billing extends Component {
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(
       response => {
         this.setState({ totalData: response.total }, () => {
-          this.loadAllData();
+          if(this.state.allData) {
+            this.loadAllData();
+          } else {
+            this.loadFilterData();
+          }
         });
       },
       error => {
@@ -490,7 +506,21 @@ export default class Billing extends Component {
     };
 
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Subscriptions");
+      this.exportService.exportToCSV(res.data, "Subscriptions", false);
+      this.setState({ loading: false });
+    });
+  }
+
+
+  loadFilterData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.billingRest.getTenantsSubscriptions({ params }).subscribe(res => {
+      const data = this.normalize.removeObjectByFilter(res.data, this.state.tableFilter)
+      this.exportService.exportToCSV(data, "Subscriptions", true);
       this.setState({ loading: false });
     });
   }
@@ -502,6 +532,12 @@ export default class Billing extends Component {
         upgradeModal: true
       });
     });
+  }
+
+  toggleExport() {
+    this.setState({
+      exportButton: !this.state.exportButton
+    })
   }
 
   render() {
@@ -790,9 +826,9 @@ export default class Billing extends Component {
                         </div>
                         <div>
                           <input
-                            name="maxProducts"
+                            name="totalProducts"
                             type="checkbox"
-                            checked={tableFilter.maxProducts}
+                            checked={tableFilter.totalProducts}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total Product
@@ -872,17 +908,34 @@ export default class Billing extends Component {
                     >
                       <i className="simple-icon-refresh" />
                     </Button>
-                    <Button
+                    <ButtonDropdown
                       className="float-right default"
-                      color="primary"
-                      style={{
-                        marginRight: 10,
-                        borderRadius: 6
-                      }}
-                      onClick={() => this.exportData()}
+                      isOpen={this.state.exportButton} 
+                      toggle={this.toggleExport}
                     >
-                      Export
-                    </Button>
+                      <DropdownToggle 
+                        caret
+                        color="primary"
+                        style={{
+                          marginRight: 10,
+                          borderRadius: 6
+                        }} 
+                      >
+                        Export
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem onClick={() => {
+                          this.setState({allData: true}, () => {
+                            this.exportData();
+                          });
+                        }}>Export Semua Data</DropdownItem>
+                        <DropdownItem onClick={() => {
+                          this.setState({allData: false}, () => {
+                            this.exportData();
+                          });
+                        }}>Export berdasarkan Filter</DropdownItem>
+                      </DropdownMenu>
+                    </ButtonDropdown>
                   </div>
                 </div>
                 <ReactTableFixedColumn
