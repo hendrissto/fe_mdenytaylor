@@ -41,12 +41,12 @@ const data = [
     label:"menu.billing",
     to: "/app/billing",
   },
-  {
-    id: "list-transactions",
-    icon: "simple-icon-book-open",
-    label:"menu.list-transactions",
-    to: "/app/list-transactions",
-  },
+  // {
+  //   id: "list-transactions",
+  //   icon: "simple-icon-book-open",
+  //   label:"menu.list-transactions",
+  //   to: "/app/list-transactions",
+  // },
   // {
   //   id: "dashboards",
   //   icon: "iconsminds-shop-4",
