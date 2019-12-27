@@ -9,6 +9,7 @@ import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
 import ExportTenants from "../../../core/export/ExportTenants";
+import NormalizeData from "../../../core/export/NormalizeData";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -24,7 +25,11 @@ import {
   Col,
   UncontrolledPopover,
   PopoverBody,
-  CustomInput
+  CustomInput,
+  ButtonDropdown, 
+  DropdownToggle, 
+  DropdownMenu, 
+  DropdownItem
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
 import Spinner from "../../../containers/pages/Spinner";
@@ -44,6 +49,7 @@ export default class Tenant extends Component {
   constructor(props) {
     super(props);
     this.tenantRest = new TenantRestService();
+    this.normalize = new NormalizeData();
     this.exportService = new ExportTenants();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
@@ -53,18 +59,25 @@ export default class Tenant extends Component {
     this.toggle = this.toggle.bind(this);
     this.exportData = this.exportData.bind(this);
     this.loadAllData = this.loadAllData.bind(this);
+    this.loadFilterData = this.loadFilterData.bind(this);
+    this.toggleExport = this.toggleExport.bind(this);
 
     this.state = {
-      totalSku: true,
-      totalOrder: true,
-      totalReceipt: true,
-      totalUser: true,
-      lastLoginDateUtc: true,
-      joinDateUtc: true,
-      siCepatCOD: true,
-      siCepatMemberId: true,
-      status: true,
-      isRealColumn: true,
+      tableFilter: {
+        companyInfo: true,
+        email: true,
+        phone: true,
+        totalSku: true,
+        totalOrder: true,
+        totalReceipt: true,
+        totalUser: true,
+        lastLoginDateUtc: true,
+        joinDateUtc: true,
+        siCepatMemberId: true,
+        siCepatCOD: true,
+        isRealColumn: true,
+        status: true,
+      },
       popoverOpen: false,
       filterPopover: false,
       totalTenants: 0,
@@ -94,7 +107,9 @@ export default class Tenant extends Component {
       isReal: true,
       isCod: "",
       filterIsReal: true,
-      totalData: 0
+      totalData: 0,
+      allData: false,
+      exportButton: false
     };
   }
 
@@ -111,12 +126,13 @@ export default class Tenant extends Component {
   }
 
   handleFilterChange(event) {
+    const tableFilter = { ...this.state.tableFilter };
     const target = event.target;
     const value = target.checked;
     const name = target.name;
-
+    tableFilter[name] = value;
     this.setState({
-      [name]: value
+      tableFilter: tableFilter
     });
   }
 
@@ -214,6 +230,7 @@ export default class Tenant extends Component {
 
   dataTable() {
     moment.locale("id");
+    const tableFilter = { ...this.state.tableFilter };
     return [
       {
         Header: "ID Tenant",
@@ -235,13 +252,15 @@ export default class Tenant extends Component {
         Header: "Nama Perusahaan",
         accessor: "companyInfo.name",
         fixed: "left",
-        width: 150
+        width: 150,
+        show: tableFilter.companyInfo
       },
       {
         Header: "Email",
         accessor: "email",
         // fixed: "left",
         width: 170,
+        show: tableFilter.email,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -249,13 +268,14 @@ export default class Tenant extends Component {
         accessor: "phone",
         // fixed: "left",
         width: 140,
+        show: tableFilter.phone,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Total SKU",
         accessor: "totalSku",
         width: 70,
-        show: this.state.totalSku,
+        show: tableFilter.totalSku,
         Cell: props => (
           <p
             style={{
@@ -270,7 +290,7 @@ export default class Tenant extends Component {
         Header: "Total Order",
         accessor: "totalOrder",
         width: 80,
-        show: this.state.totalOrder,
+        show: tableFilter.totalOrder,
         Cell: props => (
           <p
             style={{
@@ -285,7 +305,7 @@ export default class Tenant extends Component {
         Header: "Total Receipt",
         accessor: "totalReceipt",
         width: 80,
-        show: this.state.totalReceipt,
+        show: tableFilter.totalReceipt,
         Cell: props => (
           <p
             style={{
@@ -300,7 +320,7 @@ export default class Tenant extends Component {
         Header: "Total User",
         accessor: "totalUser",
         width: 80,
-        show: this.state.totalUser,
+        show: tableFilter.totalUser,
         Cell: props => (
           <div
             color="link"
@@ -321,20 +341,20 @@ export default class Tenant extends Component {
         Header: "Last Login",
         accessor: "owner.lastLoginDateUtc",
         width: 200,
-        show: this.state.lastLoginDateUtc,
+        show: tableFilter.lastLoginDateUtc,
         Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
         Header: "Join Date",
         accessor: "owner.joinDateUtc",
         width: 200,
-        show: this.state.joinDateUtc,
+        show: tableFilter.joinDateUtc,
         Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
         Header: "Sicepat COD",
         accessor: "siCepatCOD",
-        show: this.state.siCepatCOD,
+        show: tableFilter.siCepatCOD,
         Cell: props => (
           <Switch
             className="custom-switch custom-switch-secondary"
@@ -348,13 +368,13 @@ export default class Tenant extends Component {
       {
         Header: "ID Sicepat",
         accessor: "siCepatMemberId",
-        show: this.state.siCepatMemberId,
+        show: tableFilter.siCepatMemberId,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Is Real",
         accessor: "isReal",
-        show: this.state.isRealColumn,
+        show: tableFilter.isRealColumn,
         Cell: props => (
           <Switch
             className="custom-switch custom-switch-secondary"
@@ -368,7 +388,7 @@ export default class Tenant extends Component {
       {
         Header: "Status",
         accessor: "status",
-        show: this.state.status,
+        show: tableFilter.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
       }
       // {
@@ -512,7 +532,11 @@ export default class Tenant extends Component {
     this.tenantRest.getTenants({ params }).subscribe(
       response => {
         this.setState({ totalData: response.total }, () => {
-          this.loadAllData();
+          if(this.state.allData) {
+            this.loadAllData();
+          } else {
+            this.loadFilterData();
+          }
         });
       },
       error => {
@@ -528,12 +552,32 @@ export default class Tenant extends Component {
     };
 
     this.tenantRest.getTenants({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Tenants");
+      this.exportService.exportToCSV(res.data, "Tenants", false);
       this.setState({ loading: false });
     });
   }
 
+   loadFilterData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(res => {
+      const data = this.normalize.removeObjectByFilter(res.data, this.state.tableFilter)
+      this.exportService.exportToCSV(data, "Tenants", true);
+      this.setState({ loading: false });
+    });
+  }
+
+  toggleExport() {
+    this.setState({
+      exportButton: !this.state.exportButton
+    })
+  }
+
   render() {
+    const tableFilter = { ...this.state.tableFilter };
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
       return <Redirect to="/user/login" />;
@@ -684,11 +728,38 @@ export default class Tenant extends Component {
                       toggle={this.togglePopOver}
                     >
                       <PopoverBody>
+                      <div>
+                        <input
+                          name="companyInfo"
+                          type="checkbox"
+                          checked={tableFilter.companyInfo}
+                          onChange={this.handleFilterChange.bind(this)}
+                        />
+                        Nama Perusahaan
+                      </div>
+                      <div>
+                        <input
+                          name="email"
+                          type="checkbox"
+                          checked={tableFilter.email}
+                          onChange={this.handleFilterChange.bind(this)}
+                        />
+                        Email
+                      </div>
+                        <div>
+                          <input
+                            name="phone"
+                            type="checkbox"
+                            checked={tableFilter.phone}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          No Telepon
+                        </div>
                         <div>
                           <input
                             name="totalSku"
                             type="checkbox"
-                            checked={this.state.totalSku}
+                            checked={tableFilter.totalSku}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total SKU
@@ -697,7 +768,7 @@ export default class Tenant extends Component {
                           <input
                             name="totalOrder"
                             type="checkbox"
-                            checked={this.state.totalOrder}
+                            checked={tableFilter.totalOrder}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total Order
@@ -706,7 +777,7 @@ export default class Tenant extends Component {
                           <input
                             name="totalReceipt"
                             type="checkbox"
-                            checked={this.state.totalReceipt}
+                            checked={tableFilter.totalReceipt}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total Receipt
@@ -715,7 +786,7 @@ export default class Tenant extends Component {
                           <input
                             name="totalUser"
                             type="checkbox"
-                            checked={this.state.totalUser}
+                            checked={tableFilter.totalUser}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Total User
@@ -724,7 +795,7 @@ export default class Tenant extends Component {
                           <input
                             name="lastLoginDateUtc"
                             type="checkbox"
-                            checked={this.state.lastLoginDateUtc}
+                            checked={tableFilter.lastLoginDateUtc}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Last Login
@@ -733,7 +804,7 @@ export default class Tenant extends Component {
                           <input
                             name="joinDateUtc"
                             type="checkbox"
-                            checked={this.state.joinDateUtc}
+                            checked={tableFilter.joinDateUtc}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Join Date
@@ -742,7 +813,7 @@ export default class Tenant extends Component {
                           <input
                             name="siCepatCOD"
                             type="checkbox"
-                            checked={this.state.siCepatCOD}
+                            checked={tableFilter.siCepatCOD}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Sicepat COD
@@ -751,7 +822,7 @@ export default class Tenant extends Component {
                           <input
                             name="siCepatMemberId"
                             type="checkbox"
-                            checked={this.state.siCepatMemberId}
+                            checked={tableFilter.siCepatMemberId}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           ID Sicepat
@@ -760,7 +831,7 @@ export default class Tenant extends Component {
                           <input
                             name="isRealColumn"
                             type="checkbox"
-                            checked={this.state.isRealColumn}
+                            checked={tableFilter.isRealColumn}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Is Real
@@ -769,7 +840,7 @@ export default class Tenant extends Component {
                           <input
                             name="status"
                             type="checkbox"
-                            checked={this.state.status}
+                            checked={tableFilter.status}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Status
@@ -805,17 +876,34 @@ export default class Tenant extends Component {
                     >
                       <i className="simple-icon-refresh" />
                     </Button>
-                    <Button
+                    <ButtonDropdown
                       className="float-right default"
-                      color="primary"
-                      style={{
-                        marginRight: 10,
-                        borderRadius: 6
-                      }}
-                      onClick={() => this.exportData()}
+                      isOpen={this.state.exportButton} 
+                      toggle={this.toggleExport}
                     >
-                      Export
-                    </Button>
+                      <DropdownToggle 
+                        caret
+                        color="primary"
+                        style={{
+                          marginRight: 10,
+                          borderRadius: 6
+                        }} 
+                      >
+                        Export
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem onClick={() => {
+                          this.setState({allData: true}, () => {
+                            this.exportData();
+                          });
+                        }}>Export Semua Data</DropdownItem>
+                        <DropdownItem onClick={() => {
+                          this.setState({allData: false}, () => {
+                            this.exportData();
+                          });
+                        }}>Export berdasarkan Filter</DropdownItem>
+                      </DropdownMenu>
+                    </ButtonDropdown>
                   </div>
                 </div>
 
