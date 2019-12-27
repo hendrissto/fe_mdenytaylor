@@ -55,6 +55,7 @@ export default class Tenant extends Component {
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.editStatusCOD = this.editStatusCOD.bind(this);
+    this.editStatusSapCOD = this.editStatusSapCOD.bind(this);
     this.toggleFilterPopOver = this.toggleFilterPopOver.bind(this);
     this.toggle = this.toggle.bind(this);
     this.exportData = this.exportData.bind(this);
@@ -77,6 +78,7 @@ export default class Tenant extends Component {
         siCepatCOD: true,
         isRealColumn: true,
         status: true,
+        isCOD: true
       },
       popoverOpen: false,
       filterPopover: false,
@@ -109,7 +111,7 @@ export default class Tenant extends Component {
       filterIsReal: true,
       totalData: 0,
       allData: false,
-      exportButton: false
+      exportButton: false,
     };
   }
 
@@ -372,6 +374,20 @@ export default class Tenant extends Component {
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
+        Header: "SAP COD",
+        accessor: "isCOD",
+        show: tableFilter.isCOD,
+        Cell: props => (
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isCOD}
+            onChange={() => {
+              this.editStatusSapCOD(props.original);
+            }}
+          />
+        )
+      },
+      {
         Header: "Is Real",
         accessor: "isReal",
         show: tableFilter.isRealColumn,
@@ -448,6 +464,51 @@ export default class Tenant extends Component {
             MySwal.fire({
               type: "success",
               title: "COD SiCepat telah dinonaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          }
+        },
+        error => {
+          this.setState({
+            errorMessage: error.data[0].errorMessage,
+            error: true
+          });
+        }
+      );
+    });
+  }
+
+  editStatusSapCOD(data) {
+    const table = { ...this.state.table };
+    let payload = {
+      isPickup: false,
+      isCOD: !data.isCOD
+    }
+
+    table.loading = true;
+    this.setState({ table }, () => {
+      this.tenantRest.activeSapCOD(data.id, payload).subscribe(
+        response => {
+          this.loadData();
+          this.loadTenantsSummmary();
+          if (!data.isCOD) {
+            MySwal.fire({
+              type: "success",
+              title: "COD SAP telah diaktifkan.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+          } else {
+            MySwal.fire({
+              type: "success",
+              title: "COD SAP telah dinonaktifkan.",
               toast: true,
               position: "top-end",
               timer: 2000,
@@ -686,7 +747,7 @@ export default class Tenant extends Component {
                           label="Is Real"
                           checked={
                             this.state.filterIsReal === "" ||
-                            this.state.filterIsReal === false
+                              this.state.filterIsReal === false
                               ? false
                               : true
                           }
@@ -826,6 +887,15 @@ export default class Tenant extends Component {
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           ID Sicepat
+                        </div>
+                        <div>
+                          <input
+                            name="isCOD"
+                            type="checkbox"
+                            checked={tableFilter.isCOD}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          SAP COD
                         </div>
                         <div>
                           <input
