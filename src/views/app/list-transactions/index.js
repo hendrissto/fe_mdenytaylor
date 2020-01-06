@@ -198,10 +198,6 @@ export default class ListTransactions extends Component {
         ? encodeURIComponent(`${search}`)
         : encodeURIComponent(`${valueSearch}:${search}`);
 
-    // Axios.get(`http://vm1.clodeo.com:7500/solr/db/select?q=${url}`).then(res => {
-    //   console.log(res.data.response.docs);
-    // });
-
     const table = { ...this.state.table };
     table.loading = true;
     let page =
@@ -216,7 +212,7 @@ export default class ListTransactions extends Component {
     }
 
     Axios.get(
-      `http://vm1.clodeo.com:7500/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
+      `http://internal-solr.clodeo.com/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
     ).then(response => {
       const table = { ...this.state.table };
       table.data = response.data.response.docs;
