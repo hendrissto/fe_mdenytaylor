@@ -96,7 +96,6 @@ export default class Tenant extends Component {
           pageSize: 10
         }
       },
-      allData: null,
       tenantsSummary: [],
       dropdownOpen: false,
       modal: false,
@@ -180,10 +179,10 @@ export default class Tenant extends Component {
   }
 
   loadData() {
+    console.log('STATE', this.state)
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
-
     const params = {
       keyword: this.state.search || null,
       isCod: this.state.isCod || null,
@@ -192,6 +191,7 @@ export default class Tenant extends Component {
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
+    console.log('PARAMS', params)
 
     this.tenantRest.getTenants({ params }).subscribe(
       response => {
@@ -618,15 +618,18 @@ export default class Tenant extends Component {
     });
   }
 
-   loadFilterData() {
+   loadFilterData() {    
     const params = {
-      "options.includeTotalCount": true,
-      "options.take": this.state.totalData
+      keyword: this.state.search || null,
+      isCod: this.state.isCod || null,
+      isReal: this.state.isReal || null,
+      "options.take": this.state.totalData,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true
     };
 
     this.tenantRest.getTenants({ params }).subscribe(res => {
-      const data = this.normalize.removeObjectByFilter(res.data, this.state.tableFilter)
-      this.exportService.exportToCSV(data, "Tenants", true);
+      this.exportService.exportToCSV(res.data, "Tenants", false);
       this.setState({ loading: false });
     });
   }
@@ -667,7 +670,7 @@ export default class Tenant extends Component {
                       const table = { ...this.state.table };
 
                       table.pagination.skipSize = 0;
-                      this.setState({ isCod: "", isReal: true, table }, () => {
+                      this.setState({ isCod: "", isReal: this.state.isReal, table }, () => {
                         this.loadData();
                       });
                     }}
@@ -684,7 +687,7 @@ export default class Tenant extends Component {
                       const table = { ...this.state.table };
 
                       table.pagination.skipSize = 0;
-                      this.setState({ isCod: true, isReal: "", table }, () => {
+                      this.setState({ isCod: true, isReal: this.state.isReal, table }, () => {
                         this.loadData();
                       });
                     }}

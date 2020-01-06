@@ -514,13 +514,18 @@ export default class Billing extends Component {
 
   loadFilterData() {
     const params = {
-      "options.includeTotalCount": true,
-      "options.take": this.state.totalData
+      keyword: this.state.search || null,
+      subscriptionPlan: this.state.packageFilter || null,
+      freeTrial: this.state.freeTrial || null,
+      freeTrialWeekBeforeExp: this.state.freeTrialWeekBeforeExp || null,
+      daysBeforeExpDate: this.state.dayBefore || null,
+      "options.take": this.state.totalData,
+      "options.skip": this.state.table.pagination.skipSize,
+      "options.includeTotalCount": true
     };
 
     this.billingRest.getTenantsSubscriptions({ params }).subscribe(res => {
-      const data = this.normalize.removeObjectByFilter(res.data, this.state.tableFilter)
-      this.exportService.exportToCSV(data, "Subscriptions", true);
+      this.exportService.exportToCSV(res.data, "Subscriptions", false);
       this.setState({ loading: false });
     });
   }
