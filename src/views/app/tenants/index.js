@@ -9,6 +9,7 @@ import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
 import ExportTenants from "../../../core/export/ExportTenants";
+import Loader from "react-loader-spinner";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -54,6 +55,8 @@ export default class Tenant extends Component {
     this.toggle = this.toggle.bind(this);
     this.exportData = this.exportData.bind(this);
     this.loadAllData = this.loadAllData.bind(this);
+    this.toggleShippingSettingsModal = this.toggleShippingSettingsModal.bind(this);
+    this.loadOneData = this.loadOneData.bind(this);
 
     this.state = {
       totalSku: true,
@@ -65,6 +68,7 @@ export default class Tenant extends Component {
       siCepatCOD: true,
       isCOD: true,
       siCepatMemberId: true,
+      shippingSettings: true,
       status: true,
       isRealColumn: true,
       popoverOpen: false,
@@ -96,7 +100,10 @@ export default class Tenant extends Component {
       isReal: true,
       isCod: "",
       filterIsReal: true,
-      totalData: 0
+      totalData: 0,
+      shippingSettingsModal: false,
+      shippingSettingsData: [],
+      loadingShippings: false,
     };
   }
 
@@ -197,6 +204,14 @@ export default class Tenant extends Component {
     );
   }
 
+  loadOneData(id) {
+    this.tenantRest.getOneTenants(id).subscribe(res => {
+      this.setState({oneData: res})
+    }, err => {
+      console.log(err)
+    })
+  }
+
   componentDidMount() {
     this.loadData();
     this.loadTenantsSummmary();
@@ -212,6 +227,10 @@ export default class Tenant extends Component {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
+  }
+
+  toggleShippingSettingsModal() {
+    this.setState({ shippingSettingsModal: false });
   }
 
   dataTable() {
@@ -334,37 +353,21 @@ export default class Tenant extends Component {
         Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
-        Header: "Sicepat COD",
-        accessor: "siCepatCOD",
-        show: this.state.siCepatCOD,
+        Header: "Shipping Settings",
+        width: 200,
+        show: this.state.shippingSettings,
         Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.siCepatCOD}
-            onChange={() => {
-              this.editStatusCOD(props.original);
-            }}
-          />
-        )
-      },
-      {
-        Header: "ID Sicepat",
-        accessor: "siCepatMemberId",
-        show: this.state.siCepatMemberId,
-        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
-      },
-      {
-        Header: "SAP COD",
-        accessor: "isCOD",
-        show: this.state.isCOD,
-        Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.isCOD}
-            onChange={() => {
-              this.editStatusSapCOD(props.original);
-            }}
-          />
+          <div>
+            <Button
+              color="secondary"
+              style={{ width: 150 }}
+              onClick={() => {
+                this.setState({shippingSettingsData: props.original, oneData: props.original, shippingSettingsModal: true})
+              }}
+            >
+              Shipping Settings
+            </Button>
+          </div>
         )
       },
       {
@@ -372,13 +375,10 @@ export default class Tenant extends Component {
         accessor: "isReal",
         show: this.state.isRealColumn,
         Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.isReal}
-            onChange={() => {
-              this.editIsReal(props.original);
-            }}
-          />
+          <p
+          >
+            {props.value ? 'true' : 'false'}
+          </p>
         )
       },
       {
@@ -386,38 +386,7 @@ export default class Tenant extends Component {
         accessor: "status",
         show: this.state.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
-      }
-      // {
-      //   Header: "Status",
-      //   width: 200,
-      //   Cell: props => {
-      //     if (props.original.siCepatCOD) {
-      //       return (
-      //         <Button
-      //           color="secondary"
-      //           style={{ width: 150 }}
-      //           onClick={() => {
-      //             this.editStatusCOD(props.original);
-      //           }}
-      //         >
-      //           Nonaktifkan COD
-      //         </Button>
-      //       );
-      //     } else {
-      //       return (
-      //         <Button
-      //           color="secondary"
-      //           style={{ width: 150 }}
-      //           onClick={() => {
-      //             this.editStatusCOD(props.original);
-      //           }}
-      //         >
-      //           Aktifkan COD
-      //         </Button>
-      //       );
-      //     }
-      //   }
-      // }
+      },
     ];
   }
 
@@ -562,6 +531,65 @@ export default class Tenant extends Component {
     }
 
     return dataTable;
+  }
+
+  shippingSettingsModal() {
+    let temp = [];
+    const listShippingSettings =this.state.oneData.shippingSettings;
+    const data = this.state.oneData;
+    
+    for(let i = 0; i < listShippingSettings.length; i++) {
+      temp.push(
+        <tr>
+          <td> {listShippingSettings[i].courierChannelId} </td>
+          <td> 
+            <Switch
+              className="custom-switch custom-switch-secondary"
+              checked={listShippingSettings[i].isCOD || listShippingSettings[i].isPickupRequest }
+              onChange={(event) => {
+                this.setState({loadingShippings: true})
+                const params = {
+                  "isPickup": !listShippingSettings[i].isPickupRequest,
+                  "isCOD": !listShippingSettings[i].isCOD,
+                  "courierId": listShippingSettings[i].courierChannelId
+                }
+                this.tenantRest.updateShippingSettings(data.id, params).subscribe(() => {
+                  this.loadOneData(data.id);
+                  this.loadData()
+                  if(listShippingSettings[i].isCOD) {
+                    MySwal.fire({
+                      type: "success",
+                      title: `COD ${listShippingSettings[i].courierChannelId} telah dinonaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  } else {
+                    MySwal.fire({
+                      type: "success",
+                      title: `COD ${listShippingSettings[i].courierChannelId} telah diaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  }
+                  this.setState({loadingShippings: false})
+                }, err => {
+                  console.log(err)
+                  this.setState({loadingShippings: false})
+                })
+              }}
+            />
+         </td>
+        </tr>
+      )
+    }
+
+    return temp;
   }
 
   exportData() {
@@ -801,30 +829,12 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
-                            name="siCepatCOD"
+                            name="shippingSettings"
                             type="checkbox"
-                            checked={this.state.siCepatCOD}
+                            checked={this.state.shippingSettings}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Sicepat COD
-                        </div>
-                        <div>
-                          <input
-                            name="siCepatMemberId"
-                            type="checkbox"
-                            checked={this.state.siCepatMemberId}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          ID Sicepat
-                        </div>
-                        <div>
-                          <input
-                            name="sapCOD"
-                            type="checkbox"
-                            checked={this.state.isCOD}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          SAP COD
+                          Shipping Settings
                         </div>
                         <div>
                           <input
@@ -976,6 +986,49 @@ export default class Tenant extends Component {
                     this.setState({ error: false });
                   }}
                 >
+                  Close
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
+        )}
+
+        {this.state.shippingSettingsModal && (
+          <div
+            style={{
+              maxHeight: 580
+            }}
+          >
+            <Modal isOpen={this.state.shippingSettingsModal} toggle={this.toggleShippingSettingsModal}>
+              <ModalHeader toggle={this.toggleShippingSettingsModal}>Detail User</ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
+                }}
+              >
+              {!this.state.loadingShippings && (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Kurir</th>
+                      <th scope="col">COD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.shippingSettingsModal()}
+                  </tbody>
+                </table>
+              )}
+
+              {this.state.loadingShippings && (
+                <div style={{paddingLeft: '40%'}}>
+                  <Loader type="Oval" color="#51BEEA" height={80} width={80}/>
+                </div>
+              )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" outline onClick={this.toggleShippingSettingsModal}>
                   Close
                 </Button>
               </ModalFooter>
