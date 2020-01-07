@@ -542,6 +542,7 @@ export default class Tenant extends Component {
       temp.push(
         <tr>
           <td> {listShippingSettings[i].courierChannelId} </td>
+          <td> {listShippingSettings[i].memberId || '-'} </td>
           <td> 
             <Switch
               className="custom-switch custom-switch-secondary"
@@ -1012,6 +1013,7 @@ export default class Tenant extends Component {
                   <thead>
                     <tr>
                       <th scope="col">Kurir</th>
+                      <th scope="col">Member ID</th>
                       <th scope="col">COD</th>
                     </tr>
                   </thead>
