@@ -10,6 +10,7 @@ import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
 import ExportTenants from "../../../core/export/ExportTenants";
 import NormalizeData from "../../../core/export/NormalizeData";
+import Loader from "react-loader-spinner";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -62,6 +63,8 @@ export default class Tenant extends Component {
     this.loadAllData = this.loadAllData.bind(this);
     this.loadFilterData = this.loadFilterData.bind(this);
     this.toggleExport = this.toggleExport.bind(this);
+    this.toggleShippingSettingsModal = this.toggleShippingSettingsModal.bind(this);
+    this.loadOneData = this.loadOneData.bind(this);
 
     this.state = {
       tableFilter: {
@@ -78,7 +81,8 @@ export default class Tenant extends Component {
         siCepatCOD: true,
         isRealColumn: true,
         status: true,
-        isCOD: true
+        isCOD: true,
+        shippingSettings: true,
       },
       popoverOpen: false,
       filterPopover: false,
@@ -96,6 +100,7 @@ export default class Tenant extends Component {
           pageSize: 10
         }
       },
+      allData: null,
       tenantsSummary: [],
       dropdownOpen: false,
       modal: false,
@@ -109,8 +114,10 @@ export default class Tenant extends Component {
       isCod: "",
       filterIsReal: true,
       totalData: 0,
-      allData: false,
       exportButton: false,
+      shippingSettingsModal: false,
+      shippingSettingsData: [],
+      loadingShippings: false,
     };
   }
 
@@ -179,7 +186,6 @@ export default class Tenant extends Component {
   }
 
   loadData() {
-    console.log('STATE', this.state)
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
@@ -191,7 +197,6 @@ export default class Tenant extends Component {
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
-    console.log('PARAMS', params)
 
     this.tenantRest.getTenants({ params }).subscribe(
       response => {
@@ -213,6 +218,14 @@ export default class Tenant extends Component {
     );
   }
 
+  loadOneData(id) {
+    this.tenantRest.getOneTenants(id).subscribe(res => {
+      this.setState({oneData: res})
+    }, err => {
+      console.log(err)
+    })
+  }
+
   componentDidMount() {
     this.loadData();
     this.loadTenantsSummmary();
@@ -228,6 +241,10 @@ export default class Tenant extends Component {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
+  }
+
+  toggleShippingSettingsModal() {
+    this.setState({ shippingSettingsModal: false });
   }
 
   dataTable() {
@@ -354,37 +371,21 @@ export default class Tenant extends Component {
         Cell: props => <p>{moment(props.value).format("DD MMMM YYYY HH:mm")}</p>
       },
       {
-        Header: "Sicepat COD",
-        accessor: "siCepatCOD",
-        show: tableFilter.siCepatCOD,
+        Header: "Shipping Settings",
+        width: 200,
+        show: tableFilter.shippingSettings,
         Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.siCepatCOD}
-            onChange={() => {
-              this.editStatusCOD(props.original);
-            }}
-          />
-        )
-      },
-      {
-        Header: "ID Sicepat",
-        accessor: "siCepatMemberId",
-        show: tableFilter.siCepatMemberId,
-        Cell: props => <p>{props.value === null ? "-" : props.value}</p>
-      },
-      {
-        Header: "SAP COD",
-        accessor: "isCOD",
-        show: tableFilter.isCOD,
-        Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.isCOD}
-            onChange={() => {
-              this.editStatusSapCOD(props.original);
-            }}
-          />
+          <div>
+            <Button
+              color="secondary"
+              style={{ width: 150 }}
+              onClick={() => {
+                this.setState({shippingSettingsData: props.original, oneData: props.original, shippingSettingsModal: true})
+              }}
+            >
+              Shipping Settings
+            </Button>
+          </div>
         )
       },
       {
@@ -392,13 +393,10 @@ export default class Tenant extends Component {
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
-          <Switch
-            className="custom-switch custom-switch-secondary"
-            checked={props.original.isReal}
-            onChange={() => {
-              this.editIsReal(props.original);
-            }}
-          />
+          <p
+          >
+            {props.value ? 'true' : 'false'}
+          </p>
         )
       },
       {
@@ -406,38 +404,7 @@ export default class Tenant extends Component {
         accessor: "status",
         show: tableFilter.status,
         Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
-      }
-      // {
-      //   Header: "Status",
-      //   width: 200,
-      //   Cell: props => {
-      //     if (props.original.siCepatCOD) {
-      //       return (
-      //         <Button
-      //           color="secondary"
-      //           style={{ width: 150 }}
-      //           onClick={() => {
-      //             this.editStatusCOD(props.original);
-      //           }}
-      //         >
-      //           Nonaktifkan COD
-      //         </Button>
-      //       );
-      //     } else {
-      //       return (
-      //         <Button
-      //           color="secondary"
-      //           style={{ width: 150 }}
-      //           onClick={() => {
-      //             this.editStatusCOD(props.original);
-      //           }}
-      //         >
-      //           Aktifkan COD
-      //         </Button>
-      //       );
-      //     }
-      //   }
-      // }
+      },
     ];
   }
 
@@ -632,6 +599,65 @@ export default class Tenant extends Component {
       this.exportService.exportToCSV(res.data, "Tenants", false);
       this.setState({ loading: false });
     });
+  }
+
+  shippingSettingsModal() {
+    let temp = [];
+    const listShippingSettings =this.state.oneData.shippingSettings;
+    const data = this.state.oneData;
+    
+    for(let i = 0; i < listShippingSettings.length; i++) {
+      temp.push(
+        <tr>
+          <td> {listShippingSettings[i].courierChannelId} </td>
+          <td> 
+            <Switch
+              className="custom-switch custom-switch-secondary"
+              checked={listShippingSettings[i].isCOD || listShippingSettings[i].isPickupRequest }
+              onChange={(event) => {
+                this.setState({loadingShippings: true})
+                const params = {
+                  "isPickup": !listShippingSettings[i].isPickupRequest,
+                  "isCOD": !listShippingSettings[i].isCOD,
+                  "courierId": listShippingSettings[i].courierChannelId
+                }
+                this.tenantRest.updateShippingSettings(data.id, params).subscribe(() => {
+                  this.loadOneData(data.id);
+                  this.loadData()
+                  if(listShippingSettings[i].isCOD) {
+                    MySwal.fire({
+                      type: "success",
+                      title: `COD ${listShippingSettings[i].courierChannelId} telah dinonaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  } else {
+                    MySwal.fire({
+                      type: "success",
+                      title: `COD ${listShippingSettings[i].courierChannelId} telah diaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  }
+                  this.setState({loadingShippings: false})
+                }, err => {
+                  console.log(err)
+                  this.setState({loadingShippings: false})
+                })
+              }}
+            />
+         </td>
+        </tr>
+      )
+    }
+
+    return temp;
   }
 
   toggleExport() {
@@ -875,30 +901,12 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
-                            name="siCepatCOD"
+                            name="shippingSettings"
                             type="checkbox"
-                            checked={tableFilter.siCepatCOD}
+                            checked={tableFilter.shippingSettings}
                             onChange={this.handleFilterChange.bind(this)}
                           />
-                          Sicepat COD
-                        </div>
-                        <div>
-                          <input
-                            name="siCepatMemberId"
-                            type="checkbox"
-                            checked={tableFilter.siCepatMemberId}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          ID Sicepat
-                        </div>
-                        <div>
-                          <input
-                            name="isCOD"
-                            type="checkbox"
-                            checked={tableFilter.isCOD}
-                            onChange={this.handleFilterChange.bind(this)}
-                          />
-                          SAP COD
+                          Shipping Settings
                         </div>
                         <div>
                           <input
@@ -1067,6 +1075,49 @@ export default class Tenant extends Component {
                     this.setState({ error: false });
                   }}
                 >
+                  Close
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
+        )}
+
+        {this.state.shippingSettingsModal && (
+          <div
+            style={{
+              maxHeight: 580
+            }}
+          >
+            <Modal isOpen={this.state.shippingSettingsModal} toggle={this.toggleShippingSettingsModal}>
+              <ModalHeader toggle={this.toggleShippingSettingsModal}>Detail User</ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
+                }}
+              >
+              {!this.state.loadingShippings && (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Kurir</th>
+                      <th scope="col">COD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.shippingSettingsModal()}
+                  </tbody>
+                </table>
+              )}
+
+              {this.state.loadingShippings && (
+                <div style={{paddingLeft: '40%'}}>
+                  <Loader type="Oval" color="#51BEEA" height={80} width={80}/>
+                </div>
+              )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" outline onClick={this.toggleShippingSettingsModal}>
                   Close
                 </Button>
               </ModalFooter>
