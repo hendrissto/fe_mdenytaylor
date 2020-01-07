@@ -12,6 +12,10 @@ export default class TenantRestService extends React.Component {
     return this.request.get('/admin/tenants', qParams);
   }
 
+  getOneTenants(id) {
+    return this.request.get(`/admin/tenants/${id}`);
+  }
+
   getTenantsSummary(qParams) {
     return this.request.get('/admin/tenants-summary', qParams);
   }
@@ -26,5 +30,9 @@ export default class TenantRestService extends React.Component {
 
   isRealUser(id, status) {
     return this.request.put(`/admin/tenants/${id}/mark-isreal/${status}`);
+  }
+
+  updateShippingSettings(id, data) {
+    return this.request.post(`/admin/tenants/${id}/shipping-service`, data);
   }
 }
