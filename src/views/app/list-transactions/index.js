@@ -198,10 +198,6 @@ export default class ListTransactions extends Component {
         ? encodeURIComponent(`${search}`)
         : encodeURIComponent(`${valueSearch}:${search}`);
 
-    // Axios.get(`http://172.16.0.253:8983/solr/db/select?q=${url}`).then(res => {
-    //   console.log(res.data.response.docs);
-    // });
-
     const table = { ...this.state.table };
     table.loading = true;
     let page =
@@ -216,7 +212,7 @@ export default class ListTransactions extends Component {
     }
 
     Axios.get(
-      `http://172.16.0.253:8983/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
+      `http://internal-solr.clodeo.com/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
     ).then(response => {
       const table = { ...this.state.table };
       table.data = response.data.response.docs;
@@ -497,6 +493,11 @@ export default class ListTransactions extends Component {
           <Col xs="5"> Email </Col>
           <Col xs="1">:</Col>
           <Col> {data.Email} </Col>
+        </Row>
+        <Row>
+          <Col xs="5"> Email </Col>
+          <Col xs="1">:</Col>
+          <Col> {data.Phone} </Col>
         </Row>
       </div>
     );
@@ -821,9 +822,14 @@ export default class ListTransactions extends Component {
                 Email
               </DropdownItem>
               <DropdownItem
-                onClick={() => this.onChangeFilter("Phone", "Phone")}
+                onClick={() => this.onChangeFilter("Phone", "Phone Company")}
               >
-                Nomor Telepon
+                Nomor Telepon Company
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => this.onChangeFilter("Customer_phone", "Phone Customer")}
+              >
+                Nomor Telepon Customer
               </DropdownItem>
             </DropdownMenu>
           </ButtonDropdown>
