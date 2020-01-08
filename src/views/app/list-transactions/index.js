@@ -494,6 +494,11 @@ export default class ListTransactions extends Component {
           <Col xs="1">:</Col>
           <Col> {data.Email} </Col>
         </Row>
+        <Row>
+          <Col xs="5"> Email </Col>
+          <Col xs="1">:</Col>
+          <Col> {data.Phone} </Col>
+        </Row>
       </div>
     );
     dataModal.footer = (
@@ -817,9 +822,14 @@ export default class ListTransactions extends Component {
                 Email
               </DropdownItem>
               <DropdownItem
-                onClick={() => this.onChangeFilter("Phone", "Phone")}
+                onClick={() => this.onChangeFilter("Phone", "Phone Company")}
               >
-                Nomor Telepon
+                Nomor Telepon Company
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => this.onChangeFilter("Customer_phone", "Phone Customer")}
+              >
+                Nomor Telepon Customer
               </DropdownItem>
             </DropdownMenu>
           </ButtonDropdown>
