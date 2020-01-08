@@ -563,7 +563,7 @@ export default class Tenant extends Component {
       isCod: this.state.isCod || null,
       isReal: this.state.isReal || null,
       "options.take": this.state.totalData,
-      "options.skip": this.state.table.pagination.skipSize,
+      "options.skip": 0,
       "options.includeTotalCount": true
     };
 

@@ -520,7 +520,7 @@ export default class Billing extends Component {
       freeTrialWeekBeforeExp: this.state.freeTrialWeekBeforeExp || null,
       daysBeforeExpDate: this.state.dayBefore || null,
       "options.take": this.state.totalData,
-      "options.skip": this.state.table.pagination.skipSize,
+      "options.skip": 0,
       "options.includeTotalCount": true
     };
 
