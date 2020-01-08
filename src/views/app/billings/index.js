@@ -617,7 +617,7 @@ export default class Billing extends Component {
                       const table = { ...this.state.table };
 
                       table.pagination.skipSize = 0;
-                      this.setState({ packageFilter: "starter", table }, () => {
+                      this.setState({ freeTrial: false, freeTrialWeekBeforeExp: false, packageFilter: "starter", table }, () => {
                         this.loadData();
                       });
                     }}
@@ -638,7 +638,7 @@ export default class Billing extends Component {
                       const table = { ...this.state.table };
 
                       table.pagination.skipSize = 0;
-                      this.setState({ packageFilter: "growing", table }, () => {
+                      this.setState({ freeTrial: false, freeTrialWeekBeforeExp: false, packageFilter: "growing", table }, () => {
                         this.loadData();
                       });
                     }}
@@ -658,7 +658,7 @@ export default class Billing extends Component {
 
                       table.pagination.skipSize = 0;
                       this.setState(
-                        { packageFilter: "professional", table },
+                        { freeTrial: false, freeTrialWeekBeforeExp: false, packageFilter: "professional", table },
                         () => {
                           this.loadData();
                         }
@@ -680,7 +680,7 @@ export default class Billing extends Component {
 
                       table.pagination.skipSize = 0;
                       this.setState(
-                        { packageFilter: "enterprise", table },
+                        { freeTrial: false, freeTrialWeekBeforeExp: false, packageFilter: "enterprise", table },
                         () => {
                           this.loadData();
                         }
