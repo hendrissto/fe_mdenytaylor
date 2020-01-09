@@ -32,6 +32,7 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import CODRestService from "../../../api/codRestService";
 import RelatedDataRestService from "../../../api/relatedDataRestService";
 import * as moment from "moment";
+import ExportReceiptofFunds from "../../../core/export/ExportReceiptofFunds";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
@@ -50,6 +51,7 @@ class ReceiptOfFunds extends Component {
     this.codRest = new CODRestService();
     this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
+    this.exportService = new ExportReceiptofFunds();
     this.user = null;
 
     this.showModal = this.showModal.bind(this);
@@ -94,6 +96,7 @@ class ReceiptOfFunds extends Component {
       data: [],
       oneData: [],
       redirect: false,
+      totalData: 0,
       footerData: [
         [
           {
@@ -871,14 +874,7 @@ class ReceiptOfFunds extends Component {
     this.setState({ errorFile: false });
     let fileObj = event.target.files[0];
 
-    if (
-      fileObj.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    ) {
-      this.setState({ fileTemp: fileObj });
-    } else {
-      this.setState({ errorFile: true });
-    }
+    this.setState({ fileTemp: fileObj });
   };
 
   excelProcess() {
@@ -1210,6 +1206,36 @@ class ReceiptOfFunds extends Component {
     this.setState({ selectedCourier: defaultCourier });
   }
 
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.codRest.getReceiptFunds({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.codRest.getReceiptFunds({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Receipt of Funds");
+      this.setState({ loading: false });
+    });
+  }
+
   render() {
     const option = this.state.relatedData.courierChannel;
     if (this.state.redirect === true) {
@@ -1335,6 +1361,17 @@ class ReceiptOfFunds extends Component {
                       <IntlMessages
                         id={"ui.menu.receipt-of-funds.list.button.uploadAWB"}
                       />
+                    </Button>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
                     </Button>
                   </div>
                 </div>

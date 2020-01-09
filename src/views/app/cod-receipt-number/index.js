@@ -22,6 +22,8 @@ import {
 import CODRestService from "../../../api/codRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { Paginator } from "primereact/paginator";
+import Spinner from "../../../containers/pages/Spinner";
+import ExportReceiptNumber from "../../../core/export/ExportReceiptNumber";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -32,15 +34,15 @@ export default class CODReceiptNumber extends Component {
     super(props);
     this.codRest = new CODRestService();
     this.moneyFormat = new MoneyFormat();
+    this.exportService = new ExportReceiptNumber();
     this.handleInputChange = this.handleInputChange.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-    // this.toggleDropDown = this.toggleDropDown.bind(this);
-    // this.toggleSplit = this.toggleSplit.bind(this);
-    // this.toggleDropDown1 = this.toggleDropDown1.bind(this);
-    // this.toggleSplit1 = this.toggleSplit1.bind(this);
     this.dataTable = this.dataTable.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.exportData = this.exportData.bind(this);
+    this.loadAllData = this.loadAllData.bind(this);
+
     this.state = {
       sellerName: true,
       deliveryNotes: true,
@@ -74,14 +76,12 @@ export default class CODReceiptNumber extends Component {
           pageSize: 10
         }
       },
-
       dropdownOpen: false,
-      // splitButtonOpen: false,
-      // dropdownOpen1: false,
-      // splitButtonOpen1: false,
       modal: false,
       oneData: "",
-      search: ""
+      search: "",
+      loading: false,
+      totalData: 0,
     };
   }
 
@@ -161,15 +161,6 @@ export default class CODReceiptNumber extends Component {
   componentDidMount() {
     this.loadData();
   }
-
-  // below is handler of table
-  // handleOnPageChange(event) {
-  //   console.log(event)
-  // }
-
-  // handleOnPageSizeChange(newPageSize, newPage) {
-  //   console.log(newPageSize, newPage)
-  // }
 
   handleSortedChange(newSorted, column, additive) {
     console.log(newSorted);
@@ -333,6 +324,37 @@ export default class CODReceiptNumber extends Component {
       </div>
     );
   }
+
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.codRest.getCODReceipts({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          this.loadAllData();
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.codRest.getCODReceipts({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Receipt Number");
+      this.setState({ loading: false });
+    });
+  }
+
   render() {
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
@@ -514,6 +536,17 @@ export default class CODReceiptNumber extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
+                    <Button
+                      className="float-right default"
+                      color="primary"
+                      style={{
+                        marginRight: 10,
+                        borderRadius: 6
+                      }}
+                      onClick={() => this.exportData()}
+                    >
+                      Export
+                    </Button>
                   </div>
                 </div>
 
@@ -550,6 +583,7 @@ export default class CODReceiptNumber extends Component {
               </CardBody>
             </Card>
           </Colxx>
+          {this.state.loading && <Spinner />}
         </Row>
 
         <Modal
