@@ -78,6 +78,7 @@ export default class Tenant extends Component {
         siCepatCOD: true,
         isRealColumn: true,
         status: true,
+        isCOD: true,
       },
       popoverOpen: false,
       filterPopover: false,
@@ -373,7 +374,7 @@ export default class Tenant extends Component {
       {
         Header: "SAP COD",
         accessor: "isCOD",
-        show: this.state.isCOD,
+        show: tableFilter.isCOD,
         Cell: props => (
           <Switch
             className="custom-switch custom-switch-secondary"
@@ -788,7 +789,7 @@ export default class Tenant extends Component {
                       target="Popover1"
                       toggle={this.togglePopOver}
                     >
-                      <PopoverBody>
+                      <PopoverBody className="custom-popover">
                       <div>
                         <input
                           name="companyInfo"
@@ -890,9 +891,9 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
-                            name="sapCOD"
+                            name="isCOD"
                             type="checkbox"
-                            checked={this.state.isCOD}
+                            checked={tableFilter.isCOD}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           SAP COD
