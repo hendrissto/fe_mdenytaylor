@@ -1,7 +1,7 @@
 import React from "react";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import moment from "moment";
+// import moment from "moment";
 import { MoneyFormat } from "../../services/Format/MoneyFormat";
 
 const moneyFormat = new MoneyFormat();

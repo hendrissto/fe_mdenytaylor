@@ -495,7 +495,7 @@ export default class ListTransactions extends Component {
           <Col> {data.Email} </Col>
         </Row>
         <Row>
-          <Col xs="5"> Email </Col>
+          <Col xs="5"> No Telepon </Col>
           <Col xs="1">:</Col>
           <Col> {data.Phone} </Col>
         </Row>
