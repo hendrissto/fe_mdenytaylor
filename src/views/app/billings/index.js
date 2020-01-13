@@ -744,60 +744,60 @@ export default class Billing extends Component {
                       >
                         Filter
                       </Button>
-                      <Collapse isOpen={this.state.collapse}>
-                        <Card style={{ width: '100%' }}>
-                          <CardBody>
-                            Sisa Waktu Berlangganan
-                            <div
-                              onChange={this.handleFilterDayChange.bind(this)}
-                            >
-                              <Row>
-                                <div style={filterStyle}>
-                                  <input
-                                    name="dayBefore"
-                                    value="-7"
-                                    type="radio"
-                                    checked={this.state.dayBefore === 7 ? true : false}
-                                  />
-                                  7 Hari
-                                </div>
-                                <div style={filterStyle}>
-                                  <input
-                                    name="dayBefore"
-                                    value="-3"
-                                    type="radio"
-                                    checked={this.state.dayBefore === 3 ? true : false}
-                                  />
-                                  3 Hari
-                                </div>
-                                <div style={filterStyle}>
-                                  <input
-                                    name="dayBefore"
-                                    value="-1"
-                                    type="radio"
-                                    checked={this.state.dayBefore === 1 ? true : false}
-                                  />
-                                  1 Hari
-                                </div>
-                              </Row>
-                            </div>
-                          </CardBody>
-                          <CardFooter>
-                            <Button
-                              className="float-right default"
-                              color="primary"
-                              onClick={() => {
-                                this.loadData();
-                                this.setState({ collapse: false });
-                              }}
-                              style={{ borderRadius: 6 }}
-                            >
-                              Apply
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      </Collapse>
                     </InputGroup>
+                    <Collapse isOpen={this.state.collapse}>
+                      <Card style={{ width: '100%' }}>
+                        <CardBody>
+                          Sisa Waktu Berlangganan
+                          <div
+                            onChange={this.handleFilterDayChange.bind(this)}
+                          >
+                            <Row>
+                              <div style={filterStyle}>
+                                <input
+                                  name="dayBefore"
+                                  value="-7"
+                                  type="radio"
+                                  checked={this.state.dayBefore === 7 ? true : false}
+                                />
+                                7 Hari
+                              </div>
+                              <div style={filterStyle}>
+                                <input
+                                  name="dayBefore"
+                                  value="-3"
+                                  type="radio"
+                                  checked={this.state.dayBefore === 3 ? true : false}
+                                />
+                                3 Hari
+                              </div>
+                              <div style={filterStyle}>
+                                <input
+                                  name="dayBefore"
+                                  value="-1"
+                                  type="radio"
+                                  checked={this.state.dayBefore === 1 ? true : false}
+                                />
+                                1 Hari
+                              </div>
+                            </Row>
+                          </div>
+                        </CardBody>
+                        <CardFooter>
+                          <Button
+                            className="float-right default"
+                            color="primary"
+                            onClick={() => {
+                              this.loadData();
+                              this.setState({ collapse: false });
+                            }}
+                            style={{ borderRadius: 6 }}
+                          >
+                            Apply
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    </Collapse>
                   </div>
 
                   <div className="col-md-7">
@@ -819,7 +819,7 @@ export default class Billing extends Component {
                       target="Popover2"
                       toggle={this.togglePopoverColumns}
                     >
-                      <PopoverBody>
+                      <PopoverBody className="custom-popover">
                         <div>
                           <input
                             name="subscriptionPlanName"

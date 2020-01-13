@@ -84,6 +84,17 @@ export default class Tenant extends Component {
         isCOD: true,
         shippingSettings: true,
       },
+      totalSku: true,
+      totalOrder: true,
+      totalReceipt: true,
+      totalUser: true,
+      lastLoginDateUtc: true,
+      joinDateUtc: true,
+      siCepatCOD: true,
+      isCOD: true,
+      siCepatMemberId: true,
+      status: true,
+      isRealColumn: true,
       popoverOpen: false,
       filterPopover: false,
       totalTenants: 0,
@@ -100,7 +111,6 @@ export default class Tenant extends Component {
           pageSize: 10
         }
       },
-      allData: null,
       tenantsSummary: [],
       dropdownOpen: false,
       modal: false,
@@ -114,6 +124,7 @@ export default class Tenant extends Component {
       isCod: "",
       filterIsReal: true,
       totalData: 0,
+      allData: false,
       exportButton: false,
       shippingSettingsModal: false,
       shippingSettingsData: [],
@@ -393,10 +404,13 @@ export default class Tenant extends Component {
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
-          <p
-          >
-            {props.value ? 'true' : 'false'}
-          </p>
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isReal}
+            onChange={() => {
+              this.editIsReal(props.original);
+            }}
+          />
         )
       },
       {
@@ -551,56 +565,6 @@ export default class Tenant extends Component {
     return dataTable;
   }
 
-  exportData() {
-    this.setState({ loading: true });
-    const params = {
-      "options.includeTotalCount": true
-    };
-
-    this.tenantRest.getTenants({ params }).subscribe(
-      response => {
-        this.setState({ totalData: response.total }, () => {
-          if(this.state.allData) {
-            this.loadAllData();
-          } else {
-            this.loadFilterData();
-          }
-        });
-      },
-      error => {
-        this.setState({ redirect: true });
-      }
-    );
-  }
-
-  loadAllData() {
-    const params = {
-      "options.includeTotalCount": true,
-      "options.take": this.state.totalData
-    };
-
-    this.tenantRest.getTenants({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Tenants", false);
-      this.setState({ loading: false });
-    });
-  }
-
-   loadFilterData() {    
-    const params = {
-      keyword: this.state.search || null,
-      isCod: this.state.isCod || null,
-      isReal: this.state.isReal || null,
-      "options.take": this.state.totalData,
-      "options.skip": 0,
-      "options.includeTotalCount": true
-    };
-
-    this.tenantRest.getTenants({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Tenants", false);
-      this.setState({ loading: false });
-    });
-  }
-
   shippingSettingsModal() {
     let temp = [];
     const listShippingSettings =this.state.oneData.shippingSettings;
@@ -659,6 +623,56 @@ export default class Tenant extends Component {
     }
 
     return temp;
+  }
+
+  exportData() {
+    this.setState({ loading: true });
+    const params = {
+      "options.includeTotalCount": true
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(
+      response => {
+        this.setState({ totalData: response.total }, () => {
+          if(this.state.allData) {
+            this.loadAllData();
+          } else {
+            this.loadFilterData();
+          }
+        });
+      },
+      error => {
+        this.setState({ redirect: true });
+      }
+    );
+  }
+
+  loadAllData() {
+    const params = {
+      "options.includeTotalCount": true,
+      "options.take": this.state.totalData
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Tenants", false);
+      this.setState({ loading: false });
+    });
+  }
+
+   loadFilterData() {    
+    const params = {
+      keyword: this.state.search || null,
+      isCod: this.state.isCod || null,
+      isReal: this.state.isReal || null,
+      "options.take": this.state.totalData,
+      "options.skip": 0,
+      "options.includeTotalCount": true
+    };
+
+    this.tenantRest.getTenants({ params }).subscribe(res => {
+      this.exportService.exportToCSV(res.data, "Tenants", false);
+      this.setState({ loading: false });
+    });
   }
 
   toggleExport() {
@@ -818,7 +832,7 @@ export default class Tenant extends Component {
                       target="Popover1"
                       toggle={this.togglePopOver}
                     >
-                      <PopoverBody>
+                      <PopoverBody className="custom-popover">
                       <div>
                         <input
                           name="companyInfo"

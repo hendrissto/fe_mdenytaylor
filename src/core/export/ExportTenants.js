@@ -44,7 +44,6 @@ export default class ExportTenants extends React.Component {
 		normalizeLine(data) {
 			for(let i = 0; i < data.length; i++) {
 				const user = [];
-				// data[i].companyInfo = data[i].companyInfo.name + ', ' + data[i].companyInfo.phone + ', ' + data[i].companyInfo.email;
 				data[i].companyName = data[i].companyInfo.name;
 				data[i].companyPhone = data[i].companyInfo.phone;
 				data[i].companyEmail = data[i].companyInfo.email;
@@ -53,10 +52,10 @@ export default class ExportTenants extends React.Component {
 					user.push(data[i].users[j].fullName)
 				}
 				data[i].users = user.join(',');
-
 				for(let ss = 0; ss < data[i].shippingSettings.length; ss++) {
 					data[i].shippingSettings[ss].courierChannelId === 'sap' ? data[i].sap = data[i].shippingSettings[ss].shippingService : data[i].sicepat = data[i].shippingSettings[ss].shippingService
 				}
+				delete data[i].shippingSettings
 				// delete data[i].users;
 				// delete data[i].companyInfo;
 				// delete data[i].owner;
