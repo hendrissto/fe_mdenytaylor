@@ -404,10 +404,13 @@ export default class Tenant extends Component {
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
-          <p
-          >
-            {props.value ? 'true' : 'false'}
-          </p>
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isReal}
+            onChange={() => {
+              this.editIsReal(props.original);
+            }}
+          />
         )
       },
       {
