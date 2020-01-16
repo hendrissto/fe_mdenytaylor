@@ -1,6 +1,11 @@
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
+
 import ReactTable from "react-table";
+import "react-table/react-table.css";
+import withFixedColumns from "react-table-hoc-fixed-columns";
+import "react-table-hoc-fixed-columns/lib/styles.css";
+
 import { Redirect } from "react-router-dom";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
@@ -29,6 +34,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
+const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
@@ -173,13 +179,8 @@ export default class CODReceiptNumber extends Component {
       {
         Header: "Seller Name",
         accessor: "sellerName",
+        fixed: 'left',
         width: 200,
-        Cell: props => <p>{props.value}</p>
-      },
-      {
-        Header: "Delivery Notes",
-        accessor: "deliveryNotes",
-        width: 350,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -277,7 +278,13 @@ export default class CODReceiptNumber extends Component {
         width: 140,
         show: this.state.receiveAmount,
         Cell: props => <p>{this.moneyFormat.numberFormat(props.value)}</p>
-      }
+      },
+      {
+        Header: "Delivery Notes",
+        accessor: "deliveryNotes",
+        width: 350,
+        Cell: props => <p>{props.value}</p>
+      },
     ];
   }
 
@@ -550,7 +557,7 @@ export default class CODReceiptNumber extends Component {
                   </div>
                 </div>
 
-                <ReactTable
+                <ReactTableFixedColumn
                   minRows={0}
                   data={this.state.table.data}
                   columns={this.dataTable()}

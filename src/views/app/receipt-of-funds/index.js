@@ -21,7 +21,11 @@ import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
 
 import React, { Component, Fragment } from "react";
+
 import ReactTable from "react-table";
+import "react-table/react-table.css";
+import withFixedColumns from "react-table-hoc-fixed-columns";
+import "react-table-hoc-fixed-columns/lib/styles.css";
 // import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
@@ -44,6 +48,7 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
+const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -393,8 +398,10 @@ class ReceiptOfFunds extends Component {
   dataTableDetail() {
     return [
       {
-        Header: "No Resi a",
+        Header: "No Resi aaa",
         accessor: "airwaybill",
+        className: "sticky",
+        headerClassName: "sticky",
         width: 130,
         Footer: <p>Total</p>,
         Cell: props => <p>{props.value}</p>
@@ -402,23 +409,31 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Delivery Notes",
         accessor: "deliveredNotes",
+        className: "sticky",
+        headerClassName: "sticky",
         width: 350,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Destination",
         accessor: "destination",
+        className: "sticky",
+        headerClassName: "sticky",
         width: 150,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Note",
         accessor: "notes",
+        className: "sticky",
+        headerClassName: "sticky",
         Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
       },
       {
         Header: "Good Value",
         accessor: "goodsValue",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -434,6 +449,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Shipping Charge",
         accessor: "shippingCharge",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -449,6 +466,8 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Discount",
+        className: "sticky",
+        headerClassName: "sticky",
         accessor: "discount",
         Footer: props => (
           <p>
@@ -465,6 +484,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Tax",
         accessor: "tax",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -476,6 +497,8 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Adjustment",
+        className: "sticky",
+        headerClassName: "sticky",
         accessor: "adjustment",
         Footer: props => (
           <p>
@@ -492,6 +515,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Total",
         accessor: "total",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -507,6 +532,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Sub Total Amount",
         accessor: "subTotalAmount",
+        className: "sticky",
+        headerClassName: "sticky",
         width: 140,
         Footer: props => (
           <p>
@@ -524,6 +551,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Total Amount",
         accessor: "totalAmount",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -539,11 +568,15 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD (%)",
         accessor: "codFee",
+        className: "sticky",
+        headerClassName: "sticky",
         Cell: props => <p>{props.value * 100} %</p>
       },
       {
         Header: "Fee COD (Rp)",
         accessor: "codFeeRp",
+        className: "sticky",
+        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -561,6 +594,8 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Receive Amount",
         accessor: "totAmountCodFee",
+        className: "sticky",
+        headerClassName: "sticky",
         width: 140,
         Footer: props => (
           <p>
@@ -1657,7 +1692,7 @@ class ReceiptOfFunds extends Component {
                   overflow: "auto"
                 }}
               >
-                <ReactTable
+                <ReactTableFixedColumn
                   minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
