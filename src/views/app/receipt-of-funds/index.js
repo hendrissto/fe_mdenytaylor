@@ -174,7 +174,8 @@ class ReceiptOfFunds extends Component {
             formatter: tableData => this.sumData(tableData, "subTotalAmount")
           }
         ]
-      ]
+      ],
+      totalError: 0,
     };
 
     // this.toggleDropDown = this.toggleDropDown.bind(this);
@@ -1048,6 +1049,7 @@ class ReceiptOfFunds extends Component {
         }
         this.setState({
           resError: errorMessage,
+          totalError: errorMessage.length,
           resiModal: false,
           loading: false
         });
@@ -1204,7 +1206,7 @@ class ReceiptOfFunds extends Component {
     let data = [];
     if (this.state.resError !== null) {
       for (let i = 0; i < this.state.resError.length; i++) {
-        data.push(<p>{this.state.resError[i]}</p>);
+        data.push(<p>{this.state.resError[i]} <hr /></p>);
       }
     }
     return data;
@@ -1480,8 +1482,8 @@ class ReceiptOfFunds extends Component {
         {this.state.resiModalDetail && (
           <Modal
             isOpen={this.state.resiModalDetail}
-            size="lg"
             toggle={() => this.setState({ resiModalDetail: false })}
+            className="modal-large" contentClassName="content-large"
           >
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
@@ -1532,7 +1534,7 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} size="lg">
+          <Modal isOpen={this.state.resiModal} size="lg" className="modal-large"  contentClassName="content-large">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -1581,6 +1583,55 @@ class ReceiptOfFunds extends Component {
           </Modal>
         )}
 
+         {/*<Modal isOpen={this.state.resiModal} size="lg">
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody>
+              <BootstrapTable
+                data={this.state.data}
+                footerData={this.state.footerData}
+                footer
+              >
+                <TableHeaderColumn
+                  dataField="osName"
+                  isKey
+                  dataFormat={this.buttonResiCod.bind(this)}
+                >
+                  Nama Seller
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="package">
+                  Jumlah Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalReceive"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.setState({ resiModal: false })}>
+                Back
+              </Button>
+              <Button onClick={() => this.submitData()}>Submit</Button>
+            </ModalFooter>
+          </Modal>
+           */}
+
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
           <div
@@ -1588,7 +1639,7 @@ class ReceiptOfFunds extends Component {
               maxHeight: 580
             }}
           >
-            <Modal isOpen={this.state.resiModalSeller} size="lg">
+            <Modal isOpen={this.state.resiModalSeller} className="modal-large" contentClassName="content-large">
               <ModalHeader>
                 <IntlMessages id="modal.receiptDataCOD" />
               </ModalHeader>
@@ -1639,7 +1690,7 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI SELLER DETAIL */}
         {this.state.resiModalSellerDetail && (
-          <Modal isOpen={this.state.resiModalSellerDetail} size="lg">
+          <Modal isOpen={this.state.resiModalSellerDetail} className="modal-large" contentClassName="content-large">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -1693,8 +1744,12 @@ class ReceiptOfFunds extends Component {
             }}
             toggle={() => this.setState({ modalError: false })}
           >
-            <ModalHeader>Error</ModalHeader>
-            <ModalBody>{this._renderError()}</ModalBody>
+            <ModalHeader>Terjadi Kesalahan <br /> <b>Total Error: </b>{this.state.totalError}</ModalHeader>
+            <ModalBody
+            style={{
+              maxHeight: '50vh',
+              overflow: "auto"
+            }}>{this._renderError()}</ModalBody>
 
             <ModalFooter>
               <Button onClick={() => this.setState({ modalError: false })}>
