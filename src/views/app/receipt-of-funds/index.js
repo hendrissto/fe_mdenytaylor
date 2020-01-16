@@ -890,15 +890,17 @@ class ReceiptOfFunds extends Component {
         excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
+        const filteredData = newExcelData.filter(v => v.airwaybill !== undefined && v.osName !== undefined);
+        filteredData.map(v => v.airwaybill = this.addZero(v.airwaybill, 12))
 
-        for (let i = 0; i < newExcelData.length; i++) {
-          newExcelData[i].codFeeRp = Math.round(newExcelData[i].codFeeRp);
-          newExcelData[i].totAmountCodFee = Math.round(
-            newExcelData[i].totAmountCodFee
+        for (let i = 0; i < filteredData.length; i++) {
+          filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
+          filteredData[i].totAmountCodFee = Math.round(
+            filteredData[i].totAmountCodFee
           );
 
           // this condition for convert undefined value to be number 0
-          _.mapValues(newExcelData[i], function(val, key) {
+          _.mapValues(filteredData[i], function(val, key) {
             if (
               val === undefined &&
               [
@@ -915,15 +917,15 @@ class ReceiptOfFunds extends Component {
                 "totalAmount"
               ].includes(key)
             ) {
-              newExcelData[i][key] = 0;
+              filteredData[i][key] = 0;
               // return 0;
             }
             // return val;
           });
         }
-        if (!this.validate(newExcelData)) {
-          this.normalizeLines(newExcelData);
-          let data = _(newExcelData)
+        if (!this.validate(filteredData)) {
+          this.normalizeLines(filteredData);
+          let data = _(filteredData)
             .groupBy("tenantId")
             .map((newDataExcel, sellerName) => ({
               osName: newDataExcel[0].osName,
@@ -938,6 +940,15 @@ class ReceiptOfFunds extends Component {
         }
       }
     });
+  }
+
+  addZero(number, length) {
+    let my_string = '' + number.toString();
+    while (my_string.length < length) {
+        my_string = '0' + my_string;
+    }
+
+    return my_string;
   }
 
   validate(data) {
@@ -1055,7 +1066,7 @@ class ReceiptOfFunds extends Component {
     //   }
     // }
 
-    for (let i = 0; i < data.length - 1; i++) {
+    for (let i = 0; i < data.length; i++) {
       // we should getting true data
       if (data[i] && data[i].length) {
         if (data[i].length > 10) {
