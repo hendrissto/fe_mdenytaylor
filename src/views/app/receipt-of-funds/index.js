@@ -1488,7 +1488,11 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody>
+            <ModalBody 
+            style={{
+              maxHeight: '50vh',
+              overflow: "auto"
+            }}>
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
@@ -1538,7 +1542,11 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody>
+            <ModalBody 
+            style={{
+              maxHeight: '50vh',
+              overflow: "auto"
+            }}>
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
@@ -1645,7 +1653,7 @@ class ReceiptOfFunds extends Component {
               </ModalHeader>
               <ModalBody
                 style={{
-                  maxHeight: 380,
+                  maxHeight: '50vh',
                   overflow: "auto"
                 }}
               >
@@ -1694,7 +1702,11 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody>
+            <ModalBody 
+            style={{
+              maxHeight: '50vh',
+              overflow: "auto"
+            }}>
               <ReactTable
                 minRows={0}
                 page={this.state.table.pagination.currentPage}
