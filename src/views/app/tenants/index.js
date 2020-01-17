@@ -286,7 +286,7 @@ export default class Tenant extends Component {
         show: tableFilter.companyInfo
       },
       {
-        Header: "Email",
+        Header: "Email Tenant",
         accessor: "email",
         // fixed: "left",
         width: 170,
