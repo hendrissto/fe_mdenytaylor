@@ -1,11 +1,30 @@
 .button {
-    color: blue;
+  color: blue;
 }
 
 .modal-large {
-    margin-left: 110px;
+  margin-left: 110px;
 }
 
 .content-large {
-    width: 190vh;
+  width: 85vw;
 }
+
+// .rt-thead {
+//   position: sticky;
+//   top: 0;
+//   z-index: 2;
+//   background: white;
+// }
+// .rt-tbody {
+//   overflow: visible !important;
+//   height: 200px;
+// }
+
+// .sticky {
+//   position: sticky !important;
+//   left: 0;
+//   top: 0;
+//   z-index: 1;
+//   background-color: white;
+// }
