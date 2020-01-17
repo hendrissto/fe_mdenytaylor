@@ -344,7 +344,7 @@ export default class Billing extends Component {
                   <td style={{ textAlign: 'left' }}>{props.original.ownerUser.fullName}</td>
                 </tr>
                 <tr>
-                  <td style={{ textAlign: 'left' }}>Email</td>
+                  <td style={{ textAlign: 'left' }}>Email Owner</td>
                   <td> : </td>
                   <td style={{ textAlign: 'left' }}>{props.original.ownerUser.email}</td>
                 </tr>
@@ -361,7 +361,7 @@ export default class Billing extends Component {
         )
       },
       {
-        Header: "Email",
+        Header: "Email Perusahaan",
         accessor: "companyInfo.email",
         fixed: "left",
         width: 170,
