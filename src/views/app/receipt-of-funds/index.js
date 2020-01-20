@@ -926,8 +926,8 @@ class ReceiptOfFunds extends Component {
         excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
-        const filteredData = newExcelData.filter(v => v.airwaybill !== undefined && v.osName !== undefined);
-        filteredData.map(v => v.airwaybill = this.addZero(v.airwaybill, 12))
+        const filteredData = newExcelData.filter(v => v.osName !== undefined);
+        filteredData.map(v => v.airwaybill = this.addZero(v.airwaybill || '', 12))
 
         for (let i = 0; i < filteredData.length; i++) {
           filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
@@ -991,7 +991,7 @@ class ReceiptOfFunds extends Component {
     let isFound = false;
 
     for (let i = 0; i < data.length; i++) {
-      if (data[i].airwaybill === undefined) {
+      if (data[i].airwaybill === undefined || data[i].airwaybill === '000000000000') {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua resi telah diisi.",
