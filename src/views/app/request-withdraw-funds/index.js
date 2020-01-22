@@ -195,8 +195,19 @@ class WithdrawFunds extends Component {
         this.setState({ tenantBank: response.data });
       },
       err => {
-        this.setState({loadingSubmit: false})
-        console.log(err);
+        this.setState({loadingSubmit: false});
+        if(err.response.status === 401 || err.response.status === 500){
+          this.setState({redirectLogin: true});
+          MySwal.fire({
+            type: "error",
+            title: "Unauthorized.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        }
       }
     );
   }
