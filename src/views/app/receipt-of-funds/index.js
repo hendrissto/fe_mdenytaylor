@@ -1082,7 +1082,7 @@ class ReceiptOfFunds extends Component {
         codFeePercentage: array[i].codFee * 100 || 0,
         codFeeValue: Math.round(array[i].codFeeRp) || 0,
         receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
-        discountShippingChargePercentage: array[i].totalShippingCharge * 100 || 0,
+        discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
       });
     }
