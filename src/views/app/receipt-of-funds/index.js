@@ -828,8 +828,6 @@ class ReceiptOfFunds extends Component {
       Math.round(data.lines[j].totAmountCodFee);
     }
 
-    console.log('DATA.LINES', data.lines)
-
     let finish = data.lines;
     this.setState({ oneData: finish, resiModalSeller: true });
   }
@@ -954,7 +952,6 @@ class ReceiptOfFunds extends Component {
           return v;
         })
         
-        console.log(filteredData)
         for (let i = 0; i < filteredData.length; i++) {
           filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
           filteredData[i].totAmountCodFee = Math.round(
