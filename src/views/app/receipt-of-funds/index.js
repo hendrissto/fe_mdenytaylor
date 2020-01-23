@@ -937,8 +937,8 @@ class ReceiptOfFunds extends Component {
         arr.push(resp.rows);
 
         let excelData = resp.rows;
-        excelData.splice(0, 2);
-        excelData.shift();
+        // excelData.splice(0, 2);
+        // excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
         const filteredData = newExcelData.filter(v => v.osName !== undefined);
