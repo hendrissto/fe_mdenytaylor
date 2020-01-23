@@ -398,10 +398,8 @@ class ReceiptOfFunds extends Component {
   dataTableDetail() {
     return [
       {
-        Header: "No Resi aaa",
+        Header: "No Resi",
         accessor: "airwaybill",
-        className: "sticky",
-        headerClassName: "sticky",
         width: 130,
         Footer: <p>Total</p>,
         Cell: props => <p>{props.value}</p>
@@ -409,31 +407,23 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Delivery Notes",
         accessor: "deliveredNotes",
-        className: "sticky",
-        headerClassName: "sticky",
         width: 350,
         Cell: props => <p>{props.value}</p>
       },
       {
         Header: "Destination",
         accessor: "destination",
-        className: "sticky",
-        headerClassName: "sticky",
         width: 150,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
       {
         Header: "Note",
         accessor: "notes",
-        className: "sticky",
-        headerClassName: "sticky",
         Cell: props => <p>{props.value === "" ? "-" : props.value}</p>
       },
       {
         Header: "Good Value",
         accessor: "goodsValue",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -449,8 +439,6 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Shipping Charge",
         accessor: "shippingCharge",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -466,8 +454,6 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Discount",
-        className: "sticky",
-        headerClassName: "sticky",
         accessor: "discount",
         Footer: props => (
           <p>
@@ -484,8 +470,6 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Tax",
         accessor: "tax",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -497,8 +481,6 @@ class ReceiptOfFunds extends Component {
       },
       {
         Header: "Adjustment",
-        className: "sticky",
-        headerClassName: "sticky",
         accessor: "adjustment",
         Footer: props => (
           <p>
@@ -515,8 +497,6 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Total",
         accessor: "total",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -532,8 +512,6 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Sub Total Amount",
         accessor: "subTotalAmount",
-        className: "sticky",
-        headerClassName: "sticky",
         width: 140,
         Footer: props => (
           <p>
@@ -551,8 +529,6 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Total Amount",
         accessor: "totalAmount",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -568,15 +544,11 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD (%)",
         accessor: "codFee",
-        className: "sticky",
-        headerClassName: "sticky",
-        Cell: props => <p>{props.value * 100} %</p>
+        Cell: props => <p>{props.value * 100 || 0} %</p>
       },
       {
         Header: "Fee COD (Rp)",
         accessor: "codFeeRp",
-        className: "sticky",
-        headerClassName: "sticky",
         Footer: props => (
           <p>
             {this.moneyFormat.numberFormat(
@@ -592,10 +564,30 @@ class ReceiptOfFunds extends Component {
         )
       },
       {
+        Header: "Diskon Ongkir",
+        accessor: "discountShippingChargePercentage",
+        Cell: props => <p>{props.value * 100 || 0} %</p>
+      },
+      {
+        Header: "Total Ongkir",
+        accessor: "totalShippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalShippingCharge }) => (total += parseInt(totalShippingCharge)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
         Header: "Receive Amount",
         accessor: "totAmountCodFee",
-        className: "sticky",
-        headerClassName: "sticky",
         width: 140,
         Footer: props => (
           <p>
@@ -784,6 +776,28 @@ class ReceiptOfFunds extends Component {
         )
       },
       {
+        Header: "Diskon Ongkir",
+        accessor: "discountShippingChargePercentage",
+        Cell: props => <p>{props.value * 100 || 0} %</p>
+      },
+      {
+        Header: "Total Ongkir",
+        accessor: "totalShippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalShippingCharge }) => (total += parseInt(totalShippingCharge)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
         Header: "Receive Amount",
         accessor: "receiveAmount",
         width: 140,
@@ -871,6 +885,7 @@ class ReceiptOfFunds extends Component {
   }
 
   loadDetailData(id) {
+    this.setState({loading: true})
     let receiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
@@ -894,7 +909,7 @@ class ReceiptOfFunds extends Component {
         });
       }
 
-      this.setState({ data: data, resiModalDetail: true });
+      this.setState({ data: data, loading: false, resiModalDetail: true });
     });
   }
 
@@ -926,9 +941,17 @@ class ReceiptOfFunds extends Component {
         excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
-        const filteredData = newExcelData.filter(v => v.airwaybill !== undefined && v.osName !== undefined);
-        filteredData.map(v => v.airwaybill = this.addZero(v.airwaybill, 12))
-
+        const filteredData = newExcelData.filter(v => v.osName !== undefined);
+        filteredData.map(v => {
+          v.airwaybill = this.addZero(v.airwaybill || '', 12);
+          v['discountShippingChargePercentage'] = v['diskonOngkir'];
+          v['totalShippingCharge'] = v['totalOngkir'];
+          
+          delete v['diskonOngkir'];
+          delete v['totalOngkir'];
+          return v;
+        })
+        
         for (let i = 0; i < filteredData.length; i++) {
           filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
           filteredData[i].totAmountCodFee = Math.round(
@@ -950,7 +973,9 @@ class ReceiptOfFunds extends Component {
                 "subTotalAmount",
                 "totAmountCodFee",
                 "total",
-                "totalAmount"
+                "totalAmount",
+                "discountShippingChargePercentage",
+                "totalShippingCharge",
               ].includes(key)
             ) {
               filteredData[i][key] = 0;
@@ -969,7 +994,8 @@ class ReceiptOfFunds extends Component {
               package: newDataExcel.length,
               totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
               codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-              totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+              totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee")),
+              totalShippingCharge: Math.round(_.sumBy(newDataExcel, "totalShippingCharge"))
             }))
             .value();
           this.setState({ data: data, resiModal: true });
@@ -991,7 +1017,7 @@ class ReceiptOfFunds extends Component {
     let isFound = false;
 
     for (let i = 0; i < data.length; i++) {
-      if (data[i].airwaybill === undefined) {
+      if (data[i].airwaybill === undefined || data[i].airwaybill === '000000000000') {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua resi telah diisi.",
@@ -1055,7 +1081,9 @@ class ReceiptOfFunds extends Component {
         totalAmount: array[i].totalAmount || 0,
         codFeePercentage: array[i].codFee * 100 || 0,
         codFeeValue: Math.round(array[i].codFeeRp) || 0,
-        receiveAmount: Math.round(array[i].totAmountCodFee) || 0
+        receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
+        discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
+        totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
       });
     }
 
