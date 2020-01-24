@@ -862,8 +862,8 @@ class ReceiptOfFunds extends Component {
         this.setState({ table });
       },
       err => {
-        if(err.response.status === 401){
-          this.setState({redirect: true});
+        if (err.response.status === 401) {
+          this.setState({ redirect: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -885,7 +885,7 @@ class ReceiptOfFunds extends Component {
   }
 
   loadDetailData(id) {
-    this.setState({loading: true})
+    this.setState({ loading: true })
     let receiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
@@ -946,12 +946,12 @@ class ReceiptOfFunds extends Component {
           v.airwaybill = this.addZero(v.airwaybill || '', 12);
           v['discountShippingChargePercentage'] = v['diskonOngkir'];
           v['totalShippingCharge'] = v['totalOngkir'];
-          
+
           delete v['diskonOngkir'];
           delete v['totalOngkir'];
           return v;
         })
-        
+
         for (let i = 0; i < filteredData.length; i++) {
           filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
           filteredData[i].totAmountCodFee = Math.round(
@@ -959,7 +959,7 @@ class ReceiptOfFunds extends Component {
           );
 
           // this condition for convert undefined value to be number 0
-          _.mapValues(filteredData[i], function(val, key) {
+          _.mapValues(filteredData[i], function (val, key) {
             if (
               val === undefined &&
               [
@@ -1007,7 +1007,7 @@ class ReceiptOfFunds extends Component {
   addZero(number, length) {
     let my_string = '' + number.toString();
     while (my_string.length < length) {
-        my_string = '0' + my_string;
+      my_string = '0' + my_string;
     }
 
     return my_string;
@@ -1039,7 +1039,7 @@ class ReceiptOfFunds extends Component {
           customClass: "swal-height"
         });
         isFound = true;
-      }else if (data[i].osName === undefined) {
+      } else if (data[i].osName === undefined) {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua Seller Name telah diisi.",
@@ -1139,7 +1139,7 @@ class ReceiptOfFunds extends Component {
         }
       }
     }
-    
+
     return excelData;
   }
 
@@ -1450,6 +1450,7 @@ class ReceiptOfFunds extends Component {
                       Export
                     </Button>
                   </div>
+
                 </div>
 
                 <ReactTable
@@ -1551,12 +1552,76 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody 
-            style={{
-              maxHeight: '50vh',
-              overflow: "auto"
-            }}>
-              <BootstrapTable
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>
+
+              <ReactTable
+                minRows={0}
+                data={this.state.data}
+                columns={[
+                  {
+                    Header: "Nama Seller",
+                    accessor: "osName",
+                  },
+                  {
+                    Header: "Jumlah Paket",
+                    accessor: "package",
+                  },
+                  {
+                    Header: "Total",
+                    accessor: "totalAmount",
+                  },
+                  {
+                    Header: "Fee COD",
+                    accessor: "codFeeRp",
+                  },
+                  {
+                    Header: "Total Diterima",
+                    accessor: "totalReceive",
+                  }
+                ]}
+                className="-striped"
+                showPagination={false}
+                showPaginationTop={false}
+                showPaginationBottom={false}
+                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                style={{
+                  height: "100%" // This will force the table body to overflow and scroll, since there is not enough room
+                }}
+              />
+
+              <table className="w-100">
+                <thead>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <td width="40%">
+                      <span className="pl-1 font-weight-bold">Total</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalAmount")}</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "codFeeRp")}</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalReceive")}</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              {/* <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -1589,7 +1654,7 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable>
+              </BootstrapTable> */}
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.setState({ resiModalDetail: false })}>
@@ -1601,15 +1666,15 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} size="lg" className="modal-large"  contentClassName="content-large">
+          <Modal isOpen={this.state.resiModal} size="lg" className="modal-large" contentClassName="content-large">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody 
-            style={{
-              maxHeight: '50vh',
-              overflow: "auto"
-            }}>
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>
               <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
@@ -1654,7 +1719,7 @@ class ReceiptOfFunds extends Component {
           </Modal>
         )}
 
-         {/*<Modal isOpen={this.state.resiModal} size="lg">
+        {/*<Modal isOpen={this.state.resiModal} size="lg">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -1765,11 +1830,11 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody 
-            style={{
-              maxHeight: '50vh',
-              overflow: "auto"
-            }}>
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>
               <ReactTable
                 minRows={0}
                 page={this.state.table.pagination.currentPage}
@@ -1821,10 +1886,10 @@ class ReceiptOfFunds extends Component {
           >
             <ModalHeader>Terjadi Kesalahan <br /> <b>Total Error: </b>{this.state.totalError}</ModalHeader>
             <ModalBody
-            style={{
-              maxHeight: '50vh',
-              overflow: "auto"
-            }}>{this._renderError()}</ModalBody>
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>{this._renderError()}</ModalBody>
 
             <ModalFooter>
               <Button onClick={() => this.setState({ modalError: false })}>
