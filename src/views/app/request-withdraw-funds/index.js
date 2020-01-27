@@ -189,12 +189,25 @@ class WithdrawFunds extends Component {
   }
 
   loadTenantBank(id) {
+    this.setState({loadingSubmit: true})
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(
       response => {
         this.setState({ tenantBank: response.data });
       },
       err => {
-        console.log(err);
+        this.setState({loadingSubmit: false});
+        if(err.response.status === 401 || err.response.status === 500){
+          this.setState({redirectLogin: true});
+          MySwal.fire({
+            type: "error",
+            title: "Unauthorized.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        }
       }
     );
   }
@@ -340,6 +353,7 @@ class WithdrawFunds extends Component {
 
   toggle() {
     this.setState({
+      loadingSubmit: false,
       isDraft: false,
       loading: false,
       oneData: null,

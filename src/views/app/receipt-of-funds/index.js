@@ -21,7 +21,11 @@ import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
 
 import React, { Component, Fragment } from "react";
+
 import ReactTable from "react-table";
+import "react-table/react-table.css";
+import withFixedColumns from "react-table-hoc-fixed-columns";
+import "react-table-hoc-fixed-columns/lib/styles.css";
 // import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
@@ -44,6 +48,7 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
+const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -174,7 +179,8 @@ class ReceiptOfFunds extends Component {
             formatter: tableData => this.sumData(tableData, "subTotalAmount")
           }
         ]
-      ]
+      ],
+      totalError: 0,
     };
 
     // this.toggleDropDown = this.toggleDropDown.bind(this);
@@ -392,7 +398,7 @@ class ReceiptOfFunds extends Component {
   dataTableDetail() {
     return [
       {
-        Header: "No Resi a",
+        Header: "No Resi",
         accessor: "airwaybill",
         width: 130,
         Footer: <p>Total</p>,
@@ -538,7 +544,7 @@ class ReceiptOfFunds extends Component {
       {
         Header: "Fee COD (%)",
         accessor: "codFee",
-        Cell: props => <p>{props.value * 100} %</p>
+        Cell: props => <p>{props.value * 100 || 0} %</p>
       },
       {
         Header: "Fee COD (Rp)",
@@ -548,6 +554,28 @@ class ReceiptOfFunds extends Component {
             {this.moneyFormat.numberFormat(
               props.data.reduce(
                 (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
+        Header: "Diskon Ongkir",
+        accessor: "discountShippingChargePercentage",
+        Cell: props => <p>{props.value * 100 || 0} %</p>
+      },
+      {
+        Header: "Total Ongkir",
+        accessor: "totalShippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalShippingCharge }) => (total += parseInt(totalShippingCharge)),
                 0
               )
             )}
@@ -748,6 +776,28 @@ class ReceiptOfFunds extends Component {
         )
       },
       {
+        Header: "Diskon Ongkir",
+        accessor: "discountShippingChargePercentage",
+        Cell: props => <p>{props.value * 100 || 0} %</p>
+      },
+      {
+        Header: "Total Ongkir",
+        accessor: "totalShippingCharge",
+        Footer: props => (
+          <p>
+            {this.moneyFormat.numberFormat(
+              props.data.reduce(
+                (total, { totalShippingCharge }) => (total += parseInt(totalShippingCharge)),
+                0
+              )
+            )}
+          </p>
+        ),
+        Cell: props => (
+          <p>{this.moneyFormat.numberFormat(Math.round(props.value))}</p>
+        )
+      },
+      {
         Header: "Receive Amount",
         accessor: "receiveAmount",
         width: 140,
@@ -782,7 +832,8 @@ class ReceiptOfFunds extends Component {
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
-  dataTableCODSellerDetail(osName) {
+  dataTableCODSellerDetail(props) {
+    const osName = props.osName;
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
@@ -812,8 +863,8 @@ class ReceiptOfFunds extends Component {
         this.setState({ table });
       },
       err => {
-        if(err.response.status === 401){
-          this.setState({redirect: true});
+        if (err.response.status === 401) {
+          this.setState({ redirect: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -835,6 +886,7 @@ class ReceiptOfFunds extends Component {
   }
 
   loadDetailData(id) {
+    this.setState({ loading: true })
     let receiver = [];
     this.codRest.getdDetailCod(id, {}).subscribe(response => {
       // const resData = response.codCreditTransactions[0].lines;
@@ -858,7 +910,7 @@ class ReceiptOfFunds extends Component {
         });
       }
 
-      this.setState({ data: data, resiModalDetail: true });
+      this.setState({ data: data, loading: false, resiModalDetail: true });
     });
   }
 
@@ -886,19 +938,29 @@ class ReceiptOfFunds extends Component {
         arr.push(resp.rows);
 
         let excelData = resp.rows;
-        excelData.splice(0, 2);
-        excelData.shift();
+        // excelData.splice(0, 2);
+        // excelData.shift();
         const excelValue = this.extractExcelData(excelData);
         const newExcelData = this.createObjectExcel(excelValue);
+        const filteredData = newExcelData.filter(v => v.osName !== undefined);
+        filteredData.map(v => {
+          v.airwaybill = this.addZero(v.airwaybill || '', 12);
+          v['discountShippingChargePercentage'] = v['diskonOngkir'];
+          v['totalShippingCharge'] = v['totalOngkir'];
 
-        for (let i = 0; i < newExcelData.length; i++) {
-          newExcelData[i].codFeeRp = Math.round(newExcelData[i].codFeeRp);
-          newExcelData[i].totAmountCodFee = Math.round(
-            newExcelData[i].totAmountCodFee
+          delete v['diskonOngkir'];
+          delete v['totalOngkir'];
+          return v;
+        })
+
+        for (let i = 0; i < filteredData.length; i++) {
+          filteredData[i].codFeeRp = Math.round(filteredData[i].codFeeRp);
+          filteredData[i].totAmountCodFee = Math.round(
+            filteredData[i].totAmountCodFee
           );
 
           // this condition for convert undefined value to be number 0
-          _.mapValues(newExcelData[i], function(val, key) {
+          _.mapValues(filteredData[i], function (val, key) {
             if (
               val === undefined &&
               [
@@ -912,18 +974,20 @@ class ReceiptOfFunds extends Component {
                 "subTotalAmount",
                 "totAmountCodFee",
                 "total",
-                "totalAmount"
+                "totalAmount",
+                "discountShippingChargePercentage",
+                "totalShippingCharge",
               ].includes(key)
             ) {
-              newExcelData[i][key] = 0;
+              filteredData[i][key] = 0;
               // return 0;
             }
             // return val;
           });
         }
-        if (!this.validate(newExcelData)) {
-          this.normalizeLines(newExcelData);
-          let data = _(newExcelData)
+        if (!this.validate(filteredData)) {
+          this.normalizeLines(filteredData);
+          let data = _(filteredData)
             .groupBy("tenantId")
             .map((newDataExcel, sellerName) => ({
               osName: newDataExcel[0].osName,
@@ -931,7 +995,8 @@ class ReceiptOfFunds extends Component {
               package: newDataExcel.length,
               totalAmount: Math.round(_.sumBy(newDataExcel, "totalAmount")),
               codFeeRp: Math.round(_.sumBy(newDataExcel, "codFeeRp")),
-              totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee"))
+              totalReceive: Math.round(_.sumBy(newDataExcel, "totAmountCodFee")),
+              totalShippingCharge: Math.round(_.sumBy(newDataExcel, "totalShippingCharge"))
             }))
             .value();
           this.setState({ data: data, resiModal: true });
@@ -940,11 +1005,20 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  addZero(number, length) {
+    let my_string = '' + number.toString();
+    while (my_string.length < length) {
+      my_string = '0' + my_string;
+    }
+
+    return my_string;
+  }
+
   validate(data) {
     let isFound = false;
 
     for (let i = 0; i < data.length; i++) {
-      if (data[i].airwaybill === undefined) {
+      if (data[i].airwaybill === undefined || data[i].airwaybill === '000000000000') {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua resi telah diisi.",
@@ -966,7 +1040,7 @@ class ReceiptOfFunds extends Component {
           customClass: "swal-height"
         });
         isFound = true;
-      }else if (data[i].osName === undefined) {
+      } else if (data[i].osName === undefined) {
         MySwal.fire({
           type: "error",
           title: "Pastikan semua Seller Name telah diisi.",
@@ -1008,7 +1082,9 @@ class ReceiptOfFunds extends Component {
         totalAmount: array[i].totalAmount || 0,
         codFeePercentage: array[i].codFee * 100 || 0,
         codFeeValue: Math.round(array[i].codFeeRp) || 0,
-        receiveAmount: Math.round(array[i].totAmountCodFee) || 0
+        receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
+        discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
+        totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
       });
     }
 
@@ -1037,6 +1113,7 @@ class ReceiptOfFunds extends Component {
         }
         this.setState({
           resError: errorMessage,
+          totalError: errorMessage.length,
           resiModal: false,
           loading: false
         });
@@ -1055,7 +1132,7 @@ class ReceiptOfFunds extends Component {
     //   }
     // }
 
-    for (let i = 0; i < data.length - 1; i++) {
+    for (let i = 0; i < data.length; i++) {
       // we should getting true data
       if (data[i] && data[i].length) {
         if (data[i].length > 10) {
@@ -1063,7 +1140,7 @@ class ReceiptOfFunds extends Component {
         }
       }
     }
-    
+
     return excelData;
   }
 
@@ -1193,7 +1270,7 @@ class ReceiptOfFunds extends Component {
     let data = [];
     if (this.state.resError !== null) {
       for (let i = 0; i < this.state.resError.length; i++) {
-        data.push(<p>{this.state.resError[i]}</p>);
+        data.push(<p>{this.state.resError[i]} <hr /></p>);
       }
     }
     return data;
@@ -1374,6 +1451,7 @@ class ReceiptOfFunds extends Component {
                       Export
                     </Button>
                   </div>
+
                 </div>
 
                 <ReactTable
@@ -1469,14 +1547,93 @@ class ReceiptOfFunds extends Component {
         {this.state.resiModalDetail && (
           <Modal
             isOpen={this.state.resiModalDetail}
-            size="lg"
             toggle={() => this.setState({ resiModalDetail: false })}
+            className="modal-large" contentClassName="content-large"
           >
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-              <BootstrapTable
+
+              <ReactTable
+                minRows={0}
+                data={this.state.data}
+                columns={[
+                  {
+                    Header: "Nama Seller",
+                    accessor: "osName",
+                    Cell: props => (
+                      <Button
+                      color="link"
+                      onClick={() => this.dataTableCODSellerDetail(props.original)}
+                      className="text-primary hover"
+                      style={{
+                        textAlign: "center",
+                        marginLeft: "-15px",
+                        marginTop: "-14px"
+                      }}
+                      >
+                        {props.value}
+                      </Button>
+                    )
+                  },
+                  {
+                    Header: "Jumlah Paket",
+                    accessor: "package",
+                  },
+                  {
+                    Header: "Total",
+                    accessor: "totalAmount",
+                  },
+                  {
+                    Header: "Fee COD",
+                    accessor: "codFeeRp",
+                  },
+                  {
+                    Header: "Total Diterima",
+                    accessor: "totalReceive",
+                  }
+                ]}
+                className="-striped"
+                showPagination={false}
+                showPaginationTop={false}
+                showPaginationBottom={false}
+                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
+                style={{
+                  maxHeight: '50vh',
+                  overflow: "auto"
+                }}
+              />
+
+              <table className="w-100">
+                <thead>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <td width="40%">
+                      <span className="pl-1 font-weight-bold">Total</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalAmount")}</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "codFeeRp")}</span>
+                    </td>
+                    <td width="20%">
+                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalReceive")}</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              {/* <BootstrapTable
                 data={this.state.data}
                 footerData={this.state.footerData}
                 footer
@@ -1509,7 +1666,7 @@ class ReceiptOfFunds extends Component {
                 >
                   Total Diterima
                 </TableHeaderColumn>
-              </BootstrapTable>
+              </BootstrapTable> */}
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.setState({ resiModalDetail: false })}>
@@ -1521,7 +1678,60 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI */}
         {this.state.resiModal && (
-          <Modal isOpen={this.state.resiModal} size="lg">
+          <Modal isOpen={this.state.resiModal} size="lg" className="modal-large" contentClassName="content-large">
+            <ModalHeader>
+              <IntlMessages id="modal.receiptDataCOD" />
+            </ModalHeader>
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>
+              <BootstrapTable
+                data={this.state.data}
+                footerData={this.state.footerData}
+                footer
+              >
+                <TableHeaderColumn
+                  dataField="osName"
+                  isKey
+                  dataFormat={this.buttonResiCod.bind(this)}
+                >
+                  Nama Seller
+                </TableHeaderColumn>
+                <TableHeaderColumn dataField="package">
+                  Jumlah Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalAmount"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Nilai Paket
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="codFeeRp"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Fee COD
+                </TableHeaderColumn>
+                <TableHeaderColumn
+                  dataField="totalReceive"
+                  dataFormat={this.currencyFormat.bind(this)}
+                >
+                  Total Diterima
+                </TableHeaderColumn>
+              </BootstrapTable>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.setState({ resiModal: false })}>
+                Back
+              </Button>
+              <Button onClick={() => this.submitData()}>Submit</Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {/*<Modal isOpen={this.state.resiModal} size="lg">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
@@ -1568,7 +1778,7 @@ class ReceiptOfFunds extends Component {
               <Button onClick={() => this.submitData()}>Submit</Button>
             </ModalFooter>
           </Modal>
-        )}
+           */}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
@@ -1577,17 +1787,17 @@ class ReceiptOfFunds extends Component {
               maxHeight: 580
             }}
           >
-            <Modal isOpen={this.state.resiModalSeller} size="lg">
+            <Modal isOpen={this.state.resiModalSeller} className="modal-large" contentClassName="content-large">
               <ModalHeader>
                 <IntlMessages id="modal.receiptDataCOD" />
               </ModalHeader>
               <ModalBody
                 style={{
-                  maxHeight: 380,
+                  maxHeight: '50vh',
                   overflow: "auto"
                 }}
               >
-                <ReactTable
+                <ReactTableFixedColumn
                   minRows={0}
                   page={this.state.table.pagination.currentPage}
                   PaginationComponent={DataTablePagination}
@@ -1628,11 +1838,15 @@ class ReceiptOfFunds extends Component {
 
         {/* MODAL DATA RESI SELLER DETAIL */}
         {this.state.resiModalSellerDetail && (
-          <Modal isOpen={this.state.resiModalSellerDetail} size="lg">
+          <Modal isOpen={this.state.resiModalSellerDetail} className="modal-large" contentClassName="content-large">
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody>
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>
               <ReactTable
                 minRows={0}
                 page={this.state.table.pagination.currentPage}
@@ -1682,8 +1896,12 @@ class ReceiptOfFunds extends Component {
             }}
             toggle={() => this.setState({ modalError: false })}
           >
-            <ModalHeader>Error</ModalHeader>
-            <ModalBody>{this._renderError()}</ModalBody>
+            <ModalHeader>Terjadi Kesalahan <br /> <b>Total Error: </b>{this.state.totalError}</ModalHeader>
+            <ModalBody
+              style={{
+                maxHeight: '50vh',
+                overflow: "auto"
+              }}>{this._renderError()}</ModalBody>
 
             <ModalFooter>
               <Button onClick={() => this.setState({ modalError: false })}>

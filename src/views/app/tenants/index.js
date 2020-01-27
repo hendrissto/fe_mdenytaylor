@@ -286,7 +286,7 @@ export default class Tenant extends Component {
         show: tableFilter.companyInfo
       },
       {
-        Header: "Email",
+        Header: "Email Tenant",
         accessor: "email",
         // fixed: "left",
         width: 170,
@@ -918,7 +918,7 @@ export default class Tenant extends Component {
                           <input
                             name="shippingSettings"
                             type="checkbox"
-                            checked={this.state.shippingSettings}
+                            checked={tableFilter.shippingSettings}
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Shipping Settings

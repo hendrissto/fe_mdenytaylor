@@ -42,7 +42,7 @@ function* loginWithEmailPassword({payload}) {
     try {
         localStorage.setItem('user', JSON.stringify(user));
         yield put(loginUserSuccess(user));
-        history.push('/');
+        history.push('/app');
     } catch (error) {
         console.log('login error : ', error)
     }
@@ -61,7 +61,7 @@ function* registerWithEmailPassword({ payload }) {
         if (!registerUser.message) {
             localStorage.setItem('user_id', registerUser.user.uid);
             yield put(registerUserSuccess(registerUser));
-            history.push('/')
+            history.push('/app')
         } else {
             console.log('register failed :', registerUser.message)
         }
