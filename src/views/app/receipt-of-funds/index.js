@@ -1553,11 +1553,7 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody
-              style={{
-                maxHeight: '50vh',
-                overflow: "auto"
-              }}>
+            <ModalBody>
 
               <ReactTable
                 minRows={0}
@@ -1604,7 +1600,8 @@ class ReceiptOfFunds extends Component {
                 showPaginationBottom={false}
                 pageSizeOptions={[5, 10, 20, 25, 50, 100]}
                 style={{
-                  height: "100%" // This will force the table body to overflow and scroll, since there is not enough room
+                  maxHeight: '50vh',
+                  overflow: "auto"
                 }}
               />
 
