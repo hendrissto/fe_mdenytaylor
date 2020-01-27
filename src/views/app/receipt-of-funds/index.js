@@ -832,7 +832,8 @@ class ReceiptOfFunds extends Component {
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
-  dataTableCODSellerDetail(osName) {
+  dataTableCODSellerDetail(props) {
+    const osName = props.osName;
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
@@ -1565,6 +1566,20 @@ class ReceiptOfFunds extends Component {
                   {
                     Header: "Nama Seller",
                     accessor: "osName",
+                    Cell: props => (
+                      <Button
+                      color="link"
+                      onClick={() => this.dataTableCODSellerDetail(props.original)}
+                      className="text-primary hover"
+                      style={{
+                        textAlign: "center",
+                        marginLeft: "-15px",
+                        marginTop: "-14px"
+                      }}
+                      >
+                        {props.value}
+                      </Button>
+                    )
                   },
                   {
                     Header: "Jumlah Paket",
