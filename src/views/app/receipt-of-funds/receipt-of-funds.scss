@@ -2,13 +2,7 @@
   color: blue;
 }
 
-.modal-large {
-  margin-left: 110px;
-}
 
-.content-large {
-  width: 85vw;
-}
 
 // .rt-thead {
 //   position: sticky;
@@ -28,3 +22,37 @@
 //   z-index: 1;
 //   background-color: white;
 // }
+
+.p-datatable * {
+  border-radius: 6px !important;
+}
+  
+.p-datatable-thead * {
+  padding: 20px !important;
+}
+
+@media only screen and (max-width: 600px) {
+  .p-datatable * {
+    border : 0px !important;
+    width: 300px !important;
+    // text-align: center !important;
+    // padding: 10px !important;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .p-datatable * {
+    border : 0px !important;
+    text-align: center !important;
+    border-right: 1px !important;
+    // padding: 10px !important;
+  }
+
+  .modal-large {
+    margin-left: 110px;
+  }
+
+  .content-large {
+    width: 85vw;
+  }
+}

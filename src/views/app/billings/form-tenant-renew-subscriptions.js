@@ -26,6 +26,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import Spinner from "../../../containers/pages/Spinner";
 import "./style.scss";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 const MySwal = withReactContent(Swal);
 
 export default class FormTenantRenewSubscription extends Component {
@@ -33,7 +34,7 @@ export default class FormTenantRenewSubscription extends Component {
     super(props);
 
     const today = new Date();
-
+    this._moneyFormat = new MoneyFormat();
     this.billingRest = new BillingRestService();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
@@ -156,6 +157,56 @@ export default class FormTenantRenewSubscription extends Component {
         </h3>
       );
     }
+  }
+
+  
+  _renderInfo(props) {
+    return (
+      <>
+        <div className="col-md-5 col-sm-12">
+          <form>
+            <div className="form-group row">
+              <label htmlFor="invoiceNumber" className="col-sm-4 col-form-label">Invoice Number</label>
+              <div className="col-sm-8">
+                <InputText
+                  name="invoiceNumber"
+                  value={props.values.invoiceNumber}
+                  onChange={props.handleChange}
+                  placeholder="- Auto -"
+                  style={{
+                    width: 204
+                  }}
+                />
+              </div>
+            </div>
+            <div className="form-group row">
+              <label htmlFor="paymentMethod" className="col-sm-4 col-form-label">Payment Method</label>
+              <div className="col-sm-8">
+                <Dropdown
+                  value={props.values.paymentMethod}
+                  options={
+                    this.state.paymentMethod
+                  }
+                  onChange={props.handleChange}
+                  placeholder="Select a Method"
+                  name="paymentMethod"
+                  optionLabel="paymentMethod"
+                  style={{
+                    width: 204
+                  }}
+                />
+              </div>
+            </div>
+            <div className="form-group row">
+              <label htmlFor="upgradeTo" className="col-sm-4 col-form-label">Upgrade To</label>
+              <div className="col-sm-8">
+                {this._renderPackage(props)}
+              </div>
+            </div>
+          </form>
+        </div>
+      </>
+    )
   }
 
   _renderPackage(props) {
@@ -316,17 +367,17 @@ export default class FormTenantRenewSubscription extends Component {
               />
             </td>
             <td>
-              {props.values.package.length === 0 ||
+            {props.values.package.length === 0 ||
               props.values.billingCycle === undefined
                 ? "-"
                 : props.values.billingCycle.code === "monthlyPrice"
-                ? props.values.package.monthlyPrice
+                ? this._moneyFormat.numberFormat(props.values.package.monthlyPrice)
                 : props.values.billingCycle.code === "quaterlyPrice"
-                ? props.values.package.quaterlyPrice
+                ? this._moneyFormat.numberFormat(props.values.package.quaterlyPrice)
                 : props.values.billingCycle.code === "semesterlyPrice"
-                ? props.values.package.semesterlyPrice
+                ? this._moneyFormat.numberFormat(props.values.package.semesterlyPrice)
                 : props.values.billingCycle.code === "yearlyPrice"
-                ? props.values.package.yearlyPrice
+                ? this._moneyFormat.numberFormat(props.values.package.yearlyPrice)
                 : "Wrong Value"}
             </td>
             <td>
@@ -384,7 +435,7 @@ export default class FormTenantRenewSubscription extends Component {
                 />
               </Row>
             </td>
-            <td>{props.values.prices}</td>
+            <td>{this._moneyFormat.numberFormat(props.values.prices)}</td>
           </tr>
         </tbody>
       </table>
@@ -421,287 +472,122 @@ export default class FormTenantRenewSubscription extends Component {
       props.values.total = props.values.prices;
     }
     return (
-      <div
-        style={{
-          width: "100%"
-        }}
-      >
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
-                Subtotal
-              </span>
-            </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
-              {props.values.prices}
-            </Col>
-          </Row>
-        </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 15
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
-                Discount
-              </span>
-            </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                width: 500
-              }}
-            >
-              <Row>
-                <ButtonDropdown
-                  isOpen={this.state.dropdownOpenAll}
-                  toggle={this.toggleAll}
-                >
-                  <DropdownToggle
-                    caret
-                    style={{
-                      borderRadius: 0,
-                      backgroundColor: "#848484",
-                      border: 0,
-                      width: 60
-                    }}
-                  >
-                    {this.state.discountAll}
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    <DropdownItem
-                      onClick={() => {
-                        this.setState({ discountAll: "Rp." });
-                        props.values.discountTotalAmount = 0;
-                        props.values.discountTotalPercent = 0;
-                        props.values.discountTypeAll = "Rp.";
-                      }}
-                    >
-                      Rp.
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        this.setState({ discountAll: "%" });
-                        props.values.discountTotalAmount = 0;
-                        props.values.discountTotalPercent = 0;
-                        props.values.discountTypeAll = "%";
-                      }}
-                    >
-                      %
-                    </DropdownItem>
-                  </DropdownMenu>
-                </ButtonDropdown>
-                <InputText
-                  name={
-                    props.values.discountTypeAll === "Rp."
-                      ? "discountTotalAmount"
-                      : "discountTotalPercent"
-                  }
-                  onChange={props.handleChange}
-                  value={
-                    props.values.discountTypeAll === "Rp."
-                      ? props.values.discountTotalAmount
-                      : props.values.discountTotalPercent
-                  }
-                  style={{
-                    textAlign: "right"
+      <>
+      <form>
+          <div className="form-group">
+            <label htmlFor="exampleInputEmail1"><strong>Subtotal</strong></label> <br />
+            {this._moneyFormat.numberFormat(props.values.prices)}
+          </div>
+          <div className="form-group">
+            <label htmlFor="exampleInputPassword1"><strong>Discount</strong></label> <br/>
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+              <ButtonDropdown isOpen={this.state.dropdownOpenAll} toggle={this.toggleAll} >
+              <DropdownToggle caret style={{
+                  borderRadius: 0,
+                  backgroundColor: "#848484",
+                  border: 0,
+                  width: 60
+                }}>
+                {this.state.discountAll}
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem
+                  onClick={() => {
+                    this.setState({ discountAll: "Rp." });
+                    props.values.discountTotalAmount = 0;
+                    props.values.discountTotalPercent = 0;
+                    props.values.discountTypeAll = "Rp.";
                   }}
-                />
-              </Row>
-            </Col>
-          </Row>
-        </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30
-                }}
-              >
-                Tax
-              </span>
-            </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
+                >
+                  Rp.
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    this.setState({ discountAll: "%" });
+                    props.values.discountTotalAmount = 0;
+                    props.values.discountTotalPercent = 0;
+                    props.values.discountTypeAll = "%";
+                  }}
+                >
+                  %
+                </DropdownItem>
+              </DropdownMenu>
+            </ButtonDropdown>
+              </div>
               <InputText
-                style={{
-                  width: "45px",
-                  height: "35px",
-                  borderRadius: 5,
-                  textAlign: "right"
-                }}
+              className="form-control"
+              name={
+                props.values.discountTypeAll === "Rp."
+                  ? "discountTotalAmount"
+                  : "discountTotalPercent"
+              }
+              onChange={props.handleChange}
+              value={
+                props.values.discountTypeAll === "Rp."
+                  ? props.values.discountTotalAmount
+                  : props.values.discountTotalPercent
+              }
+              style={{ textAlign: "left" }}
+            />
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="exampleInputEmail1"><strong>Tax</strong></label> <br />
+            <div className="input-group mb-3">
+              <InputText
                 keyfilter="pint"
                 value={props.values.taxRate}
+                placeholder="0"
                 onChange={props.handleChange}
                 name="taxRate"
-              />
-              <span style={{ fontSize: "20px", marginLeft: "5px" }}>%</span>
-            </Col>
-          </Row>
-        </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
+                className="form-control"
                 style={{
-                  marginLeft: 30
-                }}
-              >
-                Adjustment
-              </span>
-            </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
-              <InputText
-                name="adjustmentAmount"
-                value={props.values.adjustmentAmount}
-                onChange={props.handleChange}
-                style={{
-                  textAlign: "right"
+                  textAlign: 'right'
                 }}
               />
-            </Col>
-          </Row>
-        </div>
-        <div
-          className="d-flex flex-row-reverse bd-highlight"
-          style={{ marginRight: 85 }}
-        >
-          <Row
-            style={{
-              width: 420
-            }}
-          >
-            <Col
-              md="5"
-              style={{
-                marginTop: 5
-              }}
-            >
-              <span
-                style={{
-                  marginLeft: 30,
-                  fontSize: 20,
-                  color: "#848484"
-                }}
-              >
-                Total
-              </span>
-            </Col>
-            <Col
-              style={{
-                marginTop: 5,
-                textAlign: "right"
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 20,
-                  color: "#848484"
-                }}
-              >
-                {props.values.total}
-              </span>
-            </Col>
-          </Row>
-        </div>
-        <div className="d-flex flex-row-reverse bd-highlight">
-          <Row
-            style={{
-              marginRight: 80
-            }}
-          >
-            <Button
-              style={{
-                borderRadius: "5px",
-                marginRight: "10px",
-                width: "110px"
-              }}
-              onClick={() => {
-                this.setState({ redirect: true });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              style={{ borderRadius: "5px", width: "110px" }}
-              onClick={props.handleSubmit}
-            >
-              Save
-            </Button>
-          </Row>
-        </div>
-      </div>
-    );
+              <div className="input-group-append">
+                <span className="input-group-text" id="basic-addon2">%</span>
+              </div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="exampleInputEmail1"><strong>Adjustment</strong></label> <br />
+            <InputText
+              name="adjustmentAmount"
+              value={props.values.adjustmentAmount}
+              onChange={props.handleChange}
+              style={{ textAlign: "right" }}
+              className="form-control"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="exampleInputEmail1"><strong>Total</strong></label> <br />
+            <span style={{ fontSize: 20, color: "#848484" }} >
+              {this._moneyFormat.numberFormat(props.values.total)}
+            </span>
+          </div>
+          <Button
+           style={{
+             borderRadius: "5px",
+             marginRight: "10px",
+             width: "110px"
+           }}
+           onClick={() => {
+             this.setState({ redirect: true });
+           }}
+         >
+           Cancel
+         </Button>
+         <Button
+           style={{ borderRadius: "5px", width: "110px" }}
+           onClick={props.handleSubmit}
+         >
+           Save
+         </Button>
+        </form>
+      </>
+    )
   }
 
   validateError(props) {
@@ -864,110 +750,21 @@ export default class FormTenantRenewSubscription extends Component {
                             width: "100%"
                           }}
                         >
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              invoice Number
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col>
-                              <InputText
-                                name="invoiceNumber"
-                                value={props.values.invoiceNumber}
-                                onChange={props.handleChange}
-                                style={{
-                                  width: 204
-                                }}
-                                placeholder="- Auto -"
-                              />
-                            </Col>
-                          </Row>
-
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              className="col-12 col-md-3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              Paymend Method
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col>
-                              <Dropdown
-                                value={props.values.paymentMethod}
-                                options={this.state.paymentMethod}
-                                onChange={props.handleChange}
-                                placeholder="Select a Method"
-                                name="paymentMethod"
-                                optionLabel="paymentMethod"
-                                style={{
-                                  width: 204
-                                }}
-                              />
-                            </Col>
-                          </Row>
-                          <Row
-                            style={{
-                              marginTop: 10,
-                              width: "50%"
-                            }}
-                          >
-                            <Col
-                              xs="3"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              Upgrade to
-                            </Col>
-                            <Col
-                              xs="1"
-                              style={{
-                                marginTop: 5
-                              }}
-                            >
-                              :
-                            </Col>
-                            <Col>{this._renderPackage(props)}</Col>
-                          </Row>
-                          <Row>
-                            <Col className="responsive">
-                              {this._renderTable(props)}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col>{this._renderPrice(props)}</Col>
-                          </Row>
+                          <div className="container">
+                            {this._renderInfo(props)}
+                            <Row>
+                              <Col className="responsive">
+                                {this._renderTable(props)}
+                              </Col>
+                            </Row>
+                            <div className="row">
+                              <div className="col col-md-12 col-sm-12 d-flex flex-row-reverse" style={{
+                                marginTop: 20
+                              }}>
+                                {this._renderPrice(props)}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </Formik>
