@@ -8,31 +8,14 @@ const moneyFormat = new MoneyFormat();
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 const fileExt = ".xlsx";
-var wscols = [
-  { wch: 10 }, // line count
-  { wch: 13 }, // cod value
-  { wch: 15 }, // good value
-  { wch: 15 }, // shipping charge
-  { wch: 14 }, // discount
-  { wch: 12 }, // tax
-  { wch: 12 }, // adjusment
-  { wch: 15 }, // total
-  { wch: 15 }, // subtotal amount
-  { wch: 15 }, // total amount
-  { wch: 15 }, // cod fee value
-  { wch: 15 }, // receive amount
-  { wch: 50 }, // id
-  { wch: 15 }, // courier channel
-  { wch: 15 }, // doc number
-  { wch: 15 }, // upload date
-  { wch: 15 }, // upload by
-];
 
 export default class ExportReceiptofFunds extends React.Component {
-  exportToCSV(csvData, fileName) {
-    this.normalizeLine(csvData);
+  exportToCSV(csvData, fileName, allData) {
+    if(allData) {
+      this.normalizeLine(csvData);
+    }
     const ws = XLSX.utils.json_to_sheet(csvData);
-    ws["!cols"] = wscols;
+    // ws["!cols"] = wscols;
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
