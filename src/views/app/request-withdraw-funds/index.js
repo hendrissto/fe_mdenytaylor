@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import ReactTable from "react-table";
+// import ReactTable from "react-table";
 import { Redirect } from "react-router-dom";
 import {
   Row,
@@ -38,6 +38,9 @@ import Spinner from "../../../containers/pages/Spinner";
 import NumberFormat from 'react-number-format';
 import ExportWithdrawFunds from "../../../core/export/ExportWithdrawFunds";
 
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
@@ -58,6 +61,7 @@ class WithdrawFunds extends Component {
     this.submitData = this.submitData.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    this.buttonUpload = this.buttonUpload.bind(this);
 
     this.state = {
       companyName: true,
@@ -536,6 +540,28 @@ class WithdrawFunds extends Component {
     });
   }
 
+  buttonUpload(rowData, column) {
+    return (
+      <div>
+        <Button
+          outline
+          color="success"
+          onClick={() => {
+            this.loadTenantBank(rowData.tenantId);
+            this.toggle();
+            this.setState({
+              oneData: rowData,
+              amount: rowData.balanceAmount
+            });
+          }}
+        >
+          <i className="iconsminds-upload mr-2 " />
+          Upload Bukti
+        </Button>
+      </div>
+    );
+  }
+
   render() {
     if (this.state.redirect === true) {
       return <Redirect to="/app/request-withdraw-funds/" />;
@@ -723,27 +749,42 @@ class WithdrawFunds extends Component {
                     </Button>
                   </div>
                 </div>
-                <ReactTable
-                  minRows={0}
-                  data={this.state.table.data}
-                  columns={this.dataTableColumns()}
-                  className="-striped"
-                  loading={this.state.table.loading}
-                  showPagination={false}
-                  showPaginationTop={false}
-                  showPaginationBottom={false}
-                  manual // this would indicate that server side pagination has been enabled
-                  onFetchData={(state, instance) => {
-                    const newState = { ...this.state.table };
 
-                    newState.pagination.currentPage = state.page;
-                    newState.pagination.pageSize = state.pageSize;
-                    newState.pagination.skipSize = state.pageSize * state.page;
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  <Column style={{width:'250px'}} field="companyName" header="Company" />
+                  <Column style={{width:'250px'}} field="companyEmail" header="Company Email" />
+                  <Column style={{width:'250px'}} field="fullName" header="Full Name" />
+                  <Column style={{width:'250px'}} field="username" header="Username" />
+                  <Column style={{width:'250px'}} field="userEmail" header="Email" />
+                  <Column style={{width:'250px'}} field="industry" header="Industri" />
+                  <Column style={{width:'250px'}} field="phone" header="Phone" />
+                  <Column style={{width:'250px'}} field="website" header="Website"  />
+                  <Column style={{width:'250px'}} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} header="Upload Bukti" body={this.buttonUpload}  />
+                </DataTable>
+                {/*
+                  <ReactTable
+                    minRows={0}
+                    data={this.state.table.data}
+                    columns={this.dataTableColumns()}
+                    className="-striped"
+                    loading={this.state.table.loading}
+                    showPagination={false}
+                    showPaginationTop={false}
+                    showPaginationBottom={false}
+                    manual // this would indicate that server side pagination has been enabled
+                    onFetchData={(state, instance) => {
+                      const newState = { ...this.state.table };
 
-                    this.setState({ newState });
-                    this.loadData();
-                  }}
-                />
+                      newState.pagination.currentPage = state.page;
+                      newState.pagination.pageSize = state.pageSize;
+                      newState.pagination.skipSize = state.pageSize * state.page;
+
+                      this.setState({ newState });
+                      this.loadData();
+                    }}
+                  />
+                */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
