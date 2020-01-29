@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import ReactTable from "react-table";
+// import ReactTable from "react-table";
 import {
   Row,
   Card,
@@ -17,6 +17,9 @@ import {
 } from "reactstrap";
 // import { Formik } from "formik";
 // import validate from "./validate";
+
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
@@ -56,7 +59,8 @@ class DebitCod extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-    
+    this.buttonUpload = this.buttonUpload.bind(this);
+
     this.state = {
       deliveryDate: true,
       sellerName: true,
@@ -377,6 +381,50 @@ class DebitCod extends Component {
     });
   }
 
+  buttonUpload(rowData, column) {
+    if (rowData.status !== "draft") {
+      return (
+        <div>
+          <Button
+            outline
+            color="info"
+            onClick={() => {
+              this.setState({ modal3: true });
+              this.setState({ oneData: rowData });
+            }}
+          >
+            <i className="simple-icon-paper-clip mr-2" />
+            Bukti Transfer
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Button
+            outline
+            color="success"
+            onClick={() => {
+              this.loadRelatedData(rowData.tenantId);
+              this.setState({ modal: true });
+              this.setState({
+                selectedBank: [],
+                image: null,
+                imageUrl: null,
+                loading: false,
+                oneData: rowData,
+                amount: rowData.amount
+              });
+            }}
+          >
+            <i className="iconsminds-upload mr-2 " />
+            Upload
+          </Button>
+        </div>
+      );
+    }
+  }
+
   render() {
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
@@ -513,6 +561,16 @@ class DebitCod extends Component {
                   </div>
                 </div>
 
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  <Column style={{width:'250px'}} field="deliveryDate" header="Permintaan Penarikan" />
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller" />
+                  <Column style={{width:'250px'}} field="amount" header="Jumlah Saldo Ditarik" />
+                  <Column style={{width:'250px'}} field="bankName" header="Ditarik ke Rekening" />
+                  <Column style={{width:'250px'}} field="bankDistrict" header="Cabang Bank" />
+                  <Column style={{width:'250px'}} field="status" header="Status" />
+                  <Column style={{width:'250px'}} header="Upload Bukti" body={this.buttonUpload}  />
+                </DataTable>
+                {/*
                 <ReactTable
                   minRows={0}
                   data={this.state.table.data}
@@ -534,6 +592,7 @@ class DebitCod extends Component {
                     this.loadData();
                   }}
                 />
+                 */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
