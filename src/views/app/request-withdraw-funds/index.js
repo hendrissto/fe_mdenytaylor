@@ -62,6 +62,8 @@ class WithdrawFunds extends Component {
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
     this.buttonUpload = this.buttonUpload.bind(this);
+    this.isAttachment = this.isAttachment.bind(this);
+    this.rmAttachment = this.rmAttachment.bind(this);
 
     this.state = {
       companyName: true,
@@ -107,6 +109,7 @@ class WithdrawFunds extends Component {
       image: null,
       loading: false,
       imageUrl: null,
+      attachments: [],
       redirect: false,
       errorData: "",
       totalData: 0,
@@ -177,8 +180,8 @@ class WithdrawFunds extends Component {
 
       this.setState({ table });
     }, err => {
-      if(err.response.status === 401){
-        this.setState({redirectLogin: true});
+      if (err.response.status === 401) {
+        this.setState({ redirectLogin: true });
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
@@ -193,15 +196,15 @@ class WithdrawFunds extends Component {
   }
 
   loadTenantBank(id) {
-    this.setState({loadingSubmit: true})
+    this.setState({ loadingSubmit: true })
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(
       response => {
         this.setState({ tenantBank: response.data });
       },
       err => {
-        this.setState({loadingSubmit: false});
-        if(err.response.status === 401 || err.response.status === 500){
-          this.setState({redirectLogin: true});
+        this.setState({ loadingSubmit: false });
+        if (err.response.status === 401 || err.response.status === 500) {
+          this.setState({ redirectLogin: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -364,6 +367,7 @@ class WithdrawFunds extends Component {
       selectedBank: [],
       imageUrl: null,
       image: null,
+      attachments: []
     })
     this.setState(prevState => ({
       modal: !prevState.modal
@@ -401,14 +405,22 @@ class WithdrawFunds extends Component {
     data.append("file", fileObj);
 
     this.pictureRestService.postPicture(data).subscribe(response => {
+      // Create a new array based on current state:
+      let attachments = [...this.state.attachments];
+
+      // Add item to it
+      attachments.push(response);
+
       this.setState({
         spinner: false,
         imageUrl: response.fileUrl,
         loading: true,
-        image: response
+        image: response,
+        attachments
       });
     });
   };
+
   button(cell, row) {
     if (row.status === "Berhasil") {
       return (
@@ -469,27 +481,27 @@ class WithdrawFunds extends Component {
   submitData() {
     if (this.validateError()) {
       // this.setState({ error: true });
-        MySwal.fire({
-          type: "error",
-          title: "Pastikan semua data telah diisi.",
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: "swal-height"
-        });
+      MySwal.fire({
+        type: "error",
+        title: "Pastikan semua data telah diisi.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
     } else {
       this.setState({ modal: false, loadingSubmit: true, errorData: "" });
-      
+
       let lines = {
-        fileId: this.state.isDraft === true ? undefined : this.state.image.id,
+        attachments: this.state.isDraft === true ? undefined : this.state.attachments,
         amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
         isDraft: this.state.isDraft
       };
-      
+
       this.requestWithdrawRest.postBallance(lines).subscribe(
         response => {
           this.setState({
@@ -509,7 +521,7 @@ class WithdrawFunds extends Component {
       );
     }
   }
-  
+
   exportData() {
     this.setState({ loading: true });
     const params = {
@@ -562,13 +574,52 @@ class WithdrawFunds extends Component {
     );
   }
 
+  rmAttachment(i) {
+    let attachments = [...this.state.attachments];
+    attachments.splice(i, 1);
+
+    this.setState({
+      attachments
+    });
+  }
+
+  isAttachment() {
+    const data = [];
+
+    const attachment = this.state.attachments;
+    if (attachment) {
+      for (let i = 0; i < attachment.length; i++) {
+        data.push(
+          <tr>
+            <td colSpan="1">
+              {i + 1} .
+            </td>
+            <td colSpan="3">
+              {attachment[i].customFileName}
+            </td>
+            <td colSpan="1">
+              <a href
+                className="text-danger"
+                style={{ 'cursor': 'pointer' }}
+                onClick={() => this.rmAttachment(i)}>
+                Hapus
+              </a>
+            </td>
+          </tr >
+        )
+      }
+    }
+
+    return data;
+  }
+
   render() {
     if (this.state.redirect === true) {
       return <Redirect to="/app/request-withdraw-funds/" />;
     }
 
-    if(this.state.redirectLogin === true) {
-      this.setState({redirectLogin: false});
+    if (this.state.redirectLogin === true) {
+      this.setState({ redirectLogin: false });
       return <Redirect to="/user/login" />;
 
     }
@@ -751,16 +802,16 @@ class WithdrawFunds extends Component {
                 </div>
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
-                  <Column style={{width:'250px'}} field="companyName" header="Company" />
-                  <Column style={{width:'250px'}} field="companyEmail" header="Company Email" />
-                  <Column style={{width:'250px'}} field="fullName" header="Full Name" />
-                  <Column style={{width:'250px'}} field="username" header="Username" />
-                  <Column style={{width:'250px'}} field="userEmail" header="Email" />
-                  <Column style={{width:'250px'}} field="industry" header="Industri" />
-                  <Column style={{width:'250px'}} field="phone" header="Phone" />
-                  <Column style={{width:'250px'}} field="website" header="Website"  />
-                  <Column style={{width:'250px'}} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat}  />
-                  <Column style={{width:'250px'}} header="Upload Bukti" body={this.buttonUpload}  />
+                  <Column style={{ width: '250px' }} field="companyName" header="Company" />
+                  <Column style={{ width: '250px' }} field="companyEmail" header="Company Email" />
+                  <Column style={{ width: '250px' }} field="fullName" header="Full Name" />
+                  <Column style={{ width: '250px' }} field="username" header="Username" />
+                  <Column style={{ width: '250px' }} field="userEmail" header="Email" />
+                  <Column style={{ width: '250px' }} field="industry" header="Industri" />
+                  <Column style={{ width: '250px' }} field="phone" header="Phone" />
+                  <Column style={{ width: '250px' }} field="website" header="Website" />
+                  <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
                 </DataTable>
                 {/*
                   <ReactTable
@@ -863,7 +914,7 @@ class WithdrawFunds extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange}/>
+                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
                     </td>
                   </tr>
                   <tr>
@@ -901,12 +952,7 @@ class WithdrawFunds extends Component {
                     />
                   )}
                   {this.state.loading && (
-                    <tr>
-                      <td colSpan="3">
-                        <img src={this.state.imageUrl} height="150" width="150" alt="'name'"
-                        />
-                      </td>
-                    </tr>
+                    this.isAttachment()
                   )}
                 </tbody>
               </Table>
