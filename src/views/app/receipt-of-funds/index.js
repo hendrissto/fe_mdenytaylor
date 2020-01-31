@@ -1,4 +1,3 @@
-import * as numeral from "numeral";
 import * as _ from "lodash";
 import {
   Row,
@@ -21,16 +20,10 @@ import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
 
 import React, { Component, Fragment } from "react";
-
-import ReactTable from "react-table";
-import "react-table/react-table.css";
-import withFixedColumns from "react-table-hoc-fixed-columns";
-import "react-table-hoc-fixed-columns/lib/styles.css";
 // import CsvParse from "@vtex/react-csv-parse";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DataTablePagination from "../../../components/DatatablePagination";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 
 import CODRestService from "../../../api/codRestService";
@@ -38,17 +31,20 @@ import RelatedDataRestService from "../../../api/relatedDataRestService";
 import * as moment from "moment";
 import ExportReceiptofFunds from "../../../core/export/ExportReceiptofFunds";
 
-import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import "react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 import "./receipt-of-funds.scss";
 
 import { Dropdown } from "primereact/dropdown";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { ColumnGroup } from 'primereact/columngroup';
+import { Row as RowPrime } from 'primereact/row';
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
-const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
@@ -67,7 +63,10 @@ class ReceiptOfFunds extends Component {
     this.loadDetailData = this.loadDetailData.bind(this);
     this.toggle = this.toggle.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-
+    this.actionTemplate = this.actionTemplate.bind(this);
+    this.loadDetailSellerFromBE = this.loadDetailSellerFromBE.bind(this);
+    this.loadDetailSellerFromExcel = this.loadDetailSellerFromExcel.bind(this);
+    this.moneyFormat.currencyFormat = this.moneyFormat.currencyFormat.bind(this);
     this.state = {
       uploadDateShow: true,
       idFileShow: true,
@@ -196,84 +195,7 @@ class ReceiptOfFunds extends Component {
   }
 
   sumData = (tableData, type) => {
-    switch (type) {
-      case "totalAmount":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { totalAmount }) => (total += parseInt(totalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      case "codFeeRp":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { codFeeRp }) => (total += parseInt(codFeeRp)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      case "totalReceive":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { totalReceive }) => (total += parseInt(totalReceive)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      case "totAmountCodFee":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { totAmountCodFee }) =>
-                  (total += parseInt(totAmountCodFee)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      case "codFeeValue":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { codFeeValue }) => (total += parseInt(codFeeValue)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      case "subTotalAmount":
-        return (
-          <p>
-            Rp{" "}
-            {numeral(
-              tableData.reduce(
-                (total, { subTotalAmount }) =>
-                  (total += parseInt(subTotalAmount)),
-                0
-              )
-            ).format("0,0")}
-          </p>
-        );
-      default:
-        return <p>Wrong value.</p>;
-    }
+    return this.moneyFormat.numberFormat(_.sumBy(tableData, type));
   };
 
   componentDidMount() {
@@ -819,11 +741,14 @@ class ReceiptOfFunds extends Component {
     ];
   }
 
-  dataTableCODSeller(osName) {
+  dataTableCODSeller(props) {
+    const osName = props.osName;
     let i = _.findKey(this.state.data, ["osName", osName]);
     let data = this.state.data[i];
 
     for (let j = 0; j < data.lines.length; j++) {
+      data.lines[j].codFee *= 100;
+      data.lines[j].discountShippingChargePercentage *= 100;
       Math.round(data.lines[j].codFeeRp);
       Math.round(data.lines[j].totAmountCodFee);
     }
@@ -1102,6 +1027,15 @@ class ReceiptOfFunds extends Component {
     this.codRest.postCOD(this.state.dataExcel).subscribe(
       response => {
         this.setState({ resiModal: false, modal: false, loading: false });
+        MySwal.fire({
+          type: "success",
+          title: "Sukses upload",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
         this.loadData();
       },
       error => {
@@ -1157,8 +1091,41 @@ class ReceiptOfFunds extends Component {
     return dataWithObject;
   }
 
-  currencyFormat(cell, row) {
-    return `Rp. ${numeral(cell).format("0,0")}`;
+  currencyFormat(rowData, column) {
+    switch (column.field) {
+      case 'totalAmount':
+        return this.moneyFormat.numberFormat(rowData.totalAmount);
+      case 'codFeeRp':
+        return this.moneyFormat.numberFormat(rowData.codFeeRp);
+      case 'totalReceive':
+        return this.moneyFormat.numberFormat(rowData.totalReceive);
+      case 'goodsValue':
+        return this.moneyFormat.numberFormat(rowData.goodsValue);
+      case 'shippingCharge':
+        return this.moneyFormat.numberFormat(rowData.shippingCharge);
+      case 'discount':
+        return this.moneyFormat.numberFormat(rowData.discount);
+      case 'tax':
+        return this.moneyFormat.numberFormat(rowData.tax);
+      case 'adjustment':
+        return this.moneyFormat.numberFormat(rowData.adjustment);
+      case 'total':
+        return this.moneyFormat.numberFormat(rowData.total);
+      case 'subTotalAmount':
+        return this.moneyFormat.numberFormat(rowData.subTotalAmount);
+      case 'totalShippingCharge':
+        return this.moneyFormat.numberFormat(rowData.totalShippingCharge);
+      case 'totAmountCodFee':
+        return this.moneyFormat.numberFormat(rowData.totAmountCodFee);
+      case 'goodValue':
+        return this.moneyFormat.numberFormat(rowData.goodValue);
+      case 'codFeeValue':
+        return this.moneyFormat.numberFormat(rowData.codFeeValue);
+      case 'receiveAmount':
+        return this.moneyFormat.numberFormat(rowData.receiveAmount);
+      default:
+        return 0;
+    }
   }
 
   button(cell, row) {
@@ -1313,12 +1280,123 @@ class ReceiptOfFunds extends Component {
     });
   }
 
+  actionTemplate(rowData, column) {
+    return <div>
+      <Button
+        type="button"
+        icon="pi pi-search"
+        onClick={() => this.loadDetailData(rowData.id)}
+        className="p-button-success"
+      >
+        Detail
+        </Button>
+    </div>;
+  }
+
+  changeDataFormat(rowData, column) {
+    return moment(rowData.uploadDate).format("DD-MM-YYYY HH:mm") || '-';
+  }
+
+  loadDetailSellerFromExcel(rowData, column) {
+    return (
+      <Button
+        color="link"
+        onClick={() => this.dataTableCODSeller(rowData)}
+        className="text-primary hover"
+        style={{
+          textAlign: "center",
+          marginLeft: "-15px",
+          marginTop: "-14px"
+        }}
+      >
+        {rowData.osName}
+      </Button>
+    );
+  }
+
+  loadDetailSellerFromBE(rowData, column) {
+    return (
+      <Button
+        color="link"
+        onClick={() => this.dataTableCODSellerDetail(rowData)}
+        className="text-primary hover"
+        style={{
+          textAlign: "center",
+          marginLeft: "-15px",
+          marginTop: "-14px"
+        }}
+      >
+        {rowData.osName}
+      </Button>
+    )
+  }
+
   render() {
     const option = this.state.relatedData.courierChannel;
     if (this.state.redirect === true) {
       this.setState({ redirect: false });
       return <Redirect to="/user/login" />;
     }
+
+    const footerDetailFirst = (
+      <ColumnGroup>
+        <RowPrime>
+          <Column footer="Total" />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.data, "totalAmount")} />
+          <Column footer={this.sumData(this.state.data, "codFeeRp")} />
+          <Column footer={this.sumData(this.state.data, "totalReceive")} />
+        </RowPrime>
+      </ColumnGroup>
+    )
+
+    const footerDetailSecond = (
+      <ColumnGroup>
+        <RowPrime>
+          <Column footer="Total" />
+          <Column footer=" " />
+          <Column footer=" " />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "goodValue")} />
+          <Column footer={this.sumData(this.state.oneData, "shippingCharge")} />
+          <Column footer={this.sumData(this.state.oneData, "discount")} />
+          <Column footer={this.sumData(this.state.oneData, "tax")} />
+          <Column footer={this.sumData(this.state.oneData, "adjustment")} />
+          <Column footer={this.sumData(this.state.oneData, "total")} />
+          <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
+          <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "codFeeValue")} />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "totalShippingCharge")} />
+          <Column footer={this.sumData(this.state.oneData, "receiveAmount")} />
+        </RowPrime>
+      </ColumnGroup>
+    )
+
+    const footerDetailThird = (
+      <ColumnGroup>
+        <RowPrime>
+          <Column footer="Total" />
+          <Column footer=" " />
+          <Column footer=" " />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "goodsValue")} />
+          <Column footer={this.sumData(this.state.oneData, "shippingCharge")} />
+          <Column footer={this.sumData(this.state.oneData, "discount")} />
+          <Column footer={this.sumData(this.state.oneData, "tax")} />
+          <Column footer={this.sumData(this.state.oneData, "adjustment")} />
+          <Column footer={this.sumData(this.state.oneData, "total")} />
+          <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
+          <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "codFeeRp")} />
+          <Column footer=" " />
+          <Column footer={this.sumData(this.state.oneData, "totalShippingCharge")} />
+          <Column footer={this.sumData(this.state.oneData, "totAmountCodFee")} />
+        </RowPrime>
+      </ColumnGroup>
+    )
 
     return (
       <Fragment>
@@ -1454,28 +1532,13 @@ class ReceiptOfFunds extends Component {
 
                 </div>
 
-                <ReactTable
-                  minRows={0}
-                  data={this.state.table.data}
-                  columns={this.dataTable()}
-                  className="-striped"
-                  loading={this.state.table.loading}
-                  showPagination={false}
-                  showPaginationTop={false}
-                  showPaginationBottom={false}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                  manual // this would indicate that server side pagination has been enabled
-                  onFetchData={(state, instance) => {
-                    const newState = { ...this.state.table };
 
-                    newState.pagination.currentPage = state.page;
-                    newState.pagination.pageSize = state.pageSize;
-                    newState.pagination.skipSize = state.pageSize * state.page;
-
-                    this.setState({ newState });
-                    this.loadData();
-                  }}
-                />
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  <Column field="uploadDate" body={this.changeDataFormat} header="Upload Date" />
+                  <Column field="documentNumber" header="ID File" />
+                  <Column field="uploadBy" header="Upload By" />
+                  <Column header="Detail" body={this.actionTemplate} />
+                </DataTable>
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
@@ -1554,119 +1617,13 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-
-              <ReactTable
-                minRows={0}
-                data={this.state.data}
-                columns={[
-                  {
-                    Header: "Nama Seller",
-                    accessor: "osName",
-                    Cell: props => (
-                      <Button
-                      color="link"
-                      onClick={() => this.dataTableCODSellerDetail(props.original)}
-                      className="text-primary hover"
-                      style={{
-                        textAlign: "center",
-                        marginLeft: "-15px",
-                        marginTop: "-14px"
-                      }}
-                      >
-                        {props.value}
-                      </Button>
-                    )
-                  },
-                  {
-                    Header: "Jumlah Paket",
-                    accessor: "package",
-                  },
-                  {
-                    Header: "Total",
-                    accessor: "totalAmount",
-                  },
-                  {
-                    Header: "Fee COD",
-                    accessor: "codFeeRp",
-                  },
-                  {
-                    Header: "Total Diterima",
-                    accessor: "totalReceive",
-                  }
-                ]}
-                className="-striped"
-                showPagination={false}
-                showPaginationTop={false}
-                showPaginationBottom={false}
-                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                style={{
-                  maxHeight: '50vh',
-                  overflow: "auto"
-                }}
-              />
-
-              <table className="w-100">
-                <thead>
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                </thead>
-                <tfoot>
-                  <tr>
-                    <td width="40%">
-                      <span className="pl-1 font-weight-bold">Total</span>
-                    </td>
-                    <td width="20%">
-                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalAmount")}</span>
-                    </td>
-                    <td width="20%">
-                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "codFeeRp")}</span>
-                    </td>
-                    <td width="20%">
-                      <span className="pl-1 font-weight-bold">{this.sumData(this.state.data, "totalReceive")}</span>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-
-              {/* <BootstrapTable
-                data={this.state.data}
-                footerData={this.state.footerData}
-                footer
-              >
-                <TableHeaderColumn
-                  dataField="osName"
-                  isKey
-                  dataFormat={this.buttonResiCodDetail.bind(this)}
-                >
-                  Nama Seller
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="package">
-                  Jumlah Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="codFeeRp"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Fee COD
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalReceive"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total Diterima
-                </TableHeaderColumn>
-              </BootstrapTable> */}
+              <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
+                <Column body={this.loadDetailSellerFromBE} header="Nama Seller" />
+                <Column field="package" header="Jumlah Paket" />
+                <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
+                <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
+                <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+              </DataTable>
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.setState({ resiModalDetail: false })}>
@@ -1682,45 +1639,14 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody
-              style={{
-                maxHeight: '50vh',
-                overflow: "auto"
-              }}>
-              <BootstrapTable
-                data={this.state.data}
-                footerData={this.state.footerData}
-                footer
-              >
-                <TableHeaderColumn
-                  dataField="osName"
-                  isKey
-                  dataFormat={this.buttonResiCod.bind(this)}
-                >
-                  Nama Seller
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="package">
-                  Jumlah Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Nilai Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="codFeeRp"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Fee COD
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalReceive"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total Diterima
-                </TableHeaderColumn>
-              </BootstrapTable>
+            <ModalBody>
+              <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
+                <Column body={this.loadDetailSellerFromExcel} header="Nama Seller" />
+                <Column field="package" header="Jumlah Paket" />
+                <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
+                <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
+                <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+              </DataTable>
             </ModalBody>
             <ModalFooter>
               <Button onClick={() => this.setState({ resiModal: false })}>
@@ -1730,55 +1656,6 @@ class ReceiptOfFunds extends Component {
             </ModalFooter>
           </Modal>
         )}
-
-        {/*<Modal isOpen={this.state.resiModal} size="lg">
-            <ModalHeader>
-              <IntlMessages id="modal.receiptDataCOD" />
-            </ModalHeader>
-            <ModalBody>
-              <BootstrapTable
-                data={this.state.data}
-                footerData={this.state.footerData}
-                footer
-              >
-                <TableHeaderColumn
-                  dataField="osName"
-                  isKey
-                  dataFormat={this.buttonResiCod.bind(this)}
-                >
-                  Nama Seller
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="package">
-                  Jumlah Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalAmount"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Nilai Paket
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="codFeeRp"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Fee COD
-                </TableHeaderColumn>
-                <TableHeaderColumn
-                  dataField="totalReceive"
-                  dataFormat={this.currencyFormat.bind(this)}
-                >
-                  Total Diterima
-                </TableHeaderColumn>
-              </BootstrapTable>
-            </ModalBody>
-            <ModalFooter>
-              <Button onClick={() => this.setState({ resiModal: false })}>
-                Back
-              </Button>
-              <Button onClick={() => this.submitData()}>Submit</Button>
-            </ModalFooter>
-          </Modal>
-           */}
 
         {/* MODAL DATA RESI SELLER */}
         {this.state.resiModalSeller && (
@@ -1791,38 +1668,26 @@ class ReceiptOfFunds extends Component {
               <ModalHeader>
                 <IntlMessages id="modal.receiptDataCOD" />
               </ModalHeader>
-              <ModalBody
-                style={{
-                  maxHeight: '50vh',
-                  overflow: "auto"
-                }}
-              >
-                <ReactTableFixedColumn
-                  minRows={0}
-                  page={this.state.table.pagination.currentPage}
-                  PaginationComponent={DataTablePagination}
-                  data={this.state.oneData}
-                  pages={this.state.table.pagination.totalPages}
-                  columns={this.dataTableDetail()}
-                  defaultPageSize={this.state.table.pagination.pageSize}
-                  className="-striped"
-                  loading={this.state.table.loading}
-                  showPagination={false}
-                  showPaginationTop={false}
-                  showPaginationBottom={false}
-                  pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                  manual // this would indicate that server side pagination has been enabled
-                  onFetchData={(state, instance) => {
-                    const newState = { ...this.state.table };
-
-                    newState.pagination.currentPage = state.page;
-                    newState.pagination.pageSize = state.pageSize;
-                    newState.pagination.skipSize = state.pageSize * state.page;
-
-                    this.setState({ newState });
-                    this.loadData();
-                  }}
-                />
+              <ModalBody>
+                <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailThird} scrollable={true} scrollHeight="300px">
+                  <Column style={{ width: '250px' }} field="airwaybill" header="No Resi" />
+                  <Column style={{ width: '250px' }} field="deliveredNotes" header="Delivery Notes" />
+                  <Column style={{ width: '250px' }} field="destination" header="Destination" />
+                  <Column style={{ width: '250px' }} field="notes" header="Note" />
+                  <Column style={{ width: '250px' }} field="goodsValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="discount" header="Discount" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="tax" header="Tax" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="adjustment" header="Adjustment" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="codFee" header="Fee COD (%)" />
+                  <Column style={{ width: '250px' }} field="codFeeRp" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" />
+                  <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+                </DataTable>
               </ModalBody>
 
               <ModalFooter>
@@ -1842,40 +1707,26 @@ class ReceiptOfFunds extends Component {
             <ModalHeader>
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
-            <ModalBody
-              style={{
-                maxHeight: '50vh',
-                overflow: "auto"
-              }}>
-              <ReactTable
-                minRows={0}
-                page={this.state.table.pagination.currentPage}
-                PaginationComponent={DataTablePagination}
-                data={this.state.oneData}
-                pages={this.state.table.pagination.totalPages}
-                columns={this.dataTableDetailFromBackend()}
-                defaultPageSize={this.state.table.pagination.pageSize}
-                className="-striped"
-                loading={this.state.table.loading}
-                showPagination={false}
-                showPaginationTop={false}
-                showPaginationBottom={false}
-                pageSizeOptions={[5, 10, 20, 25, 50, 100]}
-                manual // this would indicate that server side pagination has been enabled
-                onFetchData={(state, instance) => {
-                  const newState = { ...this.state.table };
-
-                  newState.pagination.currentPage = state.page;
-                  newState.pagination.pageSize = state.pageSize;
-                  newState.pagination.skipSize = state.pageSize * state.page;
-
-                  this.setState({ newState });
-                  this.loadData();
-                }}
-                style={{
-                  overflow: "inherit !important"
-                }}
-              />
+            <ModalBody>
+              <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailSecond} scrollable={true} scrollHeight="300px">
+                <Column style={{ width: '250px' }} field="airwaybillNumber" header="No Resi" />
+                <Column style={{ width: '250px' }} field="deliveryNotes" header="Delivery Notes" />
+                <Column style={{ width: '250px' }} field="destination" header="Destination" />
+                <Column style={{ width: '250px' }} field="notes" header="Note" />
+                <Column style={{ width: '250px' }} field="goodValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="discount" header="Discount" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="tax" header="Tax" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="adjustment" header="Adjustment" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="codFeePercentage" header="Fee COD (%)" />
+                <Column style={{ width: '250px' }} field="codFeeValue" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" />
+                <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="receiveAmount" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+              </DataTable>
             </ModalBody>
 
             <ModalFooter>

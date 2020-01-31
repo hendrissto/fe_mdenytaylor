@@ -56,7 +56,10 @@ class DebitCod extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
-    
+    this.isAttachment = this.isAttachment.bind(this);
+    this.showAttachment = this.showAttachment.bind(this);
+    this.rmAttachment = this.rmAttachment.bind(this);
+
     this.state = {
       deliveryDate: true,
       sellerName: true,
@@ -76,6 +79,7 @@ class DebitCod extends Component {
       amount: null,
       image: null,
       imageUrl: null,
+      attachments: [],
       table: {
         loading: true,
         data: [],
@@ -122,7 +126,8 @@ class DebitCod extends Component {
       selectedBank: [],
       imageUrl: null,
       image: null,
-      modal: !this.state.modal
+      modal: !this.state.modal,
+      attachments: []
     });
   }
 
@@ -168,8 +173,8 @@ class DebitCod extends Component {
       table.loading = false;
       this.setState({ table });
     }, err => {
-      if(err.response.status === 401){
-        this.setState({redirect: true});
+      if (err.response.status === 401) {
+        this.setState({ redirect: true });
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
@@ -291,11 +296,18 @@ class DebitCod extends Component {
     data.append("file", fileObj);
 
     this.pictureRestService.postPicture(data).subscribe(response => {
+      // Create a new array based on current state:
+      let attachments = [...this.state.attachments];
+
+      // Add item to it
+      attachments.push(response);
+
       this.setState({
         spinner: false,
         imageUrl: response.fileUrl,
         loading: true,
-        image: response
+        image: response,
+        attachments
       });
     });
   };
@@ -375,6 +387,70 @@ class DebitCod extends Component {
       this.exportService.exportToCSV(res.data, "Withdraw Funds");
       this.setState({ loadingSubmit: false });
     });
+  }
+
+
+  rmAttachment(i) {
+    let attachments = [...this.state.attachments];
+    attachments.splice(i, 1);
+
+    this.setState({
+      attachments
+    });
+  }
+
+  isAttachment() {
+    const data = [];
+
+    const attachment = this.state.attachments;
+    if (attachment) {
+      for (let i = 0; i < attachment.length; i++) {
+        data.push(
+          <tr>
+            <td>
+              {i + 1} .
+            </td>
+            <td colSpan="4">
+              {attachment[i].customFileName}
+            </td>
+            <td>
+              <a href
+                className="text-danger"
+                style={{ 'cursor': 'pointer' }}
+                onClick={() => this.rmAttachment(i)}>
+                Hapus
+              </a>
+            </td>
+          </tr>
+        )
+      }
+    }
+
+    return data;
+  }
+
+
+  showAttachment() {
+    const view = [];
+    if (this.state.oneData) {
+      this.state.oneData.attachments.map(function (attachment, i) {
+        view.push(
+          <>
+            <tr>
+              <td></td>
+              <td>
+                {i + 1} .
+              </td>
+              <td>
+                <a href={attachment.fileUrl}>{attachment.customFileName}</a>
+              </td>
+            </tr>
+          </>
+        )
+        return true;
+      })
+    }
+    return view;
   }
 
   render() {
@@ -621,22 +697,27 @@ class DebitCod extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                    <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange}/>
+                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
                     </td>
                   </tr>
+                  <tr>
+                    <td colSpan="3">
+                      {!this.state.isDraft && (
+                        <input
+                          type="file"
+                          onChange={this.fileHandler.bind(this)}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                  {this.state.spinner && (
+                    <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+                  )}
+                  {this.state.loading && (
+                    this.isAttachment()
+                  )}
                 </tbody>
               </Table>
-              <input type="file" onChange={this.fileHandler.bind(this)} />
-              {this.state.spinner && (
-                <Loader type="Oval" color="#51BEEA" height={80} width={80} />
-              )}
-              {this.state.loading && (
-                <tr>
-                  <td colSpan="3">
-                    <img src={this.state.imageUrl} height="150" width="150" alt="'name'" />
-                  </td>
-                </tr>
-              )}
             </ModalBody>
             <ModalFooter>
               <Button
@@ -691,13 +772,14 @@ class DebitCod extends Component {
                       {this.moneyFormat.numberFormat(this.state.oneData.amount)}
                     </td>
                   </tr>
-                  <tr>
-                    <td colSpan="3">
-                      <a target="_blank" href={this.state.oneData.file.fileUrl} rel="noopener noreferrer">
-                        <img src={this.state.oneData.file.fileUrl} height="150" width="150" alt="'name'"/>
-                      </a>
-                    </td>
-                  </tr>
+                  {this.showAttachment() && (
+                    <tr>
+                      <td>Lampiran</td>
+                      <td>:</td>
+                      <td></td>
+                    </tr>
+                  )}
+                  {this.showAttachment()}
                 </tbody>
               </Table>
             </ModalBody>

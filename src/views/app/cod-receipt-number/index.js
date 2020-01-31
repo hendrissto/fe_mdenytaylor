@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { Card, CardBody } from "reactstrap";
 
-import ReactTable from "react-table";
-import "react-table/react-table.css";
-import withFixedColumns from "react-table-hoc-fixed-columns";
-import "react-table-hoc-fixed-columns/lib/styles.css";
+// import ReactTable from "react-table";
+// import "react-table/react-table.css";
+// import withFixedColumns from "react-table-hoc-fixed-columns";
+// import "react-table-hoc-fixed-columns/lib/styles.css";
 
 import { Redirect } from "react-router-dom";
 
@@ -30,11 +30,16 @@ import { Paginator } from "primereact/paginator";
 import Spinner from "../../../containers/pages/Spinner";
 import ExportReceiptNumber from "../../../core/export/ExportReceiptNumber";
 
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+// import { ColumnGroup } from 'primereact/columngroup';
+// import { Row as RowPrime } from 'primereact/row';
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
-const ReactTableFixedColumn = withFixedColumns(ReactTable);
+// const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class CODReceiptNumber extends Component {
   constructor(props) {
     super(props);
@@ -392,6 +397,10 @@ export default class CODReceiptNumber extends Component {
                         onChange={this.handleInputChange}
                         onKeyPress={event => {
                           if (event.key === "Enter") {
+                            const table = this.state.table;
+  
+                            table.pagination.skipSize = 0;
+                            this.setState({table});
                             this.loadData();
                           }
                         }}
@@ -399,7 +408,13 @@ export default class CODReceiptNumber extends Component {
                       <Button
                         className="default"
                         color="primary"
-                        onClick={() => this.loadData()}
+                        onClick={() => {
+                          const table = this.state.table;
+
+                          table.pagination.skipSize = 0;
+                          this.setState({table});
+                          this.loadData()
+                        }}
                       >
                         <i className="simple-icon-magnifier" />
                       </Button>
@@ -557,6 +572,27 @@ export default class CODReceiptNumber extends Component {
                   </div>
                 </div>
 
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px" frozenWidth="200px" unfrozenWidth="600px">
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller Name" frozen={true}/>
+                  <Column style={{width:'250px'}} field="airwaybillNumber" header="No Resi" />
+                  <Column style={{width:'250px'}} field="tenantId" header="Tenant ID" />
+                  <Column style={{width:'250px'}} field="courierChannelId" header="Kurir" />
+                  <Column style={{width:'250px'}} field="destination" header="Destination" />
+                  <Column style={{width:'250px'}} field="notes" header="Note" />
+                  <Column style={{width:'250px'}} field="goodValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{width:'250px'}} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="discount" header="Discount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="tax" header="Tax" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="adjustment" header="Adjusment" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="total" header="Total" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="codFeePercentage" header="COD Fee (%)" />
+                  <Column style={{width:'250px'}} field="codFeeValue" header="COD Fee (Rp)" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="receiveAmount" header="Receive Amount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="deliveryNotes" header="Delivery Notes" />
+                </DataTable>
+                {/*
                 <ReactTableFixedColumn
                   minRows={0}
                   data={this.state.table.data}
@@ -578,6 +614,7 @@ export default class CODReceiptNumber extends Component {
                     this.loadData();
                   }}
                 />
+                 */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
