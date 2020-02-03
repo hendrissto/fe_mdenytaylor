@@ -993,10 +993,10 @@ class ReceiptOfFunds extends Component {
       lineValue.lines.push({
         tenantId: array[i].tenantId,
         sellerName: array[i].osName,
-        deliveryNotes: array[i].deliveredNotes,
+        deliveryNotes: array[i].statusDescription,
         airwaybillNumber: array[i].airwaybill.toString(),
         notes: array[i].notes || "",
-        destination: array[i].destination || "",
+        destination: array[i].receiverAddress || "",
         amount: array[i].totalAmount || 0,
         codValue: Math.round(array[i].codFeeRp) || 0,
         goodValue: array[i].goodsValue || 0,
