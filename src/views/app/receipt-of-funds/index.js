@@ -1685,8 +1685,8 @@ class ReceiptOfFunds extends Component {
               <ModalBody>
                 <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailThird} scrollable={true} scrollHeight="300px">
                   <Column style={{ width: '250px' }} field="airwaybill" header="No Resi" />
-                  <Column style={{ width: '250px' }} field="deliveredNotes" header="Delivery Notes" />
-                  <Column style={{ width: '250px' }} field="destination" header="Destination" />
+                  <Column style={{ width: '250px' }} field="statusDescription" header="Delivery Notes" />
+                  <Column style={{ width: '250px' }} field="receiverAddress" header="Destination" />
                   <Column style={{ width: '250px' }} field="notes" header="Note" />
                   <Column style={{ width: '250px' }} field="goodsValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat} />
