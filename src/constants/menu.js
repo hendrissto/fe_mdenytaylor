@@ -4,7 +4,7 @@ const data = [
     icon: "simple-icon-home",
     label: "menu.dashboards",
     to: "/app/dashboard",
-  }, 
+  },
   {
     id: "receipt-of-funds",
     icon: "iconsminds-folder",
@@ -32,20 +32,26 @@ const data = [
   {
     id: "tenants",
     icon: "simple-icon-people",
-    label:"menu.tenants",
+    label: "menu.tenants",
     to: "/app/tenants",
   },
   {
     id: "billing",
     icon: "iconsminds-shop-4",
-    label:"menu.billing",
+    label: "menu.billing",
     to: "/app/billing",
   },
   {
     id: "list-transactions",
     icon: "simple-icon-book-open",
-    label:"menu.list-transactions",
+    label: "menu.list-transactions",
     to: "/app/list-transactions",
+  },
+  {
+    id: "form-bebas",
+    icon: "simple-icon-book-open",
+    label: "menu.form-bebas",
+    to: "/app/form-bebas",
   },
   // {
   //   id: "dashboards",
