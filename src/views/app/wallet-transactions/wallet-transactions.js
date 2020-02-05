@@ -25,6 +25,7 @@ import * as moment from 'moment';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Paginator } from 'primereact/paginator';
+import { Dropdown } from 'primereact/dropdown';
 
 const MySwal = withReactContent(Swal);
 
@@ -33,7 +34,7 @@ class WalletTransactions extends Component {
     amount: null,
     note: null,
     isCredit: true,
-    feeAmount: null,
+    feeAmount: 0,
 
     image: null,
     loading: false,
@@ -59,6 +60,8 @@ class WalletTransactions extends Component {
     modalDetailWallet: false,
     isEdit: false,
     realAttachments: [],
+    tenantBank: null,
+    selectedBank: null,
   };
   constructor(props) {
     super(props);
@@ -77,6 +80,7 @@ class WalletTransactions extends Component {
     this.toggle = this.toggle.bind(this);
     this.showAttachment = this.showAttachment.bind(this);
     this.editData = this.editData.bind(this);
+    this.loadBankTenant = this.loadBankTenant.bind(this);
 
     this.state = this.initialState;
   }
@@ -174,7 +178,8 @@ class WalletTransactions extends Component {
         feeTransfer: Number.isInteger(this.state.feeAmount)
           ? parseInt(this.state.feeAmount)
           : parseFloat(this.state.feeAmount.replace(/,/g, "")),
-        attachments: this.state.attachments
+        attachments: this.state.attachments,
+        tenantBankId: !this.state.isCredit ? this.state.selectedBank.bankId : undefined,
       };
 
       this.walletTransactionsRestService
@@ -212,6 +217,7 @@ class WalletTransactions extends Component {
             tenantSelected: null,
             modalAddWallet: false,
           });
+          this.loadData();
         });
     }
   }
@@ -340,6 +346,12 @@ class WalletTransactions extends Component {
       })
     }
     return view;
+  }
+
+  loadBankTenant(id) {
+    this.relatedDataRestService.getTenantBank(id, {}).subscribe(response => {
+      this.setState({ tenantBank: response.data });
+    });
   }
 
   editData() {
@@ -515,9 +527,12 @@ class WalletTransactions extends Component {
                         field="companyInfo.name"
                         dropdown={true}
                         onDropdownClick={this.suggestTenants}
-                        onChange={e =>
+                        onChange={e => {
                           this.setState({ tenantSelected: e.value })
-                        }
+                        }}
+                        onSelect={(e) => {
+                          this.loadBankTenant(e.value.id)
+                        }}
                       />
                     </td>
                   </tr>
@@ -550,6 +565,24 @@ class WalletTransactions extends Component {
                       </div>
                     </td>
                   </tr>
+                  {!this.state.isCredit && (
+                    <tr>
+                      <td> Bank </td>
+                      <td>:</td>
+                      <td>
+                        <Dropdown
+                          optionLabel="accountName"
+                          value={this.state.selectedBank}
+                          options={this.state.tenantBank}
+                          onChange={e => {
+                            this.setState({ selectedBank: e.value });
+                          }}
+                          placeholder="Select a Bank Account"
+                        />
+                      </td>
+                    </tr>
+
+                  )}
 
                   <tr>
                     <td>{this.state.isCredit ? "Credit" : "Debit"} Amount</td>
@@ -574,6 +607,7 @@ class WalletTransactions extends Component {
                       <NumberFormat
                         className="form-control"
                         isNumericString={true}
+                        defaultValue={this.state.feeAmount}
                         thousandSeparator={true}
                         value={this.state.feeAmount}
                         onChange={event => {
