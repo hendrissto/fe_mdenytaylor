@@ -722,13 +722,31 @@ class WalletTransactions extends Component {
                       {this.moneyFormat.numberFormat(this.state.oneData.feeTransfer)}
                     </td>
                   </tr>
-                  <tr>
-                    <td>Note</td>
-                    <td>:</td>
-                    <td>
-                      {this.state.oneData.note}
-                    </td>
-                  </tr>
+                  {!this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        {this.state.oneData.note}
+                      </td>
+                    </tr>
+                  )}
+                  {this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        <Input
+                          type="textarea"
+                          className="form-control"
+                          onChange={event => {
+                            this.setState({ note: event.target.value });
+                          }}
+                          value={this.state.note}
+                        />
+                      </td>
+                    </tr>
+                  )}
                   {this.state.isEdit && (
                       <tr>
                       <td colSpan="3">
