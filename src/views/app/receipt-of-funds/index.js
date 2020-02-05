@@ -41,6 +41,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row as RowPrime } from 'primereact/row';
+import { Calendar } from 'primereact/calendar';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -103,6 +104,7 @@ class ReceiptOfFunds extends Component {
       oneData: [],
       redirect: false,
       totalData: 0,
+      date: null,
       footerData: [
         [
           {
@@ -756,6 +758,7 @@ class ReceiptOfFunds extends Component {
     }
 
     let finish = data.lines;
+    
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
@@ -996,6 +999,7 @@ class ReceiptOfFunds extends Component {
         deliveryNotes: array[i].statusDescription,
         airwaybillNumber: array[i].airwaybill.toString(),
         notes: array[i].notes || "",
+        receiverName: array[i].lastReceiverName || "",
         destination: array[i].receiverAddress || "",
         amount: array[i].totalAmount || 0,
         codValue: Math.round(array[i].codFeeRp) || 0,
@@ -1017,7 +1021,7 @@ class ReceiptOfFunds extends Component {
 
     let data = {
       ...lineValue,
-      uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
+      uploadDate: moment(this.state.date).format("YYYY-MM-DD"),
       uploadBy: this.user.user_name,
       courierChannelId: this.state.selectedCourier.id
     };
@@ -1195,7 +1199,8 @@ class ReceiptOfFunds extends Component {
     if (
       this.state.selectedCourier.length === 0 ||
       this.state.fileTemp === null ||
-      this.state.errorFile === true
+      this.state.errorFile === true ||
+      this.state.date === null
     ) {
       this.setState({ error: true });
       if (this.state.errorFile) {
@@ -1296,7 +1301,7 @@ class ReceiptOfFunds extends Component {
   }
 
   changeDataFormat(rowData, column) {
-    return moment(rowData.uploadDate).format("DD-MM-YYYY HH:mm") || '-';
+    return moment(rowData.uploadDate).format("DD-MM-YYYY") || '-';
   }
 
   loadDetailSellerFromExcel(rowData, column) {
@@ -1387,6 +1392,7 @@ class ReceiptOfFunds extends Component {
       <ColumnGroup>
         <RowPrime>
           <Column footer="Total" />
+          <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
@@ -1574,14 +1580,34 @@ class ReceiptOfFunds extends Component {
             </ModalHeader>
             <ModalBody>
               <div>
-                <Row>
+                <Row style={{
+                  marginBottom: 10
+                }}>
                   <Col
                     xs="3"
                     style={{
                       marginTop: 5
                     }}
                   >
-                    Courier
+                    Tanggal Rekap
+                  </Col>
+                  <Col
+                    xs="1"
+                    style={{
+                      marginTop: 5
+                    }}
+                  >
+                    :
+                  </Col>
+                  <Col>
+                    <Calendar value={this.state.date} onChange={(e) => this.setState({date: e.value})}></Calendar>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col
+                    xs="3"
+                  >
+                    Kurir
                   </Col>
                   <Col
                     xs="1"
@@ -1688,6 +1714,7 @@ class ReceiptOfFunds extends Component {
                 <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailThird} scrollable={true} scrollHeight="300px">
                   <Column style={{ width: '250px' }} field="airwaybill" header="No Resi" />
                   <Column style={{ width: '250px' }} field="statusDescription" header="Delivery Notes" />
+                  <Column style={{ width: '250px' }} field="lastReceiverName" header="Receiver Name" />
                   <Column style={{ width: '250px' }} field="receiverAddress" header="Destination" />
                   <Column style={{ width: '250px' }} field="notes" header="Note" />
                   <Column style={{ width: '250px' }} field="goodsValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
@@ -1727,6 +1754,7 @@ class ReceiptOfFunds extends Component {
               <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailSecond} scrollable={true} scrollHeight="300px">
                 <Column style={{ width: '250px' }} field="airwaybillNumber" header="No Resi" />
                 <Column style={{ width: '250px' }} field="deliveryNotes" header="Delivery Notes" />
+                <Column style={{ width: '250px' }} field="receiverName" header="Receiver Name" />
                 <Column style={{ width: '250px' }} field="destination" header="Destination" />
                 <Column style={{ width: '250px' }} field="notes" header="Note" />
                 <Column style={{ width: '250px' }} field="goodValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />

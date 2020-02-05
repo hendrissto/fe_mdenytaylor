@@ -90,6 +90,7 @@ class DebitCod extends Component {
       image: null,
       imageUrl: null,
       attachments: [],
+      realAttachments: [],
       table: {
         loading: true,
         data: [],
@@ -106,6 +107,8 @@ class DebitCod extends Component {
       errorData: "",
       oneData: null,
       redirect: false,
+      isEdit: false,
+      note: "",
     };
   }
 
@@ -137,6 +140,7 @@ class DebitCod extends Component {
       imageUrl: null,
       image: null,
       modal: !this.state.modal,
+      note: "",
       attachments: []
     });
   }
@@ -280,6 +284,7 @@ class DebitCod extends Component {
                     this.loadRelatedData(props.original.tenantId);
                     this.setState({ modal: true });
                     this.setState({
+                      note: "",
                       selectedBank: [],
                       image: null,
                       imageUrl: null,
@@ -348,7 +353,8 @@ class DebitCod extends Component {
         amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
-        tenantBankId: this.state.selectedBank.id
+        tenantBankId: this.state.selectedBank.id,
+        note: this.state.note,
       };
 
       this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
@@ -444,7 +450,7 @@ class DebitCod extends Component {
   showAttachment() {
     const view = [];
     if (this.state.oneData) {
-      this.state.oneData.attachments.map(function (attachment, i) {
+      this.state.attachments.map(function (attachment, i) {
         view.push(
           <>
             <tr>
@@ -453,7 +459,7 @@ class DebitCod extends Component {
                 {i + 1} .
               </td>
               <td>
-                <a href={attachment.fileUrl}>{attachment.customFileName}</a>
+                <a rel="noopener noreferrer" target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
               </td>
             </tr>
           </>
@@ -462,6 +468,55 @@ class DebitCod extends Component {
       })
     }
     return view;
+  }
+
+  editData() {
+    this.setState({modal3: false, loadingSubmit: true});
+
+    const data = this.state;
+    const oneData = data.oneData;
+    const attachments = [];
+    for(let i = 0; i < data.attachments.length; i++) {
+      attachments.push({
+        id: data.attachments[i].id,
+        isMain: i === 0 ? true : false,
+        customFileName: data.attachments[i].customFileName,
+      })
+    }
+
+    const payload = {
+      id: oneData.id,
+      tenantId: oneData.tenantId,
+      note: data.note,
+      amount: oneData.amount,
+      feeTransfer: oneData.feeTransfer,
+      attachments: attachments,
+      tenantBankId: null,
+    }
+
+    this.debitRestService.putDebitCod(oneData.id, payload).subscribe(res => {
+      MySwal.fire({
+        type: "success",
+        title: "Sukses Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({loadingSubmit: false});
+    }, err => {
+      MySwal.fire({
+        type: "error",
+        title: "Gagal Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({loadingSubmit: false});
+    })
   }
 
   actionTemplate(rowData, column) {
@@ -483,8 +538,24 @@ class DebitCod extends Component {
             outline
             color="info"
             onClick={() => {
-              this.setState({ modal3: true });
-              this.setState({ oneData: rowData });
+              // this.setState({attachments: []});
+    
+              let attachments = this.state.attachments;
+              let realAttachments = this.state.realAttachments;
+              attachments = [];
+              if(rowData.attachments) {
+                for(let i = 0; i < rowData.attachments.length; i++) {
+                  attachments.push(rowData.attachments[i]);
+                  realAttachments.push(rowData.attachments[i]);
+                }
+              }
+              this.setState({ 
+                attachments,
+                realAttachments,
+                oneData: rowData,
+                note: rowData.note,
+                modal3: true,
+              });
             }}
           >
             <i className="simple-icon-paper-clip mr-2" />
@@ -779,6 +850,20 @@ class DebitCod extends Component {
                     </td>
                   </tr>
                   <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      <Input
+                        type="textarea"
+                        className="form-control"
+                        onChange={event => {
+                          this.setState({ note: event.target.value });
+                        }}
+                        value={this.state.note}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
                     <td colSpan="3">
                       {!this.state.isDraft && (
                         <input
@@ -850,22 +935,118 @@ class DebitCod extends Component {
                       {this.moneyFormat.numberFormat(this.state.oneData.amount)}
                     </td>
                   </tr>
-                  {this.showAttachment() && (
+                  {!this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        {this.state.oneData.note}
+                      </td>
+                    </tr>
+                  )}
+                  {this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        <Input
+                          type="textarea"
+                          className="form-control"
+                          onChange={event => {
+                            this.setState({ note: event.target.value });
+                          }}
+                          value={this.state.note}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  {this.state.isEdit && (
+                      <tr>
+                      <td colSpan="3">
+                        <input
+                          type="file"
+                          onChange={this.fileHandler.bind(this)}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {this.state.spinner && (
+                    <Loader
+                      type="Oval"
+                      color="#51BEEA"
+                      height={80}
+                      width={80}
+                    />
+                  )}
+
+                  {!this.state.isEdit && this.showAttachment() && (
                     <tr>
                       <td>Lampiran</td>
                       <td>:</td>
                       <td></td>
                     </tr>
                   )}
-                  {this.showAttachment()}
+                  {!this.state.isEdit &&  this.showAttachment()}
+                  {this.state.isEdit && (
+                    this.isAttachment()
+                  )}
                 </tbody>
               </Table>
             </ModalBody>
             <ModalFooter>
+            {this.state.isEdit && (
+              <div>
+                <Button
+                  className="default"
+                  color="primary"
+                  style={{
+                    borderRadius: 6,
+                    marginRight: 10
+                  }}
+                  onClick={() => {
+                    this.setState({ isEdit: false });
+                    this.editData();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button
+                  className="default"
+                  color="primary"
+                  style={{
+                    borderRadius: 6
+                  }}
+                  onClick={() => {
+                    this.setState({ attachments: this.state.realAttachments,isEdit: false })
+                  }}
+                >
+                  Cancel
+              </Button>
+              </div>
+            )}
+            {!this.state.isEdit && (
+              <Button
+                className="default"
+                color="primary"
+                style={{
+                  borderRadius: 6
+                }}
+                onClick={() => {
+                  this.setState({ isEdit: true })
+                }}
+              >
+                Edit
+              </Button>
+
+            )}
               <Button
                 color="primary"
                 outline
-                onClick={() => this.setState({ modal3: false })}
+                style={{
+                  borderRadius: 6
+                }}
+                onClick={() => this.setState({ attachments: [], realAttachments: [], isEdit: false, modal3: false })}
               >
                 Close
               </Button>

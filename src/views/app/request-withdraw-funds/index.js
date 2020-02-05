@@ -113,6 +113,7 @@ class WithdrawFunds extends Component {
       redirect: false,
       errorData: "",
       totalData: 0,
+      note: ""
     };
 
     this.loadData = this.loadData.bind(this);
@@ -499,7 +500,8 @@ class WithdrawFunds extends Component {
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
-        isDraft: this.state.isDraft
+        isDraft: this.state.isDraft,
+        note: this.state.note,
       };
 
       this.requestWithdrawRest.postBallance(lines).subscribe(
@@ -915,6 +917,19 @@ class WithdrawFunds extends Component {
                     <td>:</td>
                     <td>
                       <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      <Input
+                        type="textarea"
+                        className="form-control"
+                        onChange={event => {
+                          this.setState({ note: event.target.value });
+                        }}
+                      />
                     </td>
                   </tr>
                   <tr>
