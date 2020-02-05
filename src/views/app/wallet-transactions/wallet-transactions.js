@@ -300,11 +300,12 @@ class WalletTransactions extends Component {
         type="button"
         icon="pi pi-search"
         onClick={() => {
-          // this.setState({attachments: []});
+          // this.setState({realAttachments: []});
 
           let attachments = this.state.attachments;
           let realAttachments = this.state.realAttachments;
           attachments = [];
+          realAttachments = [];
           if(rowData.attachments) {
             for(let i = 0; i < rowData.attachments.length; i++) {
               attachments.push(rowData.attachments[i]);
@@ -778,7 +779,7 @@ class WalletTransactions extends Component {
                       borderRadius: 6
                     }}
                     onClick={() => {
-                      this.setState({ attachments: this.state.realAttachments,isEdit: false })
+                      this.setState({ attachments: this.state.realAttachments, isEdit: false })
                     }}
                   >
                     Cancel
@@ -793,7 +794,7 @@ class WalletTransactions extends Component {
                     borderRadius: 6
                   }}
                   onClick={() => {
-                    this.setState({ attachments: [], isEdit: !this.state.isEdit })
+                    this.setState({ isEdit: true })
                   }}
                 >
                   Edit
@@ -806,7 +807,7 @@ class WalletTransactions extends Component {
                 style={{
                   borderRadius: 6
                 }}
-                onClick={() => this.setState({ modalDetailWallet: false })}
+                onClick={() => this.setState({ attachments: [], modalDetailWallet: false, isEdit: false })}
               >
                 Close
               </Button>
