@@ -4,6 +4,7 @@ import { Row, Table, Card, CardBody, Button, Input, InputGroup,
   ModalHeader,
   ModalBody,
   ModalFooter, } from "reactstrap";
+import { Redirect } from "react-router-dom";
 import { Colxx } from "../../../components/common/CustomBootstrap";
 import NumberFormat from "react-number-format";
 import Loader from "react-loader-spinner";
@@ -75,6 +76,7 @@ class WalletTransactions extends Component {
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
     this.toggle = this.toggle.bind(this);
     this.showAttachment = this.showAttachment.bind(this);
+    this.editData = this.editData.bind(this);
 
     this.state = this.initialState;
   }
@@ -169,7 +171,7 @@ class WalletTransactions extends Component {
         amount: Number.isInteger(this.state.amount)
           ? parseInt(this.state.amount)
           : parseFloat(this.state.amount.replace(/,/g, "")),
-        feeAmount: Number.isInteger(this.state.feeAmount)
+        feeTransfer: Number.isInteger(this.state.feeAmount)
           ? parseInt(this.state.feeAmount)
           : parseFloat(this.state.feeAmount.replace(/,/g, "")),
         attachments: this.state.attachments
@@ -251,7 +253,6 @@ class WalletTransactions extends Component {
     const data = [];
 
     const attachment = this.state.attachments;
-    console.log('att', attachment)
     if (attachment) {
       for (let i = 0; i < attachment.length; i++) {
         data.push(
@@ -324,20 +325,6 @@ class WalletTransactions extends Component {
 
   showAttachment() {
     const view = [];
-    // if (this.state.oneData) {
-    //   this.state.oneData.attachments.map(function (attachment, i) {
-    //     view.push(
-    //       <>
-    //         <tr>
-    //           <td>
-    //             <a href={attachment.fileUrl}>{attachment.customFileName}</a>
-    //           </td>
-    //         </tr>
-    //       </>
-    //     )
-    //     return true;
-    //   })
-    // }
     if (this.state.attachments) {
       this.state.attachments.map(function (attachment, i) {
         view.push(
@@ -355,7 +342,59 @@ class WalletTransactions extends Component {
     return view;
   }
 
+  editData() {
+    this.setState({modalDetailWallet: false, mainLoading: true});
+
+    const data = this.state;
+    const oneData = data.oneData;
+    const attachments = [];
+    for(let i = 0; i < data.attachments.length; i++) {
+      attachments.push({
+        id: data.attachments[i].id,
+        isMain: i === 0 ? true : false,
+        customFileName: data.attachments[i].customFileName,
+      })
+    }
+
+    const payload = {
+      tenantId: oneData.tenantId,
+      isCredit: oneData.transactionType === 'credit' ? true : false,
+      note: oneData.note,
+      amount: oneData.amount,
+      feeTransfer: oneData.feeTransfer,
+      attachments: attachments,
+    }
+
+    this.walletTransactionsRestService.editData(oneData.id, payload).subscribe(res => {
+      MySwal.fire({
+        type: "success",
+        title: "Sukses Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({mainLoading: false});
+    }, err => {
+      MySwal.fire({
+        type: "error",
+        title: "Gagal Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({mainLoading: false});
+    })
+  }
+
   render() {
+    if (this.state.redirect === true) {
+      this.setState({ redirect: false });
+      return <Redirect to="/user/login" />;
+    }
     return (
       <Fragment>
         <div className="card">
@@ -424,6 +463,7 @@ class WalletTransactions extends Component {
             <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" />
             <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
             <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
+            <Column style={{width:'200px'}} field="note" header="Note" />
             <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
           </DataTable>
           <Paginator
@@ -598,19 +638,18 @@ class WalletTransactions extends Component {
             <ModalHeader>Detail</ModalHeader>
             <ModalBody>
               <Table>
-              {console.log(this.state.oneData)}
                 <tbody>
                   <tr>
                     <td>Nama Rekening</td>
                     <td>:</td>
-                    <td>{this.state.oneData.sellerName}</td>
+                    <td>{this.state.oneData.bankName}</td>
                   </tr>
                   <tr>
                     <td>
                       No Rekening
                     </td>
                     <td>:</td>
-                    <td>{this.state.oneData.bankName}</td>
+                    <td>{this.state.oneData.accountNumber}</td>
                   </tr>
                   <tr>
                     <td>
@@ -624,7 +663,7 @@ class WalletTransactions extends Component {
                       Cabang Bank
                     </td>
                     <td>:</td>
-                    <td>{this.state.oneData.bankName}</td>
+                    <td>{this.state.oneData.bankDistrict}</td>
                   </tr>
                   <tr>
                     <td>Amount</td>
@@ -638,6 +677,13 @@ class WalletTransactions extends Component {
                     <td>:</td>
                     <td>
                       {this.moneyFormat.numberFormat(this.state.oneData.feeTransfer)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      {this.state.oneData.note}
                     </td>
                   </tr>
                   {this.state.isEdit && (
@@ -684,7 +730,10 @@ class WalletTransactions extends Component {
                       borderRadius: 6,
                       marginRight: 10
                     }}
-                    onClick={() => this.setState({ isEdit: false })}
+                    onClick={() => {
+                      this.setState({ isEdit: false });
+                      this.editData();
+                    }}
                   >
                     Save
                   </Button>

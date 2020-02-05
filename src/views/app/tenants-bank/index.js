@@ -441,7 +441,7 @@ export default class TenantsBank extends Component {
                         completeMethod={this.suggestBank}
                         size={30}
                         minLength={1}
-                        field="description"
+                        field="bankName"
                         dropdown={true}
                         onDropdownClick={this.suggestBank}
                         onChange={e =>
