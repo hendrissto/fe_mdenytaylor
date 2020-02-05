@@ -135,12 +135,12 @@ class DebitCod extends Component {
   toggle() {
     this.setState({
       loading: false,
-      oneData: null,
+      oneData: "",
       selectedBank: [],
       imageUrl: null,
       image: null,
       modal: !this.state.modal,
-      note: "",
+      note: "dddd",
       attachments: []
     });
   }
@@ -284,7 +284,6 @@ class DebitCod extends Component {
                     this.loadRelatedData(props.original.tenantId);
                     this.setState({ modal: true });
                     this.setState({
-                      note: "",
                       selectedBank: [],
                       image: null,
                       imageUrl: null,
@@ -366,11 +365,12 @@ class DebitCod extends Component {
           });
         },
         err => {
+          console.log(err)
           this.setState({
             loadingSubmit: false,
             modal2: true,
             modalError: true,
-            errorData: err.data[0].errorMessage
+            errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
           });
         }
       );
@@ -550,10 +550,10 @@ class DebitCod extends Component {
                 }
               }
               this.setState({ 
+                note: rowData.note,
                 attachments,
                 realAttachments,
                 oneData: rowData,
-                note: rowData.note,
                 modal3: true,
               });
             }}
@@ -573,6 +573,7 @@ class DebitCod extends Component {
               this.loadRelatedData(rowData.tenantId);
               this.setState({ modal: true });
               this.setState({
+                note: rowData.note,
                 selectedBank: [],
                 image: null,
                 imageUrl: null,
@@ -776,7 +777,7 @@ class DebitCod extends Component {
 
         {/* MODAL */}
         {this.state.modal && this.state.tenantBank !== null && (
-          <Modal isOpen={this.state.modal} toggle={this.toggle}>
+          <Modal isOpen={this.state.modal} >
             <ModalHeader toggle={this.toggle}>
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
@@ -890,6 +891,15 @@ class DebitCod extends Component {
                 }}
               >
                 Upload
+              </Button>
+              <Button
+                color="primary"
+                outline
+                onClick={() => {
+                  this.toggle();
+                }}
+              >
+                Close
               </Button>
             </ModalFooter>
           </Modal>
