@@ -323,6 +323,7 @@ class WalletTransactions extends Component {
           this.setState({
             attachments,
             realAttachments,
+            note: rowData.note,
             oneData: rowData,
             modalDetailWallet: true
           })
@@ -380,7 +381,7 @@ class WalletTransactions extends Component {
     const payload = {
       tenantId: oneData.tenantId,
       isCredit: oneData.transactionType === 'credit' ? true : false,
-      note: oneData.note,
+      note: data.note,
       amount: oneData.amount,
       feeTransfer: oneData.feeTransfer,
       attachments: attachments,
@@ -397,6 +398,7 @@ class WalletTransactions extends Component {
         customClass: "swal-height"
       });
       this.setState({mainLoading: false});
+      this.loadData();
     }, err => {
       MySwal.fire({
         type: "error",
@@ -408,6 +410,7 @@ class WalletTransactions extends Component {
         customClass: "swal-height"
       });
       this.setState({mainLoading: false});
+      this.loadData();
     })
   }
 

@@ -365,7 +365,6 @@ class DebitCod extends Component {
           });
         },
         err => {
-          console.log(err)
           this.setState({
             loadingSubmit: false,
             modal2: true,
