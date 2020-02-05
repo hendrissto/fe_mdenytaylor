@@ -1334,7 +1334,9 @@ class ReceiptOfFunds extends Component {
   }
 
   exportDetailDataToExcel(data) {
-    delete data['lines'];
+    for(let i = 0; i < data.length; i++) {
+      delete data[i]['lines'];
+    }
     this.exportService.exportToCSV(data, "Detail COD", false);
   }
 
