@@ -186,10 +186,19 @@ class WalletTransactions extends Component {
         .submitData(payload)
         .pipe(
           catchError(error => {
+            MySwal.fire({
+              type: "error",
+              title: "Gagal input data.",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
             return throwError(error);
           }),
           finalize(() => {
-            this.setState({ mainLoading: false });
+            this.setState({  modalAddWallet: false, mainLoading: false });
           })
         )
         .subscribe(() => {
@@ -215,7 +224,6 @@ class WalletTransactions extends Component {
         
             tenantOptions: null,
             tenantSelected: null,
-            modalAddWallet: false,
           });
           this.loadData();
         });
