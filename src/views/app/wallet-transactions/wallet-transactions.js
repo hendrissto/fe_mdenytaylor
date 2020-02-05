@@ -759,7 +759,7 @@ class WalletTransactions extends Component {
                     borderRadius: 6
                   }}
                   onClick={() => {
-                    this.setState({ isEdit: !this.state.isEdit })
+                    this.setState({ attachments: [], isEdit: !this.state.isEdit })
                   }}
                 >
                   Edit

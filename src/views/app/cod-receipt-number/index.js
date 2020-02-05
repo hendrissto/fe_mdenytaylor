@@ -572,8 +572,8 @@ export default class CODReceiptNumber extends Component {
                   </div>
                 </div>
 
-                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px" frozenWidth="200px" unfrozenWidth="600px">
-                  <Column style={{width:'250px'}} field="sellerName" header="Seller Name" frozen={true}/>
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller Name"/>
                   <Column style={{width:'250px'}} field="airwaybillNumber" header="No Resi" />
                   <Column style={{width:'250px'}} field="tenantId" header="Tenant ID" />
                   <Column style={{width:'250px'}} field="courierChannelId" header="Kurir" />
