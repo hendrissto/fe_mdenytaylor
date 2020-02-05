@@ -15,6 +15,8 @@ export class MoneyFormat {
       switch(column.field) {
         case 'totalAmount':
           return this.numberFormat(rowData.totalAmount);
+        case 'amount':
+          return this.numberFormat(rowData.amount);
         case 'codFeeRp':
           return this.numberFormat(rowData.codFeeRp);
         case 'totalReceive':
@@ -45,6 +47,8 @@ export class MoneyFormat {
           return this.numberFormat(rowData.receiveAmount);
         case 'balanceAmount':
           return this.numberFormat(rowData.balanceAmount);
+        case 'feeTransfer':
+          return this.numberFormat(rowData.feeTransfer);
         default:
           return 0;
       }

@@ -17,6 +17,11 @@ class ModalComponent extends Component {
           </ModalBody>
           <ModalFooter>
             <div onClick={() => this.props.close()}>{this.props.footer}</div>
+            {this.props.isSubmit && (
+              <div onClick={() => this.props.onSubmit()}>
+                {this.props.buttonSubmit}
+              </div>
+            )}
           </ModalFooter>
         </Modal>
       </Fragment>

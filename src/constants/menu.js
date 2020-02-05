@@ -18,8 +18,14 @@ const data = [
     to: "/app/cod-receipt-number",
   },
   {
+    id: "tenants-bank",
+    icon: "iconsminds-credit-card",
+    label: "Tenants Bank",
+    to: "/app/tenants-bank",
+  },
+  {
     id: "request-withdraw-funds",
-    icon: "iconsminds-wallet",
+    icon: "iconsminds-money-bag",
     label: "menu.request-withdraw-funds",
     to: "/app/request-withdraw-funds/",
   },
@@ -28,6 +34,12 @@ const data = [
     icon: "iconsminds-wallet",
     label: "Debit COD",
     to: "/app/debit-cod/",
+  },
+  {
+    id: "wallet-transactions",
+    icon: "simple-icon-wallet",
+    label: "menu.wallet-transactions",
+    to: "/app/wallet-transactions",
   },
   {
     id: "tenants",
@@ -46,12 +58,6 @@ const data = [
     icon: "simple-icon-book-open",
     label: "menu.list-transactions",
     to: "/app/list-transactions",
-  },
-  {
-    id: "form-bebas",
-    icon: "simple-icon-book-open",
-    label: "menu.form-bebas",
-    to: "/app/form-bebas",
   },
   // {
   //   id: "dashboards",

@@ -20,7 +20,8 @@ import ui from "../gogo/ui";
 import menu from "../gogo/menu";
 import blankPage from "./blank-page";
 import ListTransactions from "./list-transactions";
-import FormBebas from "./form-bebas/form-bebas";
+import TenantsBank from "./tenants-bank";
+import WalletTransactions from "./wallet-transactions/wallet-transactions";
 
 class App extends Component {
   render() {
@@ -37,11 +38,12 @@ class App extends Component {
           <Route path={`${match.url}/billings/upgrade/:tenantId`} component={FormTenantSubscription} />
           <Route path={`${match.url}/billings/renew/:tenantId`} component={FormTenantRenewSubscriptions} />
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
+          <Route path={`${match.url}/tenants-bank`} component={TenantsBank} />
           <Route path={`${match.url}/debit-cod`} component={DebitCod} />
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
-          <Route path={`${match.url}/form-bebas`} component={FormBebas} />
-         
+          <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />
+
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />
           <Route path={`${match.url}/applications`} component={applications} />
