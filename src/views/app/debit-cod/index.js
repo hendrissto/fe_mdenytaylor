@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactTable from "react-table";
 import {
+  Col,
   Row,
   Card,
   CardBody,
@@ -21,6 +22,7 @@ import {
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
 import { Redirect } from "react-router-dom";
+import ModalComponent from "../../../components/shared/modal.js";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -37,14 +39,21 @@ import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { AutoComplete } from 'primereact/autocomplete';
+import { InputText } from 'primereact/inputtext';
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import TenantRestService from "../../../api/tenantRestService";
 const MySwal = withReactContent(Swal);
 class DebitCod extends Component {
   constructor(props) {
     super(props);
 
     this.debitRestService = new DebitRestService();
+    this.tenantRestService = new TenantRestService();
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
@@ -59,13 +68,14 @@ class DebitCod extends Component {
     this.isAttachment = this.isAttachment.bind(this);
     this.showAttachment = this.showAttachment.bind(this);
     this.rmAttachment = this.rmAttachment.bind(this);
+    this.actionTemplate = this.actionTemplate.bind(this);
 
     this.state = {
       deliveryDate: true,
       sellerName: true,
       amount2: true,
       bankName: true,
-      bankDistrict: true,
+      bankDistrict2: true,
       status: true,
       fileAttach: true,
       popoverOpen: false,
@@ -173,6 +183,8 @@ class DebitCod extends Component {
       table.loading = false;
       this.setState({ table });
     }, err => {
+      table.loading = false;
+      this.setState({ table });
       if (err.response.status === 401) {
         this.setState({ redirect: true });
         MySwal.fire({
@@ -229,7 +241,7 @@ class DebitCod extends Component {
       {
         Header: "Cabang Bank",
         accessor: "bankDistrict",
-        show: this.state.bankDistrict,
+        show: this.state.bankDistrict2,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -429,7 +441,6 @@ class DebitCod extends Component {
     return data;
   }
 
-
   showAttachment() {
     const view = [];
     if (this.state.oneData) {
@@ -451,6 +462,61 @@ class DebitCod extends Component {
       })
     }
     return view;
+  }
+
+  actionTemplate(rowData, column) {
+    // return <div>
+    //   <Button
+    //     type="button"
+    //     icon="pi pi-search"
+    //     onClick={() => this.loadDetailData(rowData.id)}
+    //     className="p-button-success"
+    //   >
+    //     Detail
+    //     </Button>
+    // </div>;
+    
+    if (rowData.status !== "draft") {
+      return (
+        <div>
+          <Button
+            outline
+            color="info"
+            onClick={() => {
+              this.setState({ modal3: true });
+              this.setState({ oneData: rowData });
+            }}
+          >
+            <i className="simple-icon-paper-clip mr-2" />
+            Bukti Transfer
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Button
+            outline
+            color="success"
+            onClick={() => {
+              this.loadRelatedData(rowData.tenantId);
+              this.setState({ modal: true });
+              this.setState({
+                selectedBank: [],
+                image: null,
+                imageUrl: null,
+                loading: false,
+                oneData: rowData,
+                amount: rowData.amount
+              });
+            }}
+          >
+            <i className="iconsminds-upload mr-2 " />
+            Upload
+          </Button>
+        </div>
+      );
+    }
   }
 
   render() {
@@ -589,6 +655,17 @@ class DebitCod extends Component {
                   </div>
                 </div>
 
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller" />
+                  <Column style={{width:'250px'}} field="amount" header="Jumlah Saldo Ditarik" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="bankName" header="Ditarik ke Rekening" />
+                  <Column style={{width:'250px'}} field="bankDistrict" header="Cabang Bank" />
+                  <Column style={{width:'150px'}} field="status" header="status" />
+                  <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
+                </DataTable>
+
+                {/*
                 <ReactTable
                   minRows={0}
                   data={this.state.table.data}
@@ -610,6 +687,7 @@ class DebitCod extends Component {
                     this.loadData();
                   }}
                 />
+                 */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}

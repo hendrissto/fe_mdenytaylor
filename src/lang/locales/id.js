@@ -69,6 +69,8 @@ module.exports = {
     "menu.content": "Content",
     "menu.pages": "Pages",
     "menu.billing": "Subscription",
+    "menu.tenants-bank": "Tenants Bank",
+    "menu.wallet-transactions": "Wallet Transactions",
     "menu.list-transactions": "List Transaksi",
     "menu.data-list": "Data List",
     "menu.thumb-list": "Thumb List",

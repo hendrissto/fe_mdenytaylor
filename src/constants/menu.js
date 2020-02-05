@@ -4,7 +4,7 @@ const data = [
     icon: "simple-icon-home",
     label: "menu.dashboards",
     to: "/app/dashboard",
-  }, 
+  },
   {
     id: "receipt-of-funds",
     icon: "iconsminds-folder",
@@ -18,8 +18,14 @@ const data = [
     to: "/app/cod-receipt-number",
   },
   {
+    id: "tenants-bank",
+    icon: "iconsminds-credit-card",
+    label: "Tenants Bank",
+    to: "/app/tenants-bank",
+  },
+  {
     id: "request-withdraw-funds",
-    icon: "iconsminds-wallet",
+    icon: "iconsminds-money-bag",
     label: "menu.request-withdraw-funds",
     to: "/app/request-withdraw-funds/",
   },
@@ -30,21 +36,27 @@ const data = [
     to: "/app/debit-cod/",
   },
   {
+    id: "wallet-transactions",
+    icon: "simple-icon-wallet",
+    label: "menu.wallet-transactions",
+    to: "/app/wallet-transactions",
+  },
+  {
     id: "tenants",
     icon: "simple-icon-people",
-    label:"menu.tenants",
+    label: "menu.tenants",
     to: "/app/tenants",
   },
   {
     id: "billing",
     icon: "iconsminds-shop-4",
-    label:"menu.billing",
+    label: "menu.billing",
     to: "/app/billing",
   },
   {
     id: "list-transactions",
     icon: "simple-icon-book-open",
-    label:"menu.list-transactions",
+    label: "menu.list-transactions",
     to: "/app/list-transactions",
   },
   // {
