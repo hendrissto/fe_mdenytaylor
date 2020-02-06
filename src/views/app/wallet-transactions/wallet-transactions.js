@@ -272,7 +272,7 @@ class WalletTransactions extends Component {
       for (let i = 0; i < attachment.length; i++) {
         data.push(
           <tr key={`${attachment[i].id}`}>
-            <td>{attachment[i].customFileName}</td>
+            <td colSpan={3}>{attachment[i].customFileName}</td>
             <td>
               <a
                 href
@@ -347,7 +347,7 @@ class WalletTransactions extends Component {
         view.push(
           <>
             <tr>
-              <td>
+              <td colSpan={4}>
                 <a target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
               </td>
             </tr>

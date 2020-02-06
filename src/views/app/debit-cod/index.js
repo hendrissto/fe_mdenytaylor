@@ -482,9 +482,6 @@ class DebitCod extends Component {
       for (let i = 0; i < attachment.length; i++) {
         data.push(
           <tr>
-            <td>
-              {i + 1} .
-            </td>
             <td colSpan="4">
               {attachment[i].customFileName}
             </td>
