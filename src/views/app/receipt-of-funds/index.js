@@ -1373,6 +1373,7 @@ class ReceiptOfFunds extends Component {
           <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
+          <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "goodValue")} />
           <Column footer={this.sumData(this.state.oneData, "shippingCharge")} />
           <Column footer={this.sumData(this.state.oneData, "discount")} />
@@ -1554,7 +1555,7 @@ class ReceiptOfFunds extends Component {
                   <Column field="uploadDate" body={this.changeDataFormat} header="Upload Date" />
                   <Column field="documentNumber" header="ID File" body={this.columnFormat.emptyColumn} />
                   <Column field="uploadBy" header="Upload By"  body={this.columnFormat.emptyColumn}/>
-                  <Column header="Detail" body={this.actionTemplate} body={this.columnFormat.emptyColumn} />
+                  <Column header="Detail" body={this.actionTemplate} />
                 </DataTable>
                 <Paginator
                   first={this.state.table.pagination.skipSize}
