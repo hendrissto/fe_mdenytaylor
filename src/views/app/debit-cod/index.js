@@ -362,7 +362,7 @@ class DebitCod extends Component {
 
       let lines = {
         id: this.state.oneData.id,
-        fileId: this.state.image.id,
+        attachments: this.state.isDraft === true ? undefined : this.state.attachments,
         amount: parsedAmount || 0,
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
@@ -388,7 +388,7 @@ class DebitCod extends Component {
             '<tr>' +
               '<th>Ballance Amount</th>' +
               '<td>:</td>' +
-              `<td>${this.moneyFormat.numberFormat(data.oneData.balanceAmount)}</td>` +
+              `<td>${this.moneyFormat.numberFormat(data.oneData.amount)}</td>` +
             '</tr>' +
             '<tr>' +
               '<th>Total Bayar</th>' +
@@ -413,6 +413,7 @@ class DebitCod extends Component {
                 loadingSubmit: false,
                 modalResponse: true,
                 isChanged: false,
+                attachments: [],
               });
             },
             err => {
@@ -421,6 +422,7 @@ class DebitCod extends Component {
                 loadingSubmit: false,
                 modal2: true,
                 modalError: true,
+                attachments: [],
                 errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
               });
             }
