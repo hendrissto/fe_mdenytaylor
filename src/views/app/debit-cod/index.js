@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactTable from "react-table";
 import {
+  Col,
   Row,
   Card,
   CardBody,
@@ -21,6 +22,7 @@ import {
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
 import { Redirect } from "react-router-dom";
+import ModalComponent from "../../../components/shared/modal.js";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -37,14 +39,21 @@ import Spinner from "../../../containers/pages/Spinner";
 import BaseAlert from "../../base/baseAlert";
 import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { AutoComplete } from 'primereact/autocomplete';
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import TenantRestService from "../../../api/tenantRestService";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 class DebitCod extends Component {
   constructor(props) {
     super(props);
 
     this.debitRestService = new DebitRestService();
+    this.tenantRestService = new TenantRestService();
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
@@ -59,13 +68,15 @@ class DebitCod extends Component {
     this.isAttachment = this.isAttachment.bind(this);
     this.showAttachment = this.showAttachment.bind(this);
     this.rmAttachment = this.rmAttachment.bind(this);
+    this.actionTemplate = this.actionTemplate.bind(this);
+    this.columnFormat = new ColumnFormat();
 
     this.state = {
       deliveryDate: true,
       sellerName: true,
       amount2: true,
       bankName: true,
-      bankDistrict: true,
+      bankDistrict2: true,
       status: true,
       fileAttach: true,
       popoverOpen: false,
@@ -80,6 +91,7 @@ class DebitCod extends Component {
       image: null,
       imageUrl: null,
       attachments: [],
+      realAttachments: [],
       table: {
         loading: true,
         data: [],
@@ -96,6 +108,10 @@ class DebitCod extends Component {
       errorData: "",
       oneData: null,
       redirect: false,
+      isEdit: false,
+      note: "",
+      amountWithComma: "",
+      isChanged: false,
     };
   }
 
@@ -122,12 +138,14 @@ class DebitCod extends Component {
   toggle() {
     this.setState({
       loading: false,
-      oneData: null,
+      oneData: "",
       selectedBank: [],
       imageUrl: null,
       image: null,
       modal: !this.state.modal,
-      attachments: []
+      note: "",
+      attachments: [],
+      isChanged: false,
     });
   }
 
@@ -173,6 +191,8 @@ class DebitCod extends Component {
       table.loading = false;
       this.setState({ table });
     }, err => {
+      table.loading = false;
+      this.setState({ table });
       if (err.response.status === 401) {
         this.setState({ redirect: true });
         MySwal.fire({
@@ -229,7 +249,7 @@ class DebitCod extends Component {
       {
         Header: "Cabang Bank",
         accessor: "bankDistrict",
-        show: this.state.bankDistrict,
+        show: this.state.bankDistrict2,
         Cell: props => <p>{props.value}</p>
       },
       {
@@ -329,33 +349,88 @@ class DebitCod extends Component {
     if (this.validateError()) {
       this.setState({ error: true });
     } else {
-      this.setState({ modal: false, loadingSubmit: true });
+      let tempAmount = 0; 
+      let parsedAmount = 0;
+      const data = this.state;
+
+      if (this.state.isChanged) {
+        tempAmount = this.state.amountWithComma.split('.').join('');
+        if(tempAmount.indexOf(',') !== -1) {        
+          parsedAmount = parseFloat(tempAmount.replace(',', '.'));
+        }
+      } else {
+        parsedAmount = this.state.amount;
+      }
+
       let lines = {
         id: this.state.oneData.id,
-        fileId: this.state.image.id,
-        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
+        attachments: this.state.isDraft === true ? undefined : this.state.attachments,
+        amount: parsedAmount || 0,
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
-        tenantBankId: this.state.selectedBank.id
+        tenantBankId: this.state.selectedBank.id,
+        note: this.state.note,
       };
 
-      this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
-        response => {
-          this.setState({
-            modal2: true,
-            loadingSubmit: false,
-            modalResponse: true
-          });
-        },
-        err => {
-          this.setState({
-            loadingSubmit: false,
-            modal2: true,
-            modalError: true,
-            errorData: err.data[0].errorMessage
-          });
+      MySwal.fire({
+        title: '<strong>Konfirmasi Transfer</strong>',
+        icon: 'info',
+        html:
+          '<table className=\'table\' align=\'center\'>' +
+            '<tr>' +
+              '<th>No Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountNumber}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Nama Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountName}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Ballance Amount</th>' +
+              '<td>:</td>' +
+              `<td>${this.moneyFormat.numberFormat(data.oneData.amount)}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Total Bayar</th>' +
+              '<td>:</td>' +
+              `<td>Rp. ${parsedAmount.toLocaleString('id-ID')}</td>` +
+            '</tr>' +
+          '</table>',
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText:
+          'Ok',
+        cancelButtonText:
+          'Cancel',
+      }).then((result) => {
+        if(result.value) {
+          this.setState({modal: false, loadingSubmit: true})
+          this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
+            response => {
+              this.setState({
+                modal2: true,
+                loadingSubmit: false,
+                modalResponse: true,
+                isChanged: false,
+                attachments: [],
+              });
+            },
+            err => {
+              this.setState({
+                isChanged: false,
+                loadingSubmit: false,
+                modal2: true,
+                modalError: true,
+                attachments: [],
+                errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
+              });
+            }
+          );
         }
-      );
+      })
     }
   }
 
@@ -407,9 +482,6 @@ class DebitCod extends Component {
       for (let i = 0; i < attachment.length; i++) {
         data.push(
           <tr>
-            <td>
-              {i + 1} .
-            </td>
             <td colSpan="4">
               {attachment[i].customFileName}
             </td>
@@ -429,11 +501,10 @@ class DebitCod extends Component {
     return data;
   }
 
-
   showAttachment() {
     const view = [];
     if (this.state.oneData) {
-      this.state.oneData.attachments.map(function (attachment, i) {
+      this.state.attachments.map(function (attachment, i) {
         view.push(
           <>
             <tr>
@@ -442,7 +513,7 @@ class DebitCod extends Component {
                 {i + 1} .
               </td>
               <td>
-                <a href={attachment.fileUrl}>{attachment.customFileName}</a>
+                <a rel="noopener noreferrer" target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
               </td>
             </tr>
           </>
@@ -451,6 +522,120 @@ class DebitCod extends Component {
       })
     }
     return view;
+  }
+
+  editData() {
+    this.setState({modal3: false, loadingSubmit: true});
+
+    const data = this.state;
+    const oneData = data.oneData;
+    const attachments = [];
+    for(let i = 0; i < data.attachments.length; i++) {
+      attachments.push({
+        id: data.attachments[i].id,
+        isMain: i === 0 ? true : false,
+        customFileName: data.attachments[i].customFileName,
+      })
+    }
+
+    const payload = {
+      id: oneData.id,
+      tenantId: oneData.tenantId,
+      note: data.note,
+      amount: oneData.amount,
+      feeTransfer: oneData.feeTransfer,
+      attachments: attachments,
+      tenantBankId: null,
+    }
+
+    this.debitRestService.putDebitCod(oneData.id, payload).subscribe(res => {
+      MySwal.fire({
+        type: "success",
+        title: "Sukses Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({loadingSubmit: false});
+      this.loadData();
+    }, err => {
+      MySwal.fire({
+        type: "error",
+        title: "Gagal Edit Data.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({loadingSubmit: false});
+      this.loadData();
+    })
+  }
+
+  actionTemplate(rowData, column) {
+    if (rowData.status !== "draft") {
+      return (
+        <div>
+          <Button
+            outline
+            color="info"
+            onClick={() => {
+              // this.setState({attachments: []});
+    
+              let attachments = this.state.attachments;
+              let realAttachments = this.state.realAttachments;
+              attachments = [];
+              if(rowData.attachments) {
+                for(let i = 0; i < rowData.attachments.length; i++) {
+                  attachments.push(rowData.attachments[i]);
+                  realAttachments.push(rowData.attachments[i]);
+                }
+              }
+              this.setState({ 
+                note: rowData.note,
+                attachments,
+                realAttachments,
+                oneData: rowData,
+                modal3: true,
+              });
+            }}
+          >
+            <i className="simple-icon-paper-clip mr-2" />
+            Bukti Transfer
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Button
+            outline
+            color="success"
+            onClick={() => {
+              this.loadRelatedData(rowData.tenantId);
+              this.setState({ modal: true });
+              this.setState({
+                error: false,
+                note: rowData.note,
+                amountWithComma: rowData.amount.toString(),
+                selectedBank: [],
+                image: null,
+                imageUrl: null,
+                loading: false,
+                oneData: rowData,
+                amount: rowData.amount
+              });
+            }}
+          >
+            <i className="iconsminds-upload mr-2 " />
+            Upload
+          </Button>
+        </div>
+      );
+    }
   }
 
   render() {
@@ -589,6 +774,17 @@ class DebitCod extends Component {
                   </div>
                 </div>
 
+                <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+                  {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="amount" header="Jumlah Saldo Ditarik" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="bankName" header="Ditarik ke Rekening" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'150px'}} field="status" header="status" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
+                </DataTable>
+
+                {/*
                 <ReactTable
                   minRows={0}
                   data={this.state.table.data}
@@ -610,6 +806,7 @@ class DebitCod extends Component {
                     this.loadData();
                   }}
                 />
+                 */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
@@ -627,7 +824,7 @@ class DebitCod extends Component {
 
         {/* MODAL */}
         {this.state.modal && this.state.tenantBank !== null && (
-          <Modal isOpen={this.state.modal} toggle={this.toggle}>
+          <Modal isOpen={this.state.modal} >
             <ModalHeader toggle={this.toggle}>
               <IntlMessages id="modal.modalTitle" />
             </ModalHeader>
@@ -697,7 +894,24 @@ class DebitCod extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
+                      <NumberFormat isNumericString={true} thousandSeparator={'.'} decimalSeparator={','} value={this.state.amount} onValueChange={(values) => {
+                        const { value, formattedValue } = values;
+                        this.setState({isChanged: true, amount: value, amountWithComma: formattedValue});
+                      }} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      <Input
+                        type="textarea"
+                        className="form-control"
+                        onChange={event => {
+                          this.setState({ note: event.target.value });
+                        }}
+                        value={this.state.note}
+                      />
                     </td>
                   </tr>
                   <tr>
@@ -727,6 +941,15 @@ class DebitCod extends Component {
                 }}
               >
                 Upload
+              </Button>
+              <Button
+                color="primary"
+                outline
+                onClick={() => {
+                  this.toggle();
+                }}
+              >
+                Close
               </Button>
             </ModalFooter>
           </Modal>
@@ -772,22 +995,118 @@ class DebitCod extends Component {
                       {this.moneyFormat.numberFormat(this.state.oneData.amount)}
                     </td>
                   </tr>
-                  {this.showAttachment() && (
+                  {!this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        {this.state.oneData.note}
+                      </td>
+                    </tr>
+                  )}
+                  {this.state.isEdit && (
+                    <tr>
+                      <td>Note</td>
+                      <td>:</td>
+                      <td>
+                        <Input
+                          type="textarea"
+                          className="form-control"
+                          onChange={event => {
+                            this.setState({ note: event.target.value });
+                          }}
+                          value={this.state.note}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  {this.state.isEdit && (
+                      <tr>
+                      <td colSpan="3">
+                        <input
+                          type="file"
+                          onChange={this.fileHandler.bind(this)}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {this.state.spinner && (
+                    <Loader
+                      type="Oval"
+                      color="#51BEEA"
+                      height={80}
+                      width={80}
+                    />
+                  )}
+
+                  {!this.state.isEdit && this.showAttachment() && (
                     <tr>
                       <td>Lampiran</td>
                       <td>:</td>
                       <td></td>
                     </tr>
                   )}
-                  {this.showAttachment()}
+                  {!this.state.isEdit &&  this.showAttachment()}
+                  {this.state.isEdit && (
+                    this.isAttachment()
+                  )}
                 </tbody>
               </Table>
             </ModalBody>
             <ModalFooter>
+            {this.state.isEdit && (
+              <div>
+                <Button
+                  className="default"
+                  color="primary"
+                  style={{
+                    borderRadius: 6,
+                    marginRight: 10
+                  }}
+                  onClick={() => {
+                    this.setState({ isEdit: false });
+                    this.editData();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button
+                  className="default"
+                  color="primary"
+                  style={{
+                    borderRadius: 6
+                  }}
+                  onClick={() => {
+                    this.setState({ attachments: this.state.realAttachments,isEdit: false })
+                  }}
+                >
+                  Cancel
+              </Button>
+              </div>
+            )}
+            {!this.state.isEdit && (
+              <Button
+                className="default"
+                color="primary"
+                style={{
+                  borderRadius: 6
+                }}
+                onClick={() => {
+                  this.setState({ isEdit: true })
+                }}
+              >
+                Edit
+              </Button>
+
+            )}
               <Button
                 color="primary"
                 outline
-                onClick={() => this.setState({ modal3: false })}
+                style={{
+                  borderRadius: 6
+                }}
+                onClick={() => this.setState({ attachments: [], realAttachments: [], isEdit: false, modal3: false })}
               >
                 Close
               </Button>

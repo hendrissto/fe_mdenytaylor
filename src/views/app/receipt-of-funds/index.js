@@ -41,9 +41,11 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row as RowPrime } from 'primereact/row';
+import { Calendar } from 'primereact/calendar';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 
 class ReceiptOfFunds extends Component {
@@ -53,6 +55,7 @@ class ReceiptOfFunds extends Component {
     this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportReceiptofFunds();
+    this.columnFormat = new ColumnFormat();
     this.user = null;
 
     this.showModal = this.showModal.bind(this);
@@ -103,6 +106,7 @@ class ReceiptOfFunds extends Component {
       oneData: [],
       redirect: false,
       totalData: 0,
+      date: null,
       footerData: [
         [
           {
@@ -756,6 +760,7 @@ class ReceiptOfFunds extends Component {
     }
 
     let finish = data.lines;
+    
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
@@ -996,6 +1001,7 @@ class ReceiptOfFunds extends Component {
         deliveryNotes: array[i].statusDescription,
         airwaybillNumber: array[i].airwaybill.toString(),
         notes: array[i].notes || "",
+        receiverName: array[i].lastReceiverName || "",
         destination: array[i].receiverAddress || "",
         amount: array[i].totalAmount || 0,
         codValue: Math.round(array[i].codFeeRp) || 0,
@@ -1017,7 +1023,7 @@ class ReceiptOfFunds extends Component {
 
     let data = {
       ...lineValue,
-      uploadDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS"),
+      uploadDate: moment(this.state.date).format("YYYY-MM-DD"),
       uploadBy: this.user.user_name,
       courierChannelId: this.state.selectedCourier.id
     };
@@ -1195,7 +1201,8 @@ class ReceiptOfFunds extends Component {
     if (
       this.state.selectedCourier.length === 0 ||
       this.state.fileTemp === null ||
-      this.state.errorFile === true
+      this.state.errorFile === true ||
+      this.state.date === null
     ) {
       this.setState({ error: true });
       if (this.state.errorFile) {
@@ -1296,7 +1303,7 @@ class ReceiptOfFunds extends Component {
   }
 
   changeDataFormat(rowData, column) {
-    return moment(rowData.uploadDate).format("DD-MM-YYYY HH:mm") || '-';
+    return moment(rowData.uploadDate).format("DD-MM-YYYY") || '-';
   }
 
   loadDetailSellerFromExcel(rowData, column) {
@@ -1366,6 +1373,7 @@ class ReceiptOfFunds extends Component {
           <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
+          <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "goodValue")} />
           <Column footer={this.sumData(this.state.oneData, "shippingCharge")} />
           <Column footer={this.sumData(this.state.oneData, "discount")} />
@@ -1387,6 +1395,7 @@ class ReceiptOfFunds extends Component {
       <ColumnGroup>
         <RowPrime>
           <Column footer="Total" />
+          <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
           <Column footer=" " />
@@ -1544,8 +1553,8 @@ class ReceiptOfFunds extends Component {
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
                   <Column field="uploadDate" body={this.changeDataFormat} header="Upload Date" />
-                  <Column field="documentNumber" header="ID File" />
-                  <Column field="uploadBy" header="Upload By" />
+                  <Column field="documentNumber" header="ID File" body={this.columnFormat.emptyColumn} />
+                  <Column field="uploadBy" header="Upload By"  body={this.columnFormat.emptyColumn}/>
                   <Column header="Detail" body={this.actionTemplate} />
                 </DataTable>
                 <Paginator
@@ -1574,14 +1583,34 @@ class ReceiptOfFunds extends Component {
             </ModalHeader>
             <ModalBody>
               <div>
-                <Row>
+                <Row style={{
+                  marginBottom: 10
+                }}>
                   <Col
                     xs="3"
                     style={{
                       marginTop: 5
                     }}
                   >
-                    Courier
+                    Tanggal Rekap
+                  </Col>
+                  <Col
+                    xs="1"
+                    style={{
+                      marginTop: 5
+                    }}
+                  >
+                    :
+                  </Col>
+                  <Col>
+                    <Calendar value={this.state.date} onChange={(e) => this.setState({date: e.value})}></Calendar>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col
+                    xs="3"
+                  >
+                    Kurir
                   </Col>
                   <Col
                     xs="1"
@@ -1635,7 +1664,7 @@ class ReceiptOfFunds extends Component {
             <ModalBody>
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromBE} header="Nama Seller" />
-                <Column field="package" header="Jumlah Paket" />
+                <Column field="package" header="Jumlah Paket"  body={this.columnFormat.emptyColumn}/>
                 <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
                 <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
                 <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
@@ -1658,7 +1687,7 @@ class ReceiptOfFunds extends Component {
             <ModalBody>
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromExcel} header="Nama Seller" />
-                <Column field="package" header="Jumlah Paket" />
+                <Column field="package" header="Jumlah Paket" body={this.columnFormat.emptyColumn} />
                 <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
                 <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
                 <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
@@ -1686,10 +1715,11 @@ class ReceiptOfFunds extends Component {
               </ModalHeader>
               <ModalBody>
                 <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailThird} scrollable={true} scrollHeight="300px">
-                  <Column style={{ width: '250px' }} field="airwaybill" header="No Resi" />
-                  <Column style={{ width: '250px' }} field="deliveredNotes" header="Delivery Notes" />
-                  <Column style={{ width: '250px' }} field="destination" header="Destination" />
-                  <Column style={{ width: '250px' }} field="notes" header="Note" />
+                  <Column style={{ width: '250px' }} field="airwaybill" header="No Resi" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="statusDescription" header="Delivery Notes" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="lastReceiverName" header="Receiver Name" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="receiverAddress" header="Destination" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="notes" header="Note" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="goodsValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="discount" header="Discount" body={this.moneyFormat.currencyFormat} />
@@ -1698,9 +1728,9 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} field="codFee" header="Fee COD (%)" />
+                  <Column style={{ width: '250px' }} field="codFee" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="codFeeRp" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" />
+                  <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
                 </DataTable>
@@ -1725,10 +1755,11 @@ class ReceiptOfFunds extends Component {
             </ModalHeader>
             <ModalBody>
               <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailSecond} scrollable={true} scrollHeight="300px">
-                <Column style={{ width: '250px' }} field="airwaybillNumber" header="No Resi" />
-                <Column style={{ width: '250px' }} field="deliveryNotes" header="Delivery Notes" />
-                <Column style={{ width: '250px' }} field="destination" header="Destination" />
-                <Column style={{ width: '250px' }} field="notes" header="Note" />
+                <Column style={{ width: '250px' }} field="airwaybillNumber" header="No Resi" body={this.columnFormat.emptyColumn} />
+                <Column style={{ width: '250px' }} field="deliveryNotes" header="Delivery Notes" body={this.columnFormat.emptyColumn} />
+                <Column style={{ width: '250px' }} field="receiverName" header="Receiver Name" body={this.columnFormat.emptyColumn} />
+                <Column style={{ width: '250px' }} field="destination" header="Destination" body={this.columnFormat.emptyColumn} />
+                <Column style={{ width: '250px' }} field="notes" header="Note" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="goodValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="discount" header="Discount" body={this.moneyFormat.currencyFormat} />
@@ -1737,9 +1768,9 @@ class ReceiptOfFunds extends Component {
                 <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
-                <Column style={{ width: '250px' }} field="codFeePercentage" header="Fee COD (%)" />
+                <Column style={{ width: '250px' }} field="codFeePercentage" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="codFeeValue" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
-                <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" />
+                <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="receiveAmount" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
               </DataTable>
