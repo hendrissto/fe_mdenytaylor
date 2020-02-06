@@ -606,10 +606,12 @@ class WalletTransactions extends Component {
                       <NumberFormat
                         className="form-control"
                         isNumericString={true}
-                        thousandSeparator={true}
+                        thousandSeparator={'.'}
+                        decimalSeparator={','}
                         value={this.state.amount}
-                        onChange={event => {
-                          this.setState({ amount: event.target.value });
+                        onValueChange={(values) => {
+                          const { value, formattedValue } = values;
+                          this.setState({ amount: value });
                         }}
                       />
                     </td>
@@ -717,14 +719,14 @@ class WalletTransactions extends Component {
                     <td>Amount</td>
                     <td>:</td>
                     <td>
-                      {this.moneyFormat.numberFormat(this.state.oneData.amount)}
+                      Rp. {this.state.oneData.amount.toLocaleString('id-ID')}
                     </td>
                   </tr>
                   <tr>
                     <td>Fee Transfer</td>
                     <td>:</td>
                     <td>
-                      {this.moneyFormat.numberFormat(this.state.oneData.feeTransfer)}
+                      Rp. {this.state.oneData.feeTransfer.toLocaleString('id-ID')}
                     </td>
                   </tr>
                   {!this.state.isEdit && (
