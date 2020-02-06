@@ -24,6 +24,7 @@ import TenantsBankRestService from "../../../api/tenantsBankRestService";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 
 export default class TenantsBank extends Component {
@@ -39,6 +40,7 @@ export default class TenantsBank extends Component {
     this.resetData = this.resetData.bind(this);
     this.editData = this.editData.bind(this);
     this.actionTemplate = this.actionTemplate.bind(this);
+    this.columnFormat = new ColumnFormat();
 
     this.state = {
       loading: false,
@@ -349,22 +351,22 @@ export default class TenantsBank extends Component {
                   <Column
                     style={{ width: "250px" }}
                     field="accountNumber"
-                    header="No Rekening"
+                    header="No Rekening" body={this.columnFormat.emptyColumn}
                   />
                   <Column
                     style={{ width: "250px" }}
                     field="accountName"
-                    header="Nama Rekening"
+                    header="Nama Rekening" body={this.columnFormat.emptyColumn}
                   />
                   <Column
                     style={{ width: "250px" }}
                     field="bank.bankName"
-                    header="Bank"
+                    header="Bank" body={this.columnFormat.emptyColumn}
                   />
                   <Column
                     style={{ width: "250px" }}
                     field="district"
-                    header="Cabang Bank"
+                    header="Cabang Bank" body={this.columnFormat.emptyColumn}
                   />
                   <Column
                     style={{ width: "250px" }}

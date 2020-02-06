@@ -37,6 +37,7 @@ import { Column } from 'primereact/column';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 
 // const ReactTableFixedColumn = withFixedColumns(ReactTable);
@@ -53,6 +54,7 @@ export default class CODReceiptNumber extends Component {
     this.toggle = this.toggle.bind(this);
     this.exportData = this.exportData.bind(this);
     this.loadAllData = this.loadAllData.bind(this);
+    this.columnFormat = new ColumnFormat();
 
     this.state = {
       sellerName: true,
@@ -573,12 +575,12 @@ export default class CODReceiptNumber extends Component {
                 </div>
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
-                  <Column style={{width:'250px'}} field="sellerName" header="Seller Name"/>
-                  <Column style={{width:'250px'}} field="airwaybillNumber" header="No Resi" />
-                  <Column style={{width:'250px'}} field="tenantId" header="Tenant ID" />
-                  <Column style={{width:'250px'}} field="courierChannelId" header="Kurir" />
-                  <Column style={{width:'250px'}} field="destination" header="Destination" />
-                  <Column style={{width:'250px'}} field="notes" header="Note" />
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller Name" body={this.columnFormat.emptyColumn}/>
+                  <Column style={{width:'250px'}} field="airwaybillNumber" header="No Resi" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="tenantId" header="Tenant ID" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="courierChannelId" header="Kurir" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="destination" header="Destination" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="notes" header="Note" body={this.columnFormat.emptyColumn} />
                   <Column style={{width:'250px'}} field="goodValue" header="Goods Value" body={this.moneyFormat.currencyFormat} />
                   <Column style={{width:'250px'}} field="shippingCharge" header="Shipping Charge" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="discount" header="Discount" body={this.moneyFormat.currencyFormat}  />
@@ -587,10 +589,10 @@ export default class CODReceiptNumber extends Component {
                   <Column style={{width:'250px'}} field="total" header="Total" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat}  />
-                  <Column style={{width:'250px'}} field="codFeePercentage" header="COD Fee (%)" />
+                  <Column style={{width:'250px'}} field="codFeePercentage" header="COD Fee (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{width:'250px'}} field="codFeeValue" header="COD Fee (Rp)" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="receiveAmount" header="Receive Amount" body={this.moneyFormat.currencyFormat}  />
-                  <Column style={{width:'250px'}} field="deliveryNotes" header="Delivery Notes" />
+                  <Column style={{width:'250px'}} field="deliveryNotes" header="Delivery Notes" body={this.columnFormat.emptyColumn} />
                 </DataTable>
                 {/*
                 <ReactTableFixedColumn

@@ -46,6 +46,7 @@ import { AutoComplete } from 'primereact/autocomplete';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import TenantRestService from "../../../api/tenantRestService";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 class DebitCod extends Component {
   constructor(props) {
@@ -68,6 +69,7 @@ class DebitCod extends Component {
     this.showAttachment = this.showAttachment.bind(this);
     this.rmAttachment = this.rmAttachment.bind(this);
     this.actionTemplate = this.actionTemplate.bind(this);
+    this.columnFormat = new ColumnFormat();
 
     this.state = {
       deliveryDate: true,
@@ -775,11 +777,11 @@ class DebitCod extends Component {
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
                   {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
-                  <Column style={{width:'250px'}} field="sellerName" header="Seller" />
+                  <Column style={{width:'250px'}} field="sellerName" header="Seller" body={this.columnFormat.emptyColumn} />
                   <Column style={{width:'250px'}} field="amount" header="Jumlah Saldo Ditarik" body={this.moneyFormat.currencyFormat}  />
-                  <Column style={{width:'250px'}} field="bankName" header="Ditarik ke Rekening" />
-                  <Column style={{width:'250px'}} field="bankDistrict" header="Cabang Bank" />
-                  <Column style={{width:'150px'}} field="status" header="status" />
+                  <Column style={{width:'250px'}} field="bankName" header="Ditarik ke Rekening" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'250px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn} />
+                  <Column style={{width:'150px'}} field="status" header="status" body={this.columnFormat.emptyColumn} />
                   <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
                 </DataTable>
 
