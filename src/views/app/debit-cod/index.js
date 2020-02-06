@@ -559,6 +559,7 @@ class DebitCod extends Component {
         customClass: "swal-height"
       });
       this.setState({loadingSubmit: false});
+      this.loadData();
     }, err => {
       MySwal.fire({
         type: "error",
@@ -570,6 +571,7 @@ class DebitCod extends Component {
         customClass: "swal-height"
       });
       this.setState({loadingSubmit: false});
+      this.loadData();
     })
   }
 
