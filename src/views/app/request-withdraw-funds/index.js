@@ -555,6 +555,7 @@ class WithdrawFunds extends Component {
                 modal2: true,
                 loadingSubmit: false,
                 modalResponse: true,
+                attachments: [],
                 modalError: false
               });
             },
@@ -563,6 +564,7 @@ class WithdrawFunds extends Component {
                 loadingSubmit: false,
                 modal2: true,
                 modalError: true,
+                attachments: [],
                 modalResponse: false,
                 errorData: err.data[0].errorMessage
               });
