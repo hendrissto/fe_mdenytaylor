@@ -43,12 +43,14 @@ import { Column } from 'primereact/column';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
     this.requestWithdrawRest = new WithdrawRestService();
+    this.columnFormat = new ColumnFormat();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.exportService = new ExportWithdrawFunds();
@@ -874,14 +876,14 @@ class WithdrawFunds extends Component {
                 </div>
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
-                  <Column style={{ width: '250px' }} field="companyName" header="Company" />
-                  <Column style={{ width: '250px' }} field="companyEmail" header="Company Email" />
-                  <Column style={{ width: '250px' }} field="fullName" header="Full Name" />
-                  <Column style={{ width: '250px' }} field="username" header="Username" />
-                  <Column style={{ width: '250px' }} field="userEmail" header="Email" />
-                  <Column style={{ width: '250px' }} field="industry" header="Industri" />
-                  <Column style={{ width: '250px' }} field="phone" header="Phone" />
-                  <Column style={{ width: '250px' }} field="website" header="Website" />
+                  <Column style={{ width: '250px' }} field="companyName" header="Company" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="companyEmail" header="Company Email" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="fullName" header="Full Name" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="username" header="Username" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="userEmail" header="Email" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="industry" header="Industri" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="phone" header="Phone" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="website" header="Website" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
                 </DataTable>

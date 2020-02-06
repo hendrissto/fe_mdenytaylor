@@ -27,6 +27,7 @@ import { Column } from 'primereact/column';
 import { Paginator } from 'primereact/paginator';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 
 const MySwal = withReactContent(Swal);
 
@@ -71,6 +72,7 @@ class WalletTransactions extends Component {
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.moneyFormat = new MoneyFormat();
+    this.columnFormat = new ColumnFormat();
     this.fileHandler = this.fileHandler.bind(this);
     this.isAttachment = this.isAttachment.bind(this);
     this.rmAttachment = this.rmAttachment.bind(this);
@@ -187,7 +189,7 @@ class WalletTransactions extends Component {
           catchError(error => {
             MySwal.fire({
               type: "error",
-              title: "Gagal input data.",
+              title:  error.data[0] ? error.data[0].errorMessage : 'Tidak diketahui',
               toast: true,
               position: "top-end",
               timer: 2000,
@@ -335,7 +337,7 @@ class WalletTransactions extends Component {
   }
 
   changeDateFormat(rowData, column) {
-    return moment(rowData['transactionDate']).format('DD-MM-YYYY');
+    return moment(rowData['transactionDate']).format('DD-MM-YYYY') || '-';
   }
 
   showAttachment() {
@@ -461,7 +463,9 @@ class WalletTransactions extends Component {
                   image: null,
                   imageUrl: null,
                   attachments: [],
-              
+
+                  selectedBank: null,
+                  tenantBank: null,
                   tenantOptions: null,
                   tenantSelected: null,
                   modalAddWallet: true 
@@ -479,14 +483,14 @@ class WalletTransactions extends Component {
           <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
             {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
             <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
-            <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi"/>
-            <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" />
-            <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" />
-            <Column style={{width:'200px'}} field="bankName" header="Nama Bank" />
-            <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" />
+            <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
+            <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
+            <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
+            <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
+            <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
             <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
             <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
-            <Column style={{width:'200px'}} field="note" header="Note" />
+            <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
             <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
           </DataTable>
           <Paginator
