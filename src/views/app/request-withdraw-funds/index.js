@@ -197,9 +197,9 @@ class WithdrawFunds extends Component {
   }
 
   loadTenantBank(id) {
-    this.setState({ loadingSubmit: true })
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(
       response => {
+        this.setState({ loadingSubmit: false })
         this.setState({ tenantBank: response.data });
       },
       err => {
@@ -492,7 +492,8 @@ class WithdrawFunds extends Component {
         customClass: "swal-height"
       });
     } else {
-      this.setState({ modal: false, loadingSubmit: true, errorData: "" });
+      const data = this.state;
+      this.setState({ errorData: "" });
 
       let lines = {
         attachments: this.state.isDraft === true ? undefined : this.state.attachments,
@@ -503,24 +504,81 @@ class WithdrawFunds extends Component {
         isDraft: this.state.isDraft,
         note: this.state.note,
       };
-
-      this.requestWithdrawRest.postBallance(lines).subscribe(
-        response => {
-          this.setState({
-            modal2: true,
-            loadingSubmit: false,
-            modalResponse: true
-          });
-        },
-        err => {
-          this.setState({
-            loadingSubmit: false,
-            modal2: true,
-            modalError: true,
-            errorData: err.data[0].errorMessage
-          });
+      
+      MySwal.fire({
+        title: '<strong>Konfirmasi Transfer</strong>',
+        icon: 'info',
+        html:
+          '<table className=\'table\' align=\'center\'>' +
+            '<tr>' +
+              '<th>No Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountNumber}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Nama Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountName}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Ballance Amount</th>' +
+              '<td>:</td>' +
+              `<td>${this.moneyFormat.numberFormat(data.oneData.balanceAmount)}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Total Bayar</th>' +
+              '<td>:</td>' +
+              `<td>${this.moneyFormat.numberFormat(lines.amount)}</td>` +
+            '</tr>' +
+          '</table>',
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText:
+          'Ok',
+        cancelButtonText:
+          'Cancel',
+      }).then((result) => {
+        if(result.value) {
+          this.setState({modal: false, loadingSubmit: true})
+          this.requestWithdrawRest.postBallance(lines).subscribe(response => {
+              this.setState({
+                modal2: true,
+                loadingSubmit: false,
+                modalResponse: true,
+                modalError: false
+              });
+            },
+            err => {
+              this.setState({
+                loadingSubmit: false,
+                modal2: true,
+                modalError: true,
+                modalResponse: false,
+                errorData: err.data[0].errorMessage
+              });
+            }
+          );
         }
-      );
+      })
+
+      // this.requestWithdrawRest.postBallance(lines).subscribe(
+      //   response => {
+      //     this.setState({
+      //       modal2: true,
+      //       loadingSubmit: false,
+      //       modalResponse: true
+      //     });
+      //   },
+      //   err => {
+      //     this.setState({
+      //       loadingSubmit: false,
+      //       modal2: true,
+      //       modalError: true,
+      //       errorData: err.data[0].errorMessage
+      //     });
+      //   }
+      // );
     }
   }
 
@@ -564,6 +622,7 @@ class WithdrawFunds extends Component {
             this.loadTenantBank(rowData.tenantId);
             this.toggle();
             this.setState({
+              loadingSubmit: true,
               oneData: rowData,
               amount: rowData.balanceAmount
             });
