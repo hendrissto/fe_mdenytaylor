@@ -42,7 +42,6 @@ import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { AutoComplete } from 'primereact/autocomplete';
-import { InputText } from 'primereact/inputtext';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
