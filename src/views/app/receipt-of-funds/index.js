@@ -67,6 +67,8 @@ class ReceiptOfFunds extends Component {
     this.loadDetailSellerFromBE = this.loadDetailSellerFromBE.bind(this);
     this.loadDetailSellerFromExcel = this.loadDetailSellerFromExcel.bind(this);
     this.moneyFormat.currencyFormat = this.moneyFormat.currencyFormat.bind(this);
+    this.exportDetailDataToExcel = this.exportDetailDataToExcel.bind(this);
+
     this.state = {
       uploadDateShow: true,
       idFileShow: true,
@@ -1275,7 +1277,7 @@ class ReceiptOfFunds extends Component {
     };
 
     this.codRest.getReceiptFunds({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Receipt of Funds");
+      this.exportService.exportToCSV(res.data, "Receipt of Funds", true);
       this.setState({ loading: false });
     });
   }
@@ -1329,6 +1331,13 @@ class ReceiptOfFunds extends Component {
         {rowData.osName}
       </Button>
     )
+  }
+
+  exportDetailDataToExcel(data) {
+    for(let i = 0; i < data.length; i++) {
+      delete data[i]['lines'];
+    }
+    this.exportService.exportToCSV(data, "Detail COD", false);
   }
 
   render() {
@@ -1614,7 +1623,14 @@ class ReceiptOfFunds extends Component {
             className="modal-large" contentClassName="content-large"
           >
             <ModalHeader>
-              <IntlMessages id="modal.receiptDataCOD" />
+              <div className="row">
+                <div className="text-left">
+                  Data Resi COD
+                </div>
+                <div className="pull-right">
+                  <Button style={{position: 'absolute', right: '25px', borderRadius: '5px'}} onClick={() => {this.exportDetailDataToExcel(this.state.data)}}>Export</Button>
+                </div>
+              </div>
             </ModalHeader>
             <ModalBody>
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
@@ -1626,7 +1642,7 @@ class ReceiptOfFunds extends Component {
               </DataTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.setState({ resiModalDetail: false })}>
+              <Button onClick={() => this.setState({ resiModalDetail: false })} style={{borderRadius: '5px'}}>
                 OK
               </Button>
             </ModalFooter>
