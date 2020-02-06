@@ -108,6 +108,8 @@ class DebitCod extends Component {
       redirect: false,
       isEdit: false,
       note: "",
+      amountWithComma: "",
+      isChanged: false,
     };
   }
 
@@ -139,8 +141,9 @@ class DebitCod extends Component {
       imageUrl: null,
       image: null,
       modal: !this.state.modal,
-      note: "dddd",
-      attachments: []
+      note: "",
+      attachments: [],
+      isChanged: false,
     });
   }
 
@@ -344,34 +347,86 @@ class DebitCod extends Component {
     if (this.validateError()) {
       this.setState({ error: true });
     } else {
-      this.setState({ modal: false, loadingSubmit: true });
+      let tempAmount = 0; 
+      let parsedAmount = 0;
+      const data = this.state;
+
+      if (this.state.isChanged) {
+        tempAmount = this.state.amountWithComma.split('.').join('');
+        if(tempAmount.indexOf(',') !== -1) {        
+          parsedAmount = parseFloat(tempAmount.replace(',', '.'));
+        }
+      } else {
+        parsedAmount = this.state.amount;
+      }
+
       let lines = {
         id: this.state.oneData.id,
         fileId: this.state.image.id,
-        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
+        amount: parsedAmount || 0,
         feeTransfer: 2500,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
         note: this.state.note,
       };
 
-      this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
-        response => {
-          this.setState({
-            modal2: true,
-            loadingSubmit: false,
-            modalResponse: true
-          });
-        },
-        err => {
-          this.setState({
-            loadingSubmit: false,
-            modal2: true,
-            modalError: true,
-            errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
-          });
+      MySwal.fire({
+        title: '<strong>Konfirmasi Transfer</strong>',
+        icon: 'info',
+        html:
+          '<table className=\'table\' align=\'center\'>' +
+            '<tr>' +
+              '<th>No Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountNumber}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Nama Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountName}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Ballance Amount</th>' +
+              '<td>:</td>' +
+              `<td>${this.moneyFormat.numberFormat(data.oneData.balanceAmount)}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Total Bayar</th>' +
+              '<td>:</td>' +
+              `<td>Rp. ${parsedAmount.toLocaleString('id-ID')}</td>` +
+            '</tr>' +
+          '</table>',
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText:
+          'Ok',
+        cancelButtonText:
+          'Cancel',
+      }).then((result) => {
+        if(result.value) {
+          this.setState({modal: false, loadingSubmit: true})
+          this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
+            response => {
+              this.setState({
+                modal2: true,
+                loadingSubmit: false,
+                modalResponse: true,
+                isChanged: false,
+              });
+            },
+            err => {
+              this.setState({
+                isChanged: false,
+                loadingSubmit: false,
+                modal2: true,
+                modalError: true,
+                errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
+              });
+            }
+          );
         }
-      );
+      })
     }
   }
 
@@ -518,17 +573,6 @@ class DebitCod extends Component {
   }
 
   actionTemplate(rowData, column) {
-    // return <div>
-    //   <Button
-    //     type="button"
-    //     icon="pi pi-search"
-    //     onClick={() => this.loadDetailData(rowData.id)}
-    //     className="p-button-success"
-    //   >
-    //     Detail
-    //     </Button>
-    // </div>;
-    
     if (rowData.status !== "draft") {
       return (
         <div>
@@ -571,7 +615,9 @@ class DebitCod extends Component {
               this.loadRelatedData(rowData.tenantId);
               this.setState({ modal: true });
               this.setState({
+                error: false,
                 note: rowData.note,
+                amountWithComma: rowData.amount.toString(),
                 selectedBank: [],
                 image: null,
                 imageUrl: null,
@@ -845,7 +891,10 @@ class DebitCod extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
+                      <NumberFormat isNumericString={true} thousandSeparator={'.'} decimalSeparator={','} value={this.state.amount} onValueChange={(values) => {
+                        const { value, formattedValue } = values;
+                        this.setState({isChanged: true, amount: value, amountWithComma: formattedValue});
+                      }} />
                     </td>
                   </tr>
                   <tr>
