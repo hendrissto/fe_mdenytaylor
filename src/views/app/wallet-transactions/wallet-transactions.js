@@ -179,7 +179,7 @@ class WalletTransactions extends Component {
           ? parseInt(this.state.feeAmount)
           : parseFloat(this.state.feeAmount.replace(/,/g, "")),
         attachments: this.state.attachments,
-        tenantBankId: !this.state.isCredit ? this.state.selectedBank.bankId : undefined,
+        tenantBankId: !this.state.isCredit ? this.state.selectedBank.id : undefined,
       };
 
       this.walletTransactionsRestService
