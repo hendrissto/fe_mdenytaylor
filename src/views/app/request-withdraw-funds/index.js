@@ -113,7 +113,8 @@ class WithdrawFunds extends Component {
       redirect: false,
       errorData: "",
       totalData: 0,
-      note: ""
+      note: "",
+      amountWithComma: "",
     };
 
     this.loadData = this.loadData.bind(this);
@@ -493,12 +494,20 @@ class WithdrawFunds extends Component {
       });
     } else {
       const data = this.state;
+      const tempAmount = this.state.amountWithComma.split('.').join('');
+      let parsedAmount = 0;
       this.setState({ errorData: "" });
+
+      if(tempAmount.indexOf(',') !== -1) {        
+        parsedAmount = parseFloat(tempAmount.replace(',', '.'));
+      } else {
+        parsedAmount = parseInt(this.state.amount);
+      }
 
       let lines = {
         attachments: this.state.isDraft === true ? undefined : this.state.attachments,
-        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
-        feeTransfer: 2500,
+        amount: parsedAmount || 0,
+        feeTransfer: 0,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
         isDraft: this.state.isDraft,
@@ -528,7 +537,7 @@ class WithdrawFunds extends Component {
             '<tr>' +
               '<th>Total Bayar</th>' +
               '<td>:</td>' +
-              `<td>${this.moneyFormat.numberFormat(lines.amount)}</td>` +
+              `<td>Rp. ${parsedAmount.toLocaleString('id-ID')}</td>` +
             '</tr>' +
           '</table>',
         showCloseButton: true,
@@ -975,7 +984,10 @@ class WithdrawFunds extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
+                      <NumberFormat isNumericString={true} thousandSeparator={'.'} decimalSeparator={','} value={this.state.amount} onValueChange={(values) => {
+                        const { value, formattedValue } = values;
+                        this.setState({amount: value, amountWithComma: formattedValue});
+                      }} />
                     </td>
                   </tr>
                   <tr>
