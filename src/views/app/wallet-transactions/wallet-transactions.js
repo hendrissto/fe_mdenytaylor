@@ -26,6 +26,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Paginator } from 'primereact/paginator';
 import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
 
 const MySwal = withReactContent(Swal);
 
@@ -34,7 +35,7 @@ class WalletTransactions extends Component {
     amount: null,
     note: null,
     isCredit: true,
-    feeAmount: 0,
+    feeAmount: null,
 
     image: null,
     loading: false,
@@ -131,7 +132,6 @@ class WalletTransactions extends Component {
     if (
       this.state.amount === null ||
       this.state.amount === "" ||
-      this.state.feeAmount === null || this.state.feeAmount === "" ||
       this.state.tenantSelected.length === 0 ||
       (this.state.attachments && this.state.attachments.length === 0)
     ) {
@@ -167,7 +167,8 @@ class WalletTransactions extends Component {
         customClass: "swal-height"
       });
     } else {
-      this.setState({ mainLoading: true });
+			
+      this.setState({ modalAddWallet: false, mainLoading: true });
       const payload = {
         tenantId: this.state.tenantSelected.id,
         isCredit: this.state.isCredit,
@@ -175,12 +176,10 @@ class WalletTransactions extends Component {
         amount: Number.isInteger(this.state.amount)
           ? parseInt(this.state.amount)
           : parseFloat(this.state.amount.replace(/,/g, "")),
-        feeTransfer: Number.isInteger(this.state.feeAmount)
-          ? parseInt(this.state.feeAmount)
-          : parseFloat(this.state.feeAmount.replace(/,/g, "")),
+        feeTransfer: parseInt(this.state.feeAmount) || 0,
         attachments: this.state.attachments,
         tenantBankId: !this.state.isCredit ? this.state.selectedBank.id : undefined,
-      };
+			};
 
       this.walletTransactionsRestService
         .submitData(payload)
@@ -198,7 +197,7 @@ class WalletTransactions extends Component {
             return throwError(error);
           }),
           finalize(() => {
-            this.setState({  modalAddWallet: false, mainLoading: false });
+            this.setState({ mainLoading: false });
           })
         )
         .subscribe(() => {
@@ -616,16 +615,15 @@ class WalletTransactions extends Component {
                     <td> Fee Amount</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat
-                        className="form-control"
-                        isNumericString={true}
-                        defaultValue={this.state.feeAmount}
-                        thousandSeparator={true}
-                        value={this.state.feeAmount}
-                        onChange={event => {
-                          this.setState({ feeAmount: event.target.value });
-                        }}
-                      />
+                    <InputText
+                      keyfilter="pint"
+                      className="form-control"
+                      value={this.state.feeAmount}
+                      onChange={e =>
+                        this.setState({ feeAmount: e.target.value })
+											}
+											placeholder={0}
+                    />
                     </td>
                   </tr>
 
