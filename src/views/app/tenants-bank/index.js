@@ -18,6 +18,7 @@ import { AutoComplete } from 'primereact/autocomplete';
 import Loading from "../../../containers/pages/Spinner";
 
 import { DataTable } from "primereact/datatable";
+import { Paginator } from "primereact/paginator";
 import { Column } from "primereact/column";
 import TenantRestService from "../../../api/tenantRestService";
 import TenantsBankRestService from "../../../api/tenantsBankRestService";
@@ -41,6 +42,7 @@ export default class TenantsBank extends Component {
     this.editData = this.editData.bind(this);
     this.actionTemplate = this.actionTemplate.bind(this);
     this.columnFormat = new ColumnFormat();
+    this.handleOnPageChange = this.handleOnPageChange.bind(this);
 
     this.state = {
       loading: false,
@@ -143,6 +145,18 @@ export default class TenantsBank extends Component {
       this.setState({
         bankOptions: response.bank
       });
+    });
+  }
+
+  handleOnPageChange(paginationEvent) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    table.pagination.pageSize = paginationEvent.rows;
+    table.pagination.skipSize = paginationEvent.first;
+    table.pagination.currentPage = paginationEvent.page + 1;
+
+    this.setState({ table }, () => {
+      this.loadData();
     });
   }
 
@@ -374,6 +388,15 @@ export default class TenantsBank extends Component {
                     body={this.actionTemplate}
                   />
                 </DataTable>
+                <Paginator
+                  first={this.state.table.pagination.skipSize}
+                  rows={this.state.table.pagination.pageSize}
+                  totalRecords={
+                    Math.ceil(this.state.table.pagination.totalPages) *
+                    this.state.table.pagination.pageSize
+                  }
+                  onPageChange={this.handleOnPageChange}
+                />
               </div>
             </div>
           </Colxx>
