@@ -43,12 +43,14 @@ import { Column } from 'primereact/column';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
 
 class WithdrawFunds extends Component {
   constructor(props) {
     super(props);
     this.requestWithdrawRest = new WithdrawRestService();
+    this.columnFormat = new ColumnFormat();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.exportService = new ExportWithdrawFunds();
@@ -113,6 +115,8 @@ class WithdrawFunds extends Component {
       redirect: false,
       errorData: "",
       totalData: 0,
+      note: "",
+      amountWithComma: "",
     };
 
     this.loadData = this.loadData.bind(this);
@@ -196,9 +200,9 @@ class WithdrawFunds extends Component {
   }
 
   loadTenantBank(id) {
-    this.setState({ loadingSubmit: true })
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(
       response => {
+        this.setState({ loadingSubmit: false })
         this.setState({ tenantBank: response.data });
       },
       err => {
@@ -491,34 +495,103 @@ class WithdrawFunds extends Component {
         customClass: "swal-height"
       });
     } else {
-      this.setState({ modal: false, loadingSubmit: true, errorData: "" });
+      const data = this.state;
+      const tempAmount = this.state.amountWithComma.split('.').join('');
+      let parsedAmount = 0;
+      this.setState({ errorData: "" });
+
+      if(tempAmount.indexOf(',') !== -1) {        
+        parsedAmount = parseFloat(tempAmount.replace(',', '.'));
+      } else {
+        parsedAmount = parseInt(this.state.amount);
+      }
 
       let lines = {
         attachments: this.state.isDraft === true ? undefined : this.state.attachments,
-        amount: Number.isInteger(this.state.amount) ? this.state.amount : parseFloat(this.state.amount.replace(/,/g, '')),
-        feeTransfer: 2500,
+        amount: parsedAmount || 0,
+        feeTransfer: 0,
         tenantId: this.state.oneData.tenantId,
         tenantBankId: this.state.selectedBank.id,
-        isDraft: this.state.isDraft
+        isDraft: this.state.isDraft,
+        note: this.state.note,
       };
-
-      this.requestWithdrawRest.postBallance(lines).subscribe(
-        response => {
-          this.setState({
-            modal2: true,
-            loadingSubmit: false,
-            modalResponse: true
-          });
-        },
-        err => {
-          this.setState({
-            loadingSubmit: false,
-            modal2: true,
-            modalError: true,
-            errorData: err.data[0].errorMessage
-          });
+      
+      MySwal.fire({
+        title: '<strong>Konfirmasi Transfer</strong>',
+        icon: 'info',
+        html:
+          '<table className=\'table\' align=\'center\'>' +
+            '<tr>' +
+              '<th>No Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountNumber}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Nama Rekening</th>' +
+              '<td>:</td>' +
+              `<td>${data.selectedBank.accountName}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Ballance Amount</th>' +
+              '<td>:</td>' +
+              `<td>${this.moneyFormat.numberFormat(data.oneData.balanceAmount)}</td>` +
+            '</tr>' +
+            '<tr>' +
+              '<th>Total Bayar</th>' +
+              '<td>:</td>' +
+              `<td>Rp. ${parsedAmount.toLocaleString('id-ID')}</td>` +
+            '</tr>' +
+          '</table>',
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText:
+          'Ok',
+        cancelButtonText:
+          'Cancel',
+      }).then((result) => {
+        if(result.value) {
+          this.setState({modal: false, loadingSubmit: true})
+          this.requestWithdrawRest.postBallance(lines).subscribe(response => {
+              this.setState({
+                modal2: true,
+                loadingSubmit: false,
+                modalResponse: true,
+                attachments: [],
+                modalError: false
+              });
+            },
+            err => {
+              this.setState({
+                loadingSubmit: false,
+                modal2: true,
+                modalError: true,
+                attachments: [],
+                modalResponse: false,
+                errorData: err.data[0].errorMessage
+              });
+            }
+          );
         }
-      );
+      })
+
+      // this.requestWithdrawRest.postBallance(lines).subscribe(
+      //   response => {
+      //     this.setState({
+      //       modal2: true,
+      //       loadingSubmit: false,
+      //       modalResponse: true
+      //     });
+      //   },
+      //   err => {
+      //     this.setState({
+      //       loadingSubmit: false,
+      //       modal2: true,
+      //       modalError: true,
+      //       errorData: err.data[0].errorMessage
+      //     });
+      //   }
+      // );
     }
   }
 
@@ -562,6 +635,7 @@ class WithdrawFunds extends Component {
             this.loadTenantBank(rowData.tenantId);
             this.toggle();
             this.setState({
+              loadingSubmit: true,
               oneData: rowData,
               amount: rowData.balanceAmount
             });
@@ -802,14 +876,14 @@ class WithdrawFunds extends Component {
                 </div>
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
-                  <Column style={{ width: '250px' }} field="companyName" header="Company" />
-                  <Column style={{ width: '250px' }} field="companyEmail" header="Company Email" />
-                  <Column style={{ width: '250px' }} field="fullName" header="Full Name" />
-                  <Column style={{ width: '250px' }} field="username" header="Username" />
-                  <Column style={{ width: '250px' }} field="userEmail" header="Email" />
-                  <Column style={{ width: '250px' }} field="industry" header="Industri" />
-                  <Column style={{ width: '250px' }} field="phone" header="Phone" />
-                  <Column style={{ width: '250px' }} field="website" header="Website" />
+                  <Column style={{ width: '250px' }} field="companyName" header="Company" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="companyEmail" header="Company Email" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="fullName" header="Full Name" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="username" header="Username" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="userEmail" header="Email" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="industry" header="Industri" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="phone" header="Phone" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="website" header="Website" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
                 </DataTable>
@@ -914,7 +988,23 @@ class WithdrawFunds extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat thousandSeparator={true} value={this.state.amount} onChange={this.handleChange} />
+                      <NumberFormat isNumericString={true} thousandSeparator={'.'} decimalSeparator={','} value={this.state.amount} onValueChange={(values) => {
+                        const { value, formattedValue } = values;
+                        this.setState({amount: value, amountWithComma: formattedValue});
+                      }} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      <Input
+                        type="textarea"
+                        className="form-control"
+                        onChange={event => {
+                          this.setState({ note: event.target.value });
+                        }}
+                      />
                     </td>
                   </tr>
                   <tr>
