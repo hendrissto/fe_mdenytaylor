@@ -375,7 +375,7 @@ export default class TenantsBank extends Component {
                   <Column
                     style={{ width: "250px" }}
                     field="bank.bankName"
-                    header="Bank" body={this.columnFormat.emptyColumn}
+                    header="Bank"
                   />
                   <Column
                     style={{ width: "250px" }}

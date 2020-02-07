@@ -29,6 +29,7 @@ import { Paginator } from 'primereact/paginator';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { Checkbox } from 'primereact/checkbox';
 
 const MySwal = withReactContent(Swal);
 
@@ -65,6 +66,7 @@ class WalletTransactions extends Component {
     realAttachments: [],
     tenantBank: null,
     selectedBank: null,
+    isClodeoBank: false,
   };
   constructor(props) {
     super(props);
@@ -136,7 +138,8 @@ class WalletTransactions extends Component {
       this.state.amount === null ||
       this.state.amount === "" ||
       this.state.tenantSelected.length === 0 ||
-      (this.state.attachments && this.state.attachments.length === 0)
+      (this.state.attachments && this.state.attachments.length === 0) ||
+      (!this.state.selectedBank && !this.state.isClodeoBank)
     ) {
       return true;
     } else {
@@ -170,7 +173,10 @@ class WalletTransactions extends Component {
         customClass: "swal-height"
       });
     } else {
-			
+      let tenantBank = null;
+      if (!this.state.isClodeoBank) {
+        tenantBank = this.state.selectedBank.id;
+      }
       this.setState({ modalAddWallet: false, mainLoading: true });
       const payload = {
         tenantId: this.state.tenantSelected.id,
@@ -181,8 +187,9 @@ class WalletTransactions extends Component {
           : parseFloat(this.state.amount.replace(/,/g, "")),
         feeTransfer: parseInt(this.state.feeAmount) || 0,
         attachments: this.state.attachments,
-        tenantBankId: !this.state.isCredit ? this.state.selectedBank.id : undefined,
-			};
+        tenantBankId: !this.state.isCredit ? tenantBank : null,
+        isClodeoBank: this.state.isClodeoBank
+      };
 
       this.walletTransactionsRestService
         .submitData(payload)
@@ -522,20 +529,6 @@ class WalletTransactions extends Component {
                     <td>Tenant</td>
                     <td>:</td>
                     <td>
-                      {/* <Dropdown
-                          optionLabel="accountName"
-                          value={this.state.tenantSelected}
-                          options={this.state.tenantOptions}
-                          onChange={e => {
-                              this.setState({ tenantSelected: e.value });
-                          }}
-                          placeholder="Select a Tenant"
-                      /> */}
-
-                      {/* <Dropdown value={this.state.tenantSelected} options={this.state.tenantOptions} onChange={e => {
-                            this.setState({ tenantSelected: e.value });
-                        }} dataKey="id" optionLabel="companyInfo.name" filter={true} filterPlaceholder="Select Tenant" filterBy="companyInfo.name" showClear={true} /> */}
-
                       <AutoComplete
                         value={this.state.tenantSelected}
                         suggestions={this.state.tenantOptions}
@@ -584,6 +577,14 @@ class WalletTransactions extends Component {
                     </td>
                   </tr>
                   {!this.state.isCredit && (
+                    <tr>
+                      <td>{" "}</td>
+                      <td>{" "}</td>
+                      <td><Checkbox inputId="cb1" onChange={e => this.setState({isClodeoBank: e.checked})} checked={this.state.isClodeoBank}></Checkbox>
+                      <label htmlFor="cb1" className="p-checkbox-label">Transfer ke rekening Clodeo</label> </td>
+                    </tr>
+                  )}
+                  {!this.state.isCredit && !this.state.isClodeoBank && (
                     <tr>
                       <td> Bank </td>
                       <td>:</td>
