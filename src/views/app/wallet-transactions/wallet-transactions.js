@@ -5,7 +5,8 @@ import { Row, Table, Card, CardBody, Button, Input, InputGroup,
   ModalBody,
   ModalFooter, } from "reactstrap";
 import { Redirect } from "react-router-dom";
-import { Colxx } from "../../../components/common/CustomBootstrap";
+import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
+import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import NumberFormat from "react-number-format";
 import Loader from "react-loader-spinner";
 import RelatedDataRestService from "../../../api/relatedDataRestService";
@@ -422,6 +423,8 @@ class WalletTransactions extends Component {
     }
     return (
       <Fragment>
+        <Breadcrumb heading="Wallet Transactions" match={this.props.match} />
+        <Separator className="mb-5" />
         <div className="card">
           <div className="card-body">   
           <div className="row d-flex justify-content-between" style={{marginBottom: 10}}>
