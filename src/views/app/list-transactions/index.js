@@ -26,6 +26,7 @@ import "./list-transactions.style.scss";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import ExportListTransactions from "../../../core/export/ExportListTransactions";
 const MySwal = withReactContent(Swal);
 
 export default class ListTransactions extends Component {
@@ -34,6 +35,7 @@ export default class ListTransactions extends Component {
 
     this._moneyFormat = new MoneyFormat();
     this._listTransactionsService = new ListTransactionsService();
+    this.exportService = new ExportListTransactions();
 
     this.toogleDropdownSearch = this.toogleDropdownSearch.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
@@ -41,6 +43,7 @@ export default class ListTransactions extends Component {
     this.toggle = this.toggle.bind(this);
     this.checkAWB = this.checkAWB.bind(this);
     this.dataTransactions = this.dataTransactions.bind(this);
+    this.exportData = this.exportData.bind(this);
 
     this.state = {
       search: "",
@@ -777,95 +780,136 @@ export default class ListTransactions extends Component {
   _renderSearch() {
     const { valueSearch } = this.state;
     return (
-      <div className="mb-3 col-md-5">
-        <InputGroup className="filter">
-          <ButtonDropdown
-            isOpen={this.state.filterSearch}
-            toggle={this.toogleDropdownSearch}
-          >
-            <DropdownToggle className="btn-filter" caret>
-              {valueSearch.value}
-            </DropdownToggle>
-            <DropdownMenu className="list-filter">
-              <DropdownItem onClick={() => this.onChangeFilter("*", "All")}>
-                All
-              </DropdownItem>
-              <DropdownItem
-                onClick={() => this.onChangeFilter("tenantId", "ID Tenant")}
-              >
-                ID Tenant
-              </DropdownItem>
-              <DropdownItem
-                onClick={() =>
-                  this.onChangeFilter("ShippingTrackingNumber", "Nomor Resi")
+      <div className="mb-3 row col-md-12">
+        <div className="col-md-5">
+          <InputGroup className="filter">
+            <ButtonDropdown
+              isOpen={this.state.filterSearch}
+              toggle={this.toogleDropdownSearch}
+            >
+              <DropdownToggle className="btn-filter" caret>
+                {valueSearch.value}
+              </DropdownToggle>
+              <DropdownMenu className="list-filter">
+                <DropdownItem onClick={() => this.onChangeFilter("*", "All")}>
+                  All
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => this.onChangeFilter("tenantId", "ID Tenant")}
+                >
+                  ID Tenant
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() =>
+                    this.onChangeFilter("ShippingTrackingNumber", "Nomor Resi")
+                  }
+                >
+                  Nomor resi
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() =>
+                    this.onChangeFilter("Customer_displayName", "Nama Pelanggan")
+                  }
+                >
+                  Nama Pelanggan
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() =>
+                    this.onChangeFilter("CompanyInfo_CompanyName", "Company")
+                  }
+                >
+                  Company
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => this.onChangeFilter("Email", "Email")}
+                >
+                  Email
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => this.onChangeFilter("Phone", "Phone Company")}
+                >
+                  Nomor Telepon Company
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => this.onChangeFilter("Customer_phone", "Phone Customer")}
+                >
+                  Nomor Telepon Customer
+                </DropdownItem>
+              </DropdownMenu>
+            </ButtonDropdown>
+            <Input
+              placeholder="Search.."
+              name="search"
+              value={this.state.search}
+              onChange={this.handleInputChange}
+              onKeyPress={event => {
+                if (event.key === "Enter") {
+                  const table = this.state.table;
+
+                  table.pagination.skipSize = 0;
+                  this.setState({ table, resetPaginations: true }, () => {
+                    this.loadData();
+                  });
                 }
-              >
-                Nomor resi
-              </DropdownItem>
-              <DropdownItem
-                onClick={() =>
-                  this.onChangeFilter("Customer_displayName", "Nama Pelanggan")
-                }
-              >
-                Nama Pelanggan
-              </DropdownItem>
-              <DropdownItem
-                onClick={() =>
-                  this.onChangeFilter("CompanyInfo_CompanyName", "Company")
-                }
-              >
-                Company
-              </DropdownItem>
-              <DropdownItem
-                onClick={() => this.onChangeFilter("Email", "Email")}
-              >
-                Email
-              </DropdownItem>
-              <DropdownItem
-                onClick={() => this.onChangeFilter("Phone", "Phone Company")}
-              >
-                Nomor Telepon Company
-              </DropdownItem>
-              <DropdownItem
-                onClick={() => this.onChangeFilter("Customer_phone", "Phone Customer")}
-              >
-                Nomor Telepon Customer
-              </DropdownItem>
-            </DropdownMenu>
-          </ButtonDropdown>
-          <Input
-            placeholder="Search.."
-            name="search"
-            value={this.state.search}
-            onChange={this.handleInputChange}
-            onKeyPress={event => {
-              if (event.key === "Enter") {
+              }}
+            />
+            <Button
+              className="default btn-search"
+              color="primary"
+              onClick={() => {
                 const table = this.state.table;
 
                 table.pagination.skipSize = 0;
                 this.setState({ table, resetPaginations: true }, () => {
                   this.loadData();
                 });
-              }
-            }}
-          />
+              }}
+            >
+              <i className="simple-icon-magnifier" />
+            </Button>
+          </InputGroup>
+        </div>
+        <div className="col-md-7">
           <Button
-            className="default btn-search"
+            className="float-right default"
             color="primary"
-            onClick={() => {
-              const table = this.state.table;
-
-              table.pagination.skipSize = 0;
-              this.setState({ table, resetPaginations: true }, () => {
-                this.loadData();
-              });
+            style={{
+              marginRight: 10,
+              borderRadius: 6
             }}
+            onClick={() => this.exportData()}
           >
-            <i className="simple-icon-magnifier" />
+            Export
           </Button>
-        </InputGroup>
+        </div>
       </div>
     );
+  }
+
+  exportData() {
+    this.setState({loading: true});
+    const valueSearch = this.state.valueSearch.id;
+    const search = this.state.search === "" ? "*" : this.state.search;
+
+    const url =
+      this.state.valueSearch.value === "All"
+        ? encodeURIComponent(`${search}`)
+        : encodeURIComponent(`${valueSearch}:${search}`);
+
+    Axios.get(
+      `http://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&sort=CreateDateUtc%20desc`
+    ).then(response1 => {
+      Axios.get(
+        `http://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&rows=${response1.data.response.numFound}&sort=CreateDateUtc%20desc`
+      ).then(response => {
+      this.exportService.exportToCSV(response.data.response.docs, "List Transaksi 2020");
+      this.setState({loading: false});
+      });
+    });
+  }
+
+  loadAllData() {
+    
   }
 
   _renderTable() {
