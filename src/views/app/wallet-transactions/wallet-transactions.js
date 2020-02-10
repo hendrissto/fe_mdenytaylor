@@ -1,11 +1,18 @@
 import React, { Component, Fragment } from "react";
-import { Row, Table, Card, CardBody, Button, Input, InputGroup,
+import { 
+  // Row, 
+  Table, 
+  // Card, 
+  // CardBody, 
+  Button, 
+  Input, 
+  InputGroup,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter, } from "reactstrap";
 import { Redirect } from "react-router-dom";
-import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
+import { Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import NumberFormat from "react-number-format";
 import Loader from "react-loader-spinner";
@@ -356,7 +363,7 @@ class WalletTransactions extends Component {
           <>
             <tr>
               <td colSpan={4}>
-                <a target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
+                <a rel="noopener noreferrer" target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
               </td>
             </tr>
           </>
@@ -614,7 +621,7 @@ class WalletTransactions extends Component {
                         decimalSeparator={','}
                         value={this.state.amount}
                         onValueChange={(values) => {
-                          const { value, formattedValue } = values;
+                          const { value } = values;
                           this.setState({ amount: value });
                         }}
                       />

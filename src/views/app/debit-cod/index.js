@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import ReactTable from "react-table";
+// import ReactTable from "react-table";
 import {
-  Col,
+  // Col,
   Row,
   Card,
   CardBody,
@@ -22,7 +22,6 @@ import {
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
 import { Redirect } from "react-router-dom";
-import ModalComponent from "../../../components/shared/modal.js";
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -41,7 +40,6 @@ import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { AutoComplete } from 'primereact/autocomplete';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
