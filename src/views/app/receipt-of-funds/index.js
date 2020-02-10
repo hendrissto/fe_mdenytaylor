@@ -18,6 +18,7 @@ import { Redirect } from "react-router-dom";
 import { ExcelRenderer } from "react-excel-renderer";
 import Loading from "../../../containers/pages/Spinner";
 import { Paginator } from "primereact/paginator";
+import { InputText } from "primereact/inputtext";
 
 import React, { Component, Fragment } from "react";
 // import CsvParse from "@vtex/react-csv-parse";
@@ -104,6 +105,7 @@ class ReceiptOfFunds extends Component {
       resiModalSellerDetail: false,
       modalError: false,
       data: [],
+      initialData: [],
       oneData: [],
       redirect: false,
       totalData: 0,
@@ -843,7 +845,7 @@ class ReceiptOfFunds extends Component {
         });
       }
 
-      this.setState({ data: data, loading: false, resiModalDetail: true });
+      this.setState({ data: data, initialData: data, loading: false, resiModalDetail: true });
     });
   }
 
@@ -932,7 +934,7 @@ class ReceiptOfFunds extends Component {
               totalShippingCharge: Math.round(_.sumBy(newDataExcel, "totalShippingCharge"))
             }))
             .value();
-          this.setState({ data: data, resiModal: true });
+          this.setState({ data: data, initialData: data, resiModal: true });
         }
       }
     });
@@ -1360,6 +1362,20 @@ class ReceiptOfFunds extends Component {
     this.exportService.exportToCSV(tempData, "Detail Seller COD", false);
   }
 
+  handleSearchSellerName(e) {
+    const initialData = this.state.initialData;
+    const searchValue = e.target.value;
+    let search = [];
+
+    if (searchValue.length > 0) {
+      search = initialData.filter(item => item.osName.toLowerCase().includes(searchValue));
+    } else {
+      search = initialData;
+    }
+
+    this.setState({data: search});
+  }
+
   render() {
     const option = this.state.relatedData.courierChannel;
     if (this.state.redirect === true) {
@@ -1675,6 +1691,17 @@ class ReceiptOfFunds extends Component {
               </div>
             </ModalHeader>
             <ModalBody>
+            
+            <div className="col-md-3">
+              <label className="sr-only" for="inlineFormInputGroup">OS Name</label>
+              <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                  <div className="input-group-text" ><i className="simple-icon-magnifier"></i></div>
+                </div>
+                <input type="text" style={{borderRadius: '0px 5px 5px 0px'}} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => {this.handleSearchSellerName(e)}} />
+              </div>
+            </div>
+
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromBE} header="Nama Seller" />
                 <Column field="package" header="Jumlah Paket"  body={this.columnFormat.emptyColumn}/>
@@ -1698,6 +1725,17 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
+            
+              <div className="col-md-3">
+                <label className="sr-only" for="inlineFormInputGroup">OS Name</label>
+                <div className="input-group mb-2">
+                  <div className="input-group-prepend">
+                    <div className="input-group-text" ><i className="simple-icon-magnifier"></i></div>
+                  </div>
+                  <input type="text" style={{borderRadius: '0px 5px 5px 0px'}} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => {this.handleSearchSellerName(e)}} />
+                </div>
+              </div>
+
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromExcel} header="Nama Seller" />
                 <Column field="package" header="Jumlah Paket" body={this.columnFormat.emptyColumn} />
