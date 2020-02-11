@@ -67,6 +67,7 @@ class DebitCod extends Component {
     this.showAttachment = this.showAttachment.bind(this);
     this.rmAttachment = this.rmAttachment.bind(this);
     this.actionTemplate = this.actionTemplate.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
     this.columnFormat = new ColumnFormat();
 
     this.state = {
@@ -110,11 +111,22 @@ class DebitCod extends Component {
       note: "",
       amountWithComma: "",
       isChanged: false,
+      search: "",
     };
   }
 
   handleChange(e) {
     this.setState({ amount: e.target.value });
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   handleFilterChange(event) {
