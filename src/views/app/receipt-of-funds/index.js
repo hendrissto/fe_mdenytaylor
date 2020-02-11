@@ -1355,7 +1355,7 @@ class ReceiptOfFunds extends Component {
     let search = [];
 
     if (searchValue.length > 0) {
-      search = initialData.filter(item => item.osName.toLowerCase().includes(searchValue));
+      search = initialData.filter(item => item.osName.toLowerCase().includes(searchValue.toLowerCase()));
     } else {
       search = initialData;
     }
