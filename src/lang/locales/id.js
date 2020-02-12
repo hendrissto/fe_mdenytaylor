@@ -55,6 +55,8 @@ module.exports = {
     "title.total-balance": "Total Saldo",
   
     /* 03.Menu */
+    "menu.cod": "COD",
+    "menu.wallet": "E-Wallet",
     "menu.app": "Home",
     "menu.dashboard": "Dasbor",
     "menu.dashboards": "Dasbor",
