@@ -138,8 +138,7 @@ class WalletTransactions extends Component {
       this.state.amount === null ||
       this.state.amount === "" ||
       this.state.tenantSelected.length === 0 ||
-      (this.state.attachments && this.state.attachments.length === 0) ||
-      (!this.state.selectedBank && !this.state.isClodeoBank)
+      (!this.state.isCredit && !this.state.selectedBank && !this.state.isClodeoBank)
     ) {
       return true;
     } else {
@@ -174,7 +173,7 @@ class WalletTransactions extends Component {
       });
     } else {
       let tenantBank = null;
-      if (!this.state.isClodeoBank) {
+      if (!this.state.isClodeoBank && !this.state.isCredit) {
         tenantBank = this.state.selectedBank.id;
       }
       this.setState({ modalAddWallet: false, mainLoading: true });
@@ -186,7 +185,7 @@ class WalletTransactions extends Component {
           ? parseInt(this.state.amount)
           : parseFloat(this.state.amount.replace(/,/g, "")),
         feeTransfer: parseInt(this.state.feeAmount) || 0,
-        attachments: this.state.attachments,
+        attachments: this.state.attachments || null,
         tenantBankId: !this.state.isCredit ? tenantBank : null,
         isClodeoBank: this.state.isClodeoBank
       };

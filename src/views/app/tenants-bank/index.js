@@ -236,6 +236,7 @@ export default class TenantsBank extends Component {
               customClass: "swal-height"
             });
     
+            this.loadData();
             this.setState({loading: false, isEdit: false})
         }, err => {
           MySwal.fire({
@@ -248,6 +249,7 @@ export default class TenantsBank extends Component {
             customClass: "swal-height"
           });
     
+          this.loadData();
           this.setState({loading: false, isEdit: false})
         });
       } else {
