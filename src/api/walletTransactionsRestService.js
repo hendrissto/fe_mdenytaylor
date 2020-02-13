@@ -19,4 +19,12 @@ export default class WalletTransactionsRestService extends React.Component {
     editData(id, qParams) {
         return this.request.put(`/wallet/transaction/${id}`, qParams);
     }
+
+    loadDataTenantTransactions(qParams) {
+        return this.request.get('/wallet/tenant-transaction', qParams);
+    }
+
+    loadOneDataTenantTransactions(id, qParams) {        
+        return this.request.get(`/wallet/tenant-transaction/${id}`, qParams);
+    }
 }
