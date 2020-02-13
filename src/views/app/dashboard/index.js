@@ -53,12 +53,12 @@ export default class Dashboard extends Component {
             </Row>
             <Row>
               <Colxx lg="12" xl="6">
-                <CreditIssued value={this.moneyFormat.numberFormat(this.state.data.creditCOD)} />
-                <BalanceCredit value={this.moneyFormat.numberFormat(this.state.data.creditRemaining)} />
+                <CreditIssued value={this.state.data.creditCOD} />
+                <BalanceCredit value={this.state.data.creditRemaining} />
               </Colxx>
               <Colxx lg="12" xl="6">
-                <CODFee value={this.moneyFormat.numberFormat(this.state.data.feeCOD)} />
-                <FundReimbursement value={this.moneyFormat.numberFormat(this.state.data.creditTotal)} />
+                <CODFee value={this.state.data.feeCOD} />
+                <FundReimbursement value={this.state.data.creditTotal} />
               </Colxx>
             </Row>
           </div>

@@ -9,7 +9,7 @@ class FundReimbursement extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.fund-reimbursement' icon="iconsminds-financial" value={this.props.value} className="mb-4" />
+        <IconCard title='dashboards.cards.fund-reimbursement' icon="iconsminds-financial" value={'Rp. ' + this.props.value.toLocaleString('id-ID')} className="mb-4" />
       </div>
     )
   }

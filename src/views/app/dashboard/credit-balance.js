@@ -9,7 +9,7 @@ class CreditBalance extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag" value={this.props.value} className="mb-4" />
+        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag"  value={'Rp. ' + this.props.value.toLocaleString('id-ID')} className="mb-4" />
       </div>
     )
   }
