@@ -281,7 +281,7 @@ class DebitCod extends Component {
                   outline
                   color="info"
                   onClick={() => {
-                    this.setState({ modal3: true });
+                    this.setState({ note: null, modal3: true });
                     this.setState({ oneData: props.original });
                   }}
                 >
