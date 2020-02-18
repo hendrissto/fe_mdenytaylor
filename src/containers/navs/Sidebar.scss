@@ -1,0 +1,11 @@
+.nav-item, .nav-item span{
+    color: black;
+}
+
+.nav-item:hover, .nav-item:hover span {
+    color: blue;
+}
+
+.nav-item.active,  .nav-item.active span {
+    color: blue;
+}

@@ -5,87 +5,160 @@ const data = [
     label: "menu.dashboards",
     to: "/app/dashboard",
   },
+  
+  /* 
+  COD
+  1. Transfer Kredit COD
+  2. Resi COD
+  3. Pencairan Dana
+  4. Debit COD
+*/
   {
-    id: "receipt-of-funds",
-    icon: "iconsminds-folder",
-    label: "menu.receipt-of-funds",
-    to: "/app/receipt-of-funds",
+    id: "cod",
+    icon: "iconsminds-financial",
+    label: "menu.cod",
+    // to: "/app/receipt-of-funds",
+    subs: [
+      {
+        id: "receipt-of-funds",
+        icon: "iconsminds-folder",
+        label: "menu.receipt-of-funds",
+        to: "/app/receipt-of-funds",
+      },
+      {
+        id: "cod-receipt-number",
+        icon: "iconsminds-newspaper",
+        label: "menu.cod-receipt-number",
+        to: "/app/cod-receipt-number",
+      },
+      {
+        id: "request-withdraw-funds",
+        icon: "iconsminds-money-bag",
+        label: "menu.request-withdraw-funds",
+        to: "/app/request-withdraw-funds/",
+      },
+      {
+        id: "debit-cod",
+        icon: "iconsminds-wallet",
+        label: "Debit COD",
+        to: "/app/debit-cod/",
+      },
+    ]
   },
+
+  
+
+  /* 
+    Wallet
+    1. Tenants Bank
+    2. Wallet Transactions
+  */
   {
-    id: "cod-receipt-number",
-    icon: "iconsminds-newspaper",
-    label: "menu.cod-receipt-number",
-    to: "/app/cod-receipt-number",
-  },
-  {
-    id: "tenants-bank",
-    icon: "iconsminds-credit-card",
-    label: "Tenants Bank",
-    to: "/app/tenants-bank",
-  },
-  {
-    id: "request-withdraw-funds",
-    icon: "iconsminds-money-bag",
-    label: "menu.request-withdraw-funds",
-    to: "/app/request-withdraw-funds/",
-  },
-  {
-    id: "debit-cod",
-    icon: "iconsminds-wallet",
-    label: "Debit COD",
-    to: "/app/debit-cod/",
-  },
-  {
-    id: "wallet-transactions",
+    id: "wallet",
     icon: "simple-icon-wallet",
-    label: "menu.wallet-transactions",
-    to: "/app/wallet-transactions",
+    label: "menu.wallet",
+    // to: "/app/receipt-of-funds",
+    subs: [
+      {
+        id: "tenants-bank",
+        icon: "iconsminds-credit-card",
+        label: "Tenants Bank",
+        to: "/app/tenants-bank",
+      },
+      {
+        id: "wallet-transactions",
+        icon: "iconsminds-wallet",
+        label: "menu.wallet-transactions",
+        to: "/app/wallet-transactions",
+      },
+    ]
   },
+
+  /* 
+    Tenants
+    1. Tenants
+    2. Subscriptions
+    3. List Transaksi
+  */
   {
     id: "tenants",
     icon: "simple-icon-people",
     label: "menu.tenants",
-    to: "/app/tenants",
-  },
-  {
-    id: "billing",
-    icon: "iconsminds-shop-4",
-    label: "menu.billing",
-    to: "/app/billing",
-  },
-  {
-    id: "list-transactions",
-    icon: "simple-icon-book-open",
-    label: "menu.list-transactions",
-    to: "/app/list-transactions",
+    // to: "/app/receipt-of-funds",
+    subs: [
+      {
+        id: "tenants",
+        icon: "iconsminds-doctor",
+        label: "menu.tenants",
+        to: "/app/tenants",
+      },
+      {
+        id: "billing",
+        icon: "iconsminds-shop-4",
+        label: "menu.billing",
+        to: "/app/billing",
+      },
+      {
+        id: "list-transactions",
+        icon: "iconsminds-receipt-4",
+        label: "menu.list-transactions",
+        to: "/app/list-transactions",
+      },
+    ]
   },
   // {
-  //   id: "dashboards",
+  //   id: "receipt-of-funds",
+  //   icon: "iconsminds-folder",
+  //   label: "menu.receipt-of-funds",
+  //   to: "/app/receipt-of-funds",
+  // },
+  // {
+  //   id: "cod-receipt-number",
+  //   icon: "iconsminds-newspaper",
+  //   label: "menu.cod-receipt-number",
+  //   to: "/app/cod-receipt-number",
+  // },
+  // {
+  //   id: "tenants-bank",
+  //   icon: "iconsminds-credit-card",
+  //   label: "Tenants Bank",
+  //   to: "/app/tenants-bank",
+  // },
+  // {
+  //   id: "request-withdraw-funds",
+  //   icon: "iconsminds-money-bag",
+  //   label: "menu.request-withdraw-funds",
+  //   to: "/app/request-withdraw-funds/",
+  // },
+  // {
+  //   id: "debit-cod",
+  //   icon: "iconsminds-wallet",
+  //   label: "Debit COD",
+  //   to: "/app/debit-cod/",
+  // },
+  // {
+  //   id: "wallet-transactions",
+  //   icon: "simple-icon-wallet",
+  //   label: "menu.wallet-transactions",
+  //   to: "/app/wallet-transactions",
+  // },
+  // {
+  //   id: "tenants",
+  //   icon: "simple-icon-people",
+  //   label: "menu.tenants",
+  //   to: "/app/tenants",
+  // },
+  // {
+  //   id: "billing",
   //   icon: "iconsminds-shop-4",
-  //   label: "menu.dashboards",
-  //   to: "/app/dashboards",
-  //   subs: [
-  //     {
-  //       icon: "simple-icon-briefcase",
-  //       label: "menu.default",
-  //       to: "/app/dashboards/default"
-  //     },
-  //     {
-  //       icon: "simple-icon-pie-chart",
-  //       label: "menu.analytics",
-  //       to: "/app/dashboards/analytics"
-  //     },
-  //     {
-  //       icon: "simple-icon-basket-loaded",
-  //       label: "menu.ecommerce",
-  //       to: "/app/dashboards/ecommerce"
-  //     },
-  //     {
-  //       icon: "simple-icon-doc",
-  //       label: "menu.content",
-  //       to: "/app/dashboards/content"
-  //     }
-  //   ]
+  //   label: "menu.billing",
+  //   to: "/app/billing",
+  // },
+  // {
+  //   id: "list-transactions",
+  //   icon: "simple-icon-book-open",
+  //   label: "menu.list-transactions",
+  //   to: "/app/list-transactions",
   // },
   // {
   //   id: "pages",
