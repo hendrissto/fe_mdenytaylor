@@ -371,6 +371,7 @@ class WithdrawFunds extends Component {
       selectedBank: [],
       imageUrl: null,
       image: null,
+      note: null,
       attachments: []
     })
     this.setState(prevState => ({
@@ -1004,6 +1005,7 @@ class WithdrawFunds extends Component {
                         onChange={event => {
                           this.setState({ note: event.target.value });
                         }}
+                        value={this.state.note}
                       />
                     </td>
                   </tr>
