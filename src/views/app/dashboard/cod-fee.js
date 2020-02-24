@@ -9,7 +9,7 @@ class CODFee extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.cod-fee' icon="iconsminds-handshake" value={this.props.value} className="mb-4" />
+        <IconCard title='dashboards.cards.cod-fee' icon="iconsminds-handshake" value={'Rp. ' + this.props.value.toLocaleString('id-ID')} className="mb-4" />
       </div>
     )
   }
