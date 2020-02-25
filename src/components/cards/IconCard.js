@@ -37,7 +37,7 @@ const IconCard = ({ className = "mb-4", icon, title, value }) => {
               </h6>
             </Col>
             <Col>
-              <h1 className="text-right">{value}</h1>
+              <h2 className="text-right">{value}</h2>
             </Col>
           </Row>
         </CardBody>

@@ -18,7 +18,7 @@ class CreditIssued extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.credit-issued' icon="iconsminds-coins" value={this.props.value} className="mb-4" />
+        <IconCard title='dashboards.cards.credit-issued' icon="iconsminds-coins" value={'Rp. ' + this.props.value.toLocaleString('id-ID')} className="mb-4" />
       </div>
     )
   }
