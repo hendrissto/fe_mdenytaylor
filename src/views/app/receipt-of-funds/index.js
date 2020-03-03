@@ -1021,6 +1021,7 @@ class ReceiptOfFunds extends Component {
         receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
+        insuranceAmount: Math.round(array[i].insurance) || 0,
       });
     }
 
@@ -1411,6 +1412,7 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "total")} />
           <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
           <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
+          <Column footer={this.sumData(this.state.oneData, "insurance")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeValue")} />
           <Column footer=" " />
@@ -1436,6 +1438,7 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "total")} />
           <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
           <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
+          <Column footer={this.sumData(this.state.oneData, "insuranceAmount")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeRp")} />
           <Column footer=" " />
@@ -1779,6 +1782,7 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="insurance" header="Asuransi" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="codFee" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="codFeeRp" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
@@ -1826,6 +1830,7 @@ class ReceiptOfFunds extends Component {
                 <Column style={{ width: '250px' }} field="total" header="Total" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="insuranceAmount" header="Asuransi" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="codFeePercentage" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="codFeeValue" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
