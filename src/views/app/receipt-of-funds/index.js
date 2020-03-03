@@ -1382,7 +1382,7 @@ class ReceiptOfFunds extends Component {
         </RowPrime>
       </ColumnGroup>
     )
-
+      //FROM BE
     const footerDetailSecond = (
       <ColumnGroup>
         <RowPrime>
@@ -1399,7 +1399,7 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "total")} />
           <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
           <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
-          <Column footer={this.sumData(this.state.oneData, "insurance")} />
+          <Column footer={this.sumData(this.state.oneData, "insuranceAmount")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeValue")} />
           <Column footer=" " />
@@ -1408,7 +1408,7 @@ class ReceiptOfFunds extends Component {
         </RowPrime>
       </ColumnGroup>
     )
-
+    // FROM EXCEL
     const footerDetailThird = (
       <ColumnGroup>
         <RowPrime>
@@ -1425,7 +1425,7 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "total")} />
           <Column footer={this.sumData(this.state.oneData, "subTotalAmount")} />
           <Column footer={this.sumData(this.state.oneData, "totalAmount")} />
-          <Column footer={this.sumData(this.state.oneData, "insuranceAmount")} />
+          <Column footer={this.sumData(this.state.oneData, "insurance")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeRp")} />
           <Column footer=" " />
