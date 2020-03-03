@@ -53,6 +53,10 @@ export class MoneyFormat {
     //       return this.numberFormat(rowData.balanceAmount);
     //     case 'feeTransfer':
     //       return this.numberFormat(rowData.feeTransfer);
+    //     case 'insuranceAmount':
+    //       return this.numberFormat(rowData.insuranceAmount);
+    //     case 'insurance':
+    //       return this.numberFormat(rowData.insurance);
     //     default:
     //       return 0;
     //   }

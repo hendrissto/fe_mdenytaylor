@@ -589,6 +589,7 @@ export default class CODReceiptNumber extends Component {
                   <Column style={{width:'250px'}} field="total" header="Total" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="subTotalAmount" header="Sub Total Amount" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat}  />
+                  <Column style={{width:'250px'}} field="insuranceAmount" header="Asuransi" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="codFeePercentage" header="COD Fee (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{width:'250px'}} field="codFeeValue" header="COD Fee (Rp)" body={this.moneyFormat.currencyFormat}  />
                   <Column style={{width:'250px'}} field="receiveAmount" header="Receive Amount" body={this.moneyFormat.currencyFormat}  />
