@@ -15,7 +15,6 @@ export class MoneyFormat {
         return 'Rp. ' + rowData[column.field].toLocaleString('id-ID') || '-';
     }
 
-<<<<<<< HEAD
     currencyFormatOld = (rowData, column) => {
         switch(column.field) {
         case 'walletBalance.balance':
@@ -24,7 +23,6 @@ export class MoneyFormat {
             return 0;
         }
     }
-=======
     // currencyFormatOld = (rowData, column) => {
     //   switch(column.field) {
     //     case 'totalAmount':
@@ -71,5 +69,4 @@ export class MoneyFormat {
     //       return 0;
     //   }
     // }
->>>>>>> origin/3432
 }
