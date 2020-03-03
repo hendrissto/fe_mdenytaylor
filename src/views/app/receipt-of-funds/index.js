@@ -1020,7 +1020,7 @@ class ReceiptOfFunds extends Component {
         receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
-        insuranceAmount: Math.round(array[i].asuransi) || 0,
+        insuranceAmount: Math.round(array[i].insurance) || 0,
       });
     }
 
