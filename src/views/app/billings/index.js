@@ -41,9 +41,12 @@ import {
 import BillingRestService from "../../../api/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import "./style.scss";
 
+const MySwal = withReactContent(Swal);
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
 const filterStyle = {
