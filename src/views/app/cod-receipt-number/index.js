@@ -167,6 +167,16 @@ export default class CODReceiptNumber extends Component {
           showConfirmButton: false,
           customClass: "swal-height"
         });
+      } else {
+        MySwal.fire({
+          type: "error",
+          title: "Maaf atas kesalahan tidak terduga.",
+          toast: true,
+          position: "top-end",
+          timer: 4000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
       }
     });
   }
