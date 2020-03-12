@@ -224,7 +224,7 @@ export default class Tenant extends Component {
         this.setState({ table });
       },
       error => {
-        if(err.response.status === 401){
+        if(error.response.status === 401){
           this.setState({redirect: true});
           MySwal.fire({
             type: "error",
