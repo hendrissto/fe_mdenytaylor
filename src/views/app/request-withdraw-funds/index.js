@@ -184,14 +184,24 @@ class WithdrawFunds extends Component {
 
       this.setState({ table });
     }, err => {
-      if (err.response.status === 401) {
-        this.setState({ redirectLogin: true });
+      if(err.response.status === 401){
+        this.setState({redirect: true});
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
           toast: true,
           position: "top-end",
           timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      } else {
+        MySwal.fire({
+          type: "error",
+          title: "Maaf atas kesalahan tidak terduga.",
+          toast: true,
+          position: "top-end",
+          timer: 4000,
           showConfirmButton: false,
           customClass: "swal-height"
         });
