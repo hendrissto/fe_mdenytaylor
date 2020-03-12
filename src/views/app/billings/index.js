@@ -41,9 +41,12 @@ import {
 import BillingRestService from "../../../api/billingRestService";
 import IconCard from "../../../components/cards/IconCard";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import "./style.scss";
 
+const MySwal = withReactContent(Swal);
 const ReactTableFixedColumn = withFixedColumns(ReactTable);
 
 const filterStyle = {
@@ -233,7 +236,28 @@ export default class Billing extends Component {
         this.setState({ table });
       },
       error => {
-        this.setState({ redirect: true });
+        if(error.response.status === 401){
+          this.setState({redirect: true});
+          MySwal.fire({
+            type: "error",
+            title: "Unauthorized.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        } else {
+          MySwal.fire({
+            type: "error",
+            title: "Maaf atas kesalahan tidak terduga.",
+            toast: true,
+            position: "top-end",
+            timer: 4000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        }
       }
     );
     // this.setState({
