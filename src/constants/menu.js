@@ -31,18 +31,12 @@ const data = [
         label: "menu.cod-receipt-number",
         to: "/app/cod-receipt-number",
       },
-      {
-        id: "request-withdraw-funds",
-        icon: "iconsminds-money-bag",
-        label: "menu.request-withdraw-funds",
-        to: "/app/request-withdraw-funds/",
-      },
-      {
-        id: "debit-cod",
-        icon: "iconsminds-wallet",
-        label: "Debit COD",
-        to: "/app/debit-cod/",
-      },
+      // {
+      //   id: "debit-cod",
+      //   icon: "iconsminds-wallet",
+      //   label: "Debit COD",
+      //   to: "/app/debit-cod/",
+      // },
     ]
   },
 
@@ -70,6 +64,12 @@ const data = [
         icon: "iconsminds-wallet",
         label: "menu.wallet-transactions",
         to: "/app/wallet-transactions",
+      },
+      {
+        id: "request-withdraw-funds",
+        icon: "iconsminds-money-bag",
+        label: "menu.request-withdraw-funds",
+        to: "/app/request-withdraw-funds/",
       },
     ]
   },
