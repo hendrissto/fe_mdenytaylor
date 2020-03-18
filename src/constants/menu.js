@@ -32,12 +32,6 @@ const data = [
         to: "/app/cod-receipt-number",
       },
       {
-        id: "request-withdraw-funds",
-        icon: "iconsminds-money-bag",
-        label: "menu.request-withdraw-funds",
-        to: "/app/request-withdraw-funds/",
-      },
-      {
         id: "debit-cod",
         icon: "iconsminds-wallet",
         label: "Debit COD",
@@ -70,6 +64,12 @@ const data = [
         icon: "iconsminds-wallet",
         label: "menu.wallet-transactions",
         to: "/app/wallet-transactions",
+      },
+      {
+        id: "request-withdraw-funds",
+        icon: "iconsminds-money-bag",
+        label: "menu.request-withdraw-funds",
+        to: "/app/request-withdraw-funds/",
       },
     ]
   },
