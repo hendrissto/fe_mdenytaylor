@@ -72,6 +72,8 @@ class ReceiptOfFunds extends Component {
     this.loadDetailSellerFromExcel = this.loadDetailSellerFromExcel.bind(this);
     this.moneyFormat.currencyFormat = this.moneyFormat.currencyFormat.bind(this);
     this.exportDetailDataToExcel = this.exportDetailDataToExcel.bind(this);
+    this.checkDate = this.checkDate.bind(this);
+    this.changeDateFormatFromUser = this.changeDateFormatFromUser.bind(this);
 
     this.state = {
       uploadDateShow: true,
@@ -1031,6 +1033,7 @@ class ReceiptOfFunds extends Component {
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
+        lastUpdateDate: this.checkDate(array[i].dateTime),
       });
     }
 
@@ -1041,6 +1044,30 @@ class ReceiptOfFunds extends Component {
       courierChannelId: this.state.selectedCourier.id
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
+  }
+
+  checkDate(date) {
+    if(!date) {
+      return null
+    } else {
+      if( moment(date).format() === 'Invalid date' ) {
+        return moment(date, 'DD/MM/YYYY').format()
+      } else {
+        return moment(date).format()
+      }
+    }
+  }
+
+  changeDateFormatFromUser(rowData, column) {
+    this.checkDate(rowData.dateTime)
+  }
+
+  changeDateFormat(rowData, column) {
+    if(!rowData.lastUpdateDate) {
+      return '';
+    } else {
+      return moment(rowData.lastUpdateDate).format('DD/MM/YYYY hh:mm')
+    }
   }
 
   submitData() {
@@ -1785,6 +1812,7 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
                 </DataTable>
               </ModalBody>
 
@@ -1826,6 +1854,7 @@ class ReceiptOfFunds extends Component {
                 <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="receiveAmount" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="lastUpdateDate" header="Last Update Date" body={this.changeDateFormat} />
               </DataTable>
             </ModalBody>
 
