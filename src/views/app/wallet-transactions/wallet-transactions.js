@@ -11,7 +11,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter, } from "reactstrap";
-import { Redirect } from "react-router-dom";
+import { Redirect, NavLink } from "react-router-dom";
 import { Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import NumberFormat from "react-number-format";
@@ -407,9 +407,9 @@ class WalletTransactions extends Component {
   }
 
   loadOneData(data) {
-    const tableDetail = { ...this.state.tableDetail };
-    tableDetail.loading = true;
-    this.setState({tableDetail});
+    const table = { ...this.state.table };
+    table.loading = true;
+    this.setState({table});
 
     const params = {
       keyword: this.state.search || null,
@@ -423,7 +423,8 @@ class WalletTransactions extends Component {
       tableDetail.data = response.data;
       tableDetail.pagination.totalPages = Math.ceil(response.total / response.take);
       tableDetail.loading = false;
-      this.setState({tableDetail, mainLoading: false, modalDetailOneTenants: true });
+      table.loading = false;
+      this.setState({tableDetail, mainLoading: false, modalDetailOneTenants: true, table });
     }, err => {
       if (err.response.status === 401) {
         this.setState({ redirect: true });
@@ -437,7 +438,8 @@ class WalletTransactions extends Component {
           customClass: "swal-height"
         });
       }
-      this.setState({mainLoading: false});
+      table.loading = false;
+      this.setState({mainLoading: false, table});
     })
   }
 
@@ -468,6 +470,16 @@ class WalletTransactions extends Component {
     this.relatedDataRestService.getTenantBank(id, {}).subscribe(response => {
       this.setState({ tenantBank: response.data });
     });
+  }
+
+  detailWalletTransactions(rowData, column) {
+    return (
+      <NavLink to={`detail-transactions/${rowData.id}`}>
+        <span>
+          {rowData.companyInfo.companyName}
+        </span>
+      </NavLink>
+    )
   }
 
   editData() {
@@ -602,7 +614,7 @@ class WalletTransactions extends Component {
                 <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
                 <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
               */}
-              <Column style={{width:'250px'}} field="companyInfo.companyName" header="Company Name" />
+              <Column style={{width:'250px'}} field="companyInfo.companyName" header="Company Name" body={this.detailWalletTransactions} />
               <Column style={{width:'250px'}} field="companyInfo.email" header="Company Email" />
               <Column style={{width:'250px'}} field="companyInfo.phone" header="Company Phone" />
               <Column style={{width:'250px'}} field="walletBalance.balance" header="Ballance" body={this.moneyFormat.currencyFormatOld} />
