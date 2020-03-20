@@ -12,6 +12,7 @@ import { Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import Spinner from "../../../containers/pages/Spinner";
 import { Redirect } from "react-router-dom";
+import { MultiSelect } from 'primereact/multiselect';
 import { 
     Button, 
     Modal,
@@ -21,7 +22,7 @@ import {
     Input,
     ModalFooter
 } from 'reactstrap';
-
+import * as _ from 'lodash';
 import Loader from "react-loader-spinner";
 import PictureRestService from "../../../api/pictureRestService";
 const MySwal = withReactContent(Swal);
@@ -38,6 +39,8 @@ class DetailWalletTransactions extends Component {
         this.editData = this.editData.bind(this);
         this.showAttachment = this.showAttachment.bind(this);
         this.isAttachment = this.isAttachment.bind(this);
+        this.onColumnToggle = this.onColumnToggle.bind(this);
+        this.showTotalCount = this.showTotalCount.bind(this);
 
         this.state = {
             loading: false,
@@ -65,6 +68,30 @@ class DetailWalletTransactions extends Component {
             },
             realAttachments: [],
             attachments: [],
+            columns: [
+                { field: 'transactionDate', header: 'Tanggal Transaksi', body: this.changeDateFormat },
+                { field: 'transactionType', header: 'Tipe Transaksi', body: this.columnFormat.emptyColumn },
+                { field: 'accountNumber', header: 'No Rekening', body: this.columnFormat.emptyColumn },
+                { field: 'accountName', header: 'Nama Rekening', body:this.columnFormat.emptyColumn },
+                { field: 'bankName', header: 'Nama Bank', body: this.columnFormat.emptyColumn },
+                { field: 'bankDistrict', header: 'Cabang Bank', body: this.columnFormat.emptyColumn },
+                { field: 'amount', header: 'Amount', body: this.moneyFormat.currencyFormat},
+                { field: 'feeTransfer', header: 'Fee Transfer', body: this.moneyFormat.currencyFormat},
+                { field: 'note', header: 'Note', body: this.columnFormat.emptyColumn},
+                { field: 'Action', header: 'Action', body: this.actionTemplateForEditAttachment},
+            ],
+            selectedColumns: [
+                { field: 'transactionDate', header: 'Tanggal Transaksi', body: this.changeDateFormat },
+                { field: 'transactionType', header: 'Tipe Transaksi', body: this.columnFormat.emptyColumn },
+                { field: 'accountNumber', header: 'No Rekening', body: this.columnFormat.emptyColumn },
+                { field: 'accountName', header: 'Nama Rekening', body:this.columnFormat.emptyColumn },
+                { field: 'bankName', header: 'Nama Bank', body: this.columnFormat.emptyColumn },
+                { field: 'bankDistrict', header: 'Cabang Bank', body: this.columnFormat.emptyColumn },
+                { field: 'amount', header: 'Amount', body: this.moneyFormat.currencyFormat},
+                { field: 'feeTransfer', header: 'Fee Transfer', body: this.moneyFormat.currencyFormat},
+                { field: 'note', header: 'Note', body: this.columnFormat.emptyColumn},
+                { field: 'Action', header: 'Action', body: this.actionTemplateForEditAttachment},
+            ],
         }
     }
 
@@ -270,11 +297,36 @@ class DetailWalletTransactions extends Component {
         return moment(rowData['transactionDate']).format('DD-MM-YYYY') || '-';
     }
 
+    showTotalCount(e) {
+        console.log(e)
+        let total = 0;
+        if(e) {
+            ++total
+        }
+
+        console.log(total)
+        return this.state.selectedColumns.length
+    }
+    
+    onColumnToggle(event) {
+        let selectedColumns = event.value;
+        let orderedSelectedColumns = _.sortBy(selectedColumns, x => _.findIndex(this.state.columns, y => x.field === y.field))
+        this.setState({selectedColumns: orderedSelectedColumns});
+        // console.log('1', this.state.selectedColumns)
+        // console.log('2', this.state.columns)
+        // const sortedByInitialValues = _.sortBy(event.value, x => _.findIndex(this.state.columns, y => x.field === y.field))
+    }
+
     render() {
         if (this.state.redirect === true) {
             this.setState({ redirect: false });
             return <Redirect to="/user/login" />;
         }
+
+        const columnComponents = this.state.selectedColumns.map(col=> {
+            return <Column style={{width:'250px'}} key={col.field} field={col.field} header={col.header} body={col.body} />;
+        });
+
         return (
             <>
                 <div className="card col-md-12">
@@ -323,27 +375,38 @@ class DetailWalletTransactions extends Component {
                                     </h1>
                                 </div>
                             </div>
-                            <DataTable value={this.state.tableDetail.data} className="noheader" lazy={true} loading={this.state.tableDetail.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="250px">
-                                <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
-                                <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
-                                <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
-                                <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
-                                <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
-                            </DataTable>
-                            <Paginator
-                                first={this.state.tableDetail.pagination.skipSize}
-                                rows={this.state.tableDetail.pagination.pageSize}
-                                totalRecords={
-                                    Math.ceil(this.state.tableDetail.pagination.totalPages) *
-                                    this.state.tableDetail.pagination.pageSize
-                                }
-                                onPageChange={this.handleOnPageDetailChange}
-                            />
+
+                            <div style={{textAlign:'left', display: 'flex', justifyContent: 'flex-end'}}>
+                                <MultiSelect value={this.state.selectedColumns} options={this.state.columns} optionLabel="header" onChange={this.onColumnToggle} style={{width:'250px'}} maxSelectedLabel={0} />
+                            </div>
+                            {this.state.selectedColumns.length && (
+                                <>
+                                    <DataTable value={this.state.tableDetail.data} className="noheader" lazy={true} loading={this.state.tableDetail.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="150px">
+                                        {columnComponents}
+                                    {/*
+                                        <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
+                                        <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
+                                        <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
+                                        <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
+                                        <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
+                                    */}
+                                    </DataTable>
+                                    <Paginator
+                                        first={this.state.tableDetail.pagination.skipSize}
+                                        rows={this.state.tableDetail.pagination.pageSize}
+                                        totalRecords={
+                                            Math.ceil(this.state.tableDetail.pagination.totalPages) *
+                                            this.state.tableDetail.pagination.pageSize
+                                        }
+                                        onPageChange={this.handleOnPageDetailChange}
+                                    />
+                                </>
+                            )}
                         </div>
                     )}
                     </div>
