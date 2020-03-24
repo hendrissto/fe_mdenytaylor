@@ -12,7 +12,12 @@ export class MoneyFormat {
     }
 
     currencyFormat = (rowData, column) => {
+<<<<<<< HEAD
         return 'Rp. ' + rowData[column.field].toLocaleString('id-ID') || '-';
+=======
+        const data = rowData[column.field] || 0;
+        return 'Rp. ' + data.toLocaleString('id-ID') || '-';
+>>>>>>> origin/urgent/24-03-2020
     }
 
     currencyFormatOld = (rowData, column) => {
