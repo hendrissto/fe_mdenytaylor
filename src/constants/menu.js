@@ -71,6 +71,12 @@ const data = [
         label: "menu.wallet-transactions",
         to: "/app/wallet-transactions",
       },
+      {
+        id: "debit-cod",
+        icon: "iconsminds-wallet",
+        label: "Debit COD",
+        to: "/app/debit-cod/",
+      },
     ]
   },
 
