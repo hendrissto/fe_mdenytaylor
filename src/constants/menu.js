@@ -70,6 +70,11 @@ const data = [
         icon: "iconsminds-money-bag",
         label: "menu.request-withdraw-funds",
         to: "/app/request-withdraw-funds/",
+      }, {
+        id: "debit-cod",
+        icon: "iconsminds-wallet",
+        label: "Debit COD",
+        to: "/app/debit-cod/",
       },
     ]
   },
