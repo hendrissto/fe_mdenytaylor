@@ -376,7 +376,7 @@ class DetailWalletTransactions extends Component {
                                 </div>
                             </div>
 
-                            <div style={{textAlign:'left', display: 'flex', justifyContent: 'flex-end'}}>
+                            <div style={{textAlign:'left', display: 'flex', justifyContent: 'flex-end', marginBottom: 15}}>
                                 <MultiSelect value={this.state.selectedColumns} options={this.state.columns} optionLabel="header" onChange={this.onColumnToggle} style={{width:'250px'}} maxSelectedLabel={0} />
                             </div>
                             {this.state.selectedColumns.length && (
