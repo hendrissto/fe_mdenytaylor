@@ -541,7 +541,7 @@ class WalletTransactions extends Component {
     }
     return (
       <Fragment>
-        <Breadcrumb heading="Wallet Transactions" match={this.props.match} />
+        <Breadcrumb heading="Tenants Wallet" match={this.props.match} />
         <Separator className="mb-5" />
         <div className="card">
           <div className="card-body">   
