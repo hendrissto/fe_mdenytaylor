@@ -12,7 +12,8 @@ export class MoneyFormat {
     }
 
     currencyFormat = (rowData, column) => {
-        return 'Rp. ' + rowData[column.field].toLocaleString('id-ID') || '-';
+        const data = rowData[column.field] || 0;
+        return 'Rp. ' + data.toLocaleString('id-ID') || '-';
     }
 
     currencyFormatOld = (rowData, column) => {
