@@ -667,7 +667,7 @@ class DebitCod extends Component {
       <>
         <Row>
           <Colxx xxs={12}>
-            <Breadcrumb heading="Debit COD" match={this.props.match} />
+            <Breadcrumb heading="Histori Pencairan" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>

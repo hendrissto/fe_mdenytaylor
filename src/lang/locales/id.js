@@ -61,6 +61,7 @@ module.exports = {
     "menu.dashboard": "Dasbor",
     "menu.dashboards": "Dasbor",
     "menu.cod-receipt-number": "Resi COD",
+    "menu.debit-cod": "Histori Pencairan",
     "menu.detail-transactions": "Detail Transactions",
     "menu.request-withdraw-funds": "Pencairan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",

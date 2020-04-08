@@ -73,7 +73,7 @@ const data = [
       }, {
         id: "debit-cod",
         icon: "iconsminds-wallet",
-        label: "Debit COD",
+        label: "Histori Pencairan",
         to: "/app/debit-cod/",
       },
     ]
