@@ -1035,6 +1035,7 @@ class ReceiptOfFunds extends Component {
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
         lastUpdateDate: this.checkDate(array[i].dateTime),
+        taxInclusive: array[i].taxInclusive ? true : false,
       });
     }
 
@@ -1412,6 +1413,10 @@ class ReceiptOfFunds extends Component {
     }
 
     this.setState({data: search});
+  }
+
+  colTaxInclusive(rowData, column) {
+    return rowData.taxInclusive ? 'TRUE' : 'FALSE';
   }
 
   render() {
@@ -1826,6 +1831,7 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
+                  <Column style={{ width: '250px' }} field="taxInclusive" header="Tax Inclusive" body={this.colTaxInclusive}   />
                 </DataTable>
               </ModalBody>
 
