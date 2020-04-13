@@ -12,9 +12,18 @@ export class MoneyFormat {
     }
 
     currencyFormat = (rowData, column) => {
-      return 'Rp. ' + rowData[column.field].toLocaleString('id-ID') || '-';
+        const data = rowData[column.field] || 0;
+        return 'Rp. ' + data.toLocaleString('id-ID') || '-';
     }
 
+    currencyFormatOld = (rowData, column) => {
+        switch(column.field) {
+        case 'walletBalance.balance':
+            return this.numberFormat(rowData.walletBalance.balance);
+        default:
+            return 0;
+        }
+    }
     // currencyFormatOld = (rowData, column) => {
     //   switch(column.field) {
     //     case 'totalAmount':

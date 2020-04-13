@@ -22,6 +22,7 @@ import blankPage from "./blank-page";
 import ListTransactions from "./list-transactions";
 import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
+import DetailWalletTransactions from "./wallet-transactions/detail-page";
 
 class App extends Component {
   render() {
@@ -43,6 +44,7 @@ class App extends Component {
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
           <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />
+          <Route path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} />
 
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />

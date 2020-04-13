@@ -1,11 +1,18 @@
 import React, { Component, Fragment } from "react";
-import { Row, Table, Card, CardBody, Button, Input, InputGroup,
+import { 
+  // Row, 
+  Table, 
+  // Card, 
+  // CardBody, 
+  Button, 
+  Input, 
+  InputGroup,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter, } from "reactstrap";
-import { Redirect } from "react-router-dom";
-import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
+import { Redirect, NavLink } from "react-router-dom";
+import { Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import NumberFormat from "react-number-format";
 import Loader from "react-loader-spinner";
@@ -58,8 +65,18 @@ class WalletTransactions extends Component {
         pageSize: 10
       }
     },
-
+    tableDetail: {
+      loading: false,
+      data: [],
+      pagination: {
+        currentPage: 0,
+        totalPages: 0,
+        skipSize: 0,
+        pageSize: 10
+      }
+    },
     oneData: null,
+    oneDataTransactions: null,
     modalAddWallet: false,
     modalDetailWallet: false,
     isEdit: false,
@@ -67,6 +84,8 @@ class WalletTransactions extends Component {
     tenantBank: null,
     selectedBank: null,
     isClodeoBank: false,
+    modalDetailOneTenants: false,
+    selectedTenantId: null,
   };
   constructor(props) {
     super(props);
@@ -87,12 +106,26 @@ class WalletTransactions extends Component {
     this.showAttachment = this.showAttachment.bind(this);
     this.editData = this.editData.bind(this);
     this.loadBankTenant = this.loadBankTenant.bind(this);
+    this.loadOneData = this.loadOneData.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.actionTemplateForEditAttachment = this.actionTemplateForEditAttachment.bind(this);
+    this.handleOnPageDetailChange = this.handleOnPageDetailChange.bind(this);
 
     this.state = this.initialState;
   }
 
   componentDidMount() {
     this.loadData();
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   toggle() {
@@ -111,7 +144,7 @@ class WalletTransactions extends Component {
       "options.includeTotalCount": true
     };
 
-    this.walletTransactionsRestService.loadData({ params }).subscribe(response => {
+    this.walletTransactionsRestService.loadDataTenantTransactions({ params }).subscribe(response => {
       const table = { ...this.state.table };
       table.data = response.data;
       table.pagination.totalPages = Math.ceil(response.total / response.take);
@@ -310,7 +343,37 @@ class WalletTransactions extends Component {
     });
   }
 
+  handleOnPageDetailChange(paginationEvent) {
+    const tableDetail = { ...this.state.tableDetail };
+    tableDetail.loading = true;
+    tableDetail.pagination.pageSize = paginationEvent.rows;
+    tableDetail.pagination.skipSize = paginationEvent.first;
+    tableDetail.pagination.currentPage = paginationEvent.page + 1;
+
+    this.setState({ tableDetail }, () => {
+      this.loadOneData(this.state.selectedTenantId);
+    });
+  }
+
   actionTemplate(rowData, column) {
+    return (
+        <div>
+        <Button
+          type="button"
+          icon="pi pi-search"
+          onClick={() => {
+            this.setState({selectedTenantId: rowData.id});
+            this.loadOneData(rowData.id);
+          }}
+          className="p-button-success"
+        >
+          Detail
+        </Button>
+      </div>
+    )
+  }
+
+  actionTemplateForEditAttachment(rowData, column) {
     return <div>
       <Button
         type="button"
@@ -338,9 +401,46 @@ class WalletTransactions extends Component {
         }}
         className="p-button-success"
       >
-        Detail
+        Update
         </Button>
     </div>;
+  }
+
+  loadOneData(data) {
+    const table = { ...this.state.table };
+    table.loading = true;
+    this.setState({table});
+
+    const params = {
+      keyword: this.state.search || null,
+      "options.take": this.state.tableDetail.pagination.pageSize,
+      "options.skip": this.state.tableDetail.pagination.skipSize,
+      "options.includeTotalCount": true
+    };
+
+    this.walletTransactionsRestService.loadOneDataTenantTransactions(data, {params}).subscribe(response => {
+      const tableDetail = { ...this.state.tableDetail };
+      tableDetail.data = response.data;
+      tableDetail.pagination.totalPages = Math.ceil(response.total / response.take);
+      tableDetail.loading = false;
+      table.loading = false;
+      this.setState({tableDetail, mainLoading: false, modalDetailOneTenants: true, table });
+    }, err => {
+      if (err.response.status === 401) {
+        this.setState({ redirect: true });
+        MySwal.fire({
+          type: "error",
+          title: "Unauthorized.",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      }
+      table.loading = false;
+      this.setState({mainLoading: false, table});
+    })
   }
 
   changeDateFormat(rowData, column) {
@@ -355,7 +455,7 @@ class WalletTransactions extends Component {
           <>
             <tr>
               <td colSpan={4}>
-                <a target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
+                <a rel="noopener noreferrer" target="_blank" href={attachment.fileUrl}>{attachment.customFileName}</a>
               </td>
             </tr>
           </>
@@ -372,8 +472,20 @@ class WalletTransactions extends Component {
     });
   }
 
+  detailWalletTransactions(rowData, column) {
+    return (
+      <NavLink to={`detail-transactions/${rowData.id}`}>
+        <span>
+          {rowData.companyInfo.companyName}
+        </span>
+      </NavLink>
+    )
+  }
+
   editData() {
-    this.setState({modalDetailWallet: false, mainLoading: true});
+    const tableDetail = { ...this.state.tableDetail };
+    tableDetail.loading = true;
+    this.setState({tableDetail, modalDetailWallet: false });
 
     const data = this.state;
     const oneData = data.oneData;
@@ -396,6 +508,7 @@ class WalletTransactions extends Component {
     }
 
     this.walletTransactionsRestService.editData(oneData.id, payload).subscribe(res => {
+      tableDetail.loading = false;
       MySwal.fire({
         type: "success",
         title: "Sukses Edit Data.",
@@ -405,8 +518,7 @@ class WalletTransactions extends Component {
         showConfirmButton: false,
         customClass: "swal-height"
       });
-      this.setState({mainLoading: false});
-      this.loadData();
+      this.loadOneData(this.state.selectedTenantId);
     }, err => {
       MySwal.fire({
         type: "error",
@@ -418,7 +530,7 @@ class WalletTransactions extends Component {
         customClass: "swal-height"
       });
       this.setState({mainLoading: false});
-      this.loadData();
+      this.loadOneData(this.state.selectedTenantId);
     })
   }
 
@@ -429,7 +541,7 @@ class WalletTransactions extends Component {
     }
     return (
       <Fragment>
-        <Breadcrumb heading="Wallet Transactions" match={this.props.match} />
+        <Breadcrumb heading="Tenants Wallet" match={this.props.match} />
         <Separator className="mb-5" />
         <div className="card">
           <div className="card-body">   
@@ -489,28 +601,34 @@ class WalletTransactions extends Component {
             </div>
           </div>
                       
-          <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
             {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
-            <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
-            <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
-            <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
-            <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
-            <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
-          </DataTable>
-          <Paginator
-            first={this.state.table.pagination.skipSize}
-            rows={this.state.table.pagination.pageSize}
-            totalRecords={
-              Math.ceil(this.state.table.pagination.totalPages) *
-              this.state.table.pagination.pageSize
-            }
-            onPageChange={this.handleOnPageChange}
-          />
+            <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
+              {/*
+                <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
+                <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
+                <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
+                <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
+              */}
+              <Column style={{width:'250px'}} field="companyInfo.companyName" header="Company Name" body={this.detailWalletTransactions} />
+              <Column style={{width:'250px'}} field="companyInfo.email" header="Company Email" />
+              <Column style={{width:'250px'}} field="companyInfo.phone" header="Company Phone" />
+              <Column style={{width:'250px'}} field="walletBalance.balance" header="Ballance" body={this.moneyFormat.currencyFormatOld} />
+              <Column style={{width:'250px'}} header="Detail" body={this.actionTemplate}/>
+            </DataTable>
+            <Paginator
+              first={this.state.table.pagination.skipSize}
+              rows={this.state.table.pagination.pageSize}
+              totalRecords={
+                Math.ceil(this.state.table.pagination.totalPages) *
+                this.state.table.pagination.pageSize
+              }
+              onPageChange={this.handleOnPageChange}
+            />
           </div>
         </div>
 
@@ -613,7 +731,7 @@ class WalletTransactions extends Component {
                         decimalSeparator={','}
                         value={this.state.amount}
                         onValueChange={(values) => {
-                          const { value, formattedValue } = values;
+                          const { value } = values;
                           this.setState({ amount: value });
                         }}
                       />
@@ -687,9 +805,13 @@ class WalletTransactions extends Component {
         )}
 
         {this.state.modalDetailWallet && (
-          <Modal isOpen={this.state.modalDetailWallet}>
+          <Modal isOpen={this.state.modalDetailWallet} >
             <ModalHeader>Detail</ModalHeader>
-            <ModalBody>
+            <ModalBody
+              style={{
+                maxHeight: 380,
+                overflow: "auto"
+              }}>
               <Table>
                 <tbody>
                   <tr>
@@ -844,6 +966,47 @@ class WalletTransactions extends Component {
                   borderRadius: 6
                 }}
                 onClick={() => this.setState({ attachments: [], modalDetailWallet: false, isEdit: false })}
+              >
+                Close
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+
+        {this.state.modalDetailOneTenants && (
+          <Modal isOpen={this.state.modalDetailOneTenants} size="lg">
+            <ModalHeader>Detail Transaksi</ModalHeader>
+            <ModalBody>
+              <DataTable value={this.state.tableDetail.data} className="noheader" lazy={true} loading={this.state.tableDetail.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="250px">
+                <Column style={{width:'220px'}} field="transactionDate" header="Tanggal Transaksi" body={this.changeDateFormat} />
+                <Column style={{width:'200px'}} field="transactionType" header="Type Transaksi" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="accountNumber" header="No Rekening" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'250px'}} field="accountName" header="Nama Rekening" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="bankName" header="Nama Bank" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="bankDistrict" header="Cabang Bank" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
+                <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
+                <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
+                <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
+              </DataTable>
+              <Paginator
+                first={this.state.tableDetail.pagination.skipSize}
+                rows={this.state.tableDetail.pagination.pageSize}
+                totalRecords={
+                  Math.ceil(this.state.tableDetail.pagination.totalPages) *
+                  this.state.tableDetail.pagination.pageSize
+                }
+                onPageChange={this.handleOnPageDetailChange}
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="primary"
+                outline
+                style={{
+                  borderRadius: 6
+                }}
+                onClick={() => this.setState({ modalDetailOneTenants: false })}
               >
                 Close
               </Button>

@@ -41,6 +41,7 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
+// import { InputText } from 'primereact/inputtext';
 import { Row as RowPrime } from 'primereact/row';
 import { Calendar } from 'primereact/calendar';
 
@@ -72,6 +73,8 @@ class ReceiptOfFunds extends Component {
     this.loadDetailSellerFromExcel = this.loadDetailSellerFromExcel.bind(this);
     this.moneyFormat.currencyFormat = this.moneyFormat.currencyFormat.bind(this);
     this.exportDetailDataToExcel = this.exportDetailDataToExcel.bind(this);
+    this.checkDate = this.checkDate.bind(this);
+    this.changeDateFormatFromUser = this.changeDateFormatFromUser.bind(this);
 
     this.state = {
       uploadDateShow: true,
@@ -1031,6 +1034,7 @@ class ReceiptOfFunds extends Component {
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
+        lastUpdateDate: this.checkDate(array[i].dateTime),
       });
     }
 
@@ -1041,6 +1045,30 @@ class ReceiptOfFunds extends Component {
       courierChannelId: this.state.selectedCourier.id
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
+  }
+
+  checkDate(date) {
+    if(!date) {
+      return null
+    } else {
+      if( moment(date).format() === 'Invalid date' ) {
+        return moment(date, 'DD/MM/YYYY').format()
+      } else {
+        return moment(date).format()
+      }
+    }
+  }
+
+  changeDateFormatFromUser(rowData, column) {
+    this.checkDate(rowData.dateTime)
+  }
+
+  changeDateFormat(rowData, column) {
+    if(!rowData.lastUpdateDate) {
+      return '';
+    } else {
+      return moment(rowData.lastUpdateDate).format('DD/MM/YYYY hh:mm')
+    }
   }
 
   submitData() {
@@ -1354,10 +1382,22 @@ class ReceiptOfFunds extends Component {
   }
 
   exportDetailDataToExcel(data) {
-    for(let i = 0; i < data.length; i++) {
-      delete data[i]['lines'];
+    const tempData = _.cloneDeep(data);
+    for(let i = 0; i < tempData.length; i++) {
+      delete tempData[i]['lines'];
     }
-    this.exportService.exportToCSV(data, "Detail COD", false);
+    this.exportService.exportToCSV(tempData, "Detail COD", false);
+  }
+  
+  exportDetailSellerDataToExcel(data) {
+    const tempData = _.cloneDeep(data);
+    for(let i = 0; i < tempData.length; i++) {
+      delete tempData[i]['lines'];
+      delete tempData[i]['uploadDate'];
+      delete tempData[i]['documentNumber'];
+      delete tempData[i]['id'];
+    }
+    this.exportService.exportToCSV(tempData, "Detail Seller COD", false);
   }
 
   handleSearchSellerName(e) {
@@ -1785,6 +1825,7 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
                 </DataTable>
               </ModalBody>
 
@@ -1803,7 +1844,14 @@ class ReceiptOfFunds extends Component {
         {this.state.resiModalSellerDetail && (
           <Modal isOpen={this.state.resiModalSellerDetail} className="modal-large" contentClassName="content-large">
             <ModalHeader>
-              <IntlMessages id="modal.receiptDataCOD" />
+              <div className="row">
+                <div className="text-left">
+                  Data Resi COD
+                </div>
+                <div className="pull-right">
+                  <Button style={{position: 'absolute', right: '25px', borderRadius: '5px'}} onClick={() => {this.exportDetailSellerDataToExcel(this.state.oneData)}}>Export</Button>
+                </div>
+              </div>
             </ModalHeader>
             <ModalBody>
               <DataTable value={this.state.oneData} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailSecond} scrollable={true} scrollHeight="300px">
@@ -1826,6 +1874,7 @@ class ReceiptOfFunds extends Component {
                 <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="receiveAmount" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="lastUpdateDate" header="Last Update Date" body={this.changeDateFormat} />
               </DataTable>
             </ModalBody>
 
