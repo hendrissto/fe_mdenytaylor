@@ -1035,7 +1035,7 @@ class ReceiptOfFunds extends Component {
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
         lastUpdateDate: this.checkDate(array[i].dateTime),
-        taxInclusive: array[i].taxInclusive ? true : false,
+        taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
       });
     }
 
@@ -1046,6 +1046,18 @@ class ReceiptOfFunds extends Component {
       courierChannelId: this.state.selectedCourier.id
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
+  }
+
+  checkTaxInclusive(taxInclusive) {
+    if(taxInclusive) {
+      if(typeof taxInclusive === 'number') {
+        return taxInclusive ? true : false;
+      } else {
+        return taxInclusive.toLowerCase() === 'true' ? true : false;
+      }
+    } else {
+      return false;
+    }
   }
 
   checkDate(date) {
@@ -1416,7 +1428,15 @@ class ReceiptOfFunds extends Component {
   }
 
   colTaxInclusive(rowData, column) {
-    return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+    if (rowData.taxInclusive) {
+      if(typeof rowData.taxInclusive === 'number') {
+        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+      } else {
+        return rowData.taxInclusive.toLowerCase() === 'true' ? 'TRUE' : 'FALSE';
+      }
+    } else {
+      return 'FALSE';
+    }
   }
 
   render() {
