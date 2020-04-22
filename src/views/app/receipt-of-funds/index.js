@@ -765,7 +765,7 @@ class ReceiptOfFunds extends Component {
     }
 
     let finish = data.lines;
-    
+
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
@@ -800,8 +800,8 @@ class ReceiptOfFunds extends Component {
         this.setState({ table });
       },
       err => {
-        if(err.response.status === 401){
-          this.setState({redirect: true});
+        if (err.response.status === 401) {
+          this.setState({ redirect: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -924,6 +924,8 @@ class ReceiptOfFunds extends Component {
                 "totalAmount",
                 "discountShippingChargePercentage",
                 "totalShippingCharge",
+                "arBalanceDue",
+                "arAmountPaid",
               ].includes(key)
             ) {
               filteredData[i][key] = 0;
@@ -1035,6 +1037,8 @@ class ReceiptOfFunds extends Component {
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
         lastUpdateDate: this.checkDate(array[i].dateTime),
+        arBalanceDue: Math.round(array[i].arBalanceDue) || 0,
+        arAmountPaid: Math.round(array[i].arAmountPaid) || 0,
       });
     }
 
@@ -1048,10 +1052,10 @@ class ReceiptOfFunds extends Component {
   }
 
   checkDate(date) {
-    if(!date) {
+    if (!date) {
       return null
     } else {
-      if( moment(date).format() === 'Invalid date' ) {
+      if (moment(date).format() === 'Invalid date') {
         return moment(date, 'DD/MM/YYYY').format()
       } else {
         return moment(date).format()
@@ -1064,7 +1068,7 @@ class ReceiptOfFunds extends Component {
   }
 
   changeDateFormat(rowData, column) {
-    if(!rowData.lastUpdateDate) {
+    if (!rowData.lastUpdateDate) {
       return '';
     } else {
       return moment(rowData.lastUpdateDate).format('DD/MM/YYYY hh:mm')
@@ -1383,15 +1387,15 @@ class ReceiptOfFunds extends Component {
 
   exportDetailDataToExcel(data) {
     const tempData = _.cloneDeep(data);
-    for(let i = 0; i < tempData.length; i++) {
+    for (let i = 0; i < tempData.length; i++) {
       delete tempData[i]['lines'];
     }
     this.exportService.exportToCSV(tempData, "Detail COD", false);
   }
-  
+
   exportDetailSellerDataToExcel(data) {
     const tempData = _.cloneDeep(data);
-    for(let i = 0; i < tempData.length; i++) {
+    for (let i = 0; i < tempData.length; i++) {
       delete tempData[i]['lines'];
       delete tempData[i]['uploadDate'];
       delete tempData[i]['documentNumber'];
@@ -1411,7 +1415,7 @@ class ReceiptOfFunds extends Component {
       search = initialData;
     }
 
-    this.setState({data: search});
+    this.setState({ data: search });
   }
 
   render() {
@@ -1432,7 +1436,7 @@ class ReceiptOfFunds extends Component {
         </RowPrime>
       </ColumnGroup>
     )
-      //FROM BE
+    //FROM BE
     const footerDetailSecond = (
       <ColumnGroup>
         <RowPrime>
@@ -1452,6 +1456,8 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "insuranceAmount")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeValue")} />
+          <Column footer=" " />
+          <Column footer=" " />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "totalShippingCharge")} />
           <Column footer={this.sumData(this.state.oneData, "receiveAmount")} />
@@ -1478,6 +1484,8 @@ class ReceiptOfFunds extends Component {
           <Column footer={this.sumData(this.state.oneData, "insurance")} />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "codFeeRp")} />
+          <Column footer=" " />
+          <Column footer=" " />
           <Column footer=" " />
           <Column footer={this.sumData(this.state.oneData, "totalShippingCharge")} />
           <Column footer={this.sumData(this.state.oneData, "totAmountCodFee")} />
@@ -1623,7 +1631,7 @@ class ReceiptOfFunds extends Component {
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
                   <Column field="uploadDate" body={this.changeDataFormat} header="Upload Date" />
                   <Column field="documentNumber" header="ID File" body={this.columnFormat.emptyColumn} />
-                  <Column field="uploadBy" header="Upload By"  body={this.columnFormat.emptyColumn}/>
+                  <Column field="uploadBy" header="Upload By" body={this.columnFormat.emptyColumn} />
                   <Column header="Detail" body={this.actionTemplate} />
                 </DataTable>
                 <Paginator
@@ -1672,7 +1680,7 @@ class ReceiptOfFunds extends Component {
                     :
                   </Col>
                   <Col>
-                    <Calendar value={this.state.date} onChange={(e) => this.setState({date: e.value})}></Calendar>
+                    <Calendar value={this.state.date} onChange={(e) => this.setState({ date: e.value })}></Calendar>
                   </Col>
                 </Row>
                 <Row>
@@ -1726,32 +1734,32 @@ class ReceiptOfFunds extends Component {
                   Data Resi COD
                 </div>
                 <div className="pull-right">
-                  <Button style={{position: 'absolute', right: '25px', borderRadius: '5px'}} onClick={() => {this.exportDetailDataToExcel(this.state.data)}}>Export</Button>
+                  <Button style={{ position: 'absolute', right: '25px', borderRadius: '5px' }} onClick={() => { this.exportDetailDataToExcel(this.state.data) }}>Export</Button>
                 </div>
               </div>
             </ModalHeader>
             <ModalBody>
-            
-            <div className="col-md-3">
-              <label className="sr-only" for="inlineFormInputGroup">OS Name</label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text" ><i className="simple-icon-magnifier"></i></div>
+
+              <div className="col-md-3">
+                <label className="sr-only" for="inlineFormInputGroup">OS Name</label>
+                <div className="input-group mb-2">
+                  <div className="input-group-prepend">
+                    <div className="input-group-text" ><i className="simple-icon-magnifier"></i></div>
+                  </div>
+                  <input type="text" style={{ borderRadius: '0px 5px 5px 0px' }} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => { this.handleSearchSellerName(e) }} />
                 </div>
-                <input type="text" style={{borderRadius: '0px 5px 5px 0px'}} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => {this.handleSearchSellerName(e)}} />
               </div>
-            </div>
 
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromBE} header="Nama Seller" />
-                <Column field="package" header="Jumlah Paket"  body={this.columnFormat.emptyColumn}/>
+                <Column field="package" header="Jumlah Paket" body={this.columnFormat.emptyColumn} />
                 <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
                 <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
                 <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
               </DataTable>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={() => this.setState({ resiModalDetail: false })} style={{borderRadius: '5px'}}>
+              <Button onClick={() => this.setState({ resiModalDetail: false })} style={{ borderRadius: '5px' }}>
                 OK
               </Button>
             </ModalFooter>
@@ -1765,14 +1773,14 @@ class ReceiptOfFunds extends Component {
               <IntlMessages id="modal.receiptDataCOD" />
             </ModalHeader>
             <ModalBody>
-            
+
               <div className="col-md-3">
                 <label className="sr-only" for="inlineFormInputGroup">OS Name</label>
                 <div className="input-group mb-2">
                   <div className="input-group-prepend">
                     <div className="input-group-text" ><i className="simple-icon-magnifier"></i></div>
                   </div>
-                  <input type="text" style={{borderRadius: '0px 5px 5px 0px'}} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => {this.handleSearchSellerName(e)}} />
+                  <input type="text" style={{ borderRadius: '0px 5px 5px 0px' }} className="form-control" id="inlineFormInputGroup" placeholder="OS Name" onChange={(e) => { this.handleSearchSellerName(e) }} />
                 </div>
               </div>
 
@@ -1823,9 +1831,11 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="codFee" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="codFeeRp" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
+                  <Column style={{ width: '250px' }} field="arAmountPaid" header="AR Amount Paid" body={this.moneyFormat.currencyFormat} />
+                  <Column style={{ width: '250px' }} field="arBalanceDue" header="AR Balance Due" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
+                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date" />
                 </DataTable>
               </ModalBody>
 
@@ -1849,7 +1859,7 @@ class ReceiptOfFunds extends Component {
                   Data Resi COD
                 </div>
                 <div className="pull-right">
-                  <Button style={{position: 'absolute', right: '25px', borderRadius: '5px'}} onClick={() => {this.exportDetailSellerDataToExcel(this.state.oneData)}}>Export</Button>
+                  <Button style={{ position: 'absolute', right: '25px', borderRadius: '5px' }} onClick={() => { this.exportDetailSellerDataToExcel(this.state.oneData) }}>Export</Button>
                 </div>
               </div>
             </ModalHeader>
@@ -1872,6 +1882,8 @@ class ReceiptOfFunds extends Component {
                 <Column style={{ width: '250px' }} field="codFeePercentage" header="Fee COD (%)" body={this.columnFormat.emptyColumn} />
                 <Column style={{ width: '250px' }} field="codFeeValue" header="Fee COD (Rp)" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="discountShippingChargePercentage" header="Diskon Ongkir (%)" body={this.columnFormat.emptyColumn} />
+                <Column style={{ width: '250px' }} field="arAmountPaid" header="AR Amount Paid" body={this.moneyFormat.currencyFormat} />
+                <Column style={{ width: '250px' }} field="arBalanceDue" header="AR Balance Due" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="receiveAmount" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
                 <Column style={{ width: '250px' }} field="lastUpdateDate" header="Last Update Date" body={this.changeDateFormat} />
