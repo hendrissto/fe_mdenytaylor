@@ -1008,7 +1008,6 @@ class ReceiptOfFunds extends Component {
     const lineValue = {
       lines: []
     };
-
     for (let i = 0; i < array.length; i++) {
       lineValue.lines.push({
         tenantId: array[i].tenantId,
@@ -1052,6 +1051,8 @@ class ReceiptOfFunds extends Component {
     if(taxInclusive) {
       if(typeof taxInclusive === 'number') {
         return taxInclusive ? true : false;
+      } else if(typeof taxInclusive === 'boolean') {
+        return taxInclusive;
       } else {
         return taxInclusive.toLowerCase() === 'true' ? true : false;
       }
@@ -1430,6 +1431,8 @@ class ReceiptOfFunds extends Component {
   colTaxInclusive(rowData, column) {
     if (rowData.taxInclusive) {
       if(typeof rowData.taxInclusive === 'number') {
+        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+      } else if (typeof rowData.taxInclusive === 'boolean') {
         return rowData.taxInclusive ? 'TRUE' : 'FALSE';
       } else {
         return rowData.taxInclusive.toLowerCase() === 'true' ? 'TRUE' : 'FALSE';
