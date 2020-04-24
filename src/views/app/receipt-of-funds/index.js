@@ -1036,12 +1036,9 @@ class ReceiptOfFunds extends Component {
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: Math.round(array[i].insurance) || 0,
         lastUpdateDate: this.checkDate(array[i].dateTime),
-<<<<<<< HEAD
         taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
-=======
         arBalanceDue: Math.round(array[i].arBalanceDue) || 0,
         arAmountPaid: Math.round(array[i].arAmountPaid) || 0,
->>>>>>> origin/5013
       });
     }
 
@@ -1866,12 +1863,8 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="arBalanceDue" header="AR Balance Due" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
-<<<<<<< HEAD
                   <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
                   <Column style={{ width: '250px' }} field="taxInclusive" header="Tax Inclusive" body={this.colTaxInclusive}   />
-=======
-                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date" />
->>>>>>> origin/5013
                 </DataTable>
               </ModalBody>
 
