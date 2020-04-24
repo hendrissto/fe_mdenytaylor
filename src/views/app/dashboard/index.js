@@ -1,7 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { Row } from "reactstrap";
+import { forkJoin, of, concat } from 'rxjs';
 import BalanceCredit from "./credit-balance";
 import CreditIssued from "./credit-issued";
+import SalesCODCount from "./sales-cod-count";
+import SalesCODTotalAmount from "./sales-cod-total-amount";
 import CODFee from "./cod-fee";
 import FundReimbursement from "./fund-reimbursement";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
@@ -21,26 +24,52 @@ export default class Dashboard extends Component {
 
     this.state = {
       loading: false,
-      data: null
+      data: {
+        summary: null,
+        salesCODCount: 0,
+        salesCODTotalAmount: 0,
+      }
     };
   }
 
   componentDidMount() {
-    this.loadData();
+    this.setState({ loading: true });
+
+    forkJoin(
+      this.loadData(),
+      this.loadSalesCODCount(),
+      this.loadSalesCODTotalAmount()
+    )
+    .subscribe((response => {
+      this.setState({
+        'data.summary': response[0],
+        'data.salesCODCount': response[1],
+        'data.salesCODTotalAmount' : response[2],
+        loading: false
+      });
+    }));
   }
 
   loadData() {
     this.setState({ loading: true });
-    this.dashboardRestService.getSummary({}).subscribe(response => {
-			this.setState({ data: response, loading: false });
-    });
+    return this.dashboardRestService.getSummary({});
+  }
+
+  loadSalesCODCount() {
+    this.setState({ loading: true });
+    return this.dashboardRestService.getSalesCODCount({});
+  }
+
+  loadSalesCODTotalAmount() {
+    this.setState({ loading: true });
+    return this.dashboardRestService.getSalesCODTotalAmount({});
   }
 
   render() {
     return (
       <Fragment>
         {this.state.loading && <Loading />}
-        {this.state.data !== null && (
+        {!this.state.loading && (
           <div>
             <Row>
               <Colxx xxs="12">
@@ -53,12 +82,15 @@ export default class Dashboard extends Component {
             </Row>
             <Row>
               <Colxx lg="12" xl="6">
-                <CreditIssued value={this.state.data.creditCOD} />
-                <BalanceCredit value={this.state.data.creditRemaining} />
+                {/* <CreditIssued value={this.state.data.summary.creditCOD} />
+                <BalanceCredit value={this.state.data.summary.creditRemaining} />
+                <SalesCODCount value={this.state.data.salesCODCount} /> */}
               </Colxx>
               <Colxx lg="12" xl="6">
-                <CODFee value={this.state.data.feeCOD} />
-                <FundReimbursement value={this.state.data.creditTotal} />
+                {/* <CODFee value={this.state.data.summary.feeCOD} />
+                <FundReimbursement value={this.state.data.summary.creditTotal} />
+                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} /> */}
+
               </Colxx>
             </Row>
           </div>

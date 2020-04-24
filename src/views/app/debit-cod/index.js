@@ -189,6 +189,7 @@ class DebitCod extends Component {
 
     const params = {
       keyword: this.state.search || null,
+      statuses: 'paid,draft,open,voided',
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -369,13 +370,13 @@ class DebitCod extends Component {
     if (this.validateError()) {
       this.setState({ error: true });
     } else {
-      let tempAmount = 0; 
+      let tempAmount = 0;
       let parsedAmount = 0;
       const data = this.state;
 
       if (this.state.isChanged) {
         tempAmount = this.state.amountWithComma.split('.').join('');
-        if(tempAmount.indexOf(',') !== -1) {        
+        if(tempAmount.indexOf(',') !== -1) {
           parsedAmount = parseFloat(tempAmount.replace(',', '.'));
         }
       } else {
@@ -475,6 +476,7 @@ class DebitCod extends Component {
   loadAllData() {
     const params = {
       "options.includeTotalCount": true,
+      statuses: 'paid,draft,open,void',
       "options.take": this.state.totalData
     };
 
@@ -604,7 +606,7 @@ class DebitCod extends Component {
             color="info"
             onClick={() => {
               // this.setState({attachments: []});
-    
+
               let attachments = this.state.attachments;
               let realAttachments = this.state.realAttachments;
               attachments = [];
@@ -614,7 +616,7 @@ class DebitCod extends Component {
                   realAttachments.push(rowData.attachments[i]);
                 }
               }
-              this.setState({ 
+              this.setState({
                 note: rowData.note,
                 attachments,
                 realAttachments,
@@ -1050,7 +1052,7 @@ class DebitCod extends Component {
                       </td>
                     </tr>
                   )}
-                  
+
                   {this.state.spinner && (
                     <Loader
                       type="Oval"
