@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Row } from "reactstrap";
-import { forkJoin, of, concat } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import BalanceCredit from "./credit-balance";
 import CreditIssued from "./credit-issued";
 import SalesCODCount from "./sales-cod-count";
@@ -18,8 +18,8 @@ export default class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-		this.dashboardRestService = new DashboardRestService();
-		this.moneyFormat = new MoneyFormat();
+    this.dashboardRestService = new DashboardRestService();
+    this.moneyFormat = new MoneyFormat();
     this.loadData = this.loadData.bind(this);
 
     this.state = {
@@ -40,28 +40,27 @@ export default class Dashboard extends Component {
       this.loadSalesCODCount(),
       this.loadSalesCODTotalAmount()
     )
-    .subscribe((response => {
-      this.setState({
-        'data.summary': response[0],
-        'data.salesCODCount': response[1],
-        'data.salesCODTotalAmount' : response[2],
-        loading: false
-      });
-    }));
+      .subscribe((response => {
+        const data = {...this.state.data}
+        data.summary = response[0];
+        data.salesCODCount = response[1];
+        data.salesCODTotalAmount = response[2];
+        this.setState({
+          data,
+          loading: false
+        });
+      }));
   }
 
   loadData() {
-    this.setState({ loading: true });
     return this.dashboardRestService.getSummary({});
   }
 
   loadSalesCODCount() {
-    this.setState({ loading: true });
     return this.dashboardRestService.getSalesCODCount({});
   }
 
   loadSalesCODTotalAmount() {
-    this.setState({ loading: true });
     return this.dashboardRestService.getSalesCODTotalAmount({});
   }
 
@@ -69,7 +68,6 @@ export default class Dashboard extends Component {
     return (
       <Fragment>
         {this.state.loading && <Loading />}
-        {!this.state.loading && (
           <div>
             <Row>
               <Colxx xxs="12">
@@ -82,19 +80,18 @@ export default class Dashboard extends Component {
             </Row>
             <Row>
               <Colxx lg="12" xl="6">
-                {/* <CreditIssued value={this.state.data.summary.creditCOD} />
-                <BalanceCredit value={this.state.data.summary.creditRemaining} />
-                <SalesCODCount value={this.state.data.salesCODCount} /> */}
+                <CreditIssued value={this.state.data.summary} />
+                <BalanceCredit value={this.state.data.summary} />
+                <SalesCODCount value={this.state.data.salesCODCount} />
               </Colxx>
               <Colxx lg="12" xl="6">
-                {/* <CODFee value={this.state.data.summary.feeCOD} />
-                <FundReimbursement value={this.state.data.summary.creditTotal} />
-                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} /> */}
+                <CODFee value={this.state.data.summary} />
+                <FundReimbursement value={this.state.data.summary} />
+                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} />
 
               </Colxx>
             </Row>
           </div>
-        )}
       </Fragment>
     );
   }
