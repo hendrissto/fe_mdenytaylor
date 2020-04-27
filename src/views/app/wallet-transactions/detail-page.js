@@ -10,11 +10,11 @@ import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import WalletTransactionsRestService from "../../../api/walletTransactionsRestService";
 import { Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import Spinner from "../../../containers/pages/Spinner";
+// import Spinner from "../../../containers/pages/Spinner";
 import { Redirect } from "react-router-dom";
 import { MultiSelect } from 'primereact/multiselect';
-import { 
-    Button, 
+import {
+    Button,
     Modal,
     ModalHeader,
     ModalBody,
@@ -110,7 +110,7 @@ class DetailWalletTransactions extends Component {
                 icon="pi pi-search"
                 onClick={() => {
                     // this.setState({realAttachments: []});
-        
+
                     let attachments = this.state.attachments;
                     let realAttachments = this.state.realAttachments;
                     attachments = [];
@@ -141,14 +141,14 @@ class DetailWalletTransactions extends Component {
         const tableDetail = { ...this.state.tableDetail };
         tableDetail.loading = true;
         this.setState({tableDetail});
-    
+
         const params = {
             keyword: this.state.search || null,
             "options.take": this.state.tableDetail.pagination.pageSize,
             "options.skip": this.state.tableDetail.pagination.skipSize,
             "options.includeTotalCount": true
         };
-    
+
         this.walletTransactionsRestService.loadOneDataTenantTransactions(this.state.walletId, {params}).subscribe(response => {
             const tableDetail = { ...this.state.tableDetail };
             tableDetail.data = response.data;
@@ -171,7 +171,7 @@ class DetailWalletTransactions extends Component {
             this.setState({loading: false});
         })
     }
-    
+
     editData() {
         const tableDetail = { ...this.state.tableDetail };
         tableDetail.loading = true;
@@ -245,7 +245,7 @@ class DetailWalletTransactions extends Component {
 
     isAttachment() {
         const data = [];
-    
+
         const attachment = this.state.attachments;
         if (attachment) {
             for (let i = 0; i < attachment.length; i++) {
@@ -266,24 +266,24 @@ class DetailWalletTransactions extends Component {
             );
             }
         }
-    
+
         return data;
     }
 
     fileHandler = event => {
         this.setState({ spinner: true });
         let fileObj = event.target.files[0];
-    
+
         let data = new FormData();
         data.append("file", fileObj);
-    
+
         this.pictureRestService.postPicture(data).subscribe(response => {
             // Create a new array based on current state:
             let attachments = [...this.state.attachments];
-    
+
             // Add item to it
             attachments.push(response);
-    
+
             this.setState({
             spinner: false,
             imageUrl: response.fileUrl,
@@ -307,7 +307,7 @@ class DetailWalletTransactions extends Component {
         console.log(total)
         return this.state.selectedColumns.length
     }
-    
+
     onColumnToggle(event) {
         let selectedColumns = event.value;
         let orderedSelectedColumns = _.sortBy(selectedColumns, x => _.findIndex(this.state.columns, y => x.field === y.field))
@@ -497,7 +497,7 @@ class DetailWalletTransactions extends Component {
                                     </td>
                                 </tr>
                                 )}
-                                
+
                                 {this.state.spinner && (
                                 <Loader
                                     type="Oval"
@@ -506,7 +506,7 @@ class DetailWalletTransactions extends Component {
                                     width={80}
                                 />
                                 )}
-            
+
                                 {!this.state.isEdit && this.showAttachment() && (
                                 <tr>
                                     <td>Lampiran</td>
@@ -565,7 +565,7 @@ class DetailWalletTransactions extends Component {
                         >
                             Edit
                         </Button>
-        
+
                         )}
                         <Button
                             color="primary"
@@ -579,7 +579,7 @@ class DetailWalletTransactions extends Component {
                         </Button>
                     </ModalFooter>
                     </Modal>
-                )}  
+                )}
             </>
         )
     }
