@@ -66,6 +66,7 @@ module.exports = {
     "menu.request-withdraw-funds": "Pencairan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",
     "menu.receipt-of-funds": "Transfer Kredit COD",
+    "menu.withdraw-of-tenant-funds": "Penarikan Dana Tenan",
     "menu.tenants": "Tenant",
     "menu.default": "Default",
     "menu.analytics": "Analytics",

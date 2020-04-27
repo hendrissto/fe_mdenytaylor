@@ -8,6 +8,10 @@ export default class WalletTransactionsRestService extends React.Component {
         this.request = new RequestService();
     }
 
+    approve(id, body) {
+      return this.request.put(`/wallet/transaction/approve-withdraw-request/${id}`, body);
+    }
+
     submitData(qParams) {
         return this.request.post('/wallet/transaction', qParams);
     }
@@ -24,7 +28,7 @@ export default class WalletTransactionsRestService extends React.Component {
         return this.request.get('/wallet/tenant-transaction', qParams);
     }
 
-    loadOneDataTenantTransactions(id, qParams) {        
+    loadOneDataTenantTransactions(id, qParams) {
         return this.request.get(`/wallet/tenant-transaction/${id}`, qParams);
     }
 }

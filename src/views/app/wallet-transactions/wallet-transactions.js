@@ -184,7 +184,8 @@ class WalletTransactions extends Component {
       keyword: event.query || null,
       isWalletTransaction: true,
       "options.take": 30,
-      "options.skip": 0
+      "options.skip": 0,
+      isWalletTransaction: true
     };
 
     this.tenantRest.getTenants({ params }).subscribe(response => {
