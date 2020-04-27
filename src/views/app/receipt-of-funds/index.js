@@ -1010,7 +1010,6 @@ class ReceiptOfFunds extends Component {
     const lineValue = {
       lines: []
     };
-
     for (let i = 0; i < array.length; i++) {
       lineValue.lines.push({
         tenantId: array[i].tenantId,
@@ -1039,6 +1038,7 @@ class ReceiptOfFunds extends Component {
         lastUpdateDate: this.checkDate(array[i].dateTime),
         arBalanceDue: Math.round(array[i].arBalanceDue) || 0,
         arAmountPaid: Math.round(array[i].arAmountPaid) || 0,
+        taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
       });
     }
 
@@ -1049,6 +1049,20 @@ class ReceiptOfFunds extends Component {
       courierChannelId: this.state.selectedCourier.id
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
+  }
+
+  checkTaxInclusive(taxInclusive) {
+    if(taxInclusive) {
+      if(typeof taxInclusive === 'number') {
+        return taxInclusive ? true : false;
+      } else if(typeof taxInclusive === 'boolean') {
+        return taxInclusive;
+      } else {
+        return taxInclusive.toLowerCase() === 'true' ? true : false;
+      }
+    } else {
+      return false;
+    }
   }
 
   checkDate(date) {
@@ -1416,6 +1430,20 @@ class ReceiptOfFunds extends Component {
     }
 
     this.setState({ data: search });
+  }
+
+  colTaxInclusive(rowData, column) {
+    if (rowData.taxInclusive) {
+      if(typeof rowData.taxInclusive === 'number') {
+        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+      } else if (typeof rowData.taxInclusive === 'boolean') {
+        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+      } else {
+        return rowData.taxInclusive.toLowerCase() === 'true' ? 'TRUE' : 'FALSE';
+      }
+    } else {
+      return 'FALSE';
+    }
   }
 
   render() {
@@ -1835,7 +1863,8 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="arBalanceDue" header="AR Balance Due" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date" />
+                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
+                  <Column style={{ width: '250px' }} field="taxInclusive" header="Tax Inclusive" body={this.colTaxInclusive}   />
                 </DataTable>
               </ModalBody>
 
