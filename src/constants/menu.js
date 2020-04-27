@@ -5,8 +5,8 @@ const data = [
     label: "menu.dashboards",
     to: "/app/dashboard",
   },
-  
-  /* 
+
+  /*
   COD
   1. Transfer Kredit COD
   2. Resi COD
@@ -40,9 +40,9 @@ const data = [
     ]
   },
 
-  
 
-  /* 
+
+  /*
     Wallet
     1. Tenants Bank
     2. Wallet Transactions
@@ -71,6 +71,11 @@ const data = [
         label: "menu.request-withdraw-funds",
         to: "/app/request-withdraw-funds/",
       }, {
+        id: "withdraw-of-tenant-funds",
+        icon: "iconsminds-wallet",
+        label: "Penarikan Dana Tenant",
+        to: "/app/withdraw-of-tenant-funds/",
+      }, {
         id: "debit-cod",
         icon: "iconsminds-wallet",
         label: "Histori Pencairan",
@@ -79,7 +84,7 @@ const data = [
     ]
   },
 
-  /* 
+  /*
     Tenants
     1. Tenants
     2. Subscriptions
