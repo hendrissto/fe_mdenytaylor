@@ -13,6 +13,7 @@ import DashboardRestService from "../../../api/dashboardRestService";
 
 import Loading from "../../../containers/pages/Spinner";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat"
+import moment from "moment";
 
 export default class Dashboard extends Component {
   constructor(props) {
@@ -57,11 +58,20 @@ export default class Dashboard extends Component {
   }
 
   loadSalesCODCount() {
-    return this.dashboardRestService.getSalesCODCount({});
+    const params = {
+      lowDate: moment().day(-7).format('YYYY-MM-DD'),
+      highDate: moment().format('YYYY-MM-DD')
+    }
+    return this.dashboardRestService.getSalesCODCount({params});
   }
 
   loadSalesCODTotalAmount() {
-    return this.dashboardRestService.getSalesCODTotalAmount({});
+    const params = {
+      lowDate: moment().day(-7).format('YYYY-MM-DD'),
+      highDate: moment().format('YYYY-MM-DD')
+    }
+    console.log(params)
+    return this.dashboardRestService.getSalesCODTotalAmount({params});
   }
 
   render() {
