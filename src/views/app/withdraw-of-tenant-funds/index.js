@@ -360,12 +360,12 @@ class WithdrawOfTenantFunds extends Component {
             '<tr>' +
               '<th>No Rekening</th>' +
               '<td>:</td>' +
-              `<td>${data.selectedBank.accountNumber}</td>` +
+              `<td>${data.oneData.accountNumber}</td>` +
             '</tr>' +
             '<tr>' +
               '<th>Nama Rekening</th>' +
               '<td>:</td>' +
-              `<td>${data.selectedBank.accountName}</td>` +
+              `<td>${data.oneData.accountName}</td>` +
             '</tr>' +
             '<tr>' +
               '<th>Ballance Amount</th>' +
@@ -417,7 +417,8 @@ class WithdrawOfTenantFunds extends Component {
   exportData() {
     this.setState({ loadingSubmit: true });
     const params = {
-      "options.includeTotalCount": true
+      "options.includeTotalCount": true,
+      statuses: 'open'
     };
 
     this.debitRestService.getDebitCod({ params }).subscribe(
@@ -593,7 +594,7 @@ class WithdrawOfTenantFunds extends Component {
       <>
         <Row>
           <Colxx xxs={12}>
-            <Breadcrumb heading="Histori Pencairan" match={this.props.match} />
+            <Breadcrumb heading="Penarikan Dana Tenan" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
@@ -772,7 +773,7 @@ class WithdrawOfTenantFunds extends Component {
                       <IntlMessages id="modal.cardName" />
                     </td>
                     <td>:</td>
-                    <td></td>
+                    <td>{this.state.oneData?.accountName || '-'}</td>
                   </tr>
                   <tr>
                     <td>
@@ -780,9 +781,7 @@ class WithdrawOfTenantFunds extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.selectedBank.length === 0
-                        ? "-"
-                        : this.state.selectedBank.bank.bankName}
+                      {this.state.oneData?.bankName || '-'}
                     </td>
                   </tr>
                   <tr>
@@ -791,9 +790,7 @@ class WithdrawOfTenantFunds extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.selectedBank.length === 0
-                        ? "-"
-                        : this.state.selectedBank.accountNumber}
+                      {this.state.oneData?.accountNumber || '-'}
                     </td>
                   </tr>
                   <tr>

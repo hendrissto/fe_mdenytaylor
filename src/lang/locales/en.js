@@ -63,6 +63,7 @@ module.exports = {
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
   "menu.receipt-of-funds": "COD Credit Transfer",
+  "menu.withdraw-of-tenant-funds": "Withdraw of tenat funds",
   "menu.tenants": "Tenants",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
@@ -140,7 +141,7 @@ module.exports = {
   "dashboards.cards.cod-fee": "Total COD Fee",
   "dashboards.cards.fund-reimbursement": "Total Fund Reimbursement",
   "dashboards.cards.credit-balance": "Total Credit Balance",
-  
+
   "dashboards.pending-orders": "Pending Orders",
   "dashboards.completed-orders": "Completed Orders",
   "dashboards.refund-requests": "Refund Requests",
@@ -606,7 +607,7 @@ module.exports = {
   "modal.receiptDataCOD": "COD Receipt Data",
 
   // expenditure
-  
+
   "expenditure.title"               : "Riwayat Pengeluaran Dana",
   "expenditure.totalbalace"         : "Saldo Total",
   "expenditure.table.header.seller"             : "Penjual",

@@ -73,7 +73,7 @@ const data = [
       }, {
         id: "withdraw-of-tenant-funds",
         icon: "iconsminds-wallet",
-        label: "Penarikan Dana Tenant",
+        label: "menu.withdraw-of-tenant-funds",
         to: "/app/withdraw-of-tenant-funds/",
       }, {
         id: "debit-cod",

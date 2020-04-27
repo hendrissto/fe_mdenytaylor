@@ -458,7 +458,8 @@ class DebitCod extends Component {
   exportData() {
     this.setState({ loadingSubmit: true });
     const params = {
-      "options.includeTotalCount": true
+      "options.includeTotalCount": true,
+      statuses: 'draft, voided, paid'
     };
 
     this.debitRestService.getDebitCod({ params }).subscribe(

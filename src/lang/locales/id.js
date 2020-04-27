@@ -37,7 +37,7 @@ Table of Contents
 module.exports = {
     /* 01.General */
     "general.copyright": "Gogo React © 2018 All Rights Reserved.",
-  
+
     /* 02.User Login, Logout, Register */
     "user.login-title": "Login",
     "user.register": "Register",
@@ -53,7 +53,7 @@ module.exports = {
     "user.username": "Username",
 
     "title.total-balance": "Total Saldo",
-  
+
     /* 03.Menu */
     "menu.cod": "COD",
     "menu.wallet": "E-Wallet",
@@ -66,6 +66,7 @@ module.exports = {
     "menu.request-withdraw-funds": "Pencairan Dana",
     "menu.expenditure": "Riwayat Pengeluaran dana",
     "menu.receipt-of-funds": "Transfer Kredit COD",
+    "menu.withdraw-of-tenant-funds": "Penarikan Dana Tenan",
     "menu.tenants": "Tenant",
     "menu.default": "Default",
     "menu.analytics": "Analytics",
@@ -115,7 +116,7 @@ module.exports = {
     "menu.hidden": "Hidden",
     "menu.visible": "Visible",
     "menu.maps":"Maps",
-  
+
     "menu.landingpage": "Landing Page",
     "menu.multipage-home": "Multipage Home",
     "menu.singlepage-home": "Singlepage Home",
@@ -139,7 +140,7 @@ module.exports = {
     "menu.third-level-1": "Third Level 1",
     "menu.third-level-2": "Third Level 2",
     "menu.third-level-3": "Third Level 3",
-  
+
     /* 04.Dashboards */
     "dashboards.cards.credit-issued": "Total Kredit Dikeluarkan",
     "dashboards.cards.cod-fee": "Total Fee COD Keseluruhan",
@@ -200,7 +201,7 @@ module.exports = {
 
     /* 05.Receipt Funds History */
     "ui.menu.receipt-of-funds.list.button.uploadAWB": "Upload No Resi",
-  
+
     /* 05.Pages */
     "pages.add-new": "ADD NEW",
     "pages.add-new-modal-title": "Add New Item",
@@ -233,15 +234,15 @@ module.exports = {
     "pages.invoice-info":"Invoice template has an inline styled version for usage outside of the project as well as React version.",
     "pages.react-version":"React Version",
     "pages.inline-version":"Inline Styled Html Version",
-  
+
     /* 06.Applications */
-  
+
     /* 06.01.Chat */
     "chat.messages": "Messages",
     "chat.contacts": "Contacts",
     "chat.saysomething": "Say something..",
-  
-  
+
+
     /* 06.02.Survey */
     "survey.delete": "Delete",
     "survey.edit": "Edit",
@@ -261,7 +262,7 @@ module.exports = {
     "survey.categories": "Categories",
     "survey.active-surveys": "Active Surveys",
     "survey.labels": "Labels",
-  
+
     /* 06.03.Todo */
     "todo.add-new": "ADD NEW",
     "todo.add-new-title": "Add New Todo",
@@ -281,9 +282,9 @@ module.exports = {
     "todo.completed-tasks": "Completed Tasks",
     "todo.categories": "Categories",
     "todo.labels": "Labels",
-  
+
     /* 07.UI */
-  
+
     /* 07.01.Alerts */
     "alert.rounded": "Rounded Alert",
     "alert.react-notifications": "React Notifications",
@@ -309,7 +310,7 @@ module.exports = {
       "Holy guacamole! You should check in on some of those fields below.",
     "alert.dismissing-without-animate-text":
       "I am an alert and I can be dismissed without animating!",
-  
+
     /* 07.02.Badges */
     "badge.sizes": "Sizes",
     "badge.colors": "Colors",
@@ -325,7 +326,7 @@ module.exports = {
     "badge.info": "Info",
     "badge.light": "Light",
     "badge.dark": "Dark",
-  
+
     /* 07.03.Buttons */
     "button.default": "Bootstrap Default",
     "button.colors": "Colors",
@@ -370,7 +371,7 @@ module.exports = {
     "button.right": "Right",
     "button.dropdown": "Dropdown",
     "button.dropdown-link": "Dropdown Link",
-  
+
     /* 07.04.Cards */
     "cards.icon-card": "Icon Card",
     "cards.image-card": "Image Card",
@@ -378,12 +379,12 @@ module.exports = {
     "cards.image-card-list": "Image Card List",
     "cards.tab-card": "Tab Card",
     "cards.user-card": "User Card",
-  
+
     /* 07.05.Carousel */
     "carousel.basic": "Carousel Basic",
     "carousel.single": "Carousel Single",
     "carousel.without-controls": "Carousel Without Controls",
-  
+
     /* 07.06.Charts */
     "charts.line": "Line Chart",
     "charts.polar": "Polar Chart",
@@ -395,14 +396,14 @@ module.exports = {
     "charts.doughnut": "Doughnut Chart",
     "charts.shadow": "Shadow",
     "charts.no-shadow": "No Shadow",
-  
+
     /* 07.07.Collapse */
     "collapse.basic": "Basic",
     "collapse.toggle": "Toggle",
     "collapse.accordion": "Accordion",
     "collapse.controlled": "Controlled",
     "collapse.uncontrolled": "Uncontrolled",
-  
+
     /* 07.08.Dropdowns */
     "dropdowns.basic": "Basic",
     "dropdowns.controlled": "Controlled",
@@ -421,12 +422,12 @@ module.exports = {
     "dropdowns.sizing": "Sizing",
     "dropdowns.split-button": "Split Button Dropdowns",
     "dropdowns.dropup": "Dropup",
-  
+
     /* 07.09.Editors */
     "editors.draftjs": "Draft.js",
     "editors.quill-standart": "Quill Standard",
     "editors.quill-bubble": "Quill Bubble",
-  
+
     /* 07.10.Forms */
     "forms.basic": "Basic",
     "forms.email": "E-mail",
@@ -466,7 +467,7 @@ module.exports = {
     "forms.firstname-message": "Please enter your first name!",
     "forms.lastname": "Last name",
     "forms.lastname-message": "Please enter your last name!",
-  
+
     /* 07.11.Form Components */
     "form-components.custom-inputs": "Custom Inputs",
     "form-components.checkboxes": "Checkboxes",
@@ -502,7 +503,7 @@ module.exports = {
     /* 07.12.Icons */
     "icons.simplelineicons": "Simple Line Icons",
     "icons.iconsmind": "Iconsmind Icons",
-  
+
     /* 07.13.Input Groups */
     "input-groups.basic": "Basic",
     "input-groups.sizing": "Sizing",
@@ -524,7 +525,7 @@ module.exports = {
     "input-groups.options": "Options",
     "input-groups.choose": "Choose...",
     "input-groups.custom-file-input": "Custom File Input",
-  
+
     /* 07.14.Jumbotron */
     "jumbotron.hello-world": "Hello, world!",
     "jumbotron.lead":
@@ -532,7 +533,7 @@ module.exports = {
     "jumbotron.lead-detail":
       "It uses utility classes for typography and spacing to space content out within the larger container.",
     "jumbotron.learn-more": "Learn more",
-  
+
     /* 07.15.Modal */
     "modal.basic": "Basic",
     "modal.modal-title": "Modal title",
@@ -546,7 +547,7 @@ module.exports = {
     "modal.size": "Size",
     "modal.launch-large-modal": "Launch Large Modal",
     "modal.launch-small-modal": "Launch Small Modal",
-  
+
     /* 07.16.Navigation */
     "nav.basic": "Nav Basic",
     "nav.active": "Active",
@@ -572,20 +573,20 @@ module.exports = {
     "nav.center": "Center",
     "nav.pagination-alignment": "Pagination Alignment",
     "nav.breadcrumb-basic": "Breadcrumb Basic",
-  
+
     /* 07.17.Popover & Tooltip */
     "popover-tooltip.popover": "Popover",
     "popover-tooltip.tooltip": "Tooltip",
-  
+
     /* 07.18.Sortable */
     "sortable.columns": "Sorting Columns",
     "sortable.basic": "Basic",
     "sortable.handles": "Handles",
-  
+
     /* 07.19.Maps */
     "maps.google": "Google",
     "maps.yandex": "Yandex",
-  
+
     /* 07.20.Tables */
     "table.bootstrap-tables": "Bootstrap Tables",
     "table.bootstrap-basic": "Basic Table",
@@ -598,7 +599,7 @@ module.exports = {
     "table.react-pagination": "Pagination",
     "table.react-scrollable": "Scrollable",
     "table.react-advanced": "Filter, Length and Jump",
-  
+
 
     /* Modal Content */
     "modal.modalTitle": "Upload Bukti Transfer",
@@ -620,4 +621,3 @@ module.exports = {
     "expenditure.table.header.status" : "Status",
     "expenditure.table.header.proof"  : "Bukti"
   };
-  
