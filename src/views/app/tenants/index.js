@@ -225,7 +225,6 @@ export default class Tenant extends Component {
       },
       error => {
         if(error.response.status === 401){
-          this.setState({redirect: true});
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
