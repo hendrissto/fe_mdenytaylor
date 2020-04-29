@@ -152,7 +152,6 @@ class WalletTransactions extends Component {
       this.setState({ table });
     }, err => {
       if (err.response.status === 401) {
-        this.setState({ redirect: true });
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
@@ -427,7 +426,6 @@ class WalletTransactions extends Component {
       this.setState({tableDetail, mainLoading: false, modalDetailOneTenants: true, table });
     }, err => {
       if (err.response.status === 401) {
-        this.setState({ redirect: true });
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",

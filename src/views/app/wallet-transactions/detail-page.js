@@ -157,7 +157,6 @@ class DetailWalletTransactions extends Component {
             this.setState({detailTenant: response.data[0].tenant ,tableDetail, modalDetailOneTenants: true, loading: false });
         }, err => {
             if (err.response.status === 401) {
-                this.setState({ redirect: true });
                 MySwal.fire({
                 type: "error",
                 title: "Unauthorized.",

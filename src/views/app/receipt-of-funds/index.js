@@ -803,7 +803,6 @@ class ReceiptOfFunds extends Component {
       },
       err => {
         if (err.response.status === 401) {
-          this.setState({ redirect: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",

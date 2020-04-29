@@ -204,7 +204,6 @@ class DebitCod extends Component {
       table.loading = false;
       this.setState({ table });
       if(err.response.status === 401){
-        this.setState({redirect: true});
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
