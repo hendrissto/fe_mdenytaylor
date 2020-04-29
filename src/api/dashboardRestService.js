@@ -13,10 +13,10 @@ export default class DashboardRestService extends React.Component {
   }
 
   getSalesCODCount(qParams) {
-    return this.request.get('/dashboard/sales-cod-count');
+    return this.request.get('/dashboard/sales-cod-count', qParams);
   }
 
   getSalesCODTotalAmount(qParams) {
-    return this.request.get('/dashboard/sales-cod-total-amount');
+    return this.request.get('/dashboard/sales-cod-total-amount', qParams);
   }
 }
