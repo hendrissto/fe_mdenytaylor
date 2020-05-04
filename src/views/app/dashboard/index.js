@@ -59,18 +59,17 @@ export default class Dashboard extends Component {
 
   loadSalesCODCount() {
     const params = {
-      lowDate: moment().day(-7).format('YYYY-MM-DD'),
-      highDate: moment().format('YYYY-MM-DD')
+      lowDate: moment().format('YYYY-MM-DD'),
+      highDate: moment().day(+7).format('YYYY-MM-DD')
     }
     return this.dashboardRestService.getSalesCODCount({params});
   }
 
   loadSalesCODTotalAmount() {
     const params = {
-      lowDate: moment().day(-7).format('YYYY-MM-DD'),
-      highDate: moment().format('YYYY-MM-DD')
+      lowDate: moment().format('YYYY-MM-DD'),
+      highDate: moment().day(+7).format('YYYY-MM-DD')
     }
-    console.log(params)
     return this.dashboardRestService.getSalesCODTotalAmount({params});
   }
 
