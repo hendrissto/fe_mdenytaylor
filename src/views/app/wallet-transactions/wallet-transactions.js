@@ -181,7 +181,6 @@ class WalletTransactions extends Component {
   suggestTenants(event) {
     const params = {
       keyword: event.query || null,
-      isWalletTransaction: true,
       "options.take": 30,
       "options.skip": 0
     };
