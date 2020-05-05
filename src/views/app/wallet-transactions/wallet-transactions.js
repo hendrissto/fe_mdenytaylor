@@ -1,11 +1,11 @@
 import React, { Component, Fragment } from "react";
-import { 
-  // Row, 
-  Table, 
-  // Card, 
-  // CardBody, 
-  Button, 
-  Input, 
+import {
+  // Row,
+  Table,
+  // Card,
+  // CardBody,
+  Button,
+  Input,
   InputGroup,
   Modal,
   ModalHeader,
@@ -181,6 +181,7 @@ class WalletTransactions extends Component {
   suggestTenants(event) {
     const params = {
       keyword: event.query || null,
+      isWalletTransaction: true,
       "options.take": 30,
       "options.skip": 0
     };
@@ -257,11 +258,11 @@ class WalletTransactions extends Component {
             note: null,
             isCredit: true,
             feeAmount: null,
-        
+
             image: null,
             imageUrl: null,
             attachments: [],
-        
+
             tenantOptions: null,
             tenantSelected: null,
           });
@@ -542,7 +543,7 @@ class WalletTransactions extends Component {
         <Breadcrumb heading="Tenants Wallet" match={this.props.match} />
         <Separator className="mb-5" />
         <div className="card">
-          <div className="card-body">   
+          <div className="card-body">
           <div className="row d-flex justify-content-between" style={{marginBottom: 10}}>
             <div className="col-md-3">
               <InputGroup>
@@ -573,12 +574,12 @@ class WalletTransactions extends Component {
               <Button
                 className="default"
                 color="primary"
-                onClick={() => this.setState({ 
+                onClick={() => this.setState({
                   amount: null,
                   note: null,
                   isCredit: true,
                   feeAmount: null,
-              
+
                   image: null,
                   imageUrl: null,
                   attachments: [],
@@ -587,7 +588,7 @@ class WalletTransactions extends Component {
                   tenantBank: null,
                   tenantOptions: null,
                   tenantSelected: null,
-                  modalAddWallet: true 
+                  modalAddWallet: true
                 })}
                 style={{
                   borderRadius: 6,
@@ -598,7 +599,7 @@ class WalletTransactions extends Component {
               </Button>
             </div>
           </div>
-                      
+
             {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
             <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
               {/*
@@ -887,7 +888,7 @@ class WalletTransactions extends Component {
                       </td>
                     </tr>
                   )}
-                  
+
                   {this.state.spinner && (
                     <Loader
                       type="Oval"

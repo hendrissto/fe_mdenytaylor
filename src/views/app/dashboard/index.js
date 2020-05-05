@@ -1,7 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { Row } from "reactstrap";
+import { forkJoin } from 'rxjs';
 import BalanceCredit from "./credit-balance";
 import CreditIssued from "./credit-issued";
+import SalesCODCount from "./sales-cod-count";
+import SalesCODTotalAmount from "./sales-cod-total-amount";
 import CODFee from "./cod-fee";
 import FundReimbursement from "./fund-reimbursement";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
@@ -10,37 +13,70 @@ import DashboardRestService from "../../../api/dashboardRestService";
 
 import Loading from "../../../containers/pages/Spinner";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat"
+import moment from "moment";
 
 export default class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-		this.dashboardRestService = new DashboardRestService();
-		this.moneyFormat = new MoneyFormat();
+    this.dashboardRestService = new DashboardRestService();
+    this.moneyFormat = new MoneyFormat();
     this.loadData = this.loadData.bind(this);
 
     this.state = {
       loading: false,
-      data: null
+      data: {
+        summary: null,
+        salesCODCount: 0,
+        salesCODTotalAmount: 0,
+      }
     };
   }
 
   componentDidMount() {
-    this.loadData();
+    this.setState({ loading: true });
+
+    forkJoin(
+      this.loadData(),
+      this.loadSalesCODCount(),
+      this.loadSalesCODTotalAmount()
+    )
+      .subscribe((response => {
+        const data = {...this.state.data}
+        data.summary = response[0];
+        data.salesCODCount = response[1];
+        data.salesCODTotalAmount = response[2];
+        this.setState({
+          data,
+          loading: false
+        });
+      }));
   }
 
   loadData() {
-    this.setState({ loading: true });
-    this.dashboardRestService.getSummary({}).subscribe(response => {
-			this.setState({ data: response, loading: false });
-    });
+    return this.dashboardRestService.getSummary({});
+  }
+
+  loadSalesCODCount() {
+    const params = {
+      lowDate: moment().format('YYYY-MM-DD'),
+      highDate: moment().day(+7).format('YYYY-MM-DD')
+    }
+    return this.dashboardRestService.getSalesCODCount({params});
+  }
+
+  loadSalesCODTotalAmount() {
+    const params = {
+      lowDate: moment().format('YYYY-MM-DD'),
+      highDate: moment().day(+7).format('YYYY-MM-DD')
+    }
+    return this.dashboardRestService.getSalesCODTotalAmount({params});
   }
 
   render() {
     return (
       <Fragment>
         {this.state.loading && <Loading />}
-        {this.state.data !== null && (
           <div>
             <Row>
               <Colxx xxs="12">
@@ -53,16 +89,18 @@ export default class Dashboard extends Component {
             </Row>
             <Row>
               <Colxx lg="12" xl="6">
-                <CreditIssued value={this.state.data.creditCOD} />
-                <BalanceCredit value={this.state.data.creditRemaining} />
+                <CreditIssued value={this.state.data.summary} />
+                <BalanceCredit value={this.state.data.summary} />
+                <SalesCODCount value={this.state.data.salesCODCount} />
               </Colxx>
               <Colxx lg="12" xl="6">
-                <CODFee value={this.state.data.feeCOD} />
-                <FundReimbursement value={this.state.data.creditTotal} />
+                <CODFee value={this.state.data.summary} />
+                <FundReimbursement value={this.state.data.summary} />
+                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} />
+
               </Colxx>
             </Row>
           </div>
-        )}
       </Fragment>
     );
   }

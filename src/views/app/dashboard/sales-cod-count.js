@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import IconCard from "../../../components/cards/IconCard";
 
-class CreditBalance extends Component {
+class SalesCODCount extends Component {
   constructor(){
     super();
     this.state = {
@@ -11,9 +11,9 @@ class CreditBalance extends Component {
 
   static getDerivedStateFromProps(props, state) {
     if(props.value) {
-      const {creditRemaining} = props.value;
+      const {count} = props.value;
       return {
-        value: creditRemaining,
+        value: count,
       };
     }
     return null;
@@ -22,10 +22,10 @@ class CreditBalance extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag"  value={'Rp. ' + this.state.value.toLocaleString('id-ID')} className="mb-4" />
+        <IconCard title='dashboards.cards.sales-cod-count' icon="iconsminds-basket-coins" value={this.state.value} className="mb-4" />
       </div>
     )
   }
 }
 
-export default CreditBalance;
+export default SalesCODCount;
