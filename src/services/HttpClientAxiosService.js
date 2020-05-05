@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 
 export class HttpClientAxiosService {
   cancelToken = Axios.CancelToken;
+  axios = new Axios();
 
   constructor(axios) {
     this.axios = axios;
