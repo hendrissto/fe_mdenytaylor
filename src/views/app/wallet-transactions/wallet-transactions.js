@@ -183,8 +183,7 @@ class WalletTransactions extends Component {
     const params = {
       keyword: event.query || null,
       "options.take": 30,
-      "options.skip": 0,
-      isWalletTransaction: true
+      "options.skip": 0
     };
 
     this.tenantRest.getTenants({ params }).subscribe(response => {
