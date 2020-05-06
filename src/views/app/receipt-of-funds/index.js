@@ -762,10 +762,12 @@ class ReceiptOfFunds extends Component {
       data.lines[j].discountShippingChargePercentage *= 100;
       Math.round(data.lines[j].codFeeRp);
       Math.round(data.lines[j].totAmountCodFee);
+      if(data.lines[j].nilaiAsuransi) {
+        data.lines[j].insurance = data.lines[j].nilaiAsuransi;
+      }
     }
 
     let finish = data.lines;
-
     this.setState({ oneData: finish, resiModalSeller: true });
   }
 
@@ -801,7 +803,6 @@ class ReceiptOfFunds extends Component {
       },
       err => {
         if (err.response.status === 401) {
-          this.setState({ redirect: true });
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -1034,11 +1035,11 @@ class ReceiptOfFunds extends Component {
         receiveAmount: Math.round(array[i].totAmountCodFee) || 0,
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
-        insuranceAmount: Math.round(array[i].insurance) || 0,
+        insuranceAmount: (Math.round(array[i].insurance) || Math.round(array[i].nilaiAsuransi)) || 0,
         lastUpdateDate: this.checkDate(array[i].dateTime),
-        taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
         arBalanceDue: Math.round(array[i].arBalanceDue) || 0,
         arAmountPaid: Math.round(array[i].arAmountPaid) || 0,
+        taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
       });
     }
 
