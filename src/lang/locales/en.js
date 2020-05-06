@@ -140,7 +140,9 @@ module.exports = {
   "dashboards.cards.cod-fee": "Total COD Fee",
   "dashboards.cards.fund-reimbursement": "Total Fund Reimbursement",
   "dashboards.cards.credit-balance": "Total Credit Balance",
-  
+  "dashboards.cards.sales-cod-count": "Total Sales COD",
+  "dashboards.cards.sales-cod-total-amount": "Amount Sales COD",
+
   "dashboards.pending-orders": "Pending Orders",
   "dashboards.completed-orders": "Completed Orders",
   "dashboards.refund-requests": "Refund Requests",
@@ -606,7 +608,7 @@ module.exports = {
   "modal.receiptDataCOD": "COD Receipt Data",
 
   // expenditure
-  
+
   "expenditure.title"               : "Riwayat Pengeluaran Dana",
   "expenditure.totalbalace"         : "Saldo Total",
   "expenditure.table.header.seller"             : "Penjual",
