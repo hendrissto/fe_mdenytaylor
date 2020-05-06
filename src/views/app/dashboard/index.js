@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Row } from "reactstrap";
-import { forkJoin } from 'rxjs';
+import { forkJoin, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import BalanceCredit from "./credit-balance";
 import CreditIssued from "./credit-issued";
 import SalesCODCount from "./sales-cod-count";
@@ -12,8 +13,11 @@ import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import DashboardRestService from "../../../api/dashboardRestService";
 
 import Loading from "../../../containers/pages/Spinner";
-import { MoneyFormat } from "../../../services/Format/MoneyFormat"
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
 import moment from "moment";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 export default class Dashboard extends Component {
   constructor(props) {
@@ -40,6 +44,22 @@ export default class Dashboard extends Component {
       this.loadData(),
       this.loadSalesCODCount(),
       this.loadSalesCODTotalAmount()
+    ).pipe(
+      catchError((error)=>{
+        this.setState({
+          loading: false
+        });
+        MySwal.fire({
+          type: "error",
+          title:  error.response.data[0] ? error.response.data[0].errorMessage : 'Tidak diketahui',
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        return throwError(error);
+      })
     )
       .subscribe((response => {
         const data = {...this.state.data}
