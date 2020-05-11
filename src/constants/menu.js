@@ -7,6 +7,7 @@ const data = [
   },
 
   /*
+  /* 
   COD
   1. Transfer Kredit COD
   2. Resi COD
@@ -39,6 +40,7 @@ const data = [
       // },
     ]
   },
+
 
 
 
@@ -113,6 +115,32 @@ const data = [
         icon: "iconsminds-receipt-4",
         label: "menu.list-transactions",
         to: "/app/list-transactions",
+      },
+    ]
+  },
+  {
+    id: "users-admin",
+    icon: "simple-icon-user",
+    label: "menu.users",
+    // to: "/app/receipt-of-funds",
+    subs: [
+      {
+        id: "user",
+        icon: "iconsminds-administrator",
+        label: "menu.users",
+        to: "/app/users",
+      },
+      {
+        id: "roles",
+        icon: "iconsminds-unlock-2",
+        label: "menu.roles",
+        to: "/app/roles",
+      },
+      {
+        id: "list-permissions",
+        icon: "iconsminds-receipt-4",
+        label: "menu.permissions",
+        to: "/app/permissions",
       },
     ]
   },
