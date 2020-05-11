@@ -200,6 +200,7 @@ export default class UserRoles extends Component {
 
                 data.permissionRoles = newPerms;
                 this.setState({
+                    rowVersion: data.rowVersion,
                     oneData: data,
                     permissions: data.permissionRoles,
                     rolesName: data.name,
@@ -240,7 +241,8 @@ export default class UserRoles extends Component {
             const payload = {
                 name: data.rolesName,
                 description: data.description,
-                permissionIds: permissionIds
+                permissionIds: permissionIds,
+                rowVersion: data.isEdit ? data.rowVersion : '',
             }
 
             if (!this.state.isEdit) {
