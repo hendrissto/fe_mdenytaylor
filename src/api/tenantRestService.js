@@ -35,4 +35,8 @@ export default class TenantRestService extends React.Component {
   updateShippingSettings(id, data) {
     return this.request.post(`/admin/tenants/${id}/shipping-service`, data);
   }
+
+  updateWarehouses(tenantId, warehouseId, active) {
+    return this.request.post(`/admin/tenants/${tenantId}/wms/${warehouseId}/is-already-member/${active}`);
+  }
 }
