@@ -77,7 +77,7 @@ export default class FormTenantSubscription extends Component {
   }
 
   componentDidMount() {
-    this.loadRelatedData();
+    this.loadData();
   }
 
   toggle() {
@@ -104,12 +104,17 @@ export default class FormTenantSubscription extends Component {
     this.billingRest
       .getTenantsSubscriptionsById(tenantId, {})
       .subscribe(response => {
-        this.setState({ data: response, loading: false });
+        this.setState({ data: response }, () => {
+          this.loadRelatedData();
+        });
       });
   }
 
   loadRelatedData() {
-    this.billingRest.getRelatedData({}).subscribe(response => {
+    const params = {
+      isClodeoMain: (this.state.data.clientAppId === 'clodeo-main-web')
+    }
+    this.billingRest.getRelatedData({params}).subscribe(response => {
       const data = response.paymentMethodStr;
       const options = [];
 
@@ -120,8 +125,8 @@ export default class FormTenantSubscription extends Component {
         });
       }
 
-      this.setState({ relatedData: response, paymentMethod: options }, () => {
-        this.loadData();
+      this.setState({ relatedData: response, paymentMethod: options, loading: false }, () => {
+        // this.loadData();
       });
     });
   }
@@ -450,7 +455,7 @@ export default class FormTenantSubscription extends Component {
       </table>
     );
   }
-  
+
   _renderPrice(props) {
     props.values.total = props.values.prices;
 
@@ -690,7 +695,7 @@ export default class FormTenantSubscription extends Component {
           }
         ]
       };
-      
+
       this.billingRest
         .upgradeTenantsSubscriptions(
           parseInt(this.props.match.params.tenantId),
