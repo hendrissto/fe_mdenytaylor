@@ -27,9 +27,9 @@ import {
   UncontrolledPopover,
   PopoverBody,
   CustomInput,
-  ButtonDropdown, 
-  DropdownToggle, 
-  DropdownMenu, 
+  ButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
   DropdownItem
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
@@ -64,6 +64,7 @@ export default class Tenant extends Component {
     this.loadFilterData = this.loadFilterData.bind(this);
     this.toggleExport = this.toggleExport.bind(this);
     this.toggleShippingSettingsModal = this.toggleShippingSettingsModal.bind(this);
+    this.toggleWarehouseChannelsModal = this.toggleWarehouseChannelsModal.bind(this);
     this.loadOneData = this.loadOneData.bind(this);
 
     this.state = {
@@ -83,6 +84,7 @@ export default class Tenant extends Component {
         status: true,
         isCOD: true,
         shippingSettings: true,
+        warehouseChannels: true,
       },
       totalSku: true,
       totalOrder: true,
@@ -128,7 +130,10 @@ export default class Tenant extends Component {
       exportButton: false,
       shippingSettingsModal: false,
       shippingSettingsData: [],
+      warehouseChannelsModal: false,
+      warehouseChannelsData: [],
       loadingShippings: false,
+      loadingWarehouses: false,
     };
   }
 
@@ -224,7 +229,7 @@ export default class Tenant extends Component {
         this.setState({ table });
       },
       error => {
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
           MySwal.fire({
             type: "error",
             title: "Unauthorized.",
@@ -251,7 +256,7 @@ export default class Tenant extends Component {
 
   loadOneData(id) {
     this.tenantRest.getOneTenants(id).subscribe(res => {
-      this.setState({oneData: res})
+      this.setState({ oneData: res })
     }, err => {
       console.log(err)
     })
@@ -276,6 +281,10 @@ export default class Tenant extends Component {
 
   toggleShippingSettingsModal() {
     this.setState({ shippingSettingsModal: false });
+  }
+
+  toggleWarehouseChannelsModal() {
+    this.setState({ warehouseChannelsModal: false });
   }
 
   dataTable() {
@@ -411,10 +420,27 @@ export default class Tenant extends Component {
               color="secondary"
               style={{ width: 150 }}
               onClick={() => {
-                this.setState({shippingSettingsData: props.original, oneData: props.original, shippingSettingsModal: true})
+                this.setState({ shippingSettingsData: props.original, oneData: props.original, shippingSettingsModal: true })
               }}
             >
               Shipping Settings
+            </Button>
+          </div>
+        )
+      },
+      {
+        Header: "Warehouse Channels",
+        width: 200,
+        show: tableFilter.warehouseChannels,
+        Cell: props => (
+          <div>
+            <Button
+              color="info"
+              onClick={() => {
+                this.setState({ warehouseChannelsData: props.original, oneData: props.original, warehouseChannelsModal: true })
+              }}
+            >
+              Warehouse Channels
             </Button>
           </div>
         )
@@ -587,20 +613,20 @@ export default class Tenant extends Component {
 
   shippingSettingsModal() {
     let temp = [];
-    const listShippingSettings =this.state.oneData.shippingSettings;
+    const listShippingSettings = this.state.oneData.shippingSettings;
     const data = this.state.oneData;
-    
-    for(let i = 0; i < listShippingSettings.length; i++) {
+
+    for (let i = 0; i < listShippingSettings.length; i++) {
       temp.push(
         <tr>
           <td> {listShippingSettings[i].courierChannelId} </td>
           <td> {listShippingSettings[i].memberId || '-'} </td>
-          <td> 
+          <td>
             <Switch
               className="custom-switch custom-switch-secondary"
-              checked={listShippingSettings[i].isCOD || listShippingSettings[i].isPickupRequest }
+              checked={listShippingSettings[i].isCOD || listShippingSettings[i].isPickupRequest}
               onChange={(event) => {
-                this.setState({loadingShippings: true})
+                this.setState({ loadingShippings: true })
                 const params = {
                   "isPickup": !listShippingSettings[i].isPickupRequest,
                   "isCOD": !listShippingSettings[i].isCOD,
@@ -609,7 +635,7 @@ export default class Tenant extends Component {
                 this.tenantRest.updateShippingSettings(data.id, params).subscribe(() => {
                   this.loadOneData(data.id);
                   this.loadData()
-                  if(listShippingSettings[i].isCOD) {
+                  if (listShippingSettings[i].isCOD) {
                     MySwal.fire({
                       type: "success",
                       title: `COD ${listShippingSettings[i].courierChannelId} telah dinonaktifkan.`,
@@ -630,14 +656,73 @@ export default class Tenant extends Component {
                       customClass: "swal-height"
                     });
                   }
-                  this.setState({loadingShippings: false})
+                  this.setState({ loadingShippings: false })
                 }, err => {
                   console.log(err)
-                  this.setState({loadingShippings: false})
+                  this.setState({ loadingShippings: false })
                 })
               }}
             />
-         </td>
+          </td>
+        </tr>
+      )
+    }
+
+    return temp;
+  }
+  warehouseChannelsModal() {
+    let temp = [];
+    const listWarehouseChannels = this.state.oneData.warehouseChannels;
+    const data = this.state.oneData;
+
+    for (let i = 0; i < listWarehouseChannels.length; i++) {
+      temp.push(
+        <tr>
+          <td> {listWarehouseChannels[i].channelWarehouseName || '-'} </td>
+          <td> {listWarehouseChannels[i].warehouseName || '-'} </td>
+          <td>
+            <Switch
+              className="custom-switch custom-switch-secondary"
+              checked={listWarehouseChannels[i].isAlreadyMember}
+              onChange={(event) => {
+                this.setState({ loadingWarehouses: true })
+                const params = {
+                  tenantId: data.id,
+                  warehouseId: listWarehouseChannels[i].warehouseId,
+                  active: !listWarehouseChannels[i].isAlreadyMember
+                }
+                this.tenantRest.updateWarehouses(params.tenantId, params.warehouseId, params.active).subscribe(() => {
+                  this.loadOneData(data.id);
+                  this.loadData()
+                  if (listWarehouseChannels[i].isAlreadyMember) {
+                    MySwal.fire({
+                      type: "success",
+                      title: `Is Already Member ${listWarehouseChannels[i].warehouseName} telah dinonaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  } else {
+                    MySwal.fire({
+                      type: "success",
+                      title: `Is Already Member ${listWarehouseChannels[i].warehouseName} telah diaktifkan.`,
+                      toast: true,
+                      position: "top-end",
+                      timer: 2000,
+                      showConfirmButton: false,
+                      customClass: "swal-height"
+                    });
+                  }
+                  this.setState({ loadingWarehouses: false })
+                }, err => {
+                  console.log(err)
+                  this.setState({ loadingWarehouses: false })
+                })
+              }}
+            />
+          </td>
         </tr>
       )
     }
@@ -654,7 +739,7 @@ export default class Tenant extends Component {
     this.tenantRest.getTenants({ params }).subscribe(
       response => {
         this.setState({ totalData: response.total }, () => {
-          if(this.state.allData) {
+          if (this.state.allData) {
             this.loadAllData();
           } else {
             this.loadFilterData();
@@ -679,7 +764,7 @@ export default class Tenant extends Component {
     });
   }
 
-   loadFilterData() {    
+  loadFilterData() {
     const params = {
       keyword: this.state.search || null,
       isCod: this.state.isCod || null,
@@ -853,22 +938,22 @@ export default class Tenant extends Component {
                       toggle={this.togglePopOver}
                     >
                       <PopoverBody className="custom-popover">
-                      <div>
-                        <input
-                          name="companyInfo"
-                          type="checkbox"
-                          checked={tableFilter.companyInfo}
-                          onChange={this.handleFilterChange.bind(this)}
-                        />
+                        <div>
+                          <input
+                            name="companyInfo"
+                            type="checkbox"
+                            checked={tableFilter.companyInfo}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
                         Nama Perusahaan
                       </div>
-                      <div>
-                        <input
-                          name="email"
-                          type="checkbox"
-                          checked={tableFilter.email}
-                          onChange={this.handleFilterChange.bind(this)}
-                        />
+                        <div>
+                          <input
+                            name="email"
+                            type="checkbox"
+                            checked={tableFilter.email}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
                         Email
                       </div>
                         <div>
@@ -945,6 +1030,15 @@ export default class Tenant extends Component {
                         </div>
                         <div>
                           <input
+                            name="warehouseChannels"
+                            type="checkbox"
+                            checked={tableFilter.warehouseChannels}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Warehouse Channels
+                        </div>
+                        <div>
+                          <input
                             name="isRealColumn"
                             type="checkbox"
                             checked={tableFilter.isRealColumn}
@@ -994,27 +1088,27 @@ export default class Tenant extends Component {
                     </Button>
                     <ButtonDropdown
                       className="float-right default"
-                      isOpen={this.state.exportButton} 
+                      isOpen={this.state.exportButton}
                       toggle={this.toggleExport}
                     >
-                      <DropdownToggle 
+                      <DropdownToggle
                         caret
                         color="primary"
                         style={{
                           marginRight: 10,
                           borderRadius: 6
-                        }} 
+                        }}
                       >
                         Export
                       </DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem onClick={() => {
-                          this.setState({allData: true}, () => {
+                          this.setState({ allData: true }, () => {
                             this.exportData();
                           });
                         }}>Export Semua Data</DropdownItem>
                         <DropdownItem onClick={() => {
-                          this.setState({allData: false}, () => {
+                          this.setState({ allData: false }, () => {
                             this.exportData();
                           });
                         }}>Export berdasarkan Filter</DropdownItem>
@@ -1131,29 +1225,72 @@ export default class Tenant extends Component {
                   overflow: "auto"
                 }}
               >
-              {!this.state.loadingShippings && (
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Kurir</th>
-                      <th scope="col">Member ID</th>
-                      <th scope="col">COD</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.shippingSettingsModal()}
-                  </tbody>
-                </table>
-              )}
+                {!this.state.loadingShippings && (
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Kurir</th>
+                        <th scope="col">Member ID</th>
+                        <th scope="col">COD</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.shippingSettingsModal()}
+                    </tbody>
+                  </table>
+                )}
 
-              {this.state.loadingShippings && (
-                <div style={{paddingLeft: '40%'}}>
-                  <Loader type="Oval" color="#51BEEA" height={80} width={80}/>
-                </div>
-              )}
+                {this.state.loadingShippings && (
+                  <div style={{ paddingLeft: '40%' }}>
+                    <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+                  </div>
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" outline onClick={this.toggleShippingSettingsModal}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </Modal>
+          </div>
+        )}
+        {this.state.warehouseChannelsModal && (
+          <div
+            style={{
+              maxHeight: 580
+            }}
+          >
+            <Modal isOpen={this.state.warehouseChannelsModal} toggle={this.toggleWarehouseChannelsModal}>
+              <ModalHeader toggle={this.toggleWarehouseChannelsModal}>Warehouse Channels</ModalHeader>
+              <ModalBody
+                style={{
+                  maxHeight: 380,
+                  overflow: "auto"
+                }}
+              >
+                {!this.state.loadingWarehouses && (
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Warehouse Channel</th>
+                        <th scope="col">Warehouse Name</th>
+                        <th scope="col">Is Already Member</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.warehouseChannelsModal()}
+                    </tbody>
+                  </table>
+                )}
+
+                {this.state.loadingWarehouses && (
+                  <div style={{ paddingLeft: '40%' }}>
+                    <Loader type="Oval" color="#51BEEA" height={80} width={80} />
+                  </div>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" outline onClick={this.toggleWarehouseChannelsModal}>
                   Close
                 </Button>
               </ModalFooter>
