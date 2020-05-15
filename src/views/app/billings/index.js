@@ -491,18 +491,15 @@ export default class Billing extends Component {
                 Upgrade
               </Button>
             </NavLink>
-            {
-              props.original.clientAppId === 'clodeo-main-web' &&
-              <NavLink to={`billings/renew/${props.original.tenantId}`}>
-                <Button
-                  className="float-right default"
-                  color="secondary"
-                  style={{ borderRadius: 6 }}
-                >
-                  Renew
-                </Button>
-              </NavLink>
-            }
+            <NavLink to={`billings/renew/${props.original.tenantId}`}>
+              <Button
+                className="float-right default"
+                color="secondary"
+                style={{ borderRadius: 6 }}
+              >
+                Renew
+              </Button>
+            </NavLink>
           </Row>
         )
       }
