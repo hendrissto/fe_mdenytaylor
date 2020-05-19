@@ -121,6 +121,8 @@ export default class ListPermission extends Component {
             this.loadData();
         });
     }
+
+    // Action template
     actionTemplate(rowData, column) {
         return (
             <div>
@@ -128,7 +130,7 @@ export default class ListPermission extends Component {
                     type="button"
                     icon="pi pi-search"
                     onClick={() => {
-                        this.dataPermission(rowData)
+                        this.ModalDetailPermission(rowData)
                     }}
                     className="p-button-success">
                     Detail
@@ -136,7 +138,9 @@ export default class ListPermission extends Component {
             </div>
         );
     }
-    dataPermission(data) {
+
+    // Modal detail permission
+    ModalDetailPermission(data) {
         const dataModal = this.state.dataModal;
 
         dataModal.header = `Permission`;
