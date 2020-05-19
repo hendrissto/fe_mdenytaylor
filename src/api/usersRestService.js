@@ -28,4 +28,11 @@ export default class UsersRestService extends React.Component {
         return this.request.get(`/access-roles/${id}`);
     }
 
+    loadDataPermissions(qParams) {
+        return this.request.get('/access-permissions', qParams);
+    }
+
+    getSinglePermissions(id) {
+        return this.request.get(`/access-permissions/${id}`);
+    }
 }
