@@ -1,4 +1,4 @@
-/* Gogo Main Style 
+/* Gogo Main Style
 
 Table of Contents
 
@@ -6365,7 +6365,7 @@ input:-webkit-autofill {
   padding: 0.5rem 1.5rem;
   background: $input-background;
   color: $primary-color;
-  
+
   cursor: pointer;
 
   span {
@@ -6865,7 +6865,7 @@ input:-webkit-autofill {
     }
   }
 
-  
+
 .react-contextmenu-item {
   span {
     margin-left: initial;
@@ -7732,4 +7732,10 @@ input:-webkit-autofill {
       transform: translate(0, -50%);
     }
   }
+}
+
+
+// please move this style
+#notificationDropdown {
+  width: 370px;
 }

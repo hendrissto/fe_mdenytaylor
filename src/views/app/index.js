@@ -3,6 +3,8 @@ import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 import AppLayout from "../../layout/AppLayout";
+import Notifications from "../../containers/applications/Notifications";
+
 import dashboard from "./dashboard";
 import CODReceiptNumber from "./cod-receipt-number";
 import Tenant from "./tenants";
@@ -45,6 +47,7 @@ class App extends Component {
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
           <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />
           <Route path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} />
+          <Route path={`${match.url}/notifications`} component={Notifications} />
 
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />

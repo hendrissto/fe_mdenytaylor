@@ -17,6 +17,7 @@ import app from "./views/app";
 import user from "./views/user";
 import error from "./views/error";
 import { getDirection } from "./helpers/Utils";
+import OneSignal from 'react-onesignal';
 import "primereact/resources/themes/nova-light/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -40,15 +41,20 @@ const AuthRoute = ({ component: Component, authUser, ...rest }) => (
 );
 
 class App extends Component {
+  constructor() {
+    super();
+    OneSignal.initialize('406c1e40-5093-4464-9f31-6805bd1bf5c5');
+    // OneSignal.sendTags({});
+  }
   componentDidMount() {
-    const direction = getDirection();
-    if (direction.isRtl) {
-      document.body.classList.add("rtl");
-      document.body.classList.remove("ltr");
-    } else {
-      document.body.classList.add("ltr");
-      document.body.classList.remove("rtl");
-    }
+    // const direction = getDirection();
+    // if (direction.isRtl) {
+    //   document.body.classList.add("rtl");
+    //   document.body.classList.remove("ltr");
+    // } else {
+    //   document.body.classList.add("ltr");
+    //   document.body.classList.remove("rtl");
+    // }
   }
 
   render() {
