@@ -461,9 +461,23 @@ export default class Tenant extends Component {
       },
       {
         Header: "Status",
+        accessor: "isActive",
+        show: tableFilter.status,
+        Cell: props => (
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isActive}
+            onChange={() => {
+              this.editIsActive(props.original);
+            }}
+          />
+        )
+      },
+      {
+        Header: "Status",
         accessor: "status",
         show: tableFilter.status,
-        Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
+        Cell: props => <p>{props.value === 'active' ? "Aktif" : "Tidak Aktif"}</p>
       },
     ];
   }
@@ -560,6 +574,35 @@ export default class Tenant extends Component {
     table.loading = true;
     this.setState({ table }, () => {
       this.tenantRest.isRealUser(data.id, !data.isReal).subscribe(
+        response => {
+          this.loadData();
+          this.loadTenantsSummmary();
+          MySwal.fire({
+            type: "success",
+            title: "Berhasil.",
+            toast: true,
+            position: "top-end",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: "swal-height"
+          });
+        },
+        error => {
+          this.setState({
+            errorMessage: error.data[0].errorMessage,
+            error: true
+          });
+        }
+      );
+    });
+  }
+
+  editIsActive(data) {
+    const table = { ...this.state.table };
+
+    table.loading = true;
+    this.setState({ table }, () => {
+      this.tenantRest.isActiveUser(data.id, !data.isActive).subscribe(
         response => {
           this.loadData();
           this.loadTenantsSummmary();
