@@ -1,4 +1,5 @@
 
+import OneSignal from 'react-onesignal';
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
 import { auth } from '../../helpers/Firebase';
 import {
@@ -40,9 +41,15 @@ function* loginWithEmailPassword({payload}) {
     const { user } = payload;
     const { history } = payload;
     try {
-        localStorage.setItem('user', JSON.stringify(user));
-        yield put(loginUserSuccess(user));
-        history.push('/app');
+      console.log(user)
+      // OneSignal.initialize('d7d25033-4fbb-42c8-90e0-314799a9309c');
+      // OneSignal.sendTags({
+      //   userId: user.user_id,
+      // });
+
+      localStorage.setItem('user', JSON.stringify(user));
+      yield put(loginUserSuccess(user));
+      history.push('/app');
     } catch (error) {
         console.log('login error : ', error)
     }

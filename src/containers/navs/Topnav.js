@@ -302,7 +302,7 @@ class TopNav extends Component {
               )}
             </button>
           </div> */}
-          <div className="user d-inline-block">
+          <div className="user d-inline-block ml-2">
             <UncontrolledDropdown className="dropdown-menu-right">
               <DropdownToggle className="p-0" color="empty">
                 <span className="name mr-1">Admin</span>

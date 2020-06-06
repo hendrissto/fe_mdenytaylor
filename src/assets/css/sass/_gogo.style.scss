@@ -1647,9 +1647,9 @@ button {
   @include depth(1);
 
   #notificationDropdown {
-    width: 260px;
+    width: 430px;
     padding: 1.5rem !important;
-    height: 280px;
+    max-height: 400px;
     right: 15px;
   }
 
@@ -7734,8 +7734,15 @@ input:-webkit-autofill {
   }
 }
 
-
-// please move this style
-#notificationDropdown {
-  width: 370px;
+.router-link {
+  color: #7575FF;
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+.unread-message {
+  background: #EDF2FA;
+  padding: 15px 5px;
+  border-radius: 5px;
 }
