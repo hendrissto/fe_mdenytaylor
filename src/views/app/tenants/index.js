@@ -30,7 +30,8 @@ import {
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
+  UncontrolledTooltip
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
 import Spinner from "../../../containers/pages/Spinner";
@@ -478,7 +479,21 @@ export default class Tenant extends Component {
         Header: "Keterangan",
         accessor: "companyInfo.companyStatus",
         show: tableFilter.companyStatus,
-        Cell: props => <p>{props.value || '-'}</p>
+        width: 200,
+        Cell: props =>
+          <div>
+            <p id={`UncontrolledTooltipExample${props.index}`} style={{
+              color: 'blue',
+              cursor: 'pointer',
+            }}>{props.value || '-'}</p>
+            {props.value &&
+              <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
+                maxWidth: 1000,
+              }}>
+                <div style={{ width: '200px', wordBreak: "break-word", textAlign: 'left' }}>{props.value || '-'}</div>
+              </UncontrolledTooltip>
+            }
+          </div>
       },
     ];
   }
@@ -611,7 +626,7 @@ export default class Tenant extends Component {
       showConfirmButton: true
     }).then((res) => {
       if (!res.dismiss) {
-        const companyStatus = res.value === true ? '-' : res.value; 
+        const companyStatus = res.value === true ? '-' : res.value;
         const payload = {
           companyStatus: companyStatus || ''
         };
