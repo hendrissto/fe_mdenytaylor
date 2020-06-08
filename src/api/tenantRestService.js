@@ -40,7 +40,7 @@ export default class TenantRestService extends React.Component {
     return this.request.post(`/admin/tenants/${tenantId}/wms/${warehouseId}/is-already-member/${active}`);
   }
 
-  isActiveUser(id, status) {
-    return this.request.put(`/admin/tenants/${id}/activate-tenant/${status}`);
+  isActiveUser(id, status, payload) {
+    return this.request.put(`/admin/tenants/${id}/activate-tenant/${status}`, payload);
   }
 }
