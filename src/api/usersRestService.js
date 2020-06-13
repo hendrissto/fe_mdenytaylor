@@ -6,6 +6,23 @@ export default class UsersRestService extends React.Component {
     constructor() {
         super();
         this.request = new RequestService(process.env.REACT_APP_API_DEV_ADMIN_URL);
+        this.requestUser = new RequestService(process.env.REACT_APP_API_AUTH_URL);
+    }
+
+    loadDataUsers(qParams) {
+      return this.requestUser.post('/admin/q', qParams);
+    }
+
+    createUsers(payload) {
+      return this.requestUser.post('/admin', payload);
+    }
+
+    updateUsers(payload) {
+      return this.requestUser.put(`/admin`, payload);
+    }
+
+    getUser(id) {
+      return this.requestUser.get(`/admin/${id}`);
     }
 
     loadDataRoles(qParams) {
