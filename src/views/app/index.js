@@ -25,6 +25,7 @@ import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
 import DetailWalletTransactions from "./wallet-transactions/detail-page";
 import UserRoles from "./users-roles";
+import Users from "./users";
 import ListPermission from "./list-permission";
 
 class App extends Component {
@@ -49,6 +50,7 @@ class App extends Component {
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
           <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />
           <Route path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} />
+          <Route path={`${match.url}/users`} component={Users} />
           <Route path={`${match.url}/roles`} component={UserRoles} />
           <Route path={`${match.url}/permissions`} component={ListPermission} />
 
