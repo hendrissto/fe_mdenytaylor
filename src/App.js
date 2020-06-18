@@ -41,14 +41,15 @@ const AuthRoute = ({ component: Component, authUser, ...rest }) => (
 
 class App extends Component {
   componentDidMount() {
-    const direction = getDirection();
-    if (direction.isRtl) {
-      document.body.classList.add("rtl");
-      document.body.classList.remove("ltr");
-    } else {
-      document.body.classList.add("ltr");
-      document.body.classList.remove("rtl");
-    }
+
+    // const direction = getDirection();
+    // if (direction.isRtl) {
+    //   document.body.classList.add("rtl");
+    //   document.body.classList.remove("ltr");
+    // } else {
+    //   document.body.classList.add("ltr");
+    //   document.body.classList.remove("rtl");
+    // }
   }
 
   render() {

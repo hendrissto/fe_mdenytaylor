@@ -81,6 +81,7 @@ module.exports = {
   "menu.details": "Details",
   "menu.search": "Search",
   "menu.login": "Login",
+  "menu.notifications": "Notifications",
   "menu.register": "Register",
   "menu.forgot-password": "Forgot Password",
   "menu.error": "Error",

@@ -22,6 +22,30 @@ const data = [
     title: '3 items just added to wish list by a user!',
     date: '09.04.2018 - 12:45',
     id: 4
+  },
+  {
+    img: '/assets/img/notification-thumb-3.jpg',
+    title: '3 items just added to wish list by a user!',
+    date: '09.04.2018 - 12:45',
+    id: 4
+  },
+  {
+    img: '/assets/img/notification-thumb-3.jpg',
+    title: '3 items just added to wish list by a user!',
+    date: '09.04.2018 - 12:45',
+    id: 4
+  },
+  {
+    img: '/assets/img/notification-thumb-3.jpg',
+    title: '3 items just added to wish list by a user!',
+    date: '09.04.2018 - 12:45',
+    id: 4
+  },
+  {
+    img: '/assets/img/notification-thumb-3.jpg',
+    title: '3 items just added to wish list by a user!',
+    date: '09.04.2018 - 12:45',
+    id: 4
   }
 ]
 export default data

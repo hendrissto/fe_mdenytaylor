@@ -1,9 +1,13 @@
 import { HttpClientAxiosInterceptedService } from "./HttpClientAxiosInterceptedService";
 
+import { OneSignalNotificationService } from './notification/OneSignalNotificationService';
+
+const oneSignalService = new OneSignalNotificationService();
 export default class RequestService extends HttpClientAxiosInterceptedService {
   constructor(baseUrl) {
     let headers;
     if (localStorage.getItem('user')) {
+      oneSignalService.subscribe();
       const user = JSON.parse(localStorage.getItem('user'));
       headers = {
         "Authorization": 'Bearer ' + user.access_token,

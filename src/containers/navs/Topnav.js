@@ -26,8 +26,8 @@ import {
 } from "../../constants/defaultValues";
 
 import { MobileMenuIcon, MenuIcon } from "../../components/svg";
+import Notifications from "../applications/Notifications";
 // import TopnavEasyAccess from "./Topnav.EasyAccess";
-// import TopnavNotifications from "./Topnav.Notifications";
 // import TopnavDarkSwitch from "./Topnav.DarkSwitch";
 
 import { getDirection, setDirection } from "../../helpers/Utils";
@@ -284,10 +284,11 @@ class TopNav extends Component {
         </a>
 
         <div className="navbar-right">
+          <Notifications type="summary"/>
+
           {/* {isDarkSwitchActive && <TopnavDarkSwitch/>} */}
           {/* <div className="header-icons d-inline-block align-middle">
             <TopnavEasyAccess />
-            <TopnavNotifications />
             <button
               className="header-icon btn btn-empty d-none d-sm-inline-block"
               type="button"
@@ -301,7 +302,7 @@ class TopNav extends Component {
               )}
             </button>
           </div> */}
-          <div className="user d-inline-block">
+          <div className="user d-inline-block ml-2">
             <UncontrolledDropdown className="dropdown-menu-right">
               <DropdownToggle className="p-0" color="empty">
                 <span className="name mr-1">Admin</span>

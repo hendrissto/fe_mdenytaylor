@@ -40,9 +40,9 @@ function* loginWithEmailPassword({payload}) {
     const { user } = payload;
     const { history } = payload;
     try {
-        localStorage.setItem('user', JSON.stringify(user));
-        yield put(loginUserSuccess(user));
-        history.push('/app');
+      localStorage.setItem('user', JSON.stringify(user));
+      yield put(loginUserSuccess(user));
+      history.push('/app');
     } catch (error) {
         console.log('login error : ', error)
     }

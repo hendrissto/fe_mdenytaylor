@@ -3,6 +3,8 @@ import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 import AppLayout from "../../layout/AppLayout";
+import Notifications from "../../containers/applications/Notifications";
+
 import dashboard from "./dashboard";
 import CODReceiptNumber from "./cod-receipt-number";
 import Tenant from "./tenants";
@@ -53,6 +55,7 @@ class App extends Component {
           <Route path={`${match.url}/users`} component={Users} />
           <Route path={`${match.url}/roles`} component={UserRoles} />
           <Route path={`${match.url}/permissions`} component={ListPermission} />
+          <Route path={`${match.url}/notifications`} component={Notifications} />
 
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />
