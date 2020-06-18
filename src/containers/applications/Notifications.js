@@ -21,45 +21,16 @@ import NotificationRestService from "../../api/notificationRestService";
 import { DateTimezoneService } from "../../services/DateTimezoneService";
 const MySwal = withReactContent(Swal);
 
-const NotificationItem = ({title, description, isReadByUser, isSummary, id, index, notificationDateTime}) => {
-
-  return (
-    <div className={!isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" }>
-      {/* <a href="/app/pages/details">
-        <img
-          src={img}
-          alt={title}
-          className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
-        />
-      </a> */}
-      <div className="pl-3 pr-2 col-12">
-        {isSummary &&
-          <div className="row d-flex justify-content-between align-items-center mx-0">
-            <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{title}</p>
-            <p className="row mr-2 text-muted mb-1 text-small">{notificationDateTime}</p>
-          </div>
-        }
-        {!isSummary &&
-         <div className="row d-flex justify-content-between align-items-center mx-0">
-          <span className="row pl-3">
-            <h5 className="font-weight-bold mb-1 mr-1">{title}</h5>{!isReadByUser && <span className="router-link pull-right ml2 p0" onClick={() => this.markOneAsRead(id, index)}>Tandai sudah dibaca</span>}
-          </span>
-          <p className="row mr-2 text-muted mb-1 text-small">{notificationDateTime}</p>
-        </div>
-        }
-        <p className="row pl-3 text-muted mb-0 text-small">{description}</p>
-      </div>
-    </div>
-  );
-};
-
+var OneSignal = window.OneSignal;
 export default class Notifications extends Component {
+  interval;
   constructor(props) {
     super(props);
     this.notificationRest = new NotificationRestService();
     this.dateTimezone = new DateTimezoneService();
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
     this.loadData = this.loadData.bind(this);
+    this.markOneAsRead = this.markOneAsRead.bind(this);
     this.iconsStatus = {
       syncProductSalesChannelerror: 'linear-gradient(132.97deg, #3FD3A7 3.3%, #40B793 100%)',
       newCodCreditinfo: 'linear-gradient(132.97deg, #FFAA60 3.3%, #FF582B 100%)',
@@ -83,6 +54,10 @@ export default class Notifications extends Component {
 
   componentDidMount() {
     this.loadData();
+    // this.interval = setInterval(() => {
+    //   console.log('HALLO')
+    //   this.loadData()
+    // }, 60000); // reload in 60 seconds
   }
 
   handleOnPageChange(paginationEvent) {
@@ -101,15 +76,15 @@ export default class Notifications extends Component {
     const table = { ...this.state.table };
     table.loading = true;
     this.setState({ table });
-
+    console.log(this.props.type)
     const params = {
       keyword: this.state.search || null,
-      "options.take":  this.props.type === 'summary' ? 10 : this.state.table.pagination.pageSize,
-      "options.skip": this.state.table.pagination.skipSize,
-      "options.includeTotalCount": true
+      "take":  this.props.type === 'summary' ? 10 : this.state.table.pagination.pageSize,
+      "skip": this.state.table.pagination.skipSize,
+      "includeTotalCount": true
     };
 
-    this.notificationRest.getNotifications({ params }).subscribe(
+    this.notificationRest.getNotifications(params).subscribe(
       response => {
         const table = { ...this.state.table };
         table.data = response.data.map(data => {
@@ -169,12 +144,12 @@ export default class Notifications extends Component {
       }
     }
 
+    if(arrayObs.length) {
+      const table = { ...this.state.table };
+      table.loading = true;
+      this.setState({ table });
 
-    const table = { ...this.state.table };
-    table.loading = true;
-    this.setState({ table });
-
-    forkJoin(arrayObs)
+      forkJoin(arrayObs)
       .pipe(
         catchError(error => {
           return throwError(error);
@@ -184,17 +159,40 @@ export default class Notifications extends Component {
         table.loading = false;
         this.setState({ table });
       });
+    }
+
+  }
+
+  markOneAsRead(notification, index) {
+    if (notification.isReadByUser) {
+      return;
+    }
+
+    const table = { ...this.state.table };
+    table.loading = true;
+    this.setState({ table });
+    return this.notificationRest.markOneAsRead(notification.id)
+    .pipe(
+      catchError(error => {
+        return throwError(error);
+      })
+    ).subscribe(response => {
+      table.loading = false;
+      this.setState({ table });
+      this.replaceDataByIndex(index, response);
+    });
   }
 
   replaceDataByIndex(index, newData = null) {
     if (newData) {
       const table = { ...this.state.table };
-      table.data = this.state.table.data.map(data => {
-        data = this.reFormatNotif(newData);
-        return data;
+      table.data[index] = this.reFormatNotif(newData);
+      console.log(_.filter(this.state.table.data, ['isReadByUser', false]).length)
+      console.log(this.state.table.data)
+      this.setState({
+        table,
+        unreadUser: _.filter(this.state.table.data, ['isReadByUser', false]).length
       });
-
-      this.setState({table});
     }
   }
 
@@ -242,8 +240,34 @@ export default class Notifications extends Component {
               </div>
               {/* <PerfectScrollbar options={{ suppressScrollX: true, wheelPropagation: false }} style={{maxHeight: '80vh'}}> */}
                 {this.state.table.data.map((data, index) => {
-                  return <NotificationItem key={index} {...data} />;
-                })}
+                 return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" }>
+                  {/* <a href="/app/pages/details">
+                    <img
+                      src={img}
+                      alt={data.title}
+                      className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
+                    />
+                  </a> */}
+                  <div className="pl-3 pr-2 col-12">
+                    {this.props.type === 'summary' &&
+                      <div className="row d-flex justify-content-between align-items-center mx-0">
+                        <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{data.title}</p>
+                        <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                      </div>
+                    }
+                    {this.props.type !== 'summary' &&
+                    <div className="row d-flex justify-content-between align-items-center mx-0">
+                      <span className="row pl-3">
+                        <h5 className="font-weight-bold mb-1 mr-1">{data.title}</h5>{!data.isReadByUser && <span className="router-link pull-right ml2 p0" onClick={() => this.markOneAsRead(data, index)}>Tandai sudah dibaca</span>}
+                      </span>
+                      <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                    </div>
+                    }
+                    <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
+                  </div>
+                </div>
+               // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
+              })}
               {/* </PerfectScrollbar> */}
               <Paginator
                 first={this.state.table.pagination.skipSize}
@@ -287,7 +311,33 @@ export default class Notifications extends Component {
                 options={{ suppressScrollX: true, wheelPropagation: false }}
               >
                 {this.state.table.data.map((data, index) => {
-                  return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
+                  return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" }>
+                    {/* <a href="/app/pages/details">
+                      <img
+                        src={img}
+                        alt={data.title}
+                        className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
+                      />
+                    </a> */}
+                    <div className="pl-3 pr-2 col-12">
+                      {this.props.type === 'summary' &&
+                        <div className="row d-flex justify-content-between align-items-center mx-0">
+                          <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{data.title}</p>
+                          <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                        </div>
+                      }
+                      {this.props.type !== 'summary' &&
+                      <div className="row d-flex justify-content-between align-items-center mx-0">
+                        <span className="row pl-3">
+                          <h5 className="font-weight-bold mb-1 mr-1">{data.title}</h5>{!data.isReadByUser && <span className="router-link pull-right ml2 p0" onClick={() => this.markOneAsRead(data, index)}>Tandai sudah dibaca</span>}
+                        </span>
+                        <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                      </div>
+                      }
+                      <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
+                    </div>
+                  </div>
+                  // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
                 })}
               </PerfectScrollbar>
               <div className="col-md-12 text-center mt-2">

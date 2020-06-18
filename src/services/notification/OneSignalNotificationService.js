@@ -24,6 +24,9 @@ export class OneSignalNotificationService {
         notificationClickHandlerMatch: 'origin',
         notificationClickHandlerAction: 'focus',
       });
+      OneSignal.on('popoverShown', function() {
+        console.log('Slide Prompt Shown');
+      });
     });
 
     // this._globalEventService.listen('CORE:LOGOUT:SUCCESS').subscribe(() => {
@@ -72,7 +75,7 @@ export class OneSignalNotificationService {
         }
       }
     }
-
+    // console.log(command)
     switch (command) {
       case 'notification.displayed':
         this.onNotificationReceived(payload);
@@ -100,7 +103,9 @@ export class OneSignalNotificationService {
   }
 
   onNotificationReceived(event) {
-    this._globalEventService.emit('PUSH_NOTIFICATION_RECEIVED', event);
+    // console.log(event)
+    return event;
+    // this._globalEventService.emit('PUSH_NOTIFICATION_RECEIVED', event);
   }
 
   removeExternalUserId() {
@@ -144,7 +149,7 @@ export class OneSignalNotificationService {
     this.getUserID();
 
     this.setExternalUserId(user.user_id);
-    console.log(user)
+    // console.log(user)
     this.sendTags({
       userId: user.user_id,
     });

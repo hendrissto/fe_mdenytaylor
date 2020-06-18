@@ -7,7 +7,7 @@ export default class RequestService extends HttpClientAxiosInterceptedService {
   constructor(baseUrl) {
     let headers;
     if (localStorage.getItem('user')) {
-      oneSignalService.subscribe();
+      // oneSignalService.subscribe();
       const user = JSON.parse(localStorage.getItem('user'));
       headers = {
         "Authorization": 'Bearer ' + user.access_token,
