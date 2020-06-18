@@ -171,13 +171,19 @@ export default class Users extends Component {
       <div>
         <Button
           type="button"
-          icon="pi pi-search"
           onClick={() => {
             this.setState({ isEdit: true })
             this.editData(rowData)
           }}
           className="p-button-success">
           Edit
+                </Button>
+        <Button
+          type="button"
+          style={{background: '#EA5455', marginLeft: '5px'}}
+          onClick={() => this.deleteData(rowData)}
+          className="p-button-danger">
+          Hapus
                 </Button>
       </div>
     );
@@ -216,6 +222,61 @@ export default class Users extends Component {
           modalAddUsers: true,
         });
       });
+  }
+
+  deleteData(data) {
+
+    MySwal.fire({
+      type: 'info',
+      title: 'Data user akan dihapus.',
+      text: 'Berikan alasan',
+      input: 'text',
+      showCancelButton: true,
+      allowOutsideClick: false,
+      showConfirmButton: true
+    }).then((res) => {
+      if (!res.dismiss) {
+        this.setState({ loading: true }, () => {
+          const payload = {
+            data: {
+              reason: res.value === true ? '-' : res.value
+            }
+          }
+          this.userRestService.deleteUser(data.id, payload).subscribe(
+            response => {
+              MySwal.fire({
+                type: "success",
+                title: "Berhasil menghapus user",
+                toast: true,
+                position: "top-end",
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: "swal-height"
+              });
+
+              this.loadData().subscribe();
+              this.setState({ loading: false })
+            },
+            error => {
+              const message = this.messageParserService.parse(error.data) || 'Gagal Menghapus User';
+
+              MySwal.fire({
+                type: "error",
+                title: message[0],
+                toast: true,
+                position: "top-end",
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: "swal-height"
+              });
+
+              this.setState({ loading: false })
+            }
+          );
+        });
+      }
+    })
+
   }
 
   formIsValid() {
