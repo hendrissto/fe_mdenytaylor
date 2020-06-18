@@ -22,6 +22,7 @@ export const firebaseConfig = {
 };
 export const oneSignalConfig = {
   appID: "406c1e40-5093-4464-9f31-6805bd1bf5c5",
+
   // appID: "d7d25033-4fbb-42c8-90e0-314799a9309c",
 };
 
