@@ -30,7 +30,8 @@ import {
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
+  UncontrolledTooltip
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
 import Spinner from "../../../containers/pages/Spinner";
@@ -85,6 +86,7 @@ export default class Tenant extends Component {
         isCOD: true,
         shippingSettings: true,
         warehouseChannels: true,
+        companyStatus: true,
       },
       totalSku: true,
       totalOrder: true,
@@ -461,9 +463,37 @@ export default class Tenant extends Component {
       },
       {
         Header: "Status",
-        accessor: "status",
+        accessor: "isActive",
         show: tableFilter.status,
-        Cell: props => <p>{props.value === 1 ? "Aktif" : "Tidak Aktif"}</p>
+        Cell: props => (
+          <Switch
+            className="custom-switch custom-switch-secondary"
+            checked={props.original.isActive}
+            onChange={() => {
+              this.editIsActive(props.original);
+            }}
+          />
+        )
+      },
+      {
+        Header: "Keterangan",
+        accessor: "companyInfo.companyStatus",
+        show: tableFilter.companyStatus,
+        width: 200,
+        Cell: props =>
+          <div>
+            <p id={`UncontrolledTooltipExample${props.index}`} style={{
+              color: 'blue',
+              cursor: 'pointer',
+            }}>{props.value || '-'}</p>
+            {props.value &&
+              <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
+                maxWidth: 1000,
+              }}>
+                <div style={{ width: '200px', wordBreak: "break-word", textAlign: 'left' }}>{props.value || '-'}</div>
+              </UncontrolledTooltip>
+            }
+          </div>
       },
     ];
   }
@@ -581,6 +611,52 @@ export default class Tenant extends Component {
         }
       );
     });
+  }
+
+  editIsActive(data) {
+    const table = { ...this.state.table };
+
+    MySwal.fire({
+      type: 'info',
+      title: 'Ubah status Tenant',
+      text: data.isActive ? 'Berikan Alasan' : '',
+      input: data.isActive ? 'text' : '',
+      showCancelButton: true,
+      allowOutsideClick: false,
+      showConfirmButton: true
+    }).then((res) => {
+      if (!res.dismiss) {
+        const companyStatus = res.value === true ? '-' : res.value;
+        const payload = {
+          companyStatus: companyStatus || ''
+        };
+        table.loading = true;
+        this.setState({ table }, () => {
+          this.tenantRest.isActiveUser(data.id, !data.isActive, payload).subscribe(
+            response => {
+              this.loadData();
+              this.loadTenantsSummmary();
+              MySwal.fire({
+                type: "success",
+                title: "Berhasil.",
+                toast: true,
+                position: "top-end",
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: "swal-height"
+              });
+            },
+            error => {
+              this.setState({
+                errorMessage: error.data[0].errorMessage,
+                error: true
+              });
+            }
+          );
+        });
+      }
+    })
+
   }
 
   oneData() {
@@ -1054,6 +1130,15 @@ export default class Tenant extends Component {
                             onChange={this.handleFilterChange.bind(this)}
                           />
                           Status
+                        </div>
+                        <div>
+                          <input
+                            name="Keterangan"
+                            type="checkbox"
+                            checked={tableFilter.companyStatus}
+                            onChange={this.handleFilterChange.bind(this)}
+                          />
+                          Keterangan
                         </div>
                       </PopoverBody>
                     </UncontrolledPopover>

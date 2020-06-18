@@ -39,4 +39,8 @@ export default class TenantRestService extends React.Component {
   updateWarehouses(tenantId, warehouseId, active) {
     return this.request.post(`/admin/tenants/${tenantId}/wms/${warehouseId}/is-already-member/${active}`);
   }
+
+  isActiveUser(id, status, payload) {
+    return this.request.put(`/admin/tenants/${id}/activate-tenant/${status}`, payload);
+  }
 }
