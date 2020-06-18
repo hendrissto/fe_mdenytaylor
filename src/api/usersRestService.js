@@ -25,6 +25,10 @@ export default class UsersRestService extends React.Component {
       return this.requestUser.get(`/admin/${id}`);
     }
 
+    deleteUser(id, payload) {
+      return this.requestUser.delete(`/admin/${id}`, payload);
+    }
+
     loadDataRoles(qParams) {
         return this.request.get('/access-roles', qParams);
     }
