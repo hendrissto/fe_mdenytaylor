@@ -12,6 +12,7 @@ import FormTenantRenewSubscriptions from './billings/form-tenant-renew-subscript
 import WithdrawFunds from "./request-withdraw-funds";
 import ReceiptOfFunds from "./receipt-of-funds";
 import DebitCod from './debit-cod'
+import WithdrawOfTenantFunds from './withdraw-of-tenant-funds'
 
 import dashboards from "../gogo/dashboards";
 import pages from "../gogo/pages";
@@ -41,6 +42,7 @@ class App extends Component {
           <Route path={`${match.url}/request-withdraw-funds`} component={WithdrawFunds} />
           <Route path={`${match.url}/tenants-bank`} component={TenantsBank} />
           <Route path={`${match.url}/debit-cod`} component={DebitCod} />
+          <Route path={`${match.url}/withdraw-of-tenant-funds`} component={WithdrawOfTenantFunds} />
           <Route path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} />
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
           <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />

@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-// import ReactTable from "react-table";
 import {
-  // Col,
   Row,
   Card,
   CardBody,
@@ -16,8 +14,6 @@ import {
   Popover,
   PopoverBody
 } from "reactstrap";
-// import { Formik } from "formik";
-// import validate from "./validate";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
@@ -27,10 +23,11 @@ import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 
 import DebitRestService from "../../../api/debitRestService";
+import WalletTransactionsRestService from "../../../api/walletTransactionsRestService";
+
 import RelatedDataRestService from "../../../api/relatedDataRestService";
 import PictureRestService from "../../../api/pictureRestService";
 import { MoneyFormat } from "../../../services/Format/MoneyFormat";
-import NumberFormat from 'react-number-format';
 
 import { Dropdown } from "primereact/dropdown";
 import Loader from "react-loader-spinner";
@@ -46,12 +43,14 @@ import withReactContent from "sweetalert2-react-content";
 import TenantRestService from "../../../api/tenantRestService";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 const MySwal = withReactContent(Swal);
-class DebitCod extends Component {
+class WithdrawOfTenantFunds extends Component {
   constructor(props) {
     super(props);
 
     this.debitRestService = new DebitRestService();
     this.tenantRestService = new TenantRestService();
+    this.walletTransactionsRestService = new WalletTransactionsRestService();
+
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
@@ -189,7 +188,7 @@ class DebitCod extends Component {
 
     const params = {
       keyword: this.state.search || null,
-      statuses: 'draft, voided, paid',
+      statuses: 'open',
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -205,6 +204,7 @@ class DebitCod extends Component {
       table.loading = false;
       this.setState({ table });
       if(err.response.status === 401){
+        this.setState({redirect: true});
         MySwal.fire({
           type: "error",
           title: "Unauthorized.",
@@ -281,49 +281,6 @@ class DebitCod extends Component {
       {
         Header: "Upload Bukti",
         show: this.state.fileAttach,
-        Cell: props => {
-          if (props.original.status !== "draft") {
-            return (
-              <div>
-                <Button
-                  outline
-                  color="info"
-                  onClick={() => {
-                    this.setState({ note: null, modal3: true });
-                    this.setState({ oneData: props.original });
-                  }}
-                >
-                  <i className="simple-icon-paper-clip mr-2" />
-                  Bukti Transfer
-                </Button>
-              </div>
-            );
-          } else {
-            return (
-              <div>
-                <Button
-                  outline
-                  color="success"
-                  onClick={() => {
-                    this.loadRelatedData(props.original.tenantId);
-                    this.setState({ modal: true });
-                    this.setState({
-                      selectedBank: [],
-                      image: null,
-                      imageUrl: null,
-                      loading: false,
-                      oneData: props.original,
-                      amount: props.original.amount
-                    });
-                  }}
-                >
-                  <i className="iconsminds-upload mr-2 " />
-                  Upload
-                </Button>
-              </div>
-            );
-          }
-        }
       }
     ];
   }
@@ -356,8 +313,7 @@ class DebitCod extends Component {
     if (
       this.state.image === null ||
       this.state.amount === null ||
-      this.state.amount === undefined ||
-      this.state.selectedBank === []
+      this.state.amount === undefined
     ) {
       return true;
     } else {
@@ -382,14 +338,18 @@ class DebitCod extends Component {
         parsedAmount = this.state.amount;
       }
 
+      const attachments = [];
+      for(let i = 0; i < data.attachments.length; i++) {
+        attachments.push({
+          id: data.attachments[i].id,
+          isMain: i === 0 ? true : false,
+          customFileName: data.attachments[i].customFileName,
+        })
+      }
+
       let lines = {
-        id: this.state.oneData.id,
-        attachments: this.state.isDraft === true ? undefined : this.state.attachments,
-        amount: parsedAmount || 0,
-        feeTransfer: 2500,
-        tenantId: this.state.oneData.tenantId,
-        tenantBankId: this.state.selectedBank.id,
-        note: this.state.note,
+        isApprove: true,
+        attachments: attachments,
       };
 
       MySwal.fire({
@@ -400,12 +360,12 @@ class DebitCod extends Component {
             '<tr>' +
               '<th>No Rekening</th>' +
               '<td>:</td>' +
-              `<td>${data.selectedBank.accountNumber}</td>` +
+              `<td>${data.oneData.accountNumber}</td>` +
             '</tr>' +
             '<tr>' +
               '<th>Nama Rekening</th>' +
               '<td>:</td>' +
-              `<td>${data.selectedBank.accountName}</td>` +
+              `<td>${data.oneData.accountName}</td>` +
             '</tr>' +
             '<tr>' +
               '<th>Ballance Amount</th>' +
@@ -428,7 +388,7 @@ class DebitCod extends Component {
       }).then((result) => {
         if(result.value) {
           this.setState({modal: false, loadingSubmit: true})
-          this.debitRestService.putDebitCod(this.state.oneData.id, lines).subscribe(
+          this.walletTransactionsRestService.approve(this.state.oneData.id, lines).subscribe(
             response => {
               this.setState({
                 modal2: true,
@@ -458,7 +418,7 @@ class DebitCod extends Component {
     this.setState({ loadingSubmit: true });
     const params = {
       "options.includeTotalCount": true,
-      statuses: 'draft, voided, paid'
+      statuses: 'open'
     };
 
     this.debitRestService.getDebitCod({ params }).subscribe(
@@ -476,7 +436,6 @@ class DebitCod extends Component {
   loadAllData() {
     const params = {
       "options.includeTotalCount": true,
-      statuses: 'paid,draft,open,void',
       "options.take": this.state.totalData
     };
 
@@ -598,39 +557,6 @@ class DebitCod extends Component {
   }
 
   actionTemplate(rowData, column) {
-    if (rowData.status !== "draft") {
-      return (
-        <div>
-          <Button
-            outline
-            color="info"
-            onClick={() => {
-              // this.setState({attachments: []});
-
-              let attachments = this.state.attachments;
-              let realAttachments = this.state.realAttachments;
-              attachments = [];
-              if(rowData.attachments) {
-                for(let i = 0; i < rowData.attachments.length; i++) {
-                  attachments.push(rowData.attachments[i]);
-                  realAttachments.push(rowData.attachments[i]);
-                }
-              }
-              this.setState({
-                note: rowData.note,
-                attachments,
-                realAttachments,
-                oneData: rowData,
-                modal3: true,
-              });
-            }}
-          >
-            <i className="simple-icon-paper-clip mr-2" />
-            Bukti Transfer
-          </Button>
-        </div>
-      );
-    } else {
       return (
         <div>
           <Button
@@ -657,7 +583,6 @@ class DebitCod extends Component {
           </Button>
         </div>
       );
-    }
   }
 
   render() {
@@ -669,7 +594,7 @@ class DebitCod extends Component {
       <>
         <Row>
           <Colxx xxs={12}>
-            <Breadcrumb heading="Histori Pencairan" match={this.props.match} />
+            <Breadcrumb heading="Penarikan Dana Tenan" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
@@ -806,29 +731,6 @@ class DebitCod extends Component {
                   <Column style={{width:'250px'}} header="Upload Bukti" body={this.actionTemplate}/>
                 </DataTable>
 
-                {/*
-                <ReactTable
-                  minRows={0}
-                  data={this.state.table.data}
-                  columns={this.dataTable()}
-                  className="-striped"
-                  loading={this.state.table.loading}
-                  showPagination={false}
-                  showPaginationTop={false}
-                  showPaginationBottom={false}
-                  manual // this would indicate that server side pagination has been enabled
-                  onFetchData={(state, instance) => {
-                    const newState = { ...this.state.table };
-
-                    newState.pagination.currentPage = state.page;
-                    newState.pagination.pageSize = state.pageSize;
-                    newState.pagination.skipSize = state.pageSize * state.page;
-
-                    this.setState({ newState });
-                    this.loadData();
-                  }}
-                />
-                 */}
                 <Paginator
                   first={this.state.table.pagination.skipSize}
                   rows={this.state.table.pagination.pageSize}
@@ -871,17 +773,7 @@ class DebitCod extends Component {
                       <IntlMessages id="modal.cardName" />
                     </td>
                     <td>:</td>
-                    <td>
-                      <Dropdown
-                        optionLabel="accountName"
-                        value={this.state.selectedBank}
-                        options={this.state.tenantBank}
-                        onChange={e => {
-                          this.setState({ selectedBank: e.value });
-                        }}
-                        placeholder="Select a Bank Account"
-                      />
-                    </td>
+                    <td>{this.state.oneData?.accountName || '-'}</td>
                   </tr>
                   <tr>
                     <td>
@@ -889,9 +781,7 @@ class DebitCod extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.selectedBank.length === 0
-                        ? "-"
-                        : this.state.selectedBank.bank.bankName}
+                      {this.state.oneData?.bankName || '-'}
                     </td>
                   </tr>
                   <tr>
@@ -900,9 +790,7 @@ class DebitCod extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.selectedBank.length === 0
-                        ? "-"
-                        : this.state.selectedBank.accountNumber}
+                      {this.state.oneData?.accountNumber || '-'}
                     </td>
                   </tr>
                   <tr>
@@ -916,24 +804,7 @@ class DebitCod extends Component {
                     <td>Total Bayar</td>
                     <td>:</td>
                     <td>
-                      <NumberFormat isNumericString={true} thousandSeparator={'.'} decimalSeparator={','} value={this.state.amount} onValueChange={(values) => {
-                        const { value, formattedValue } = values;
-                        this.setState({isChanged: true, amount: value, amountWithComma: formattedValue});
-                      }} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Note</td>
-                    <td>:</td>
-                    <td>
-                      <Input
-                        type="textarea"
-                        className="form-control"
-                        onChange={event => {
-                          this.setState({ note: event.target.value });
-                        }}
-                        value={this.state.note}
-                      />
+                      {this.moneyFormat.numberFormat(this.state.amount) || 0}
                     </td>
                   </tr>
                   <tr>
@@ -1140,4 +1011,4 @@ class DebitCod extends Component {
   }
 }
 
-export default DebitCod;
+export default WithdrawOfTenantFunds;

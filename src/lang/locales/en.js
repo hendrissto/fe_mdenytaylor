@@ -63,6 +63,7 @@ module.exports = {
   "menu.cod-receipt-number": "COD Receipt Number",
   "menu.request-withdraw-funds": "Request Withdraw Funds",
   "menu.receipt-of-funds": "COD Credit Transfer",
+  "menu.withdraw-of-tenant-funds": "Withdraw of tenat funds",
   "menu.tenants": "Tenants",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
