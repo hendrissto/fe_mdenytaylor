@@ -594,7 +594,7 @@ class WithdrawOfTenantFunds extends Component {
       <>
         <Row>
           <Colxx xxs={12}>
-            <Breadcrumb heading="Penarikan Dana Tenan" match={this.props.match} />
+            <Breadcrumb heading="Permintaan penarikan dana" match={this.props.match} />
             <Separator className="mb-5" />
           </Colxx>
           <Colxx xxs={12}>
