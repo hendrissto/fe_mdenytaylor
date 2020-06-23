@@ -851,7 +851,7 @@ class ReceiptOfFunds extends Component {
           osName: resData[index].sellerName,
           //tenantId: resData[index].lines[0].tenantId,
           package: resData[index].lineCount,
-          totalAmount: resData[index].total,
+          totalAmount: resData[index].totalAmount,
           codFeeRp: resData[index].codFeeValue,
           totalReceive: resData[index].receiveAmount,
           lines: resData[index].lines
@@ -1782,7 +1782,7 @@ class ReceiptOfFunds extends Component {
               <DataTable value={this.state.data} responsive={true} resizableColumns={true} columnResizeMode="fit" footerColumnGroup={footerDetailFirst} scrollable={true} scrollHeight="300px">
                 <Column body={this.loadDetailSellerFromBE} header="Nama Seller" />
                 <Column field="package" header="Jumlah Paket" body={this.columnFormat.emptyColumn} />
-                <Column field="totalAmount" header="Total" body={this.moneyFormat.currencyFormat} />
+                <Column field="totalAmount" header="Total Amount" body={this.moneyFormat.currencyFormat} />
                 <Column field="codFeeRp" header="Fee COD" body={this.moneyFormat.currencyFormat} />
                 <Column field="totalReceive" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
               </DataTable>
