@@ -436,11 +436,12 @@ class WithdrawOfTenantFunds extends Component {
   loadAllData() {
     const params = {
       "options.includeTotalCount": true,
-      "options.take": this.state.totalData
+      "options.take": this.state.totalData,
+      statuses: 'open'
     };
 
     this.debitRestService.getDebitCod({ params }).subscribe(res => {
-      this.exportService.exportToCSV(res.data, "Withdraw Funds");
+      this.exportService.exportToCSV(res.data, "Penarikan Data Tenant");
       this.setState({ loadingSubmit: false });
     });
   }
