@@ -774,7 +774,7 @@ class WithdrawOfTenantFunds extends Component {
                       <IntlMessages id="modal.cardName" />
                     </td>
                     <td>:</td>
-                    <td>{this.state.oneData?.accountName || '-'}</td>
+                    <td>{this.state.oneData.accountName || '-'}</td>
                   </tr>
                   <tr>
                     <td>
@@ -782,7 +782,7 @@ class WithdrawOfTenantFunds extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.oneData?.bankName || '-'}
+                      {this.state.oneData.bankName || '-'}
                     </td>
                   </tr>
                   <tr>
@@ -791,7 +791,7 @@ class WithdrawOfTenantFunds extends Component {
                     </td>
                     <td>:</td>
                     <td>
-                      {this.state.oneData?.accountNumber || '-'}
+                      {this.state.oneData.accountNumber || '-'}
                     </td>
                   </tr>
                   <tr>

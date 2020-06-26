@@ -70,7 +70,7 @@ export default class FormTenantRenewSubscription extends Component {
   }
 
   componentDidMount() {
-    this.loadRelatedData();
+    this.loadSingleData();
   }
 
   toggle() {
@@ -119,11 +119,23 @@ export default class FormTenantRenewSubscription extends Component {
       });
   }
 
+  loadSingleData() {
+    const tenantId = parseInt(this.props.match.params.tenantId);
+    this.billingRest
+      .getTenantsSubscriptionsById(tenantId, {})
+      .subscribe(response => {
+        this.setState({ data: response }, () => {
+          this.loadRelatedData();
+        });
+      });
+  }
+
+
   loadRelatedData() {
     const params = {
       isClodeoMain: (this.state.data.clientAppId === 'clodeo-main-web')
     }
-    this.billingRest.getRelatedData({params}).subscribe(response => {
+    this.billingRest.getRelatedData({ params }).subscribe(response => {
       const data = response.paymentMethodStr;
       const options = [];
 
@@ -370,18 +382,18 @@ export default class FormTenantRenewSubscription extends Component {
               />
             </td>
             <td>
-            {props.values.package.length === 0 ||
-              props.values.billingCycle === undefined
+              {props.values.package.length === 0 ||
+                props.values.billingCycle === undefined
                 ? "-"
                 : props.values.billingCycle.code === "monthlyPrice"
-                ? this._moneyFormat.numberFormat(props.values.package.monthlyPrice)
-                : props.values.billingCycle.code === "quaterlyPrice"
-                ? this._moneyFormat.numberFormat(props.values.package.quaterlyPrice)
-                : props.values.billingCycle.code === "semesterlyPrice"
-                ? this._moneyFormat.numberFormat(props.values.package.semesterlyPrice)
-                : props.values.billingCycle.code === "yearlyPrice"
-                ? this._moneyFormat.numberFormat(props.values.package.yearlyPrice)
-                : "Wrong Value"}
+                  ? this._moneyFormat.numberFormat(props.values.package.monthlyPrice)
+                  : props.values.billingCycle.code === "quaterlyPrice"
+                    ? this._moneyFormat.numberFormat(props.values.package.quaterlyPrice)
+                    : props.values.billingCycle.code === "semesterlyPrice"
+                      ? this._moneyFormat.numberFormat(props.values.package.semesterlyPrice)
+                      : props.values.billingCycle.code === "yearlyPrice"
+                        ? this._moneyFormat.numberFormat(props.values.package.yearlyPrice)
+                        : "Wrong Value"}
             </td>
             <td>
               <Row>
@@ -476,63 +488,63 @@ export default class FormTenantRenewSubscription extends Component {
     }
     return (
       <>
-      <form>
+        <form>
           <div className="form-group">
             <label htmlFor="exampleInputEmail1"><strong>Subtotal</strong></label> <br />
             {this._moneyFormat.numberFormat(props.values.prices)}
           </div>
           <div className="form-group">
-            <label htmlFor="exampleInputPassword1"><strong>Discount</strong></label> <br/>
+            <label htmlFor="exampleInputPassword1"><strong>Discount</strong></label> <br />
             <div className="input-group mb-3">
               <div className="input-group-prepend">
-              <ButtonDropdown isOpen={this.state.dropdownOpenAll} toggle={this.toggleAll} >
-              <DropdownToggle caret style={{
-                  borderRadius: 0,
-                  backgroundColor: "#848484",
-                  border: 0,
-                  width: 60
-                }}>
-                {this.state.discountAll}
-              </DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem
-                  onClick={() => {
-                    this.setState({ discountAll: "Rp." });
-                    props.values.discountTotalAmount = 0;
-                    props.values.discountTotalPercent = 0;
-                    props.values.discountTypeAll = "Rp.";
-                  }}
-                >
-                  Rp.
+                <ButtonDropdown isOpen={this.state.dropdownOpenAll} toggle={this.toggleAll} >
+                  <DropdownToggle caret style={{
+                    borderRadius: 0,
+                    backgroundColor: "#848484",
+                    border: 0,
+                    width: 60
+                  }}>
+                    {this.state.discountAll}
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    <DropdownItem
+                      onClick={() => {
+                        this.setState({ discountAll: "Rp." });
+                        props.values.discountTotalAmount = 0;
+                        props.values.discountTotalPercent = 0;
+                        props.values.discountTypeAll = "Rp.";
+                      }}
+                    >
+                      Rp.
                 </DropdownItem>
-                <DropdownItem
-                  onClick={() => {
-                    this.setState({ discountAll: "%" });
-                    props.values.discountTotalAmount = 0;
-                    props.values.discountTotalPercent = 0;
-                    props.values.discountTypeAll = "%";
-                  }}
-                >
-                  %
+                    <DropdownItem
+                      onClick={() => {
+                        this.setState({ discountAll: "%" });
+                        props.values.discountTotalAmount = 0;
+                        props.values.discountTotalPercent = 0;
+                        props.values.discountTypeAll = "%";
+                      }}
+                    >
+                      %
                 </DropdownItem>
-              </DropdownMenu>
-            </ButtonDropdown>
+                  </DropdownMenu>
+                </ButtonDropdown>
               </div>
               <InputText
-              className="form-control"
-              name={
-                props.values.discountTypeAll === "Rp."
-                  ? "discountTotalAmount"
-                  : "discountTotalPercent"
-              }
-              onChange={props.handleChange}
-              value={
-                props.values.discountTypeAll === "Rp."
-                  ? props.values.discountTotalAmount
-                  : props.values.discountTotalPercent
-              }
-              style={{ textAlign: "left" }}
-            />
+                className="form-control"
+                name={
+                  props.values.discountTypeAll === "Rp."
+                    ? "discountTotalAmount"
+                    : "discountTotalPercent"
+                }
+                onChange={props.handleChange}
+                value={
+                  props.values.discountTypeAll === "Rp."
+                    ? props.values.discountTotalAmount
+                    : props.values.discountTotalPercent
+                }
+                style={{ textAlign: "left" }}
+              />
             </div>
           </div>
           <div className="form-group">
@@ -571,22 +583,22 @@ export default class FormTenantRenewSubscription extends Component {
             </span>
           </div>
           <Button
-           style={{
-             borderRadius: "5px",
-             marginRight: "10px",
-             width: "110px"
-           }}
-           onClick={() => {
-             this.setState({ redirect: true });
-           }}
-         >
-           Cancel
+            style={{
+              borderRadius: "5px",
+              marginRight: "10px",
+              width: "110px"
+            }}
+            onClick={() => {
+              this.setState({ redirect: true });
+            }}
+          >
+            Cancel
          </Button>
-         <Button
-           style={{ borderRadius: "5px", width: "110px" }}
-           onClick={props.handleSubmit}
-         >
-           Save
+          <Button
+            style={{ borderRadius: "5px", width: "110px" }}
+            onClick={props.handleSubmit}
+          >
+            Save
          </Button>
         </form>
       </>
@@ -636,14 +648,14 @@ export default class FormTenantRenewSubscription extends Component {
         lastPaymentDate: this.state.today,
         discountPercent:
           parseInt(props.discountTotalPercent) === 0 ||
-          isNaN(props.discountTotalPercent) === true ||
-          props.discountTotalPercent === ""
+            isNaN(props.discountTotalPercent) === true ||
+            props.discountTotalPercent === ""
             ? null
             : parseInt(props.discountTotalPercent),
         discountAmount:
           parseInt(props.discountTotalAmount) === 0 ||
-          isNaN(props.discountTotalAmount) === true ||
-          props.discountTotalAmount === ""
+            isNaN(props.discountTotalAmount) === true ||
+            props.discountTotalAmount === ""
             ? 0
             : parseInt(props.discountTotalAmount),
         taxRate:
@@ -663,14 +675,14 @@ export default class FormTenantRenewSubscription extends Component {
             unitPrice: props.packagePrice,
             discountPercent:
               parseInt(props.discountPercent) === 0 ||
-              isNaN(props.discountPercent) === true ||
-              props.discountPercent === ""
+                isNaN(props.discountPercent) === true ||
+                props.discountPercent === ""
                 ? null
                 : parseInt(props.discountPercent),
             discountAmount:
               parseInt(props.discountAmount) === 0 ||
-              isNaN(props.discountAmount) === true ||
-              props.discountAmount === ""
+                isNaN(props.discountAmount) === true ||
+                props.discountAmount === ""
                 ? 0
                 : parseInt(props.discountAmount)
           }
