@@ -120,7 +120,10 @@ export default class FormTenantRenewSubscription extends Component {
   }
 
   loadRelatedData() {
-    this.billingRest.getRelatedData({}).subscribe(response => {
+    const params = {
+      isClodeoMain: (this.state.data.clientAppId === 'clodeo-main-web')
+    }
+    this.billingRest.getRelatedData({params}).subscribe(response => {
       const data = response.paymentMethodStr;
       const options = [];
 
@@ -159,7 +162,7 @@ export default class FormTenantRenewSubscription extends Component {
     }
   }
 
-  
+
   _renderInfo(props) {
     return (
       <>

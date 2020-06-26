@@ -2,10 +2,10 @@ import moment from "moment";
 import "moment/locale/id";
 import { NavLink, Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { 
-  Card, 
-  CardBody, 
-  UncontrolledTooltip 
+import {
+  Card,
+  CardBody,
+  UncontrolledTooltip
 } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -32,9 +32,9 @@ import {
   CardFooter,
   UncontrolledPopover,
   PopoverBody,
-  ButtonDropdown, 
-  DropdownToggle, 
-  DropdownMenu, 
+  ButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
   DropdownItem
 } from "reactstrap";
 
@@ -351,11 +351,17 @@ export default class Billing extends Component {
         width: 150,
         Cell: props => (
           <div>
-           <p id={`UncontrolledTooltipExample${props.index}`} style={{
-             color: 'blue',
-             textDecoration: 'underline',
-             cursor: 'pointer',
-            }}>{props.value}</p>
+            <span id={`UncontrolledTooltipExample${props.index}`} style={{
+                display: 'flex',
+                flexDirection: 'row',
+                }}>
+              <p style={{
+                color: 'blue',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                marginRight: '3px'
+                }}>{props.value}</p><span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
+            </span>
             <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
               maxWidth: 1000,
             }}>
@@ -499,7 +505,7 @@ export default class Billing extends Component {
       }
     ];
   }
-  
+
   exportData() {
     this.setState({ loading: true });
     const params = {
@@ -574,7 +580,7 @@ export default class Billing extends Component {
       this.setState({ redirect: false });
       return <Redirect to="/user/login" />;
     }
-    
+
     return (
       <Fragment>
         <Row>
@@ -938,16 +944,16 @@ export default class Billing extends Component {
                     </Button>
                     <ButtonDropdown
                       className="float-right default"
-                      isOpen={this.state.exportButton} 
+                      isOpen={this.state.exportButton}
                       toggle={this.toggleExport}
                     >
-                      <DropdownToggle 
+                      <DropdownToggle
                         caret
                         color="primary"
                         style={{
                           marginRight: 10,
                           borderRadius: 6
-                        }} 
+                        }}
                       >
                         Export
                       </DropdownToggle>
