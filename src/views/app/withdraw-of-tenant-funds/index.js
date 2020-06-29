@@ -349,6 +349,7 @@ class WithdrawOfTenantFunds extends Component {
 
       let lines = {
         isApprove: true,
+        note: this.state.note,
         attachments: attachments,
       };
 
@@ -391,11 +392,14 @@ class WithdrawOfTenantFunds extends Component {
           this.walletTransactionsRestService.approve(this.state.oneData.id, lines).subscribe(
             response => {
               this.setState({
+                errorData: '',
                 modal2: true,
                 loadingSubmit: false,
                 modalResponse: true,
+                modalError: false,
                 isChanged: false,
                 attachments: [],
+                note: '',
               });
             },
             err => {
@@ -404,8 +408,10 @@ class WithdrawOfTenantFunds extends Component {
                 loadingSubmit: false,
                 modal2: true,
                 modalError: true,
+                modalResponse: false,
                 attachments: [],
-                errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui'
+                errorData: err.data[0] ? err.data[0].errorMessage : 'Tidak diketahui',
+                note: '',
               });
             }
           );
@@ -806,6 +812,20 @@ class WithdrawOfTenantFunds extends Component {
                     <td>:</td>
                     <td>
                       {this.moneyFormat.numberFormat(this.state.amount) || 0}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Note</td>
+                    <td>:</td>
+                    <td>
+                      <Input
+                        type="textarea"
+                        className="form-control"
+                        onChange={event => {
+                          this.setState({ note: event.target.value });
+                        }}
+                        value={this.state.note}
+                      />
                     </td>
                   </tr>
                   <tr>
