@@ -44,11 +44,13 @@ export default class UserRoles extends Component {
         this.onSelectedPermission = this.onSelectedPermission.bind(this);
         this.isPermissionSelected = this.isPermissionSelected.bind(this);
         this.rmPermissionSelected = this.rmPermissionSelected.bind(this);
+        this.loadRelatedData = this.loadRelatedData.bind(this);
 
         this.state = {
             loading: false,
             modalAddRoles: false,
             permissionOptions: null,
+            permissionOpts: null,
             rolesName: "",
             permissions: [],
             description: null,
@@ -88,13 +90,15 @@ export default class UserRoles extends Component {
             this.state.permissions.push(e.value);
             uniqBy = _.uniqBy(this.state.permissions, 'id');
             this.setState({
-                permissions: uniqBy
+                permissions: uniqBy,
+                tempPerm: null
             });
         }
     }
 
     componentDidMount() {
         this.loadData();
+        this.loadRelatedData();
     }
 
 
@@ -104,7 +108,7 @@ export default class UserRoles extends Component {
         this.setState({ table });
 
         const params = {
-            keyword: this.state.search || null,
+            "keyword": this.state.search || null,
             "options.take": this.state.table.pagination.pageSize,
             "options.skip": this.state.table.pagination.skipSize,
             "options.includeTotalCount": true
@@ -142,19 +146,33 @@ export default class UserRoles extends Component {
         });
     }
 
-    suggestPermissions(event) {
-        const params = {
-            keyword: event.query || null,
-            "options.take": 30,
-            "options.skip": 0
-        };
-
-        this.userRestService.loadRelated({ params }).subscribe(response => {
-            this.setState({
-                permissionOptions: response.accessPermissions
-            })
+    suggestPermissions(event, searchKey) {
+        let record = this.state.permissionOptions;
+        let query = event.query;
+        record = _.castArray(record);
+        searchKey = _.castArray(searchKey);
+        let suggestions = record.filter(value => {
+            const regEx = new RegExp(query, 'ig');
+            return _.filter(searchKey, key => {
+                const valueString = _.toString(_.get(value, key, ''));
+                return regEx.test(valueString);
+            }).length;
         });
 
+        this.setState({
+            permissionOpts: suggestions,
+        })
+    }
+
+    loadRelatedData() {
+        this.userRestService.loadRelated()
+            .subscribe(response => {
+                if (response.accessPermissions) {
+                    this.setState({
+                        permissionOptions: response.accessPermissions,
+                    })
+                }
+            });
     }
 
     handleOnPageChange(paginationEvent) {
@@ -413,25 +431,27 @@ export default class UserRoles extends Component {
                                 >
                                     {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
                                     <Column
-                                        style={{ width: "250px" }}
+                                        style={{ "width": "10%", "verticalAlign": "top"}}
                                         field="name"
                                         header="Nama"
                                         className="text-left"
+
                                     />
                                     <Column
-                                        style={{ width: "250px" }}
+                                        style={{ "width": "55%", "verticalAlign": "top"}}
                                         field="listRoles"
                                         header="Permissions"
                                         className="text-left"
+
                                     />
                                     <Column
-                                        style={{ width: "250px" }}
+                                        style={{ "width": "20%", "verticalAlign": "top"}}
                                         field="description"
                                         header="Deskripsi"
                                         className="text-left"
                                     />
                                     <Column
-                                        style={{ width: "250px" }}
+                                        style={{ width: "15%", verticalAlign: "top" }}
                                         header="Action"
                                         body={this.actionTemplate}
                                     />
@@ -451,7 +471,7 @@ export default class UserRoles extends Component {
                 </Row>
                 {this.state.loading && <Loading />}
 
-                {this.state.modalAddRoles && (
+                {(this.state.modalAddRoles && this.state.permissionOptions) && (
                     <Modal isOpen={this.state.modalAddRoles} size="lg">
                         <ModalHeader>Tambah Roles</ModalHeader>
                         <ModalBody>
@@ -479,13 +499,13 @@ export default class UserRoles extends Component {
                                                     width: 150
                                                 }}
                                                 value={this.state.tempPerm}
-                                                suggestions={this.state.permissionOptions}
-                                                completeMethod={this.suggestPermissions}
+                                                suggestions={this.state.permissionOpts}
+                                                completeMethod={(e) => this.suggestPermissions(e, ['name'])}
                                                 size={30}
                                                 minLength={1}
                                                 field="name"
                                                 dropdown={true}
-                                                onDropdownClick={this.suggestPermissions}
+                                                onDropdownClick={(e) => this.suggestPermissions(e, ['name'])}
                                                 onChange={this.onSelectedPermission}
                                             />
                                         </td>

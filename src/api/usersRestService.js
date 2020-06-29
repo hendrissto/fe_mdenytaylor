@@ -33,8 +33,8 @@ export default class UsersRestService extends React.Component {
         return this.request.get('/access-roles', qParams);
     }
 
-    loadRelated(qParams) {
-        return this.request.get('/access-roles/entry-related-data', qParams);
+    loadRelated() {
+        return this.request.get('/access-roles/entry-related-data');
     }
 
     createRoles(payload) {
@@ -55,5 +55,9 @@ export default class UsersRestService extends React.Component {
 
     getSinglePermissions(id) {
         return this.request.get(`/access-permissions/${id}`);
+    }
+
+    markActive(id, active) {
+      return this.requestUser.put(`/admin/${id}/mark-active?active=${active}`);
     }
 }

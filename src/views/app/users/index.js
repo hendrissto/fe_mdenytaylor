@@ -34,6 +34,8 @@ import * as css from "../../base/baseCss";
 import Swal from "sweetalert2";
 import "./user.scss";
 import withReactContent from "sweetalert2-react-content";
+import { InputSwitch } from 'primereact/inputswitch';
+
 const MySwal = withReactContent(Swal);
 
 export default class Users extends Component {
@@ -46,8 +48,10 @@ export default class Users extends Component {
     this.resetData = this.resetData.bind(this);
     this.editData = this.editData.bind(this);
     this.actionTemplate = this.actionTemplate.bind(this);
+    this.switchActionTemplate = this.switchActionTemplate.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
+    this.markActive = this.markActive.bind(this);
 
     this.state = {
       firstName: '',
@@ -126,7 +130,7 @@ export default class Users extends Component {
       .pipe(tap((response) => {
         response.data.forEach(user => {
           user.listRole = user.accessRoleAdmin.map((data, i) => {
-            return data.roleName;
+            return data.roleName.toString().replace(/,/g, ', ');
           });
         })
         const table = { ...this.state.table };
@@ -178,16 +182,50 @@ export default class Users extends Component {
           className="p-button-success">
           Edit
                 </Button>
-        <Button
-          type="button"
-          style={{background: '#EA5455', marginLeft: '5px'}}
-          onClick={() => this.deleteData(rowData)}
-          className="p-button-danger">
-          Hapus
-                </Button>
       </div>
     );
   }
+
+  switchActionTemplate(rowData, column) {
+    const id = rowData.id;
+    const check = rowData.status === 'active' ? true : false;
+
+    return (
+      <>
+        <InputSwitch checked={check} onChange={(e) => this.markActive(id, e.value)} />
+      </>
+    )
+  }
+
+  markActive(id, active) {
+    this.setState({
+      loading: true
+    });
+    this.userRestService.markActive(id, active).pipe(
+      catchError((error) => {
+        this.setState({
+          loading: false
+        });
+        MySwal.fire({
+          type: "error",
+          title: active ? "Gagal Mengaktifkan" : "Gagal Menonaktifkan",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        return throwError(error);
+      }), tap(() => {
+        this.loadData().subscribe();
+        this.setState({
+          loading: false
+        });
+      })
+    ).subscribe()
+  }
+
+
 
   editData(data) {
     this.userRestService.getUser(data.id)
@@ -348,7 +386,7 @@ export default class Users extends Component {
             showConfirmButton: false,
             customClass: "swal-height"
           });
-          this.restoreForm({...formValue, selectedRoles: this.state.selectedRoles})
+          this.restoreForm({ ...formValue, selectedRoles: this.state.selectedRoles })
 
           this.setState({ loading: false, modalAddUsers: true, isEdit: false })
         });
@@ -384,7 +422,7 @@ export default class Users extends Component {
             showConfirmButton: false,
             customClass: "swal-height"
           });
-          this.restoreForm({...formValue, selectedRoles: this.state.selectedRoles})
+          this.restoreForm({ ...formValue, selectedRoles: this.state.selectedRoles })
 
           this.setState({ loading: false, modalAddUsers: true })
         });
@@ -409,7 +447,7 @@ export default class Users extends Component {
     email,
     password,
     nationalPhoneNumber,
-    userName, selectedRoles}) {
+    userName, selectedRoles }) {
     this.setState(
       {
         firstName,
@@ -515,6 +553,13 @@ export default class Users extends Component {
                   />
                   <Column
                     style={{ width: "250px" }}
+                    field="status"
+                    header="Status"
+                    className="text-center"
+                    body={this.switchActionTemplate}
+                  />
+                  <Column
+                    style={{ width: "250px" }}
                     header=""
                     body={this.actionTemplate}
                   />
@@ -538,132 +583,132 @@ export default class Users extends Component {
           <Modal isOpen={this.state.modalAddUsers} size="lg">
             <ModalHeader>{this.state.isEdit ? 'Ubah' : 'Tambah'} User</ModalHeader>
             <Formik
-                initialValues = {{
-                  firstName: this.state.firstName,
-                  lastName:  this.state.lastName,
-                  email:  this.state.email,
-                  password:  this.state.password,
-                  nationalPhoneNumber:  this.state.nationalPhoneNumber,
-                  userName:  this.state.userName,
-                }}
-                onSubmit={this.submitData}
-                validationSchema={validation}
-              >
-                {props => (
+              initialValues={{
+                firstName: this.state.firstName,
+                lastName: this.state.lastName,
+                email: this.state.email,
+                password: this.state.password,
+                nationalPhoneNumber: this.state.nationalPhoneNumber,
+                userName: this.state.userName,
+              }}
+              onSubmit={this.submitData}
+              validationSchema={validation}
+            >
+              {props => (
                 <form onSubmit={props.handleSubmit}>
-                <ModalBody>
-                  <Table>
-                    <tbody>
-                      <tr>
-                        <td colSpan={3}>UserName</td>
-                        <td>:</td>
-                        <td colSpan={1}>
-                          <InputText
-                            name="userName"
-                            type="text"
-                            value={props.values.userName}
-                            onChange={props.handleChange}
-                          />
-                          <p style={css.style.required}>{props.errors && props.touched
-                            ? props.errors.userName
-                            : null}</p>
-                        </td>
-                        <td colSpan={2}>Email</td>
-                        <td>:</td>
-                        <td colSpan={2}>
-                          <InputText
-                            name="email"
-                            type="email"
-                            value={props.values.email}
-                            onChange={props.handleChange}
-                          />
+                  <ModalBody>
+                    <Table>
+                      <tbody>
+                        <tr>
+                          <td colSpan={3}>UserName</td>
+                          <td>:</td>
+                          <td colSpan={1}>
+                            <InputText
+                              name="userName"
+                              type="text"
+                              value={props.values.userName}
+                              onChange={props.handleChange}
+                            />
+                            <p style={css.style.required}>{props.errors && props.touched
+                              ? props.errors.userName
+                              : null}</p>
+                          </td>
+                          <td colSpan={2}>Email</td>
+                          <td>:</td>
+                          <td colSpan={2}>
+                            <InputText
+                              name="email"
+                              type="email"
+                              value={props.values.email}
+                              onChange={props.handleChange}
+                            />
 
-                          <p style={css.style.required}>{props.errors && props.touched
-                            ? props.errors.email
-                            : null}</p>
-                        </td>
-                      </tr>
+                            <p style={css.style.required}>{props.errors && props.touched
+                              ? props.errors.email
+                              : null}</p>
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td colSpan={3}>Nama Awal</td>
-                        <td>:</td>
-                        <td colSpan={1}>
-                          <InputText
+                        <tr>
+                          <td colSpan={3}>Nama Awal</td>
+                          <td>:</td>
+                          <td colSpan={1}>
+                            <InputText
 
-                            name="firstName"
-                            type="text"
-                            value={props.values.firstName}
-                            onChange={props.handleChange}
-                          />
+                              name="firstName"
+                              type="text"
+                              value={props.values.firstName}
+                              onChange={props.handleChange}
+                            />
 
-                          <p style={css.style.required}>{props.errors && props.touched
-                            ? props.errors.firstName
-                            : null}</p>
-                        </td>
-                        <td colSpan={2}>Nama Akhir</td>
-                        <td>:</td>
-                        <td colSpan={2}>
-                          <InputText
+                            <p style={css.style.required}>{props.errors && props.touched
+                              ? props.errors.firstName
+                              : null}</p>
+                          </td>
+                          <td colSpan={2}>Nama Akhir</td>
+                          <td>:</td>
+                          <td colSpan={2}>
+                            <InputText
 
-                            name="lastName"
-                            type="text"
-                            value={props.values.lastName}
-                            onChange={props.handleChange}
-                          />
-                          <p style={css.style.required}>{props.errors.lastName && props.touched
-                            ? props.errors.lastName
-                            : null}</p>
-                        </td>
-                      </tr>
+                              name="lastName"
+                              type="text"
+                              value={props.values.lastName}
+                              onChange={props.handleChange}
+                            />
+                            <p style={css.style.required}>{props.errors.lastName && props.touched
+                              ? props.errors.lastName
+                              : null}</p>
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td colSpan={3}>Nomor</td>
-                        <td>:</td>
-                        <td colSpan={this.state.isEdit ? 6 : 1}>
-                          <InputText
+                        <tr>
+                          <td colSpan={3}>No. Telp</td>
+                          <td>:</td>
+                          <td colSpan={this.state.isEdit ? 6 : 1}>
+                            <InputText
 
-                            name="nationalPhoneNumber"
-                            type="text"
-                            value={props.values.nationalPhoneNumber}
-                            onChange={props.handleChange}
-                           />
-                          <p style={css.style.required}>{props.errors && props.touched
-                            ? props.errors.nationalPhoneNumber
-                            : null}</p>
-                        </td>
-                        {!this.state.isEdit &&
-                          <>
-                            <td colSpan={2}>Password</td>
-                            <td>:</td>
-                            <td colSpan={2}>
-                              <InputText
-                                readOnly
-                                name="password"
-                                type="text"
-                                value={props.values.password}
-                              />
-                            </td>
-                          </>
-                        }
-                      </tr>
+                              name="nationalPhoneNumber"
+                              type="text"
+                              value={props.values.nationalPhoneNumber}
+                              onChange={props.handleChange}
+                            />
+                            <p style={css.style.required}>{props.errors && props.touched
+                              ? props.errors.nationalPhoneNumber
+                              : null}</p>
+                          </td>
+                          {!this.state.isEdit &&
+                            <>
+                              <td colSpan={2}>Password</td>
+                              <td>:</td>
+                              <td colSpan={2}>
+                                <InputText
+                                  readOnly
+                                  name="password"
+                                  type="text"
+                                  value={props.values.password}
+                                />
+                              </td>
+                            </>
+                          }
+                        </tr>
 
-                      <tr>
-                        <td colSpan={2}>Roles</td>
-                        <td>:</td>
-                        <td colSpan={6}>
-                          <DataTable value={this.state.roles} className="user-table"
-                            selection={this.state.selectedRoles} onSelectionChange={e => this.setState({ selectedRoles: e.value })}>
-                            <Column selectionMode="multiple" style={{ width: '3em' }} />
-                            <Column field="name" header="Nama" />
-                            <Column field="description" header="Deskripsi" />
-                          </DataTable>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </Table>
-              </ModalBody>
-                <ModalFooter>
-                  <Button
+                        <tr>
+                          <td colSpan={2}>Roles</td>
+                          <td>:</td>
+                          <td colSpan={6}>
+                            <DataTable value={this.state.roles} className="user-table"
+                              selection={this.state.selectedRoles} onSelectionChange={e => this.setState({ selectedRoles: e.value })}>
+                              <Column selectionMode="multiple" style={{ width: '3em' }} />
+                              <Column field="name" header="Nama" />
+                              <Column field="description" header="Deskripsi" />
+                            </DataTable>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button
                       color="primary"
                       type="submit"
                       style={{
@@ -672,22 +717,22 @@ export default class Users extends Component {
                     >
                       Simpan
                   </Button>
-                  <Button
-                    color="primary"
-                    outline
-                    onClick={() => {
-                      this.resetData();
-                      this.setState({ isEdit: false, modalAddUsers: false });
-                    }}
-                    style={{
-                      borderRadius: 6
-                    }}
-                  >
-                  Close
+                    <Button
+                      color="primary"
+                      outline
+                      onClick={() => {
+                        this.resetData();
+                        this.setState({ isEdit: false, modalAddUsers: false });
+                      }}
+                      style={{
+                        borderRadius: 6
+                      }}
+                    >
+                      Close
                 </Button>
-                </ModalFooter>
-              </form>
-            )}
+                  </ModalFooter>
+                </form>
+              )}
             </Formik>
           </Modal>
         )}

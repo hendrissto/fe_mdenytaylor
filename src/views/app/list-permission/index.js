@@ -80,7 +80,7 @@ export default class ListPermission extends Component {
         this.setState({ table });
 
         const params = {
-            keyword: this.state.search || null,
+            "keyword": this.state.search || null,
             "options.take": this.state.table.pagination.pageSize,
             "options.skip": this.state.table.pagination.skipSize,
             "options.includeTotalCount": true
