@@ -26,11 +26,14 @@ import TenantsBankRestService from "../../../api/tenantsBankRestService";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
 const MySwal = withReactContent(Swal);
+
 
 export default class TenantsBank extends Component {
   constructor(props) {
     super(props);
+    this.authentication = new AclService();
     this.tenantRestService = new TenantRestService();
     this.tenantBankRestService = new TenantsBankRestService();
     this.suggestTenants = this.suggestTenants.bind(this);
@@ -162,6 +165,7 @@ export default class TenantsBank extends Component {
   actionTemplate(rowData, column) {
     return (
       <div>
+        { this.authentication.can(['wallet.tenant_bank.edit']) &&
         <Button
           type="button"
           icon="pi pi-search"
@@ -173,6 +177,7 @@ export default class TenantsBank extends Component {
         >
           Edit
         </Button>
+        }
       </div>
     );
   }
@@ -213,7 +218,7 @@ export default class TenantsBank extends Component {
     } else {
       this.setState({modalAddBank: false, loading: true});
       const data = this.state;
-  
+
       const payload = {
         accountName: data.accountName,
         accountNumber: data.accountNumber,
@@ -222,7 +227,7 @@ export default class TenantsBank extends Component {
         inactive: false,
         bankId: data.bankSelected.id
       }
-  
+
       if(!this.state.isEdit) {
         this.tenantBankRestService.submitData(data.tenantSelected.id, payload).subscribe(res => {
             MySwal.fire({
@@ -234,7 +239,7 @@ export default class TenantsBank extends Component {
               showConfirmButton: false,
               customClass: "swal-height"
             });
-    
+
             this.loadData();
             this.setState({loading: false, isEdit: false})
         }, err => {
@@ -247,7 +252,7 @@ export default class TenantsBank extends Component {
             showConfirmButton: false,
             customClass: "swal-height"
           });
-    
+
           this.loadData();
           this.setState({loading: false, isEdit: false})
         });
@@ -263,7 +268,7 @@ export default class TenantsBank extends Component {
             customClass: "swal-height"
           });
           this.loadData();
-  
+
           this.setState({loading: false, isEdit: false})
       }, err => {
         MySwal.fire({
@@ -276,7 +281,7 @@ export default class TenantsBank extends Component {
           customClass: "swal-height"
         });
         this.loadData();
-  
+
         this.setState({loading: false, isEdit: false})
       });
       }
@@ -332,6 +337,7 @@ export default class TenantsBank extends Component {
                       </Button>
                     </InputGroup>
                   </div>
+                  { this.authentication.can(['wallet.tenant_bank.create']) &&
                   <div>
                     <Button
                       className="default"
@@ -345,6 +351,7 @@ export default class TenantsBank extends Component {
                       Tambah Tenant Bank
                     </Button>
                   </div>
+                  }
                 </div>
                 <DataTable
                   value={this.state.table.data}

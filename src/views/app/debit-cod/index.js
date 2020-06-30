@@ -45,6 +45,8 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import TenantRestService from "../../../api/tenantRestService";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
+
 const MySwal = withReactContent(Swal);
 class DebitCod extends Component {
   constructor(props) {
@@ -55,6 +57,7 @@ class DebitCod extends Component {
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
+    this.authentication = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.toggle = this.toggle.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
@@ -1107,7 +1110,7 @@ class DebitCod extends Component {
               </Button>
               </div>
             )}
-            {!this.state.isEdit && (
+            {!this.state.isEdit && this.authentication.can(['cod.cod_list.edit']) &&
               <Button
                 className="default"
                 color="primary"
@@ -1121,7 +1124,7 @@ class DebitCod extends Component {
                 Edit
               </Button>
 
-            )}
+            }
               <Button
                 color="primary"
                 outline

@@ -13,6 +13,8 @@ import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
 import ExportSubscriptions from "../../../core/export/ExportSubscriptions";
+import { AclService } from "../../../services/auth/AclService";
+
 import Spinner from "../../../containers/pages/Spinner";
 import NormalizeData from "../../../core/export/NormalizeData";
 
@@ -61,6 +63,7 @@ export default class Billing extends Component {
     this.exportService = new ExportSubscriptions();
     this.normalize = new NormalizeData();
     this.moneyFormat = new MoneyFormat();
+    this.authentication = new AclService();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -335,7 +338,7 @@ export default class Billing extends Component {
   dataTable() {
     moment.locale("id");
     const tableFilter = { ...this.state.tableFilter };
-    return [
+    const columns = [
       {
         Header: "ID Tenant",
         accessor: "tenantId",
@@ -473,7 +476,11 @@ export default class Billing extends Component {
         show: tableFilter.billingAmount,
         Cell: props => <p>{props.value === null ? "-" : props.value}</p>
       },
-      {
+
+    ];
+
+    if(this.authentication.can(['tenant.subscription.edit'])) {
+      columns.push({
         Header: <p style={{textAlign: "center"}}>Actions</p>,
         accessor: "status",
         width: 220,
@@ -482,15 +489,15 @@ export default class Billing extends Component {
         show: true,
         Cell: props => (
           <Row>
-            <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
-              <Button
-                className="float-right default"
-                color="secondary"
-                style={{ marginRight: 10, marginLeft: 10, borderRadius: 6 }}
-              >
-                Upgrade
-              </Button>
-            </NavLink>
+          <NavLink to={`billings/upgrade/${props.original.tenantId}`}>
+            <Button
+              className="float-right default"
+              color="secondary"
+              style={{ marginRight: 10, marginLeft: 10, borderRadius: 6 }}
+            >
+              Upgrade
+            </Button>
+          </NavLink>
             <NavLink to={`billings/renew/${props.original.tenantId}`}>
               <Button
                 className="float-right default"
@@ -502,8 +509,9 @@ export default class Billing extends Component {
             </NavLink>
           </Row>
         )
-      }
-    ];
+      })
+    }
+    return columns;
   }
 
   exportData() {
@@ -615,13 +623,15 @@ export default class Billing extends Component {
                       });
                     }}
                   >
-                    <IconCard
-                      title="Free Trial Tenant (Total)"
-                      value={
-                        this.state.tenantsSubscriptionsSummary.totalFreeTrial
-                      }
-                      className="mb-4"
-                    />
+                    { this.authentication.can(['cod.transfer_credit.create']) &&
+                      <IconCard
+                        title="Free Trial Tenant (Total)"
+                        value={
+                          this.state.tenantsSubscriptionsSummary.totalFreeTrial
+                        }
+                        className="mb-4"
+                      />
+                    }
                   </div>
                   <div
                     className="col-12 col-md-4 hover"

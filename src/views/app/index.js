@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+import { AclService } from "../../services/auth/AclService";
 
 import AppLayout from "../../layout/AppLayout";
 import dashboard from "./dashboard";
@@ -19,21 +20,35 @@ import pages from "../gogo/pages";
 import applications from "../gogo/applications";
 import ui from "../gogo/ui";
 import menu from "../gogo/menu";
-import blankPage from "./blank-page";
 import ListTransactions from "./list-transactions";
 import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
 import DetailWalletTransactions from "./wallet-transactions/detail-page";
+import { GuardProvider, GuardedRoute } from 'react-router-guards';
+
 
 class App extends Component {
   render() {
     const { match } = this.props;
+    this.authentication = new AclService();
 
+
+    const activateRouted = (to, from, next) => {
+      const isValidRoles = this.authentication.can(to.meta.permissions);
+      if (isValidRoles) {
+        next();
+
+      } else {
+        next.redirect(`/blank-page`);
+      }
+    };
     return (
       <AppLayout>
         <Switch>
-          <Redirect exact from={`${match.url}/`} to={`${match.url}/billing`} />
-          <Route path={`${match.url}/dashboard`} component={dashboard} />
+
+        <GuardProvider guards={[activateRouted]}>
+          <Redirect exact from={`${match.url}/`}  to={`${match.url}/billing`} />
+          <GuardedRoute path={`${match.url}/dashboard`} component={dashboard} meta={{permissions: ['dashboard.general.view']}}/>
           <Route path={`${match.url}/cod-receipt-number`} component={CODReceiptNumber} />
           <Route path={`${match.url}/tenants`} component={Tenant} />
           <Route path={`${match.url}/billing`} component={Billing} />
@@ -47,14 +62,13 @@ class App extends Component {
           <Route path={`${match.url}/list-transactions`} component={ListTransactions} />
           <Route path={`${match.url}/wallet-transactions`} component={WalletTransactions} />
           <Route path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} />
-
+      </GuardProvider>
           {/* route dummy */}
           <Route path={`${match.url}/dashboards`} component={dashboards} />
           <Route path={`${match.url}/applications`} component={applications} />
           <Route path={`${match.url}/pages`} component={pages} />
           <Route path={`${match.url}/ui`} component={ui} />
           <Route path={`${match.url}/menu`} component={menu} />
-          <Route path={`${match.url}/blank-page`} component={blankPage} />\
           <Redirect to="/error" />
         </Switch>
       </AppLayout>

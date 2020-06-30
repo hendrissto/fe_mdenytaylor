@@ -48,12 +48,14 @@ import { Calendar } from 'primereact/calendar';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
 const MySwal = withReactContent(Swal);
 
 class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
     this.codRest = new CODRestService();
+    this.authentication = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportReceiptofFunds();
@@ -1628,19 +1630,21 @@ class ReceiptOfFunds extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
-                    <Button
-                      className="float-right"
-                      color="primary"
-                      onClick={() => this.setState({ modal: true })}
-                      style={{
-                        borderRadius: 6
-                      }}
-                    >
-                      <i className="iconsminds-upload mr-2" />
-                      <IntlMessages
-                        id={"ui.menu.receipt-of-funds.list.button.uploadAWB"}
-                      />
-                    </Button>
+                    { this.authentication.can(['cod.transfer_credit.create']) &&
+                      <Button
+                        className="float-right"
+                        color="primary"
+                        onClick={() => this.setState({ modal: true })}
+                        style={{
+                          borderRadius: 6
+                        }}
+                      >
+                        <i className="iconsminds-upload mr-2" />
+                        <IntlMessages
+                          id={"ui.menu.receipt-of-funds.list.button.uploadAWB"}
+                        />
+                      </Button>
+                    }
                     <Button
                       className="float-right default"
                       color="primary"
