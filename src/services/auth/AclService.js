@@ -4,11 +4,6 @@ import { Observable } from 'rxjs';
 export class AclService {
   user = null;
   roles = [];
-  constructor() {
-    this.user = localStorage.getItem('user');
-    this.roles = JSON.parse(JSON.parse(this.user).access_permissions) || [];
-  }
-
   hasRole(role) {
     return this.roles.includes(role);
   }
@@ -19,10 +14,14 @@ export class AclService {
   }
 
   can(...accesses) {
+    this.user = localStorage.getItem('user');
+    this.roles = this.user ? JSON.parse(JSON.parse(this.user).access_permissions) : [];
+
     accesses = accesses.filter(_.identity);
     if (!accesses.length) {
       return true;
     }
+    console.log(this.roles)
     return _.map(accesses, accessGroup => this.canByGroup(accessGroup)).filter(_.identity).length > 0;
   }
 

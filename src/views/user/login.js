@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import React, { Component } from "react";
 import { Row, Card, CardTitle, Form, Label, Input, Button } from "reactstrap";
 import { NavLink } from "react-router-dom";
@@ -10,9 +11,12 @@ import AuthRestService from "../../api/authRestService";
 import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";
+import menuItems from "../../constants/menu";
+
 
 import BaseAlert from '../base/baseAlert'
 import * as css from "../base/baseCss"
+import { AclService } from "../../services/auth/AclService";
 
 class Login extends Component {
   data = {
@@ -24,6 +28,7 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.authRest = new AuthRestService();
+    this.acl = new AclService();
 
     this.state = {
       loading: false,
@@ -39,7 +44,39 @@ class Login extends Component {
       this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
         this.props.loginUser(response, this.props.history);
-        this.setState({ loading: false })
+        const validMenus = [];
+          _.filter(menuItems, (menu, index) => {
+            if(this.acl.can(menu.permissions)) {
+              if(menu.id === 'tenants') {
+                // set manually tenant menu should first
+                validMenus[index] = validMenus[0];
+                validMenus[0] = menu;
+
+                // set temporary
+                const firstSub = validMenus[0].subs[0];
+                validMenus[0].subs[0] = validMenus[0].subs[1];
+                validMenus[0].subs[1] = firstSub;
+
+              } else {
+                validMenus.push(menu);
+              }
+            }
+          })
+          if(validMenus[0]) {
+
+            if(validMenus[0].subs) {
+              this.props.history.push(validMenus[0].subs[0].to);
+
+            } else {
+              this.props.history.push(validMenus[0].to);
+            }
+
+          } else {
+            this.props.history.push('/app');
+
+          }
+          this.setState({ loading: false })
+
       }, err => {
         this.setState({ loading: false, error: true })
       });

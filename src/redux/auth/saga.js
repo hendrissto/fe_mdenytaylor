@@ -1,9 +1,6 @@
-import * as _ from "lodash";
 
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
 import { auth } from '../../helpers/Firebase';
-import menuItems from "../../constants/menu";
-import { AclService } from "../../services/auth/AclService";
 
 import {
     LOGIN_USER,
@@ -16,7 +13,6 @@ import {
     registerUserSuccess
 } from './actions';
 
-const acl = new AclService();
 
 
 // const loginWithEmailPasswordAsync = async (email, password) =>
@@ -45,31 +41,10 @@ const acl = new AclService();
 
 function* loginWithEmailPassword({payload}) {
     const { user } = payload;
-    const { history } = payload;
     try {
         localStorage.setItem('user', JSON.stringify(user));
         yield put(loginUserSuccess(user));
 
-        const validMenus = [];
-        _.filter(menuItems, (menu) => {
-          if(acl.can(menu.permissions)) {
-            validMenus.push(menu);
-          }
-        })
-
-        if(validMenus[0]) {
-
-          if(validMenus[0].subs) {
-            history.push(validMenus[0].subs[0].to);
-
-          } else {
-            history.push(validMenus[0].to);
-          }
-
-        } else {
-          history.push('/app');
-
-        }
     } catch (error) {
         console.log('login error : ', error)
     }
