@@ -1,0 +1,14 @@
+.user-table {
+  .p-datatable-thead * {
+    padding: 0px 0px 0px 0!important;
+    .p-selection-column {
+      height: 3em;
+    }
+  }
+  .p-checkbox-box {
+    border: 1px solid #a6a6a6!important;
+  }
+}
+th {
+  vertical-align: middle!important;
+}
