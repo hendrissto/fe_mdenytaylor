@@ -1,11 +1,45 @@
+import * as _ from "lodash";
 import React, { Component, Fragment } from "react";
 
 import { Row, Card, Button } from "reactstrap";
 import { NavLink } from "react-router-dom";
 import { Colxx } from "../../components/common/CustomBootstrap";
 import IntlMessages from "../../helpers/IntlMessages";
+import menuItems from "../../constants/menu";
+import { AclService } from "../../services/auth/AclService";
 
 export default class BlankPage extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.acl = new AclService();
+    this.redirectValidRoute = this.redirectValidRoute.bind(this);
+
+  }
+
+  redirectValidRoute() {
+    const { history } = this.props;
+    const validMenus = [];
+
+    _.filter(menuItems, (menu) => {
+      if(this.acl.can(menu.permissions)) {
+        validMenus.push(menu);
+      }
+    })
+
+    if(validMenus[0]) {
+      if(validMenus[0].subs) {
+        history.push(validMenus[0].subs[0].to);
+      } else {
+        history.push(validMenus[0].to);
+      }
+
+    } else {
+      history.push('/app');
+    }
+  }
+
   render() {
     return (
       <Row className="h-100">
@@ -33,7 +67,7 @@ export default class BlankPage extends Component {
               </p>
               <p className="display-3 font-weight-bold mb-5">403</p>
               <Button
-                href="/app"
+                onClick={e => this.redirectValidRoute()}
                 color="primary"
                 className="btn-shadow"
                 size="lg"

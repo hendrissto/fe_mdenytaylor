@@ -53,7 +53,7 @@ class WithdrawFunds extends Component {
     super(props);
     this.requestWithdrawRest = new WithdrawRestService();
     this.columnFormat = new ColumnFormat();
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.exportService = new ExportWithdrawFunds();
@@ -898,7 +898,7 @@ class WithdrawFunds extends Component {
                   <Column style={{ width: '250px' }} field="phone" header="Phone" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="website" header="Website" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
-                  { this.authentication.can(['cod.cod_list.create']) &&
+                  { this.acl.can(['cod.cod_list.create']) &&
                     <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
                   }
                 </DataTable>

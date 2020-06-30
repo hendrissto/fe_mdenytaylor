@@ -57,7 +57,7 @@ class DebitCod extends Component {
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.toggle = this.toggle.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
@@ -1110,7 +1110,7 @@ class DebitCod extends Component {
               </Button>
               </div>
             )}
-            {!this.state.isEdit && this.authentication.can(['cod.cod_list.edit']) &&
+            {!this.state.isEdit && this.acl.can(['cod.cod_list.edit']) &&
               <Button
                 className="default"
                 color="primary"

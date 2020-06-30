@@ -63,7 +63,7 @@ export default class Billing extends Component {
     this.exportService = new ExportSubscriptions();
     this.normalize = new NormalizeData();
     this.moneyFormat = new MoneyFormat();
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.loadData = this.loadData.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -479,7 +479,7 @@ export default class Billing extends Component {
 
     ];
 
-    if(this.authentication.can(['tenant.subscription.edit'])) {
+    if(this.acl.can(['tenant.subscription.edit'])) {
       columns.push({
         Header: <p style={{textAlign: "center"}}>Actions</p>,
         accessor: "status",
@@ -623,15 +623,13 @@ export default class Billing extends Component {
                       });
                     }}
                   >
-                    { this.authentication.can(['cod.transfer_credit.create']) &&
-                      <IconCard
-                        title="Free Trial Tenant (Total)"
-                        value={
-                          this.state.tenantsSubscriptionsSummary.totalFreeTrial
-                        }
-                        className="mb-4"
-                      />
+                  <IconCard
+                    title="Free Trial Tenant (Total)"
+                    value={
+                      this.state.tenantsSubscriptionsSummary.totalFreeTrial
                     }
+                    className="mb-4"
+                  />
                   </div>
                   <div
                     className="col-12 col-md-4 hover"

@@ -55,7 +55,7 @@ class ReceiptOfFunds extends Component {
   constructor(props) {
     super(props);
     this.codRest = new CODRestService();
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportReceiptofFunds();
@@ -1630,7 +1630,7 @@ class ReceiptOfFunds extends Component {
                         </div>
                       </PopoverBody>
                     </Popover>
-                    { this.authentication.can(['cod.transfer_credit.create']) &&
+                    { this.acl.can(['cod.transfer_credit.create']) &&
                       <Button
                         className="float-right"
                         color="primary"

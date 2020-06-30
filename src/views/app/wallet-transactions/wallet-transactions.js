@@ -94,7 +94,7 @@ class WalletTransactions extends Component {
     this.walletTransactionsRestService = new WalletTransactionsRestService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.columnFormat = new ColumnFormat();
     this.fileHandler = this.fileHandler.bind(this);
@@ -572,7 +572,7 @@ class WalletTransactions extends Component {
                 </Button>
               </InputGroup>
             </div>
-            { this.authentication.can(['wallet.tenant_wallet.create']) &&
+            { this.acl.can(['wallet.tenant_wallet.create']) &&
             <div>
               <Button
                 className="default"
@@ -990,7 +990,7 @@ class WalletTransactions extends Component {
                 <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
                 <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
                 <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
-                { this.authentication.can(['wallet.tenant_wallet.edit']) &&
+                { this.acl.can(['wallet.tenant_wallet.edit']) &&
                   <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
                 }
               </DataTable>

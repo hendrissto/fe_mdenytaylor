@@ -33,7 +33,7 @@ const MySwal = withReactContent(Swal);
 export default class TenantsBank extends Component {
   constructor(props) {
     super(props);
-    this.authentication = new AclService();
+    this.acl = new AclService();
     this.tenantRestService = new TenantRestService();
     this.tenantBankRestService = new TenantsBankRestService();
     this.suggestTenants = this.suggestTenants.bind(this);
@@ -165,7 +165,7 @@ export default class TenantsBank extends Component {
   actionTemplate(rowData, column) {
     return (
       <div>
-        { this.authentication.can(['wallet.tenant_bank.edit']) &&
+        { this.acl.can(['wallet.tenant_bank.edit']) &&
         <Button
           type="button"
           icon="pi pi-search"
@@ -337,7 +337,7 @@ export default class TenantsBank extends Component {
                       </Button>
                     </InputGroup>
                   </div>
-                  { this.authentication.can(['wallet.tenant_bank.create']) &&
+                  { this.acl.can(['wallet.tenant_bank.create']) &&
                   <div>
                     <Button
                       className="default"
