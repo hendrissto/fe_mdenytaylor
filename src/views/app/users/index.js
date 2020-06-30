@@ -52,6 +52,7 @@ export default class Users extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleOnPageChange = this.handleOnPageChange.bind(this);
     this.markActive = this.markActive.bind(this);
+    this.submitResetPassword = this.submitResetPassword.bind(this);
 
     this.state = {
       firstName: '',
@@ -66,6 +67,9 @@ export default class Users extends Component {
       modalAddUsers: false,
       search: "",
       isEdit: false,
+      isResetPassword: false,
+      userId: null,
+      newPassword: '',
       doc: null,
       table: {
         loading: true,
@@ -179,8 +183,23 @@ export default class Users extends Component {
             this.setState({ isEdit: true })
             this.editData(rowData)
           }}
-          className="p-button-success">
+          className="p-button-success mr-2">
           Edit
+                </Button>
+        <Button
+          color="danger"
+          type="button"
+          onClick={() => {
+            this.setState({
+              isResetPassword: true,
+              userId: rowData.id,
+              newPassword: randomstring.generate({
+                length: 15,
+                charset: 'alphabetic'
+              })
+            })
+          }}>
+          Reset Password
                 </Button>
       </div>
     );
@@ -439,6 +458,8 @@ export default class Users extends Component {
       nationalPhoneNumber: null,
       selectedRoles: [],
       userName: '',
+      isResetPassword: false,
+      userId: ''
     })
   }
 
@@ -459,6 +480,40 @@ export default class Users extends Component {
         selectedRoles
       }
     )
+  }
+
+  submitResetPassword(formValue) {
+    this.setState({ loading: true });
+    const payload = {
+      newPassword: formValue.newPassword
+    }
+    this.userRestService.resetUserPassword(formValue.id, payload).subscribe(res => {
+      MySwal.fire({
+        type: "success",
+        title: "Berhasil reset password user.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.loadData().subscribe();
+    }, err => {
+      const message = this.messageParserService.parse(err.data) || 'Gagal reset password user';
+      MySwal.fire({
+        type: "error",
+        title: message[0],
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+    });
+    this.setState({
+      loading: false
+    })
+    this.resetData();
   }
 
   render() {
@@ -730,6 +785,87 @@ export default class Users extends Component {
                     >
                       Close
                 </Button>
+                  </ModalFooter>
+                </form>
+              )}
+            </Formik>
+          </Modal>
+        )}
+
+        {this.state.isResetPassword && (
+          <Modal isOpen={this.state.isResetPassword}>
+            <ModalHeader>Reset Password</ModalHeader>
+            <Formik
+              initialValues={{
+                id: this.state.userId,
+                newPassword: this.state.newPassword
+              }}
+              onSubmit={this.submitResetPassword}
+            >
+              {props => (
+                <form onSubmit={props.handleSubmit}>
+                  <ModalBody>
+                    <Table>
+                      <tbody>
+                        <tr>
+                          <td colSpan={2} style={{ verticalAlign: 'middle' }}>Password Baru</td>
+                          <td style={{ verticalAlign: 'middle' }}>:</td>
+                          <td colSpan={2} style={{ verticalAlign: 'middle' }}>
+                            <InputText
+                              readOnly
+                              name="newPassword"
+                              type="text"
+                              value={props.values.newPassword}
+                              onChange={props.handleChange}
+                              onBlur={props.handleBlur}
+                            />
+                          </td>
+                          <td style={{ verticalAlign: 'middle' }}>
+                            <a
+                              href
+                              className="text-info mt-2"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                this.setState({
+                                  newPassword: randomstring.generate({
+                                    length: 15,
+                                    charset: 'alphabetic'
+                                  }),
+                                });
+                                props.values.newPassword = this.state.newPassword
+                              }
+                              }>
+                              <span>
+                                Generate
+                              </span>
+                            </a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button
+                      color="primary"
+                      type="submit"
+                      style={{
+                        borderRadius: 6
+                      }}
+                    >
+                      Simpan
+                </Button>
+                    <Button
+                      color="primary"
+                      outline
+                      onClick={() => {
+                        this.resetData();
+                      }}
+                      style={{
+                        borderRadius: 6
+                      }}
+                    >
+                      Close
+              </Button>
                   </ModalFooter>
                 </form>
               )}

@@ -431,21 +431,21 @@ export default class UserRoles extends Component {
                                 >
                                     {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
                                     <Column
-                                        style={{ "width": "10%", "verticalAlign": "top"}}
+                                        style={{ "width": "20%", "verticalAlign": "top" }}
                                         field="name"
                                         header="Nama"
                                         className="text-left"
 
                                     />
                                     <Column
-                                        style={{ "width": "55%", "verticalAlign": "top"}}
+                                        style={{ "width": "60%", "verticalAlign": "top" }}
                                         field="listRoles"
                                         header="Permissions"
                                         className="text-left"
 
                                     />
                                     <Column
-                                        style={{ "width": "20%", "verticalAlign": "top"}}
+                                        style={{ "width": "20%", "verticalAlign": "top" }}
                                         field="description"
                                         header="Deskripsi"
                                         className="text-left"
