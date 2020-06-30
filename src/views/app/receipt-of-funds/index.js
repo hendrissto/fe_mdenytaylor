@@ -112,6 +112,7 @@ class ReceiptOfFunds extends Component {
       redirect: false,
       totalData: 0,
       date: null,
+      showRetryButton: false,
       footerData: [
         [
           {
@@ -1091,7 +1092,7 @@ class ReceiptOfFunds extends Component {
   }
 
   submitData() {
-    this.setState({ resiModal: false, modal: false, loading: true });
+    this.setState({ resiModal: false, modal: false, loading: true, modalError: false });
     this.codRest.postCOD(this.state.dataExcel).subscribe(
       response => {
         this.setState({ resiModal: false, modal: false, loading: false });
@@ -1107,6 +1108,8 @@ class ReceiptOfFunds extends Component {
         this.loadData();
       },
       error => {
+        const showRetryButton = error.status === 409 ? true : false;
+
         let errorMessage = [];
         if (error.data.length > 0) {
           for (let i = 0; i < error.data.length; i++) {
@@ -1114,6 +1117,7 @@ class ReceiptOfFunds extends Component {
           }
         }
         this.setState({
+          showRetryButton,
           resError: errorMessage,
           totalError: errorMessage.length,
           resiModal: false,
@@ -1946,6 +1950,11 @@ class ReceiptOfFunds extends Component {
               }}>{this._renderError()}</ModalBody>
 
             <ModalFooter>
+              {this.state.showRetryButton && (
+                <Button onClick={() => this.submitData()}>
+                  Retry
+                </Button>
+              )}
               <Button onClick={() => this.setState({ modalError: false })}>
                 Back
               </Button>
