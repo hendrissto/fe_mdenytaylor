@@ -49,6 +49,7 @@ import withReactContent from "sweetalert2-react-content";
 import TenantRestService from "../../../api/tenantRestService";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
 import TenantsBankRestService from "../../../api/tenantsBankRestService";
+import './style.scss';
 const MySwal = withReactContent(Swal);
 class WithdrawOfTenantFunds extends Component {
   constructor(props) {
@@ -767,22 +768,29 @@ class WithdrawOfTenantFunds extends Component {
                     <Collapse isOpen={this.state.collapse} className="col-md-12">
                       <Card>
                           <div className="form-row">
-                            <div className="form-group col-md-6">
-                              <label for="inputPassword4">Bank</label>
-                              <div className="col-md-7">
-                                <MultiSelect optionLabel="bankName" value={this.state.bankSelected} options={this.state.bankOptions}  onChange={(e) => this.setState({bankSelected: e.value})} filter={true} maxSelectedLabels={2} />
+                            <div className="form-group col-md-3">
+                              <label>Bank</label>
+                              <div>
+                                <MultiSelect optionLabel="bankName" value={this.state.bankSelected} options={this.state.bankOptions} style={{width: '100%', height: 35}} onChange={(e) => this.setState({bankSelected: e.value})} filter={true} maxSelectedLabels={2} />
                               </div>
                             </div>
-                            <div className="form-group col-md-6">
-                              <label for="inputEmail4">Tanggal</label>
-                              <div className="row">
-                                <div className="col-md-6">
-                                  <Calendar value={this.state.lowDate} onChange={(e) => this.setState({lowDate: moment(e.value).format('YYYY-MM-DD')})}></Calendar>
-                                </div>
-                                <div className="col-md-6">
-                                  <Calendar value={this.state.highDate} onChange={(e) => this.setState({highDate: moment(e.value).format('YYYY-MM-DD')})}></Calendar>
-                                </div>
+                            <div className="form-group col-md-3">
+                              <label>Tanggal Awal Penarikan</label>
+                              <div>
+                                <Calendar baseZIndex={10000} showIcon={true} value={this.state.lowDate} style={{width: '100%'}} onChange={(e) => this.setState({lowDate: moment(e.value).format('YYYY-MM-DD')})} inputStyle={{width: '87%'}}></Calendar>
                               </div>
+                            </div>
+                            <div className="form-group">
+                              <label>&nbsp;</label>
+                              <div>
+                                <span style={{verticalAlign: 'sub'}}> - </span>
+                              </div>
+                            </div>
+                            <div className="form-group col-md-3">
+                            <label>Tanggal Akhir Penarikan</label>
+                            <div>
+                              <Calendar baseZIndex={10000} showIcon={true} value={this.state.highDate} style={{width: '100%'}} onChange={(e) => this.setState({highDate: moment(e.value).format('YYYY-MM-DD')})} inputStyle={{width: '87%'}}></Calendar>
+                            </div>
                             </div>
                           </div>
                         <CardFooter>
