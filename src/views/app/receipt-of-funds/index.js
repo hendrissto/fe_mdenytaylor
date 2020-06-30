@@ -1110,7 +1110,6 @@ class ReceiptOfFunds extends Component {
       error => {
         const showRetryButton = error.status === 409 ? true : false;
 
-        console.log(error)
         let errorMessage = [];
         if (error.data.length > 0) {
           for (let i = 0; i < error.data.length; i++) {
