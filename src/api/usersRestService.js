@@ -60,4 +60,12 @@ export default class UsersRestService extends React.Component {
     markActive(id, active) {
       return this.requestUser.put(`/admin/${id}/mark-active?active=${active}`);
     }
+
+    resetUserPassword(id, payload) {
+      return this.requestUser.put(`/admin/${id}/reset-password`, payload)
+    }
+    
+    changePassword(payload) {
+      return this.requestUser.put(`/admin/me/change-password`, payload)
+    }
 }
