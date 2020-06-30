@@ -132,10 +132,7 @@ export default class FormTenantRenewSubscription extends Component {
 
 
   loadRelatedData() {
-    const params = {
-      isClodeoMain: (this.state.data.clientAppId === 'clodeo-main-web')
-    }
-    this.billingRest.getRelatedData({ params }).subscribe(response => {
+    this.billingRest.getRelatedData(this.state.data.clientAppId).subscribe(response => {
       const data = response.paymentMethodStr;
       const options = [];
 
