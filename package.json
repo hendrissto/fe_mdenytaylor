@@ -46,6 +46,7 @@
     "react-rater": "5.1.0",
     "react-redux": "7.1.1",
     "react-router-dom": "5.0.1",
+    "react-router-guards": "^1.0.2",
     "react-scripts": "3.1.1",
     "react-select": "3.0.4",
     "react-sortablejs": "1.5.1",

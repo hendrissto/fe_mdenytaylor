@@ -44,6 +44,8 @@ import { Column } from 'primereact/column';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
+
 const MySwal = withReactContent(Swal);
 
 class WithdrawFunds extends Component {
@@ -51,6 +53,7 @@ class WithdrawFunds extends Component {
     super(props);
     this.requestWithdrawRest = new WithdrawRestService();
     this.columnFormat = new ColumnFormat();
+    this.acl = new AclService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
     this.exportService = new ExportWithdrawFunds();
@@ -510,7 +513,7 @@ class WithdrawFunds extends Component {
       let parsedAmount = 0;
       this.setState({ errorData: "" });
 
-      if(tempAmount.indexOf(',') !== -1) {        
+      if(tempAmount.indexOf(',') !== -1) {
         parsedAmount = parseFloat(tempAmount.replace(',', '.'));
       } else {
         parsedAmount = parseInt(this.state.amount);
@@ -525,7 +528,7 @@ class WithdrawFunds extends Component {
         isDraft: this.state.isDraft,
         note: this.state.note,
       };
-      
+
       MySwal.fire({
         title: '<strong>Konfirmasi Transfer</strong>',
         icon: 'info',
@@ -895,7 +898,9 @@ class WithdrawFunds extends Component {
                   <Column style={{ width: '250px' }} field="phone" header="Phone" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="website" header="Website" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
+                  { this.acl.can(['cod.cod_list.create']) &&
+                    <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
+                  }
                 </DataTable>
                 {/*
                   <ReactTable

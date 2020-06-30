@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import ReactDOM from "react-dom";
@@ -15,17 +16,28 @@ import {
   changeDefaultClassnames,
   changeSelectedMenuHasSubItems
 } from "../../redux/actions";
+import { AclService } from "../../services/auth/AclService";
 
 import menuItems from "../../constants/menu";
 import "./Sidebar.scss";
 
 class Sidebar extends Component {
+  menus = [];
   constructor(props) {
     super(props);
+    this.acl = new AclService();
     this.state = {
       selectedParentMenu: "",
       viewingParentMenu: ""
     };
+    const validMenus = [];
+    _.filter(menuItems, (menu) => {
+      if(this.acl.can(menu.permissions)) {
+        // console.log(menu)
+        validMenus.push(menu);
+      }
+    })
+    this.menus = validMenus;
   }
 
   handleWindowResize = event => {
@@ -203,7 +215,7 @@ class Sidebar extends Component {
       } else if (this.state.selectedParentMenu === "") {
         this.setState(
           {
-            selectedParentMenu: menuItems[0].id
+            selectedParentMenu: this.menus[0].id
           },
           callback
         );
@@ -219,7 +231,7 @@ class Sidebar extends Component {
 
   getIsHasSubItem = () => {
     const { selectedParentMenu } = this.state;
-    const menuItem = menuItems.find(x => x.id === selectedParentMenu);
+    const menuItem = this.menus.find(x => x.id === selectedParentMenu);
     if (menuItem)
       return menuItem && menuItem.subs && menuItem.subs.length > 0
         ? true
@@ -311,8 +323,8 @@ class Sidebar extends Component {
               }}
             >
               <Nav vertical className="list-unstyled">
-                {menuItems &&
-                  menuItems.map(item => {
+                {this.menus &&
+                  this.menus.map(item => {
                     return (
                       <NavItem
                         key={item.id}
@@ -355,8 +367,8 @@ class Sidebar extends Component {
             <PerfectScrollbar
               options={{ suppressScrollX: true, wheelPropagation: false }}
             >
-              {menuItems &&
-                menuItems.map(item => {
+              {this.menus &&
+                this.menus.map(item => {
                   return (
                     <Nav
                       key={item.id}

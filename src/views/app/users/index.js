@@ -12,7 +12,6 @@ import {
   InputGroup
 } from "reactstrap";
 import { Formik } from "formik";
-import * as _ from "lodash";
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
 import { InputText } from 'primereact/inputtext';
@@ -28,6 +27,7 @@ import { catchError, tap } from 'rxjs/operators';
 
 import { MessageParserService } from '../../../api/common/messageParserService';
 import UsersRestService from "../../../api/usersRestService";
+import { AclService } from "../../../services/auth/AclService";
 
 import validation from "./validation";
 import * as css from "../../base/baseCss";
@@ -41,6 +41,7 @@ const MySwal = withReactContent(Swal);
 export default class Users extends Component {
   constructor(props) {
     super(props);
+    this.acl = new AclService();
     this.userRestService = new UsersRestService();
     this.messageParserService = new MessageParserService();
     this.loadData = this.loadData.bind(this);
@@ -551,24 +552,26 @@ export default class Users extends Component {
                       </Button>
                     </InputGroup>
                   </div>
-                  <div>
-                    <Button
-                      className="default"
-                      color="primary"
-                      onClick={() => this.setState({
-                        modalAddUsers: true, password: randomstring.generate({
-                          length: 15,
-                          charset: 'alphabetic'
-                        })
-                      })}
-                      style={{
-                        borderRadius: 6,
-                        marginRight: 14
-                      }}
-                    >
-                      Tambah User
-                    </Button>
-                  </div>
+                  { this.acl.can(['admin.user_admin.create']) &&
+                    <div>
+                      <Button
+                        className="default"
+                        color="primary"
+                        onClick={() => this.setState({
+                          modalAddUsers: true, password: randomstring.generate({
+                            length: 15,
+                            charset: 'alphabetic'
+                          })
+                        })}
+                        style={{
+                          borderRadius: 6,
+                          marginRight: 14
+                        }}
+                      >
+                        Tambah User
+                      </Button>
+                    </div>
+                  }
                 </div>
                 <DataTable
                   value={this.state.table.data}
@@ -606,18 +609,22 @@ export default class Users extends Component {
                     header="Roles"
                     className="text-left"
                   />
-                  <Column
-                    style={{ width: "250px" }}
-                    field="status"
-                    header="Status"
-                    className="text-center"
-                    body={this.switchActionTemplate}
-                  />
-                  <Column
-                    style={{ width: "250px" }}
-                    header=""
-                    body={this.actionTemplate}
-                  />
+                  { this.acl.can(['admin.user_admin.edit']) &&
+                    <Column
+                      style={{ width: "250px" }}
+                      field="status"
+                      header="Status"
+                      className="text-center"
+                      body={this.switchActionTemplate}
+                    />
+                  }
+                  { this.acl.can(['admin.user_admin.edit']) &&
+                    <Column
+                      style={{ width: "250px" }}
+                      header=""
+                      body={this.actionTemplate}
+                    />
+                  }
                 </DataTable>
                 <Paginator
                   first={this.state.table.pagination.skipSize}

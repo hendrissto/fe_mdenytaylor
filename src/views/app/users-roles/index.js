@@ -26,11 +26,14 @@ import UsersRestService from "../../../api/usersRestService";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
+
 const MySwal = withReactContent(Swal);
 
 export default class UserRoles extends Component {
     constructor(props) {
         super(props);
+        this.acl = new AclService();
         this.userRestService = new UsersRestService();
         this.loadData = this.loadData.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -404,6 +407,7 @@ export default class UserRoles extends Component {
                                             </Button>
                                         </InputGroup>
                                     </div>
+                                    { this.acl.can(['admin.role_admin.create']) &&
                                     <div>
                                         <Button
                                             className="default"
@@ -417,6 +421,7 @@ export default class UserRoles extends Component {
                                             Tambah User Roles
                     </Button>
                                     </div>
+                                    }
                                 </div>
                                 <DataTable
                                     value={this.state.table.data}
@@ -450,11 +455,13 @@ export default class UserRoles extends Component {
                                         header="Deskripsi"
                                         className="text-left"
                                     />
+                                    { this.acl.can(['admin.role_admin.edit']) &&
                                     <Column
                                         style={{ width: "15%", verticalAlign: "top" }}
                                         header="Action"
                                         body={this.actionTemplate}
                                     />
+                                    }
                                 </DataTable>
                                 <Paginator
                                     first={this.state.table.pagination.skipSize}

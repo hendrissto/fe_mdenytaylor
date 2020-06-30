@@ -3,11 +3,11 @@ const data = [
     id: "dasbor",
     icon: "simple-icon-home",
     label: "menu.dashboards",
+    permissions: ['dashboard.general.view'],
     to: "/app/dashboard",
   },
 
   /*
-  /* 
   COD
   1. Transfer Kredit COD
   2. Resi COD
@@ -18,18 +18,20 @@ const data = [
     id: "cod",
     icon: "iconsminds-financial",
     label: "menu.cod",
-    // to: "/app/receipt-of-funds",
+    permissions: ['cod.general.view'],
     subs: [
       {
         id: "receipt-of-funds",
         icon: "iconsminds-folder",
         label: "menu.receipt-of-funds",
+        // permissions: ['cod.general.view'],
         to: "/app/receipt-of-funds",
       },
       {
         id: "cod-receipt-number",
         icon: "iconsminds-newspaper",
         label: "menu.cod-receipt-number",
+        // permissions: ['cod.general.view'],
         to: "/app/cod-receipt-number",
       },
       // {
@@ -43,7 +45,6 @@ const data = [
 
 
 
-
   /*
     Wallet
     1. Tenants Bank
@@ -53,34 +54,39 @@ const data = [
     id: "wallet",
     icon: "simple-icon-wallet",
     label: "menu.wallet",
-    // to: "/app/receipt-of-funds",
+    permissions: ['wallet.general.view'],
     subs: [
       {
         id: "tenants-bank",
         icon: "iconsminds-credit-card",
         label: "Tenants Bank",
+        // permissions: ['wallet.general.view'],
         to: "/app/tenants-bank",
       },
       {
         id: "wallet-transactions",
         icon: "iconsminds-wallet",
         label: "menu.wallet-transactions",
+        // permissions: ['wallet.general.view'],
         to: "/app/wallet-transactions",
       },
       {
         id: "request-withdraw-funds",
         icon: "iconsminds-money-bag",
         label: "menu.request-withdraw-funds",
+        // permissions: ['wallet.general.view'],
         to: "/app/request-withdraw-funds/",
       }, {
         id: "withdraw-of-tenant-funds",
         icon: "iconsminds-wallet",
         label: "menu.withdraw-of-tenant-funds",
+        // permissions: ['cod.general.view'],
         to: "/app/withdraw-of-tenant-funds/",
       }, {
         id: "debit-cod",
         icon: "iconsminds-wallet",
         label: "Histori Pencairan",
+        // permissions: ['wallet.general.view'],
         to: "/app/debit-cod/",
       },
     ]
@@ -96,18 +102,20 @@ const data = [
     id: "tenants",
     icon: "simple-icon-people",
     label: "menu.tenants",
-    // to: "/app/receipt-of-funds",
+    permissions: ['tenant.general.view'],
     subs: [
       {
         id: "tenants",
         icon: "iconsminds-doctor",
         label: "menu.tenants",
+        // permissions: ['tenant.general.view'],
         to: "/app/tenants",
       },
       {
         id: "billing",
         icon: "iconsminds-shop-4",
         label: "menu.billing",
+        // permissions: ['tenant.general.view'],
         to: "/app/billing",
       },
       {
@@ -122,6 +130,7 @@ const data = [
     id: "users-admin",
     icon: "simple-icon-user",
     label: "menu.users",
+    permissions: ['admin.general.view'],
     // to: "/app/receipt-of-funds",
     subs: [
       {
@@ -145,33 +154,7 @@ const data = [
     ]
   },
   // {
-  //   id: "receipt-of-funds",
-  //   icon: "iconsminds-folder",
-  //   label: "menu.receipt-of-funds",
-  //   to: "/app/receipt-of-funds",
-  // },
-  // {
-  //   id: "cod-receipt-number",
-  //   icon: "iconsminds-newspaper",
-  //   label: "menu.cod-receipt-number",
-  //   to: "/app/cod-receipt-number",
-  // },
-  // {
-  //   id: "tenants-bank",
-  //   icon: "iconsminds-credit-card",
-  //   label: "Tenants Bank",
-  //   to: "/app/tenants-bank",
-  // },
-  // {
-  //   id: "request-withdraw-funds",
-  //   icon: "iconsminds-money-bag",
-  //   label: "menu.request-withdraw-funds",
-  //   to: "/app/request-withdraw-funds/",
-  // },
-  // {
-  //   id: "debit-cod",
-  //   icon: "iconsminds-wallet",
-  //   label: "Debit COD",
+  //cod-receipt-number   label: "Debit COD",
   //   to: "/app/debit-cod/",
   // },
   // {

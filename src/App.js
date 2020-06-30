@@ -16,6 +16,7 @@ import main from "./views";
 import app from "./views/app";
 import user from "./views/user";
 import error from "./views/error";
+import BlankPage from "./views/app/blank-page";
 import { getDirection } from "./helpers/Utils";
 import "primereact/resources/themes/nova-light/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -71,6 +72,7 @@ class App extends Component {
                 <Route path="/user" component={user} />
                 <Route path="/error" exact component={error} />
                 <Route path="/" exact component={main} />
+                <Route path={"/blank-page"} component={BlankPage} />\
                 <Redirect to="/error" />
               </Switch>
             </Router>
