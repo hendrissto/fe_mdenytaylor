@@ -3,6 +3,7 @@ import {
   Row,
   Card,
   CardBody,
+  CardFooter,
   Button,
   Modal,
   ModalHeader,
@@ -12,12 +13,15 @@ import {
   Input,
   InputGroup,
   Popover,
-  PopoverBody
+  PopoverBody,
+  Collapse
 } from "reactstrap";
 
 import IntlMessages from "../../../helpers/IntlMessages";
 import { Paginator } from "primereact/paginator";
 import { Redirect } from "react-router-dom";
+import moment from 'moment';
+import * as _ from 'lodash';
 
 import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
 import Breadcrumb from "../../../containers/navs/Breadcrumb";
@@ -37,11 +41,14 @@ import ExportDebitCOD from "../../../core/export/ExportDebitCOD";
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Calendar } from 'primereact/calendar';
+import { MultiSelect } from 'primereact/multiselect';
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import TenantRestService from "../../../api/tenantRestService";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import TenantsBankRestService from "../../../api/tenantsBankRestService";
 const MySwal = withReactContent(Swal);
 class WithdrawOfTenantFunds extends Component {
   constructor(props) {
@@ -54,8 +61,10 @@ class WithdrawOfTenantFunds extends Component {
     this.relatedData = new RelatedDataRestService();
     this.exportService = new ExportDebitCOD();
     this.pictureRestService = new PictureRestService();
+    this.tenantBankRestService = new TenantsBankRestService();
     this.moneyFormat = new MoneyFormat();
     this.toggle = this.toggle.bind(this);
+    this.loadRelatedDataBank = this.loadRelatedDataBank.bind(this);
     this.loadRelatedData = this.loadRelatedData.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.submitData = this.submitData.bind(this);
@@ -90,6 +99,9 @@ class WithdrawOfTenantFunds extends Component {
       imageUrl: null,
       attachments: [],
       realAttachments: [],
+      collapse: false,
+      bankNames: [],
+      bankSelected: [],
       table: {
         loading: true,
         data: [],
@@ -111,6 +123,9 @@ class WithdrawOfTenantFunds extends Component {
       amountWithComma: "",
       isChanged: false,
       search: "",
+      bankOptions: [],
+      lowDate: null,
+      highDate: null,
     };
   }
 
@@ -166,6 +181,7 @@ class WithdrawOfTenantFunds extends Component {
   }
 
   componentDidMount() {
+    this.loadRelatedDataBank();
     this.loadData();
   }
 
@@ -181,6 +197,14 @@ class WithdrawOfTenantFunds extends Component {
     });
   }
 
+  loadRelatedDataBank() {
+    this.tenantBankRestService.loadRelatedData({}).subscribe(response => {
+      this.setState({
+        bankOptions: response.bank,
+      })
+    });
+  }
+
   loadData() {
     const table = { ...this.state.table };
     table.loading = true;
@@ -189,6 +213,9 @@ class WithdrawOfTenantFunds extends Component {
     const params = {
       keyword: this.state.search || null,
       statuses: 'open',
+      lowDate: this.state.lowDate,
+      highDate: this.state.highDate,
+      bankNames: this.state.bankNames || null,
       "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
@@ -620,13 +647,23 @@ class WithdrawOfTenantFunds extends Component {
                             this.loadData();
                           }
                         }}
+                        style={{borderRadius: '5px 0px 0px 5px'}}
                       />
                       <Button
                         className="default"
                         color="primary"
                         onClick={() => this.loadData()}
+                        style={{borderRadius: '0px 5px 5px 0px'}}
                       >
                         <i className="simple-icon-magnifier" />
+                      </Button>
+                      <Button
+                        className="default"
+                        color="primary"
+                        onClick={() => this.setState({collapse: !this.state.collapse})}
+                        style={{marginLeft: 10, borderRadius: 5}}
+                      >
+                        Filter
                       </Button>
                     </InputGroup>
                   </div>
@@ -726,6 +763,76 @@ class WithdrawOfTenantFunds extends Component {
                       Export
                     </Button>
                   </div>
+                  {this.state.bankOptions && (
+                    <Collapse isOpen={this.state.collapse} className="col-md-12">
+                      <Card>
+                          <div className="form-row">
+                            <div className="form-group col-md-6">
+                              <label for="inputPassword4">Bank</label>
+                              <div className="col-md-7">
+                                <MultiSelect optionLabel="bankName" value={this.state.bankSelected} options={this.state.bankOptions}  onChange={(e) => this.setState({bankSelected: e.value})} filter={true} maxSelectedLabels={2} />
+                              </div>
+                            </div>
+                            <div className="form-group col-md-6">
+                              <label for="inputEmail4">Tanggal</label>
+                              <div className="row">
+                                <div className="col-md-6">
+                                  <Calendar value={this.state.lowDate} onChange={(e) => this.setState({lowDate: moment(e.value).format('YYYY-MM-DD')})}></Calendar>
+                                </div>
+                                <div className="col-md-6">
+                                  <Calendar value={this.state.highDate} onChange={(e) => this.setState({highDate: moment(e.value).format('YYYY-MM-DD')})}></Calendar>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        <CardFooter>
+                        <div className="float-right">
+                          <Button 
+                            className="default"
+                            color="primary"
+                            style={{borderRadius: 5, marginRight: 10}}
+                            onClick={() => {
+                              this.setState({collapse: false})
+                              const data = this.state;
+                              const bankNames = data.bankSelected;
+                              const filterBank = [];
+                              let bank = null;
+
+                              if(_.isArray(bankNames)) {
+                                for (const bank of bankNames) {
+                                  filterBank.push(bank.bankName)
+                                }
+                              }
+
+                              if (filterBank.length) {
+                                bank = filterBank.join();
+                              }
+                              this.setState({bankNames: bank}, () => {
+                                this.loadData();
+                              });
+                            }}
+                          >
+                            Terapkan
+                          </Button>
+                          <Button
+                            className="default"
+                            color="danger"
+                            style={{borderRadius: 5}}
+                            onClick={() => {
+                              this.setState({
+                                bankSelected: null,
+                                lowDate: null,
+                                highDate: null,
+                              })
+                            }}
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                        </CardFooter>
+                      </Card>
+                    </Collapse>
+                  )}
                 </div>
 
                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
@@ -751,8 +858,7 @@ class WithdrawOfTenantFunds extends Component {
             </Card>
           </Colxx>
           {this.state.loadingSubmit && <Spinner />}
-        </Row>
-
+        </Row>  
         {/* MODAL */}
         {this.state.modal && this.state.tenantBank !== null && (
           <Modal isOpen={this.state.modal} >
