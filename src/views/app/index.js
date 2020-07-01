@@ -65,9 +65,9 @@ class App extends Component {
           <GuardedRoute path={`${match.url}/list-transactions`} component={ListTransactions} meta={{permissions: ['tenant.general.view']}} />
           <GuardedRoute path={`${match.url}/wallet-transactions`} component={WalletTransactions} meta={{permissions: ['wallet.tenant_wallet.view']}} />
           <GuardedRoute path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} meta={{permissions: ['wallet.tenant_wallet.view']}} />
-          <GuardedRoute path={`${match.url}/users`} component={Users} meta={{permissions: ['admin.user_admin.view"']}} />
-          <GuardedRoute path={`${match.url}/roles`} component={UserRoles} meta={{permissions: ['admin.role_admin.view"']}} />
-          <GuardedRoute path={`${match.url}/permissions`} component={ListPermission} meta={{permissions: ['admin.permission_admin.view"']}} />
+          <GuardedRoute path={`${match.url}/users`} component={Users} meta={{permissions: ['admin.user_admin.view']}} />
+          <GuardedRoute path={`${match.url}/roles`} component={UserRoles} meta={{permissions: ['admin.role_admin.view']}} />
+          <GuardedRoute path={`${match.url}/permissions`} component={ListPermission} meta={{permissions: ['admin.permission_admin.view']}} />
       </GuardProvider>
           {/* route dummy */}
           {/* <GuardedRoute path={`${match.url}/dashboards`} component={dashboards} meta={{permissions: ['dashboard.general.view']}} />
