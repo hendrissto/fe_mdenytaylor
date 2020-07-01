@@ -36,6 +36,8 @@ import {
 import TenantRestService from "../../../api/tenantRestService";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
+import { AclService } from "../../../services/auth/AclService";
+
 import "./tenants.css";
 
 import Switch from "rc-switch";
@@ -50,6 +52,7 @@ const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
+    this.acl = new AclService();
     this.tenantRest = new TenantRestService();
     this.normalize = new NormalizeData();
     this.exportService = new ExportTenants();
@@ -466,6 +469,8 @@ export default class Tenant extends Component {
         accessor: "isActive",
         show: tableFilter.status,
         Cell: props => (
+          <>
+          { this.acl.can(['wallet.tenant_wallet.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isActive}
@@ -473,6 +478,8 @@ export default class Tenant extends Component {
               this.editIsActive(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {
