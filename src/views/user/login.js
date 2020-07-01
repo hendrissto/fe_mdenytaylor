@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { Row, Card, CardTitle, Form, Label, Input, Button } from "reactstrap";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
+import * as _ from 'lodash';
 
 import { loginUser } from "../../redux/actions";
 import { Colxx } from "../../components/common/CustomBootstrap";
@@ -33,6 +34,7 @@ class Login extends Component {
     this.state = {
       loading: false,
       error: false,
+      errorMessage: '',
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -78,7 +80,9 @@ class Login extends Component {
           this.setState({ loading: false })
 
       }, err => {
-        this.setState({ loading: false, error: true })
+        this.setState({ error: false, errorMessage: ''});
+        const errorMessage = _.get(err, 'data.error_description', '');
+        this.setState({ errorMessage ,loading: false, error: true })
       });
     }
   }
@@ -125,7 +129,7 @@ class Login extends Component {
                   onClick={() => {
                     this.setState({error: false});
                   }}
-                  text={'Username & password salah, silahkan periksa kembali..'}
+                  text={this.state.errorMessage}
                 />
               )}
               </CardTitle>
