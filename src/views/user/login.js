@@ -3,7 +3,6 @@ import React, { Component } from "react";
 import { Row, Card, CardTitle, Form, Label, Input, Button } from "reactstrap";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
-import * as _ from 'lodash';
 
 import { loginUser } from "../../redux/actions";
 import { Colxx } from "../../components/common/CustomBootstrap";
