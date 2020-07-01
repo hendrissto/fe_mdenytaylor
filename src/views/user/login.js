@@ -43,7 +43,6 @@ class Login extends Component {
         this.props.loginUser(response, this.props.history);
         this.setState({ loading: false })
       }, err => {
-        console.log(123)
         this.setState({ error: false, errorMessage: ''});
         const errorMessage = _.get(err, 'data.error_description', '');
         this.setState({ errorMessage ,loading: false, error: true })
