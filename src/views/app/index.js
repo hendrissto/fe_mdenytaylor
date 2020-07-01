@@ -5,7 +5,6 @@ import { GuardProvider, GuardedRoute } from 'react-router-guards';
 import { AclService } from "../../services/auth/AclService";
 
 import AppLayout from "../../layout/AppLayout";
-import Notifications from "../../containers/applications/Notifications";
 
 import dashboard from "./dashboard";
 import CODReceiptNumber from "./cod-receipt-number";
@@ -70,7 +69,6 @@ class App extends Component {
           <GuardedRoute path={`${match.url}/users`} component={Users} meta={{permissions: ['admin.user_admin.view']}} />
           <GuardedRoute path={`${match.url}/roles`} component={UserRoles} meta={{permissions: ['admin.role_admin.view']}} />
           <GuardedRoute path={`${match.url}/permissions`} component={ListPermission} meta={{permissions: ['admin.permission_admin.view']}} />
-          <Route path={`${match.url}/notifications`} component={Notifications} />
       </GuardProvider>
           {/* route dummy */}
           {/* <GuardedRoute path={`${match.url}/dashboards`} component={dashboards} meta={{permissions: ['dashboard.general.view']}} />

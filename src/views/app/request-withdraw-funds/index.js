@@ -326,6 +326,7 @@ class WithdrawFunds extends Component {
         Cell: props => {
           return (
             <div>
+              { this.acl.can(['wallet.tenant_wallet.edit']) &&
               <Button
                 outline
                 color="success"
@@ -341,6 +342,7 @@ class WithdrawFunds extends Component {
                 <i className="iconsminds-upload mr-2 " />
                 Upload Bukti
               </Button>
+              }
             </div>
           );
         }
