@@ -10,7 +10,7 @@ export default class UsersRestService extends React.Component {
     }
 
     loadDataUsers(qParams) {
-      return this.requestUser.post('/admin/q', qParams);
+      return this.requestUser.get('/admin', qParams);
     }
 
     createUsers(payload) {
