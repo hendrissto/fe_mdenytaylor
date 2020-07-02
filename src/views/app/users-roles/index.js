@@ -259,8 +259,16 @@ export default class UserRoles extends Component {
 
     validate() {
         const data = this.state;
+        let invalids = [];
+        if (data.permissions.length) {
+            invalids = _.filter(data.permissions, permissionOption => {
+                return !permissionOption.isValid
+            });
 
-        if (!data.permissions.length || !data.rolesName) {
+            console.log(invalids);
+
+        }
+        if (!data.permissions.length || !data.rolesName || invalids.length) {
             return true;
         } else {
             return false;
@@ -271,7 +279,7 @@ export default class UserRoles extends Component {
         if (this.validate()) {
             MySwal.fire({
                 type: "error",
-                title: "Pastikan semua data telah diisi.",
+                title: "Pastikan semua data telah diisi dan memenuhi syarat.",
                 toast: true,
                 position: "top-end",
                 timer: 2000,
@@ -538,7 +546,7 @@ export default class UserRoles extends Component {
                                                                     {'Menu ' + _.startCase(permission.parent.permissionGroup)}
                                                                 </label>
                                                                 <span className={permission.isValid ? 'alert-roles success' : 'alert-roles warning'}>
-                                                                    {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Harap pilih permission View ${_.startCase(permission.parent.permissionGroup)} dulu!`}
+                                                                    {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Wajib memilih "View ${_.startCase(permission.parent.permissionGroup)}" terlebih dahulu`}
                                                                 </span>
                                                             </div>
                                                             <ul className="mt-2">

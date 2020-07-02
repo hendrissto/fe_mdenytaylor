@@ -134,8 +134,10 @@ export default class Users extends Component {
       .pipe(tap((response) => {
         response.data.forEach(user => {
           user.listRole = user.accessRoleAdmin.map((data, i) => {
-            return data.roleName.toString().replace(/,/g, ', ');
+            return data.roleName;
           });
+          user.listRole = user.listRole.toString().replace(/,/g, ', ');
+
         })
         const table = { ...this.state.table };
         table.data = response.data;
