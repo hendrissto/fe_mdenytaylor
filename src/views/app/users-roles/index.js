@@ -86,52 +86,52 @@ export default class UserRoles extends Component {
     }
 
     onSelectedPermission(data) {
-        if (data) {
-            const doc = data.value || data.permission;
+      if(data.value.menu) {
+        this.setState({
+          tempPerm: null
+        });
+        return;
+      }
+      if (data) {
+          const doc = data.value || data.permission;
 
-            const parent = _.filter(this.state.permissionOptions, permissionOption => {
-                return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionGroup == doc.permissionGroup)
-            })[0];
-            // let uniqBy = [];
-            this.setState({
-                tempPerm: doc
-            });
-            if (doc.id) {
-                const permissions = this.state.permissions;
-                const perm = {
-                    parent: parent,
-                    children: [doc],
-                    isValid: (parent.name === doc.name)
-                }
+          const parent = _.filter(this.state.permissionOptions, permissionOption => {
+              return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionSubGroup === doc.permissionSubGroup)
+          })[0];
 
-                console.log('parent', parent);
-                console.log('doc', doc);
+          if (doc.id) {
+              const permissions = this.state.permissions;
+              const perm = {
+                parent: parent,
+                children: [doc],
+                isValid: (doc.id === parent.id)
+              }
 
-                if (this.state.permissions.length) {
+              if (this.state.permissions.length) {
 
-                    const permissionsExist = _.findIndex(permissions, ['parent.permissionGroup', parent.permissionGroup]);
-                    if (permissions[permissionsExist]) {
-                        permissions[permissionsExist].children.push(doc)
-                        permissions[permissionsExist].children = _.uniqBy(permissions[permissionsExist].children, 'id');
-                        permissions[permissionsExist].isValid = true;
+                  const permissionsExist = _.findIndex(permissions, ['parent.permissionSubGroup', parent.permissionSubGroup]);
+                  if (permissions[permissionsExist]) {
+                      permissions[permissionsExist].children.push(doc)
+                      permissions[permissionsExist].children = _.uniqBy(permissions[permissionsExist].children, 'id');
+                      permissions[permissionsExist].isValid = (doc.id === parent.id);
 
-                    } else {
-                        permissions.push(perm)
-                        permissions.isValid = false;
-                    }
+                  } else {
+                      permissions.push(perm)
+                      permissions.isValid = false;
+                  }
 
-                } else {
-                    permissions.push(perm)
-                }
+              } else {
+                  permissions.push(perm)
+              }
 
-                this.setState({
-                    permissions: permissions,
-                    tempPerm: null
-                });
+              this.setState({
+                  permissions: permissions,
+                  tempPerm: null
+              });
 
-            }
+          }
 
-        }
+      }
     }
 
     componentDidMount() {
@@ -199,8 +199,24 @@ export default class UserRoles extends Component {
         });
 
         this.setState({
-            permissionOpts: suggestions,
+            permissionOpts: this.buildNestedPermission(suggestions),
         })
+    }
+
+    buildNestedPermission(suggestions) {
+      let permissionGroup = '';
+
+      _.map(suggestions, (permission, indexPermission) => {
+
+        if (permission.permissionGroup !== permissionGroup) {
+
+          permissionGroup = permission.permissionGroup;
+          suggestions.splice(indexPermission, 0, {
+            menu: permissionGroup
+          });
+        }
+      });
+      return suggestions;
     }
 
     loadRelatedData() {
@@ -247,7 +263,10 @@ export default class UserRoles extends Component {
         this.userRestService.getSingleRole(data.id)
             .subscribe((data) => {
                 data.permissionRoles.forEach(perm => {
-                    this.onSelectedPermission(perm);
+                  console.log(this.state.permissionOptions)
+                  // this.buildNestedPermission(this.state.permissionOptions);
+
+                  this.onSelectedPermission(perm);
                 });
 
                 this.setState({
@@ -395,6 +414,25 @@ export default class UserRoles extends Component {
         });
     }
 
+    itemTemplate(item) {
+      return (
+        <>
+          { item.menu &&
+        <div className="label-option option p-clearfix" style={{ }}>
+            <strong >{_.upperCase(item.menu)}</strong>
+        </div>
+          }
+          { !item.menu &&
+        <div className="p-clearfix option">
+            <span>
+              <strong>{_.startCase(item.permissionSubGroup)}:</strong> <span style={{fontSize: '13px'}}>{item.name}</span>
+            </span>
+        </div>
+          }
+        </>
+      );
+    }
+
 
     render() {
         return (
@@ -525,9 +563,11 @@ export default class UserRoles extends Component {
                                         <td colSpan={2}>Permission</td>
                                         <td>:</td>
                                         <td colSpan={2}>
+
+
                                             <AutoComplete
                                                 inputStyle={{
-                                                    width: 150
+                                                    width: 350
                                                 }}
                                                 value={this.state.tempPerm}
                                                 suggestions={this.state.permissionOpts}
@@ -538,6 +578,7 @@ export default class UserRoles extends Component {
                                                 dropdown={true}
                                                 onDropdownClick={(e) => this.suggestPermissions(e, ['name'])}
                                                 onChange={this.onSelectedPermission}
+                                                itemTemplate={this.itemTemplate}
                                             />
                                         </td>
                                     </tr>
@@ -550,8 +591,9 @@ export default class UserRoles extends Component {
                                                         <td>
                                                             <div className="mb-3">
                                                                 <label className="mr-2 title">
-                                                                    {'Menu ' + _.startCase(permission.parent.permissionGroup)}
+                                                                  <strong style={{fontSize: '15px'}}>Menu {_.startCase(permission.parent.permissionGroup)} > </strong> <span style={{fontSize: '13px'}}>{_.startCase(permission.parent.permissionSubGroup)}</span>
                                                                 </label>
+
                                                                 <span className={permission.isValid ? 'alert-roles success' : 'alert-roles warning'}>
                                                                     {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Wajib memilih "View ${_.startCase(permission.parent.permissionGroup)}" terlebih dahulu`}
                                                                 </span>
