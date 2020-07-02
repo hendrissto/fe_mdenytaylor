@@ -45,38 +45,11 @@ class Login extends Component {
       this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
         this.props.loginUser(response, this.props.history);
-        const validMenus = [];
-          _.filter(menuItems, (menu, index) => {
-            if(this.acl.can(menu.permissions)) {
-              if(menu.id === 'tenants') {
-                // set manually tenant menu should first
-                validMenus[index] = validMenus[0];
-                validMenus[0] = menu;
 
-                // set temporary
-                const firstSub = validMenus[0].subs[0];
-                validMenus[0].subs[0] = validMenus[0].subs[1];
-                validMenus[0].subs[1] = firstSub;
+        const { history } = this.props;
+        this.acl.redirectAllowedMenu(history);
 
-              } else {
-                validMenus.push(menu);
-              }
-            }
-          })
-          if(validMenus[0]) {
-
-            if(validMenus[0].subs) {
-              this.props.history.push(validMenus[0].subs[0].to);
-
-            } else {
-              this.props.history.push(validMenus[0].to);
-            }
-
-          } else {
-            this.props.history.push('/app');
-
-          }
-          this.setState({ loading: false })
+        this.setState({ loading: false })
 
       }, err => {
         this.setState({ error: false, errorMessage: ''});
