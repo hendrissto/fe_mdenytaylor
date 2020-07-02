@@ -20,24 +20,8 @@ export default class BlankPage extends Component {
 
   redirectValidRoute() {
     const { history } = this.props;
-    const validMenus = [];
+    this.acl.redirectAllowedMenu(history);
 
-    _.filter(menuItems, (menu) => {
-      if(this.acl.can(menu.permissions)) {
-        validMenus.push(menu);
-      }
-    })
-
-    if(validMenus[0]) {
-      if(validMenus[0].subs) {
-        history.push(validMenus[0].subs[0].to);
-      } else {
-        history.push(validMenus[0].to);
-      }
-
-    } else {
-      history.push('/app');
-    }
   }
 
   render() {

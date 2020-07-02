@@ -18,7 +18,6 @@ import {
 } from "../../redux/actions";
 import { AclService } from "../../services/auth/AclService";
 
-import menuItems from "../../constants/menu";
 import "./Sidebar.scss";
 
 class Sidebar extends Component {
@@ -30,13 +29,7 @@ class Sidebar extends Component {
       selectedParentMenu: "",
       viewingParentMenu: ""
     };
-    const validMenus = [];
-    _.filter(menuItems, (menu) => {
-      if(this.acl.can(menu.permissions)) {
-        // console.log(menu)
-        validMenus.push(menu);
-      }
-    })
+    const validMenus = this.acl.allowedMenus();
     this.menus = validMenus;
   }
 

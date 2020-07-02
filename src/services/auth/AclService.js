@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import menuItems from "../../constants/menu";
 import { Observable } from 'rxjs';
 
 export class AclService {
@@ -21,7 +22,6 @@ export class AclService {
     if (!accesses.length) {
       return true;
     }
-    console.log(this.roles)
     return _.map(accesses, accessGroup => this.canByGroup(accessGroup)).filter(_.identity).length > 0;
   }
 
@@ -38,6 +38,37 @@ export class AclService {
 
     const matchAbilities = results.filter(_.identity).length;
     return matchAbilities === accesses.length;
+  }
+
+  allowedMenus(data = menuItems) {
+    const validMenus = [];
+    _.filter(data, (menu) => {
+      if(this.can(menu.permissions)) {
+        if(menu.subs) {
+          const validSubs = this.allowedMenus(menu.subs);
+          menu.subs = validSubs;
+        }
+        validMenus.push(menu);
+      }
+    })
+    return validMenus;
+  }
+
+  redirectAllowedMenu(history) {
+    const validMenus = this.allowedMenus();
+    if(validMenus[0]) {
+
+      if(validMenus[0].subs) {
+        history.push(validMenus[0].subs[0].to);
+
+      } else {
+        history.push(validMenus[0].to);
+      }
+
+    } else {
+      history.push('/app');
+
+    }
   }
 
 }
