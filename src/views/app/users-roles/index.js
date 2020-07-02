@@ -26,6 +26,7 @@ import UsersRestService from "../../../api/usersRestService";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import './users-roles.scss'
 const MySwal = withReactContent(Swal);
 
 export default class UserRoles extends Component {
@@ -42,7 +43,7 @@ export default class UserRoles extends Component {
         this.columnFormat = new ColumnFormat();
         this.handleOnPageChange = this.handleOnPageChange.bind(this);
         this.onSelectedPermission = this.onSelectedPermission.bind(this);
-        this.isPermissionSelected = this.isPermissionSelected.bind(this);
+        // this.isPermissionSelected = this.isPermissionSelected.bind(this);
         this.rmPermissionSelected = this.rmPermissionSelected.bind(this);
         this.loadRelatedData = this.loadRelatedData.bind(this);
 
@@ -81,18 +82,52 @@ export default class UserRoles extends Component {
         });
     }
 
-    onSelectedPermission(e) {
-        let uniqBy = [];
-        this.setState({
-            tempPerm: e.value
-        });
-        if (e.value.id) {
-            this.state.permissions.push(e.value);
-            uniqBy = _.uniqBy(this.state.permissions, 'id');
+    onSelectedPermission(data) {
+        if (data) {
+            const doc = data.value || data.permission;
+
+            const parent = _.filter(this.state.permissionOptions, permissionOption => {
+                return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionGroup == doc.permissionGroup)
+            })[0];
+            // let uniqBy = [];
             this.setState({
-                permissions: uniqBy,
-                tempPerm: null
+                tempPerm: doc
             });
+            if (doc.id) {
+                const permissions = this.state.permissions;
+                const perm = {
+                    parent: parent,
+                    children: [doc],
+                    isValid: (parent.name === doc.name)
+                }
+
+                console.log('parent', parent);
+                console.log('doc', doc);
+
+                if (this.state.permissions.length) {
+
+                    const permissionsExist = _.findIndex(permissions, ['parent.permissionGroup', parent.permissionGroup]);
+                    if (permissions[permissionsExist]) {
+                        permissions[permissionsExist].children.push(doc)
+                        permissions[permissionsExist].children = _.uniqBy(permissions[permissionsExist].children, 'id');
+                        permissions[permissionsExist].isValid = true;
+
+                    } else {
+                        permissions.push(perm)
+                        permissions.isValid = false;
+                    }
+
+                } else {
+                    permissions.push(perm)
+                }
+
+                this.setState({
+                    permissions: permissions,
+                    tempPerm: null
+                });
+
+            }
+
         }
     }
 
@@ -148,6 +183,7 @@ export default class UserRoles extends Component {
 
     suggestPermissions(event, searchKey) {
         let record = this.state.permissionOptions;
+
         let query = event.query;
         record = _.castArray(record);
         searchKey = _.castArray(searchKey);
@@ -205,22 +241,15 @@ export default class UserRoles extends Component {
     }
 
     editData(data) {
-        let newPerms = [];
         this.userRestService.getSingleRole(data.id)
             .subscribe((data) => {
                 data.permissionRoles.forEach(perm => {
-                    const newPerm = {
-                        id: perm.permissionId,
-                        name: perm.permission.name
-                    }
-                    newPerms.push(newPerm)
+                    this.onSelectedPermission(perm);
                 });
 
-                data.permissionRoles = newPerms;
                 this.setState({
                     rowVersion: data.rowVersion,
                     oneData: data,
-                    permissions: data.permissionRoles,
                     rolesName: data.name,
                     description: data.description,
                     modalAddRoles: true,
@@ -252,14 +281,20 @@ export default class UserRoles extends Component {
         } else {
             this.setState({ modalAddRoles: false, loading: true });
             const data = this.state;
-            const permissionIds = [];
+            const permissions = [];
             data.permissions.forEach(perm => {
-                permissionIds.push(perm.id)
+                perm.children.forEach(child => {
+                    const permission = {
+                        id: child.id,
+                        sortOrder: child.sortOrder
+                    }
+                    permissions.push(permission)
+                });
             });
             const payload = {
                 name: data.rolesName,
                 description: data.description,
-                permissionIds: permissionIds,
+                permissions: permissions,
                 rowVersion: data.isEdit ? data.rowVersion : '',
             }
 
@@ -334,40 +369,21 @@ export default class UserRoles extends Component {
         })
     }
 
-    isPermissionSelected() {
-        const data = [];
-
-        const permission = this.state.permissions;
-        if (permission.length) {
-            for (let i = 0; i < permission.length; i++) {
-                data.push(
-                    <tr key={`${permission[i].id}`}>
-                        <td colSpan={3}></td>
-                        <td>{permission[i].name}</td>
-                        <td>
-                            <a
-                                href
-                                className="text-danger"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => this.rmPermissionSelected(i)}>
-                                Hapus
-                            </a>
-                        </td>
-                    </tr>
-                );
-            }
-        }
-        return data;
-    }
-
-    rmPermissionSelected(i) {
+    rmPermissionSelected(i, idx) {
         let permissions = [...this.state.permissions];
-        permissions.splice(i, 1);
-
+        if (_.startsWith(permissions[i].children[idx].name, 'View')) {
+            permissions[i].isValid = false;
+        }
+        if (permissions[i].children.length <= 1) {
+            permissions.splice(i, 1);
+        } else {
+            permissions[i].children.splice(idx, 1);
+        }
         this.setState({
             permissions
         });
     }
+
 
     render() {
         return (
@@ -491,7 +507,7 @@ export default class UserRoles extends Component {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colSpan={2}>Permissions</td>
+                                        <td colSpan={2}>Permission</td>
                                         <td>:</td>
                                         <td colSpan={2}>
                                             <AutoComplete
@@ -511,9 +527,45 @@ export default class UserRoles extends Component {
                                         </td>
                                     </tr>
                                     {this.state.permissions && (
-                                        this.isPermissionSelected()
-                                    )
-                                    }
+                                        this.state.permissions.map((permission, i) => {
+                                            return (
+                                                <>
+                                                    <tr>
+                                                        <td colSpan={3}></td>
+                                                        <td>
+                                                            <div className="mb-3">
+                                                                <label className="mr-2 title">
+                                                                    {'Menu ' + _.startCase(permission.parent.permissionGroup)}
+                                                                </label>
+                                                                <span className={permission.isValid ? 'alert-roles success' : 'alert-roles warning'}>
+                                                                    {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Harap pilih permission View ${_.startCase(permission.parent.permissionGroup)} dulu!`}
+                                                                </span>
+                                                            </div>
+                                                            <ul className="mt-2">
+                                                                {
+                                                                    permission.children.map((child, idx) => {
+                                                                        return (
+                                                                            <>
+                                                                                <li class="mb-2">
+                                                                                    <label className="mr-2" style={{ width: '160px' }}>
+                                                                                        {child.name}
+                                                                                    </label>
+                                                                                    <a className="text-danger text-right trash"
+                                                                                        onClick={() => this.rmPermissionSelected(i, idx)}>
+                                                                                        <img src="/assets/img/icon/trash.svg" alt="Hapus" />
+                                                                                    </a>
+                                                                                </li>
+                                                                            </>
+                                                                        )
+                                                                    })
+                                                                }
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                </>
+                                            )
+                                        })
+                                    )}
                                     <tr>
                                         <td colSpan={2}>Deskripsi</td>
                                         <td>:</td>
