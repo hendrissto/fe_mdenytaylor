@@ -595,7 +595,7 @@ export default class UserRoles extends Component {
                                                                 </label>
 
                                                                 <span className={permission.isValid ? 'alert-roles success' : 'alert-roles warning'}>
-                                                                    {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Wajib memilih "View ${_.startCase(permission.parent.permissionGroup)}" terlebih dahulu`}
+                                                                    {permission.isValid ? 'Pilihan permissions sudah memenuhi syarat' : `Wajib memilih "View ${_.startCase(permission.parent.permissionSubGroup)}" terlebih dahulu`}
                                                                 </span>
                                                             </div>
                                                             <ul className="mt-2">
