@@ -117,7 +117,9 @@ export default class UserRoles extends Component {
                   if (permissions[permissionsExist]) {
                       permissions[permissionsExist].children.push(doc)
                       permissions[permissionsExist].children = _.uniqBy(permissions[permissionsExist].children, 'id');
-                      permissions[permissionsExist].isValid = (doc.id === parent.id);
+                      if(!permissions[permissionsExist].isValid) {
+                        permissions[permissionsExist].isValid = (doc.id === parent.id);
+                      }
 
                   } else {
                       permissions.push(perm)
