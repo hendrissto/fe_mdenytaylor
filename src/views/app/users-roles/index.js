@@ -86,7 +86,7 @@ export default class UserRoles extends Component {
     }
 
     onSelectedPermission(data) {
-      if(data.value.menu) {
+      if(_.get(data.value, 'menu')) {
         this.setState({
           tempPerm: null
         });
@@ -263,7 +263,6 @@ export default class UserRoles extends Component {
         this.userRestService.getSingleRole(data.id)
             .subscribe((data) => {
                 data.permissionRoles.forEach(perm => {
-                  console.log(this.state.permissionOptions)
                   // this.buildNestedPermission(this.state.permissionOptions);
 
                   this.onSelectedPermission(perm);
@@ -287,7 +286,6 @@ export default class UserRoles extends Component {
                 return !permissionOption.isValid
             });
 
-            console.log(invalids);
 
         }
         if (!data.permissions.length || !data.rolesName || invalids.length) {
