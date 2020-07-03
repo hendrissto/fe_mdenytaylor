@@ -226,14 +226,54 @@ export default class UserRoles extends Component {
     }
 
     loadRelatedData() {
-        this.userRestService.loadRelated()
-            .subscribe(response => {
-                if (response.accessPermissions) {
-                    this.setState({
-                        permissionOptions: response.accessPermissions,
-                    })
-                }
-            });
+      this.userRestService.loadRelated()
+          .subscribe(response => {
+              if (response.accessPermissions) {
+                const ignorePermissions = [
+                  'cod.cod_list.view',
+                  'cod.cod_list.create',
+                  'cod.cod_list.edit',
+                  'cod.cod_list.delete',
+
+                  // transfer_credit
+                  'cod.transfer_credit.update',
+                  'cod.transfer_credit.delete',
+
+
+                  // tenant_bank
+                  'wallet.tenant_bank.delete',
+
+                  // tenant_wallet
+                  'wallet.tenant_wallet.delete',
+
+                  // withdrawal_history
+                  'wallet.withdrawal_history.delete',
+
+                  // tenant_list
+                  'tenant.tenant_list.create',
+                  'tenant.tenant_list.delete',
+
+                  // subscription
+                  'tenant.subscription.create',
+                  'tenant.subscription.delete',
+
+                  // role_admin
+                  'admin.role_admin.delete',
+
+                  // permission_admin
+                  'admin.permission_admin.create',
+                  'admin.permission_admin.edit',
+                  'admin.permission_admin.delete'];
+                response.accessPermissions = _.filter(response.accessPermissions, permission => {
+
+                  return !_.includes(ignorePermissions, permission.id);
+                });
+
+                this.setState({
+                    permissionOptions: response.accessPermissions,
+                })
+              }
+          });
     }
 
     handleOnPageChange(paginationEvent) {
