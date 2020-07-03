@@ -45,6 +45,8 @@ export default class UserRoles extends Component {
         this.actionTemplate = this.actionTemplate.bind(this);
         this.columnFormat = new ColumnFormat();
         this.handleOnPageChange = this.handleOnPageChange.bind(this);
+
+        this.onChangePermission = this.onChangePermission.bind(this);
         this.onSelectedPermission = this.onSelectedPermission.bind(this);
         // this.isPermissionSelected = this.isPermissionSelected.bind(this);
         this.rmPermissionSelected = this.rmPermissionSelected.bind(this);
@@ -85,6 +87,13 @@ export default class UserRoles extends Component {
         });
     }
 
+    onChangePermission(data) {
+      const doc = data.value;
+      this.setState({
+        tempPerm: doc
+      });
+    }
+
     onSelectedPermission(data) {
       if(_.get(data.value, 'menu')) {
         this.setState({
@@ -98,10 +107,6 @@ export default class UserRoles extends Component {
           const parent = _.filter(this.state.permissionOptions, permissionOption => {
               return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionSubGroup === doc.permissionSubGroup)
           })[0];
-
-          this.setState({
-            tempPerm: doc
-          });
 
           if (doc.id) {
               const permissions = this.state.permissions;
@@ -621,7 +626,8 @@ export default class UserRoles extends Component {
                                                 field="name"
                                                 dropdown={true}
                                                 onDropdownClick={(e) => this.suggestPermissions(e, ['name'])}
-                                                onChange={this.onSelectedPermission}
+                                                onChange={this.onChangePermission}
+                                                onSelect={this.onSelectedPermission}
                                                 itemTemplate={this.itemTemplate}
                                             />
                                         </td>
