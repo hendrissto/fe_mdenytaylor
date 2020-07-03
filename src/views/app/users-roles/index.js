@@ -99,6 +99,10 @@ export default class UserRoles extends Component {
               return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionSubGroup === doc.permissionSubGroup)
           })[0];
 
+          this.setState({
+            tempPerm: doc
+          });
+
           if (doc.id) {
               const permissions = this.state.permissions;
               const perm = {
