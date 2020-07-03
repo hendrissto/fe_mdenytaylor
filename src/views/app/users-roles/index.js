@@ -45,6 +45,8 @@ export default class UserRoles extends Component {
         this.actionTemplate = this.actionTemplate.bind(this);
         this.columnFormat = new ColumnFormat();
         this.handleOnPageChange = this.handleOnPageChange.bind(this);
+
+        this.onChangePermission = this.onChangePermission.bind(this);
         this.onSelectedPermission = this.onSelectedPermission.bind(this);
         // this.isPermissionSelected = this.isPermissionSelected.bind(this);
         this.rmPermissionSelected = this.rmPermissionSelected.bind(this);
@@ -85,6 +87,13 @@ export default class UserRoles extends Component {
         });
     }
 
+    onChangePermission(data) {
+      const doc = data.value;
+      this.setState({
+        tempPerm: doc
+      });
+    }
+
     onSelectedPermission(data) {
       if(_.get(data.value, 'menu')) {
         this.setState({
@@ -98,10 +107,6 @@ export default class UserRoles extends Component {
           const parent = _.filter(this.state.permissionOptions, permissionOption => {
               return (_.startsWith(permissionOption.description, 'View') && permissionOption.permissionSubGroup === doc.permissionSubGroup)
           })[0];
-
-          this.setState({
-            tempPerm: doc
-          });
 
           if (doc.id) {
               const permissions = this.state.permissions;
@@ -226,14 +231,54 @@ export default class UserRoles extends Component {
     }
 
     loadRelatedData() {
-        this.userRestService.loadRelated()
-            .subscribe(response => {
-                if (response.accessPermissions) {
-                    this.setState({
-                        permissionOptions: response.accessPermissions,
-                    })
-                }
-            });
+      this.userRestService.loadRelated()
+          .subscribe(response => {
+              if (response.accessPermissions) {
+                const ignorePermissions = [
+                  'cod.cod_list.view',
+                  'cod.cod_list.create',
+                  'cod.cod_list.edit',
+                  'cod.cod_list.delete',
+
+                  // transfer_credit
+                  'cod.transfer_credit.update',
+                  'cod.transfer_credit.delete',
+
+
+                  // tenant_bank
+                  'wallet.tenant_bank.delete',
+
+                  // tenant_wallet
+                  'wallet.tenant_wallet.delete',
+
+                  // withdrawal_history
+                  'wallet.withdrawal_history.delete',
+
+                  // tenant_list
+                  'tenant.tenant_list.create',
+                  'tenant.tenant_list.delete',
+
+                  // subscription
+                  'tenant.subscription.create',
+                  'tenant.subscription.delete',
+
+                  // role_admin
+                  'admin.role_admin.delete',
+
+                  // permission_admin
+                  'admin.permission_admin.create',
+                  'admin.permission_admin.edit',
+                  'admin.permission_admin.delete'];
+                response.accessPermissions = _.filter(response.accessPermissions, permission => {
+
+                  return !_.includes(ignorePermissions, permission.id);
+                });
+
+                this.setState({
+                    permissionOptions: response.accessPermissions,
+                })
+              }
+          });
     }
 
     handleOnPageChange(paginationEvent) {
@@ -581,7 +626,8 @@ export default class UserRoles extends Component {
                                                 field="name"
                                                 dropdown={true}
                                                 onDropdownClick={(e) => this.suggestPermissions(e, ['name'])}
-                                                onChange={this.onSelectedPermission}
+                                                onChange={this.onChangePermission}
+                                                onSelect={this.onSelectedPermission}
                                                 itemTemplate={this.itemTemplate}
                                             />
                                         </td>
