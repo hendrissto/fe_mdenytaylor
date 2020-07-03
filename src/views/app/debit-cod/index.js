@@ -1110,7 +1110,7 @@ class DebitCod extends Component {
               </Button>
               </div>
             )}
-            {!this.state.isEdit && this.acl.can(['cod.cod_list.edit']) &&
+            {!this.state.isEdit && this.acl.can(['wallet.withdrawal_history.edit']) &&
               <Button
                 className="default"
                 color="primary"
