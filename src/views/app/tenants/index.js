@@ -420,6 +420,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.shippingSettings,
         Cell: props => (
+          <>
+          { this.acl.can(['wallet.tenant_wallet.edit']) &&
           <div>
             <Button
               color="secondary"
@@ -431,6 +433,8 @@ export default class Tenant extends Component {
               Shipping Settings
             </Button>
           </div>
+          }
+          </>
         )
       },
       {
@@ -438,6 +442,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.warehouseChannels,
         Cell: props => (
+          <>
+          { this.acl.can(['wallet.tenant_wallet.edit']) &&
           <div>
             <Button
               color="info"
@@ -448,13 +454,17 @@ export default class Tenant extends Component {
               Warehouse Channels
             </Button>
           </div>
-        )
+            }
+          </>
+          )
       },
       {
         Header: "Is Real",
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
+          <>
+          { this.acl.can(['wallet.tenant_wallet.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isReal}
@@ -462,6 +472,8 @@ export default class Tenant extends Component {
               this.editIsReal(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {
