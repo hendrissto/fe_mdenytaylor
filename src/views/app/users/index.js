@@ -155,7 +155,7 @@ export default class Users extends Component {
 
     const params = {
       keyword: this.state.search || null,
-      "options.take": this.state.table.pagination.pageSize,
+      // "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
@@ -220,31 +220,42 @@ export default class Users extends Component {
   }
 
   markActive(id, active) {
-    this.setState({
-      loading: true
+    MySwal.fire({
+      type: 'info',
+      title:  `${active ? 'Aktifkan' : 'Nonaktifkan'} user?`,
+      showCancelButton: true,
+      allowOutsideClick: false,
+      showConfirmButton: true
+    }).then((res) => {
+      if (!res.dismiss) {
+        this.setState({
+          loading: true
+        });
+        this.userRestService.markActive(id, active).pipe(
+          catchError((error) => {
+            this.setState({
+              loading: false
+            });
+            MySwal.fire({
+              type: "error",
+              title: active ? "Gagal Mengaktifkan" : "Gagal Menonaktifkan",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+            return throwError(error);
+          }), tap(() => {
+            this.loadData().subscribe();
+            this.setState({
+              loading: false
+            });
+          })
+        ).subscribe()
+
+     }
     });
-    this.userRestService.markActive(id, active).pipe(
-      catchError((error) => {
-        this.setState({
-          loading: false
-        });
-        MySwal.fire({
-          type: "error",
-          title: active ? "Gagal Mengaktifkan" : "Gagal Menonaktifkan",
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: "swal-height"
-        });
-        return throwError(error);
-      }), tap(() => {
-        this.loadData().subscribe();
-        this.setState({
-          loading: false
-        });
-      })
-    ).subscribe()
   }
 
 
