@@ -263,7 +263,7 @@ class TopNav extends Component {
         <ModalHeader>Reset Password</ModalHeader>
         <Formik
           initialValues={{
-            oldPassword: '',
+            oldPassword: this.state.oldPassword,
             newPassword: this.state.newPassword
           }}
           onSubmit={this.submitResetPassword}
@@ -279,7 +279,7 @@ class TopNav extends Component {
                       <td colSpan={2} style={{ verticalAlign: 'middle' }}>
                         <InputText
                           name="oldPassword"
-                          type="text"
+                          type="password"
                           value={props.values.oldPassword}
                           onChange={props.handleChange}
                           onBlur={props.handleBlur}
@@ -291,33 +291,12 @@ class TopNav extends Component {
                       <td style={{ verticalAlign: 'middle' }}>:</td>
                       <td colSpan={2} style={{ verticalAlign: 'middle' }}>
                         <InputText
-                          readOnly
                           name="newPassword"
-                          type="text"
+                          type="password"
                           value={props.values.newPassword}
                           onChange={props.handleChange}
                           onBlur={props.handleBlur}
                         />
-                      </td>
-                      <td style={{ verticalAlign: 'middle' }}>
-                        <a
-                          href
-                          className="text-info mt-2"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => {
-                            this.setState({
-                              newPassword: randomstring.generate({
-                                length: 15,
-                                charset: 'alphabetic'
-                              }),
-                            });
-                            props.values.newPassword = this.state.newPassword
-                          }
-                          }>
-                          <span>
-                            Generate
-                                </span>
-                        </a>
                       </td>
                     </tr>
                   </tbody>
@@ -478,16 +457,16 @@ class TopNav extends Component {
                   {/* <DropdownItem>History</DropdownItem> */}
                   {/* <DropdownItem>Support</DropdownItem> */}
                   {/* <DropdownItem divider /> */}
-                  <DropdownItem onClick={() => this.setState({
+                  <DropdownItem style={{
+                    cursor: 'pointer'
+                  }} onClick={() => this.setState({
                     isChangePassword: true,
-                    newPassword: randomstring.generate({
-                      length: 15,
-                      charset: 'alphabetic'
-                    })
                   })}>
                     Ganti Password
                 </DropdownItem>
-                  <DropdownItem onClick={() => this.handleLogout()}>
+                  <DropdownItem style={{
+                    cursor: 'pointer'
+                  }} onClick={() => this.handleLogout()}>
                     Sign out
                 </DropdownItem>
                 </DropdownMenu>
