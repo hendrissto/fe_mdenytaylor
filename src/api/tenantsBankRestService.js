@@ -18,9 +18,9 @@ export default class TenantsBankRestService extends React.Component {
 
     loadRelatedData(qParams) {
         return this.request.get('/tenant-bank/entry-related-data', qParams);
-		}
-		
-		editData(id, tenantId, qParams) {
-			return this.request.put(`/tenant-bank/${id}?tenantId=${tenantId}`, qParams);
-		}
+    }
+    
+    editData(id, tenantId, qParams) {
+        return this.request.put(`/tenant-bank/${id}?tenantId=${tenantId}`, qParams);
+    }
 }
