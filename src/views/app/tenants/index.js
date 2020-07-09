@@ -421,7 +421,7 @@ export default class Tenant extends Component {
         show: tableFilter.shippingSettings,
         Cell: props => (
           <>
-          { this.acl.can(['wallet.tenant_wallet.edit']) &&
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="secondary"
@@ -443,7 +443,7 @@ export default class Tenant extends Component {
         show: tableFilter.warehouseChannels,
         Cell: props => (
           <>
-          { this.acl.can(['wallet.tenant_wallet.edit']) &&
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="info"
@@ -464,7 +464,7 @@ export default class Tenant extends Component {
         show: tableFilter.isRealColumn,
         Cell: props => (
           <>
-          { this.acl.can(['wallet.tenant_wallet.edit']) &&
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isReal}
@@ -482,7 +482,7 @@ export default class Tenant extends Component {
         show: tableFilter.status,
         Cell: props => (
           <>
-          { this.acl.can(['wallet.tenant_wallet.edit']) &&
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isActive}
