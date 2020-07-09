@@ -281,6 +281,7 @@ export default class UserRoles extends Component {
           });
     }
 
+
     handleOnPageChange(paginationEvent) {
         const table = { ...this.state.table };
         table.loading = true;

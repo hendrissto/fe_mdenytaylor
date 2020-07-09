@@ -96,10 +96,11 @@ export default class Users extends Component {
   }
 
   componentDidMount() {
-    forkJoin(
-      this.loadData(),
-      this.loadRolesData(),
-    ).pipe(
+    const obs = [this.loadData()];
+    if(this.acl.can(['admin.user_admin.create'])) {
+      obs.push(this.loadRolesData());
+    }
+    forkJoin(...obs).pipe(
       catchError((error) => {
         this.setState({
           loading: false
