@@ -215,7 +215,9 @@ export default class Users extends Component {
 
     return (
       <>
+        { this.acl.can(['admin.user_admin.edit']) &&
         <InputSwitch checked={check} onChange={(e) => this.markActive(id, e.value)} />
+        }
       </>
     )
   }

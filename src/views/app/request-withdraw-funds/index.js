@@ -326,7 +326,6 @@ class WithdrawFunds extends Component {
         Cell: props => {
           return (
             <div>
-              { this.acl.can(['wallet.tenant_wallet.edit']) &&
               <Button
                 outline
                 color="success"
@@ -342,7 +341,6 @@ class WithdrawFunds extends Component {
                 <i className="iconsminds-upload mr-2 " />
                 Upload Bukti
               </Button>
-              }
             </div>
           );
         }
@@ -900,7 +898,7 @@ class WithdrawFunds extends Component {
                   <Column style={{ width: '250px' }} field="phone" header="Phone" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="website" header="Website" body={this.columnFormat.emptyColumn} />
                   <Column style={{ width: '250px' }} field="balanceAmount" header="Balance Amount" body={this.moneyFormat.currencyFormat} />
-                  { this.acl.can(['wallet.withdrawal_history.create']) &&
+                  { this.acl.can(['wallet.withdrawal_history.create', 'wallet.withdrawal.create']) &&
                     <Column style={{ width: '250px' }} header="Upload Bukti" body={this.buttonUpload} />
                   }
                 </DataTable>

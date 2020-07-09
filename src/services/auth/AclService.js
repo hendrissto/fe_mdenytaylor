@@ -32,12 +32,15 @@ export class AclService {
   canByGroup(access) {
     const abilities = this.roles;
     const accesses = _.castArray(access);
+
     const results = accesses.map(ability => {
       return _.includes(abilities, ability);
     });
 
     const matchAbilities = results.filter(_.identity).length;
-    return matchAbilities === accesses.length;
+    // old condition
+    // return matchAbilities === accesses.length;
+    return matchAbilities;
   }
 
   allowedMenus(data = menuItems) {
