@@ -317,7 +317,22 @@ export default class Tenant extends Component {
         accessor: "companyInfo.name",
         fixed: "left",
         width: 150,
-        show: tableFilter.companyInfo
+        show: tableFilter.companyInfo,
+        Cell: props =>  (
+          <div>
+            <span style={{
+                display: 'flex',
+                flexDirection: 'row',
+                }}>
+              <p style={{
+                color: 'blue',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                marginRight: '3px'
+                }}>{props.value}</p><span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
+            </span>
+          </div>
+        )
       },
       {
         Header: "Email Tenant",
