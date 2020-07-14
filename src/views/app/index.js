@@ -27,13 +27,10 @@ import ListTransactions from "./list-transactions";
 import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
 import DetailWalletTransactions from "./wallet-transactions/detail-page";
-<<<<<<< HEAD
 import UserRoles from "./users-roles";
 import Users from "./users";
 import ListPermission from "./list-permission";
-=======
 import MonitoringPickup from "./monitoring-pickup";
->>>>>>> origin/239
 
 class App extends Component {
   render() {
