@@ -83,6 +83,7 @@ module.exports = {
     "menu.data-list": "Data List",
     "menu.thumb-list": "Thumb List",
     "menu.image-list": "Image List",
+    "menu.monitoring-pickup": "Monitoring Pickup",
     "menu.details": "Details",
     "menu.search": "Search",
     "menu.login": "Login",

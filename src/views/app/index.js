@@ -27,9 +27,13 @@ import ListTransactions from "./list-transactions";
 import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
 import DetailWalletTransactions from "./wallet-transactions/detail-page";
+<<<<<<< HEAD
 import UserRoles from "./users-roles";
 import Users from "./users";
 import ListPermission from "./list-permission";
+=======
+import MonitoringPickup from "./monitoring-pickup";
+>>>>>>> origin/239
 
 class App extends Component {
   render() {
@@ -70,6 +74,7 @@ class App extends Component {
           <GuardedRoute path={`${match.url}/users`} component={Users} meta={{permissions: ['admin.user_admin.view']}} />
           <GuardedRoute path={`${match.url}/roles`} component={UserRoles} meta={{permissions: ['admin.role_admin.view']}} />
           <GuardedRoute path={`${match.url}/permissions`} component={ListPermission} meta={{permissions: ['admin.permission_admin.view']}} />
+          <GuardedRoute path={`${match.url}/monitoring-pickup`} component={MonitoringPickup} />
           {/* {/* <Route path={`${match.url}/notifications`} component={Notifications} /> */}
       </GuardProvider>
           {/* route dummy */}
