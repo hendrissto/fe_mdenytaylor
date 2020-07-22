@@ -895,7 +895,9 @@ class ReceiptOfFunds extends Component {
         const newExcelData = this.createObjectExcel(excelValue);
         const filteredData = newExcelData.filter(v => v.osName !== undefined);
         filteredData.map(v => {
-          v.airwaybill = this.addZero(v.airwaybill || '', 12);
+          if(process.env.REACT_APP_API_ADMIN_URL !== 'https://clodeo-dev-api-admin.azurewebsites.net') {
+            v.airwaybill = this.addZero(v.airwaybill || '', 12);
+          }
           v['discountShippingChargePercentage'] = v['diskonOngkir'];
           v['totalShippingCharge'] = v['totalOngkir'];
 
