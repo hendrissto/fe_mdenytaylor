@@ -43,6 +43,19 @@ const data = [
     ]
   },
 
+  /*
+    Wallet
+    1. Tenants Bank
+    2. Wallet Transactions
+  */
+  {
+    id: "monitoring-pickup",
+    icon: "simple-icon-eye",
+    label: "menu.monitoring-pickup",
+    to: "/app/monitoring-pickup",
+    permissions: ['tenant.pickup_monitoring.view'],
+  },
+
 
 
   /*
