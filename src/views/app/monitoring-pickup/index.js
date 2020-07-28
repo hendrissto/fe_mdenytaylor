@@ -6,6 +6,7 @@ import {
     Button,
     Input,
     InputGroup,
+    Collapse,
 } from "reactstrap";
 import { Paginator } from "primereact/paginator";
 import { Redirect } from "react-router-dom";
@@ -15,9 +16,11 @@ import MonitoringPickupRestService from "../../../api/monitoringPickupRestServic
 import Spinner from "../../../containers/pages/Spinner";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { MultiSelect } from 'primereact/multiselect';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import * as _ from 'lodash';
 const MySwal = withReactContent(Swal);
 
 class MonitoringPickup extends Component {
@@ -33,6 +36,7 @@ class MonitoringPickup extends Component {
             loadingSubmit: false,
             spinner: false,
             loading: false,
+            collapse: false,
             table: {
                 loading: true,
                 data: [],
@@ -47,6 +51,11 @@ class MonitoringPickup extends Component {
             oneData: null,
             redirect: false,
             search: "",
+            shippingCourierChannelOptions: [
+                { label: 'SiCepat', value: 'sicepat' },
+                { label: 'SAP Express', value: 'sap' },
+            ],
+            shippingCourierChannelId: ['sicepat', 'sap'],
         };
     }
 
@@ -93,6 +102,7 @@ class MonitoringPickup extends Component {
 
         const params = {
             keyword: this.state.search || null,
+            shippingCourierChannelId: _.join(this.state.shippingCourierChannelId || [], ',') || null,
             "options.take": this.state.table.pagination.pageSize,
             "options.skip": this.state.table.pagination.skipSize,
             "options.includeTotalCount": true
@@ -232,8 +242,58 @@ class MonitoringPickup extends Component {
                                             >
                                                 <i className="simple-icon-magnifier" />
                                             </Button>
+                                            <Button
+                                                className="default"
+                                                color="primary"
+                                                onClick={() => this.setState({ collapse: !this.state.collapse })}
+                                                style={{ marginLeft: 10, borderRadius: 5 }}
+                                            >
+                                                Filter
+                      </Button>
                                         </InputGroup>
                                     </div>
+                                    {this.state.collapse && (
+                                        <Collapse isOpen={this.state.collapse} className="col-md-12">
+                                            <div className="row">
+                                                <div className="col-md-3">
+                                                    <label>Kurir</label>
+                                                    <div>
+                                                        <MultiSelect value={this.state.shippingCourierChannelId} options={this.state.shippingCourierChannelOptions} style={{ width: '100%', height: 35 }} onChange={(e) => this.setState({ shippingCourierChannelId: e.value })} filter={true} maxSelectedLabels={2} />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-12 text-right my-3">
+                                                    <Button
+                                                        className="default"
+                                                        color="primary"
+                                                        style={{ borderRadius: 5, marginRight: 10 }}
+                                                        onClick={() => {
+                                                            this.setState({ collapse: false });
+                                                            this.loadData();
+                                                        }}
+                                                    >
+                                                        Terapkan
+                          </Button>
+                                                    <Button
+                                                        className="default"
+                                                        color="danger"
+                                                        style={{ borderRadius: 5 }}
+                                                        onClick={() => {
+                                                            this.setState({
+                                                                bankSelected: null,
+                                                                lowDate: null,
+                                                                highDate: null,
+                                                            })
+                                                        }}
+                                                    >
+                                                        Reset
+                          </Button>
+                                                </div>
+                                            </div>
+                                        </Collapse>
+                                    )}
                                 </div>
 
                                 <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
