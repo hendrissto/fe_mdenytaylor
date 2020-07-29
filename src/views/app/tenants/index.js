@@ -60,6 +60,7 @@ const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
+    this.acl = new AclService();
     this.billingRest = new BillingRestService();
     this.tenantRest = new TenantRestService();
     this.normalize = new NormalizeData();
