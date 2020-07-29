@@ -53,6 +53,7 @@ const data = [
     icon: "simple-icon-eye",
     label: "menu.monitoring-pickup",
     to: "/app/monitoring-pickup",
+    permissions: ['tenant.pickup_monitoring.view'],
   },
 
 
