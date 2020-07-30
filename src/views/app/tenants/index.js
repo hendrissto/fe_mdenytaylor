@@ -272,7 +272,15 @@ export default class Tenant extends Component {
 
   loadRelatedData() {
     return this.billingRest.getRelatedData().pipe(tap(response => {
-      this.setState({ relatedData: response });
+      const relatedData = response;
+      const validshippingServices = [];
+      const shippingServices = response.shippingServices;
+      for (let index = 0; index < shippingServices.length; index++) {
+        shippingServices[index].shippingServiceStr = _.startCase(shippingServices[index].shippingServiceStr);
+        validshippingServices[index] = shippingServices[index];
+      }
+      relatedData.shippingServices = validshippingServices;
+      this.setState({ relatedData: relatedData });
     }));
   }
 
@@ -935,7 +943,7 @@ export default class Tenant extends Component {
     this.setState({ loadingShippings: true });
     const payload = {...this.state.formShippingSetting};
     payload.shippingService = _.get(payload.shippingService, 'shippingService') || null;
-    this.tenantRest.updateShippingSettings(this.state.oneData.id, payload).subscribe(() => {
+    this.tenantRest.updateShippingSettings(this.state.oneData.id, [payload]).subscribe(() => {
       this.loadOneData(this.state.oneData.id);
       MySwal.fire({
         type: "success",
@@ -946,7 +954,7 @@ export default class Tenant extends Component {
         showConfirmButton: false,
         customClass: "swal-height"
       });
-      this.setState({ loadingShippings: false })
+      this.setState({ loadingShippings: false, formShippingSetting: null })
     }, error => {
       MySwal.fire({
         type: "error",
