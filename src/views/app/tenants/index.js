@@ -778,12 +778,12 @@ export default class Tenant extends Component {
     const data = this.state.oneData;
 
     for (let i = 0; i < listShippingSettings.length; i++) {
-      const courier = _.find(data.shippingSettings, ['courierChannelId', listShippingSettings[i]]);
+      const courier = _.find(data.shippingSettings, ['courierChannelId', listShippingSettings[i].id]);
       temp.push(
         <tr>
-          <td> { _.get(courier, 'courierChannelId') || listShippingSettings[i]} </td>
+          <td> {listShippingSettings[i].name} </td>
           <td>
-            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i] &&
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
             <div>
               <Input
                 type="text"
@@ -797,13 +797,13 @@ export default class Tenant extends Component {
 
             </div>
             }
-            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i]) && <label>
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
               {_.get(courier, 'memberId') || '-'}
             </label>
             }
           </td>
           <td>
-            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i] &&
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
               <Switch
                 className="custom-switch custom-switch-secondary"
                 checked={this.state.formShippingSetting.isAlreadyMember}
@@ -812,13 +812,13 @@ export default class Tenant extends Component {
                 }}
               />
             }
-            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i]) && <label>
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
                 {_.get(courier, 'isAlreadyMember') ? 'Ya' : 'Tidak' || '-'}
               </label>
             }
           </td>
           <td>
-            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i] &&
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
               (<Dropdown
                 value={this.state.formShippingSetting.shippingService}
                 options={
@@ -833,13 +833,13 @@ export default class Tenant extends Component {
                 }}
               />)
             }
-            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i]) && <label>
-              {_.get(courier, 'shippingServiceStr') || '-'}
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
+              {_.startCase(_.get(courier, 'shippingServiceStr')) || '-'}
             </label>
             }
           </td>
           <td>
-            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i] &&
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
               <Input
                 type="textarea"
                 id="registrationInfo"
@@ -851,7 +851,7 @@ export default class Tenant extends Component {
                 }}
               />
             }
-            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i]) &&
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) &&
             <label style={{
               width: 250,
               wordBreak: 'break-word'
@@ -861,7 +861,7 @@ export default class Tenant extends Component {
             }
           </td>
           <td>
-            {this.renderButtonShippingSettings(data, courier, listShippingSettings[i])}
+            {this.renderButtonShippingSettings(data, courier, listShippingSettings[i].id)}
           </td>
         </tr>
       )
@@ -1560,7 +1560,7 @@ export default class Tenant extends Component {
                         <th scope="col">Status Member</th>
                         <th scope="col">Layanan</th>
                         <th scope="col" width="250px">Info Registrasi</th>
-                        <th></th>
+                        <th width="200px"></th>
                       </tr>
                     </thead>
                     <tbody>
