@@ -774,7 +774,7 @@ export default class Users extends Component {
                           <td colSpan={2}>Roles</td>
                           <td>:</td>
                           <td colSpan={6}>
-                            <DataTable value={this.state.roles} className="user-table"
+                            <DataTable value={this.state.roles} className="user-table" scrollable={true} scrollHeight="350px"
                               selection={this.state.selectedRoles} onSelectionChange={e => this.setState({ selectedRoles: e.value })}>
                               <Column selectionMode="multiple" style={{ width: '3em' }} />
                               <Column field="name" header="Nama" />
