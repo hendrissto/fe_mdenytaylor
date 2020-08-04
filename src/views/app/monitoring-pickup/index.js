@@ -41,9 +41,9 @@ class MonitoringPickup extends Component {
       this.columnFormat = new ColumnFormat();
 
         this.state = {
-            doc: null,
+            dataAWBHistory: null,
             awbDetailModal: false,
-            historyModal: false,
+            awbHistoryModal: false,
             dataModal: {
               header: "",
               body: "",
@@ -227,6 +227,38 @@ class MonitoringPickup extends Component {
                 Cell: props => <p>{props.value}</p>
             },
         ];
+    }
+
+    loadAWBHistory(rowData) {
+      const table = { ...this.state.table };
+      table.loading = true;
+      this.setState({ table });
+      this.monitoringPickupRestService.getAWBHistory(rowData.id).subscribe(response => {
+        table.loading = false;
+        this.setState({table, dataAWBHistory: response, awbHistoryModal: true});
+      }, err => {
+        table.loading = false;
+        this.setState({ table });
+        let messages;
+        if (err.status === 401) {
+          messages = "Unauthorized.";
+        } else if (Array.isArray(err.data)) {
+          messages = err.data[0].errorMessage;
+        } else if (Array.isArray(err.data.errors)) {
+          messages = err.data.errors[0].error_message;
+        } else {
+          messages = err.data.message;
+        }
+        MySwal.fire({
+          type: "error",
+          title:  messages ||  'Tidak diketahui',
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+      });
     }
 
     loadAWBDetail(rowData) {
@@ -425,8 +457,7 @@ class MonitoringPickup extends Component {
               outline
               color="info"
               onClick={() => {
-                console.log(rowData)
-                this.setState({historyModal: true});
+                this.loadAWBHistory(rowData);
               }}
             >
               Histori
@@ -447,6 +478,38 @@ class MonitoringPickup extends Component {
         </>
       );
   }
+
+  generateRowAWBHistory() {
+    let rows = [];
+    const histories = this.state.dataAWBHistory
+    if(!histories.length) {
+      rows.push(
+        <tr>
+          <td colSpan="3" className="text-center"> Tidak ada data </td>
+
+        </tr>
+      )
+      return rows;
+    }
+
+    for (let i = 0; i < histories.length; i++) {
+      rows.push(
+        <tr>
+          <td> {histories[i].airwaybillNumber} </td>
+          <td> {_.startCase(histories[i].status)}</td>
+          <td> {
+            moment(
+              histories[i].lastUpdate,
+              "YYYY-MM-DD hh:mm"
+            ).format("DD-MM-YYYY hh:mm") || "-"}
+          </td>
+        </tr>
+      )
+    }
+
+    return rows;
+  }
+
 
     render() {
         if (this.state.redirect === true) {
@@ -568,15 +631,28 @@ class MonitoringPickup extends Component {
                     {this.state.loadingSubmit && <Spinner />}
 
                     {/* DETAIL AWB */}
-                    {this.state.historyModal && (
-                      <Modal isOpen={this.state.historyModal}>
+                    {this.state.awbHistoryModal && (
+                      <Modal isOpen={this.state.awbHistoryModal}>
                         <ModalHeader>Histori</ModalHeader>
                         <ModalBody>
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th scope="col">No Resi</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Pembaruan Terakhir</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.generateRowAWBHistory()}
+                          </tbody>
+                        </table>
+
                         </ModalBody>
 
-                        <ModalFooter>
-                          <Button onClick={() => this.setState({ historyModal: false })}>
-                            Ok
+                        <ModalFooter className="text-center">
+                          <Button onClick={() => this.setState({ awbHistoryModal: false })}>
+                            Close
                           </Button>
                         </ModalFooter>
                       </Modal>
