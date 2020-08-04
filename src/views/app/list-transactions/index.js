@@ -215,7 +215,7 @@ export default class ListTransactions extends Component {
     }
 
     Axios.get(
-      `http://internal-solr.clodeo.com/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
+      `https://internal-solr.clodeo.com/solr/db/select?q=${url}&start=${page}&sort=CreateDateUtc%20desc`
     ).then(response => {
       const table = { ...this.state.table };
       table.data = response.data.response.docs;
@@ -897,10 +897,10 @@ export default class ListTransactions extends Component {
         : encodeURIComponent(`${valueSearch}:${search}`);
 
     Axios.get(
-      `http://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&sort=CreateDateUtc%20desc`
+      `https://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&sort=CreateDateUtc%20desc`
     ).then(response1 => {
       Axios.get(
-        `http://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&rows=${response1.data.response.numFound}&sort=CreateDateUtc%20desc`
+        `https://internal-solr.clodeo.com/solr/db/select?fq=CreateDateUtc%3A%5B2020-01-01T00%3A00%3A00Z%20TO%20NOW%5D&q=${url}&rows=${response1.data.response.numFound}&sort=CreateDateUtc%20desc`
       ).then(response => {
       this.exportService.exportToCSV(response.data.response.docs, "List Transaksi 2020");
       this.setState({loading: false});
