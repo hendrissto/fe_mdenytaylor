@@ -317,7 +317,7 @@ export default class Notifications extends Component {
                           <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{data.title}</p>
                           <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
                         </div>
-                        <p className="row pl-3 text-muted mb-0 text-small" htmlFor={data.description}></p>
+                        <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
                       </div>
                     </div>
                     // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
