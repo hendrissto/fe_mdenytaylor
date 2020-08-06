@@ -908,7 +908,7 @@ export default class Tenant extends Component {
   updateShippingSettings(event, courierChannelId) {
     this.setState({ loadingShippings: true });
     const payload = {...this.state.formShippingSetting};
-    payload.shippingService = _.get(payload.shippingService, 'shippingService') || null;
+    payload.shippingService = _.get(payload.shippingService, 'shippingService') || 0;
     this.tenantRest.updateShippingSettings(this.state.oneData.id, [payload]).subscribe(() => {
       this.loadOneData(this.state.oneData.id);
       MySwal.fire({
