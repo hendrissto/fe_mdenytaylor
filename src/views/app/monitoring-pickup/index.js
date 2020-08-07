@@ -36,18 +36,20 @@ class MonitoringPickup extends Component {
         this.monitoringPickupRestService = new MonitoringPickupRestService();
         this.handleOnPageChange = this.handleOnPageChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-      this.awbTemplate = this.awbTemplate.bind(this);
-      this.actionTemplate = this.actionTemplate.bind(this);
-      this.columnFormat = new ColumnFormat();
+        this.awbTemplate = this.awbTemplate.bind(this);
+        this.actionTemplate = this.actionTemplate.bind(this);
+        this.loadRelatedDataCourier = this.loadRelatedDataCourier.bind(this);
+        this.columnFormat = new ColumnFormat();
 
         this.state = {
             dataAWBHistory: null,
             awbDetailModal: false,
             awbHistoryModal: false,
+            clientAppId: 'clodeo-admin-web',
             dataModal: {
-              header: "",
-              body: "",
-              footer: ""
+                header: "",
+                body: "",
+                footer: ""
             },
             error: false,
             loadingSubmit: false,
@@ -69,8 +71,8 @@ class MonitoringPickup extends Component {
             redirect: false,
             search: "",
             shippingCourierChannelOptions: [
-                { label: 'SiCepat', value: 'sicepat' },
-                { label: 'SAP Express', value: 'sap' },
+                // { label: 'SiCepat', value: 'sicepat' },
+                // { label: 'SAP Express', value: 'sap' },
             ],
             shippingCourierChannelId: [],
         };
@@ -97,6 +99,7 @@ class MonitoringPickup extends Component {
     }
 
     componentDidMount() {
+        this.loadRelatedDataCourier();
         this.loadData();
     }
 
@@ -110,6 +113,20 @@ class MonitoringPickup extends Component {
         this.setState({ table }, () => {
             this.loadData();
         });
+    }
+
+    loadRelatedDataCourier() {
+        this.monitoringPickupRestService.loadRelatedData(this.state.clientAppId)
+            .subscribe(response => {
+                this.setState({
+                    shippingCourierChannelOptions: _.map(response.integratedShippings, courier => {
+                        return {
+                            label: courier.name,
+                            value: courier.id,
+                        }
+                    }),
+                })
+            });
     }
 
     loadData() {
@@ -179,10 +196,10 @@ class MonitoringPickup extends Component {
                 Cell: props => <p>{props.value}</p>
             },
             {
-              Header: "Status",
-              accessor: "status",
-              show: this.state.status,
-              Cell: props => <p>{_.startCase(props.value)}</p>
+                Header: "Status",
+                accessor: "status",
+                show: this.state.status,
+                Cell: props => <p>{_.startCase(props.value)}</p>
             },
             {
                 Header: "Kurir",
@@ -230,285 +247,285 @@ class MonitoringPickup extends Component {
     }
 
     loadAWBHistory(rowData) {
-      const table = { ...this.state.table };
-      table.loading = true;
-      this.setState({ table });
-      this.monitoringPickupRestService.getAWBHistory(rowData.id).subscribe(response => {
-        table.loading = false;
-        this.setState({table, dataAWBHistory: response, awbHistoryModal: true});
-      }, err => {
-        table.loading = false;
+        const table = { ...this.state.table };
+        table.loading = true;
         this.setState({ table });
-        let messages;
-        if (err.status === 401) {
-          messages = "Unauthorized.";
-        } else if (Array.isArray(err.data)) {
-          messages = err.data[0].errorMessage;
-        } else if (Array.isArray(err.data.errors)) {
-          messages = err.data.errors[0].error_message;
-        } else {
-          messages = err.data.message;
-        }
-        MySwal.fire({
-          type: "error",
-          title:  messages ||  'Tidak diketahui',
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: "swal-height"
+        this.monitoringPickupRestService.getAWBHistory(rowData.id).subscribe(response => {
+            table.loading = false;
+            this.setState({ table, dataAWBHistory: response, awbHistoryModal: true });
+        }, err => {
+            table.loading = false;
+            this.setState({ table });
+            let messages;
+            if (err.status === 401) {
+                messages = "Unauthorized.";
+            } else if (Array.isArray(err.data)) {
+                messages = err.data[0].errorMessage;
+            } else if (Array.isArray(err.data.errors)) {
+                messages = err.data.errors[0].error_message;
+            } else {
+                messages = err.data.message;
+            }
+            MySwal.fire({
+                type: "error",
+                title: messages || 'Tidak diketahui',
+                toast: true,
+                position: "top-end",
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: "swal-height"
+            });
         });
-      });
     }
 
     loadAWBDetail(rowData) {
-      const table = { ...this.state.table };
-      table.loading = true;
-      this.setState({ table });
-
-      this.monitoringPickupRestService.getAWBDetail({
-          courierCode: rowData.shippingCourierChannelId,
-          waybill: rowData.shippingTrackingNumber
-        }).subscribe(response => {
-          table.loading = false;
-          this.setState(table, () => {
-            this.dataAWB(response.data);
-          })
-      }, err => {
-        table.loading = false;
+        const table = { ...this.state.table };
+        table.loading = true;
         this.setState({ table });
-        let messages;
-        if (err.status === 401) {
-          messages = "Unauthorized.";
-        } else if (Array.isArray(err.data)) {
-          messages = err.data[0].errorMessage;
-        } else if (Array.isArray(err.data.errors)) {
-          messages = err.data.errors[0].error_message;
-        } else {
-          messages = err.data.message;
-        }
-        MySwal.fire({
-          type: "error",
-          title:  messages ||  'Tidak diketahui',
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: "swal-height"
+
+        this.monitoringPickupRestService.getAWBDetail({
+            courierCode: rowData.shippingCourierChannelId,
+            waybill: rowData.shippingTrackingNumber
+        }).subscribe(response => {
+            table.loading = false;
+            this.setState(table, () => {
+                this.dataAWB(response.data);
+            })
+        }, err => {
+            table.loading = false;
+            this.setState({ table });
+            let messages;
+            if (err.status === 401) {
+                messages = "Unauthorized.";
+            } else if (Array.isArray(err.data)) {
+                messages = err.data[0].errorMessage;
+            } else if (Array.isArray(err.data.errors)) {
+                messages = err.data.errors[0].error_message;
+            } else {
+                messages = err.data.message;
+            }
+            MySwal.fire({
+                type: "error",
+                title: messages || 'Tidak diketahui',
+                toast: true,
+                position: "top-end",
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: "swal-height"
+            });
         });
-      });
     }
 
     dataAWB(data) {
-      const dataModal = this.state.dataModal;
+        const dataModal = this.state.dataModal;
 
-      dataModal.header = "Rincian Pengiriman";
-      dataModal.body = (
-        <div className="modal-awb">
-          <div className="header-awb">
-            <div className="courier">{data.summary.courierName || "-"}</div>
-            <div className="title">No Resi</div>
-            <div className="airwaybill">
-              #{data.summary.trackingNumber || "-"}
+        dataModal.header = "Rincian Pengiriman";
+        dataModal.body = (
+            <div className="modal-awb">
+                <div className="header-awb">
+                    <div className="courier">{data.summary.courierName || "-"}</div>
+                    <div className="title">No Resi</div>
+                    <div className="airwaybill">
+                        #{data.summary.trackingNumber || "-"}
+                    </div>
+                </div>
+
+                <div>
+                    <table className="data-awb">
+                        <tr>
+                            <th>Tanggal dikirim</th>
+                            <th>Tanggal diterima</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {data.summary.shipDate === "" || data.summary.shipDate === null ? '-' : moment(data.summary.shipDate).format(
+                                    "DD-MM-YYYY"
+                                )}
+                            </td>
+                            <td>
+                                {data.summary.deliveryDate === "" || data.summary.deliveryDate === null ? '-' : moment(
+                                    data.summary.deliveryDate
+                                ).format("YYYY-MM-DD")}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Asal</th>
+                            <th>Tujuan</th>
+                        </tr>
+                        <tr>
+                            <td>{data.summary.origin || "-"}</td>
+                            <td>{data.summary.destination || "-"}</td>
+                        </tr>
+                        <tr>
+                            <th>Pengirim</th>
+                            <th>Penerima</th>
+                        </tr>
+                        <tr>
+                            <td>{data.summary.shipperName || "-"}</td>
+                            <td>{data.summary.receiverName || "-"}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div className="status-shipping">
+                    <div className="title2">Status Pengiriman</div>
+
+                    <div>
+                        <table className="outbond">
+                            <tr>
+                                <th colSpan="3" className="text-left">Outbond</th>
+                            </tr>
+                            {this._renderOutbond(data)}
+                        </table>
+                    </div>
+
+                    <div>
+                        <table className="time-shipping">
+                            <tr>
+                                <th colSpan="3" className="text-left">Waktu Pengiriman</th>
+                            </tr>
+                            <tr>
+                                <td className="text-left">
+                                    {moment(
+                                        data.deliveryStatus.podDate,
+                                        "YYYY-MM-DD hh:mm"
+                                    ).format("DD-MM-YYYY hh:mm") || "-"}
+                                </td>
+                                <td className="text-left">{data.deliveryStatus.podReceiver || "-"}</td>
+                                <td className="text-left">{data.deliveryStatus.status || "-"}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div>
-            <table className="data-awb">
-              <tr>
-                <th>Tanggal dikirim</th>
-                <th>Tanggal diterima</th>
-              </tr>
-              <tr>
-                <td>
-                  {data.summary.shipDate === "" || data.summary.shipDate === null ? '-' : moment(data.summary.shipDate).format(
-                    "DD-MM-YYYY"
-                  )}
-                </td>
-                <td>
-                  {data.summary.deliveryDate === "" || data.summary.deliveryDate === null ? '-' : moment(
-                    data.summary.deliveryDate
-                  ).format("YYYY-MM-DD")}
-                </td>
-              </tr>
-              <tr>
-                <th>Asal</th>
-                <th>Tujuan</th>
-              </tr>
-              <tr>
-                <td>{data.summary.origin || "-"}</td>
-                <td>{data.summary.destination || "-"}</td>
-              </tr>
-              <tr>
-                <th>Pengirim</th>
-                <th>Penerima</th>
-              </tr>
-              <tr>
-                <td>{data.summary.shipperName || "-"}</td>
-                <td>{data.summary.receiverName || "-"}</td>
-              </tr>
-            </table>
-          </div>
-
-          <div className="status-shipping">
-            <div className="title2">Status Pengiriman</div>
-
+        );
+        dataModal.footer = (
             <div>
-              <table className="outbond">
-                <tr>
-                  <th colSpan="3" className="text-left">Outbond</th>
-                </tr>
-                {this._renderOutbond(data)}
-              </table>
-            </div>
-
-            <div>
-              <table className="time-shipping">
-                <tr>
-                  <th colSpan="3" className="text-left">Waktu Pengiriman</th>
-                </tr>
-                <tr>
-                  <td className="text-left">
-                    {moment(
-                      data.deliveryStatus.podDate,
-                      "YYYY-MM-DD hh:mm"
-                    ).format("DD-MM-YYYY hh:mm") || "-"}
-                  </td>
-                  <td className="text-left">{data.deliveryStatus.podReceiver || "-"}</td>
-                  <td className="text-left">{data.deliveryStatus.status || "-"}</td>
-                </tr>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-      dataModal.footer = (
-        <div>
-          <Button
-            className="default btn-search"
-            color="primary"
-            style={{
-              borderRadius: 6
-            }}
-            onClick={() => this.setState({ awbDetailModal: false })}
-          >
-            Close
+                <Button
+                    className="default btn-search"
+                    color="primary"
+                    style={{
+                        borderRadius: 6
+                    }}
+                    onClick={() => this.setState({ awbDetailModal: false })}
+                >
+                    Close
           </Button>
-        </div>
-      );
+            </div>
+        );
 
-      this.setState({ dataModal, awbDetailModal: true });
+        this.setState({ dataModal, awbDetailModal: true });
     }
 
     _renderOutbond(data) {
-      const list = [];
+        const list = [];
 
-      if(data.summary.courierCode === 'jne') {
-        for (let i = 0; i < data.outbounds.length; i++) {
-          list.push(
-            <tr>
-              <td className="text-left">{data.outbounds[i].outboundDate}</td>
-              <td className="text-left">
-                {data.outbounds[i].outboundDescription === null
-                  ? ""
-                  : data.outbounds[i].outboundDescription}
-              </td>
-              <td className="text-left">{data.outbounds[i].outboundCode}</td>
-            </tr>
-          );
+        if (data.summary.courierCode === 'jne') {
+            for (let i = 0; i < data.outbounds.length; i++) {
+                list.push(
+                    <tr>
+                        <td className="text-left">{data.outbounds[i].outboundDate}</td>
+                        <td className="text-left">
+                            {data.outbounds[i].outboundDescription === null
+                                ? ""
+                                : data.outbounds[i].outboundDescription}
+                        </td>
+                        <td className="text-left">{data.outbounds[i].outboundCode}</td>
+                    </tr>
+                );
+            }
+        } else if (data.summary.courierCode === 'J&T') {
+            for (let i = 0; i < data.outbounds.length; i++) {
+                list.push(
+                    <tr>
+                        <td className="text-left">{data.outbounds[i].outboundDate}</td>
+                        <td className="text-left">
+                            {data.outbounds[i].outboundDescription === null
+                                ? ""
+                                : data.outbounds[i].cityName}
+                        </td>
+                        <td className="text-left">{data.outbounds[i].outboundDescription}</td>
+                    </tr>
+                );
+            }
+        } else {
+            for (let i = 0; i < data.outbounds.length; i++) {
+                list.push(
+                    <tr>
+                        <td className="text-left">{data.outbounds[i].outboundDate}</td>
+                        <td className="text-left">
+                            {data.outbounds[i].cityName === null
+                                ? ""
+                                : data.outbounds[i].cityName}
+                        </td>
+                        <td className="text-left">{data.outbounds[i].outboundCode}</td>
+                    </tr>
+                );
+            }
         }
-      } else if (data.summary.courierCode === 'J&T') {
-        for (let i = 0; i < data.outbounds.length; i++) {
-          list.push(
-            <tr>
-              <td className="text-left">{data.outbounds[i].outboundDate}</td>
-              <td className="text-left">
-                {data.outbounds[i].outboundDescription === null
-                  ? ""
-                  : data.outbounds[i].cityName}
-              </td>
-              <td className="text-left">{data.outbounds[i].outboundDescription}</td>
-            </tr>
-          );
-      }
-    } else {
-      for (let i = 0; i < data.outbounds.length; i++) {
-        list.push(
-          <tr>
-            <td className="text-left">{data.outbounds[i].outboundDate}</td>
-            <td className="text-left">
-              {data.outbounds[i].cityName === null
-                ? ""
-                : data.outbounds[i].cityName}
-            </td>
-            <td className="text-left">{data.outbounds[i].outboundCode}</td>
-          </tr>
-        );
-      }
-    }
 
-      return list;
+        return list;
     }
 
     actionTemplate(rowData, column) {
         return (
-          <div>
-            <Button
-              outline
-              color="info"
-              onClick={() => {
-                this.loadAWBHistory(rowData);
-              }}
-            >
-              Histori
+            <div>
+                <Button
+                    outline
+                    color="info"
+                    onClick={() => {
+                        this.loadAWBHistory(rowData);
+                    }}
+                >
+                    Histori
             </Button>
-          </div>
+            </div>
         );
     }
 
     awbTemplate(rowData, column) {
-      return (
-        <>
-          <p style={{
-            color: 'blue',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-            marginRight: '3px'
-            }} onClick={() => this.loadAWBDetail(rowData)}>{rowData.shippingTrackingNumber}</p>
-        </>
-      );
-  }
-
-  generateRowAWBHistory() {
-    let rows = [];
-    const histories = this.state.dataAWBHistory
-    if(!histories.length) {
-      rows.push(
-        <tr>
-          <td colSpan="3" className="text-center"> Tidak ada data </td>
-
-        </tr>
-      )
-      return rows;
+        return (
+            <>
+                <p style={{
+                    color: 'blue',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    marginRight: '3px'
+                }} onClick={() => this.loadAWBDetail(rowData)}>{rowData.shippingTrackingNumber}</p>
+            </>
+        );
     }
 
-    for (let i = 0; i < histories.length; i++) {
-      rows.push(
-        <tr>
-          <td> {histories[i].airwaybillNumber} </td>
-          <td> {_.startCase(histories[i].status)}</td>
-          <td> {
-            moment(
-              histories[i].lastUpdate,
-              "YYYY-MM-DD hh:mm"
-            ).format("DD-MM-YYYY hh:mm") || "-"}
-          </td>
-        </tr>
-      )
-    }
+    generateRowAWBHistory() {
+        let rows = [];
+        const histories = this.state.dataAWBHistory
+        if (!histories.length) {
+            rows.push(
+                <tr>
+                    <td colSpan="3" className="text-center"> Tidak ada data </td>
 
-    return rows;
-  }
+                </tr>
+            )
+            return rows;
+        }
+
+        for (let i = 0; i < histories.length; i++) {
+            rows.push(
+                <tr>
+                    <td> {histories[i].airwaybillNumber} </td>
+                    <td> {_.startCase(histories[i].status)}</td>
+                    <td> {
+                        moment(
+                            histories[i].lastUpdate,
+                            "YYYY-MM-DD hh:mm"
+                        ).format("DD-MM-YYYY hh:mm") || "-"}
+                    </td>
+                </tr>
+            )
+        }
+
+        return rows;
+    }
 
 
     render() {
@@ -557,7 +574,7 @@ class MonitoringPickup extends Component {
                       </Button>
                                         </InputGroup>
                                     </div>
-                                    {this.state.collapse && (
+                                    {this.state.shippingCourierChannelOptions && (
                                         <Collapse isOpen={this.state.collapse} className="col-md-12">
                                             <div className="row">
                                                 <div className="col-md-3">
@@ -614,7 +631,7 @@ class MonitoringPickup extends Component {
                                     <Column style={{ width: '250px' }} field="shipmentStatus" header="Status Pengiriman" body={this.columnFormat.startCase} />
                                     <Column style={{ width: '150px' }} field="isSuccess" header="Berhasil" body={this.columnFormat.operationBoolean} />
                                     <Column style={{ width: '220px' }} field="lastAttempDateTimeUtc" header="Update Terakhir" body={this.columnFormat.dateTimeFormatterFromUtc} />
-                                    <Column style={{width:'250px'}} header="" body={this.actionTemplate}/>
+                                    <Column style={{ width: '250px' }} header="" body={this.actionTemplate} />
                                 </DataTable>
                                 <Paginator
                                     first={this.state.table.pagination.skipSize}
@@ -632,43 +649,43 @@ class MonitoringPickup extends Component {
 
                     {/* DETAIL AWB */}
                     {this.state.awbHistoryModal && (
-                      <Modal isOpen={this.state.awbHistoryModal}>
-                        <ModalHeader>Histori</ModalHeader>
-                        <ModalBody>
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th scope="col">No Resi</th>
-                              <th scope="col">Status</th>
-                              <th scope="col">Pembaruan Terakhir</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {this.generateRowAWBHistory()}
-                          </tbody>
-                        </table>
+                        <Modal isOpen={this.state.awbHistoryModal}>
+                            <ModalHeader>Histori</ModalHeader>
+                            <ModalBody>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">No Resi</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Pembaruan Terakhir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.generateRowAWBHistory()}
+                                    </tbody>
+                                </table>
 
-                        </ModalBody>
+                            </ModalBody>
 
-                        <ModalFooter className="text-center">
-                          <Button onClick={() => this.setState({ awbHistoryModal: false })}>
-                            Close
+                            <ModalFooter className="text-center">
+                                <Button onClick={() => this.setState({ awbHistoryModal: false })}>
+                                    Close
                           </Button>
-                        </ModalFooter>
-                      </Modal>
+                            </ModalFooter>
+                        </Modal>
                     )}
                     {this.state.awbDetailModal && (
-                      <div>
-                        <ModalComponent
-                          header={this.state.dataModal.header}
-                          body={this.state.dataModal.body}
-                          footer={this.state.dataModal.footer}
-                          close={() => {
-                            this.setState({ modal: false });
-                          }}
-                        />
-                      </div>
-                  )}
+                        <div>
+                            <ModalComponent
+                                header={this.state.dataModal.header}
+                                body={this.state.dataModal.body}
+                                footer={this.state.dataModal.footer}
+                                close={() => {
+                                    this.setState({ modal: false });
+                                }}
+                            />
+                        </div>
+                    )}
                 </Row>
             </>
         );

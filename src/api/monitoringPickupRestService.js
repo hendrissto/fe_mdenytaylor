@@ -18,4 +18,8 @@ export default class MonitoringPickupRestService extends React.Component {
     getAWBHistory(salesTransactionID, qParams) {
       return this.request.get(`/monitoring-pickup/waybill-history/${salesTransactionID}`, qParams);
     }
+
+    loadRelatedData(clientAppId) {
+      return this.request.get(`/admin/entry-related-data?clientAppId=${clientAppId}`);
+  }
 }
