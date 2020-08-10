@@ -1,4 +1,4 @@
-/* Gogo Main Style 
+/* Gogo Main Style
 
 Table of Contents
 
@@ -6366,7 +6366,7 @@ input:-webkit-autofill {
   padding: 0.5rem 1.5rem;
   background: $input-background;
   color: $primary-color;
-  
+
   cursor: pointer;
 
   span {
@@ -6866,7 +6866,7 @@ input:-webkit-autofill {
     }
   }
 
-  
+
 .react-contextmenu-item {
   span {
     margin-left: initial;
@@ -7733,4 +7733,26 @@ input:-webkit-autofill {
       transform: translate(0, -50%);
     }
   }
+}
+.tooltip-cstm {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-cstm .tooltiptext {
+  visibility: hidden;
+  width: 260px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip-cstm:hover .tooltiptext {
+  visibility: visible;
 }

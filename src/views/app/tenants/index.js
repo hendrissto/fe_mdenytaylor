@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import { useState } from 'react';
 import { forkJoin, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -6,7 +7,6 @@ import moment from "moment";
 import "moment/locale/id";
 import { Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
@@ -31,6 +31,8 @@ import {
   ModalFooter,
   Row,
   Col,
+  Card,
+  CardBody,
   UncontrolledPopover,
   PopoverBody,
   CustomInput,
@@ -38,7 +40,8 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-  UncontrolledTooltip
+  UncontrolledTooltip,
+  Tooltip
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
 import BillingRestService from "../../../api/billingRestService";
@@ -740,14 +743,26 @@ export default class Tenant extends Component {
 
   shippingSettingsModal() {
     let temp = [];
+    const couriresNotCOD = ['anteraja', 'gosend'];
     const listShippingSettings = this.state.relatedData.integratedShippings;
     const data = this.state.oneData;
 
     for (let i = 0; i < listShippingSettings.length; i++) {
       const courier = _.find(data.shippingSettings, ['courierChannelId', listShippingSettings[i].id]);
+      let services = this.state.relatedData.shippingServices;
+      if(_.includes(couriresNotCOD,listShippingSettings[i].id)) {
+        services = _.reject(services, ['shippingServiceStr', 'Cod']);
+      }
       temp.push(
         <tr>
-          <td> {listShippingSettings[i].name} </td>
+          <td>
+            {listShippingSettings[i].name}
+            { _.includes(couriresNotCOD,listShippingSettings[i].id) &&
+              <div className="tooltip-cstm"><i className="pi pi-info-circle"></i>
+                <span className="tooltiptext">Kurir ini belum menyediakan layanan COD</span>
+              </div>
+            }
+          </td>
           <td>
             { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
             <div>
@@ -787,9 +802,7 @@ export default class Tenant extends Component {
             { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
               (<Dropdown
                 value={this.state.formShippingSetting.shippingService}
-                options={
-                  this.state.relatedData.shippingServices
-                }
+                options={services}
                 onChange={this.onChangeFormShipping.bind(this, 'shippingService')}
                 placeholder="Pilih Layanan"
                 name="shippingService"
@@ -911,6 +924,7 @@ export default class Tenant extends Component {
     payload.shippingService = _.get(payload.shippingService, 'shippingService') || 0;
     this.tenantRest.updateShippingSettings(this.state.oneData.id, [payload]).subscribe(() => {
       this.loadOneData(this.state.oneData.id);
+      this.loadData().subscribe()
       MySwal.fire({
         type: "success",
         title: `Berhasil merubah pengaturan pengiriman.`,
