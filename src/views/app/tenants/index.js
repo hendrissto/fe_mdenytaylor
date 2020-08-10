@@ -36,6 +36,8 @@ import {
 import TenantRestService from "../../../api/tenantRestService";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
+import { AclService } from "../../../services/auth/AclService";
+
 import "./tenants.css";
 
 import Switch from "rc-switch";
@@ -50,6 +52,7 @@ const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
+    this.acl = new AclService();
     this.tenantRest = new TenantRestService();
     this.normalize = new NormalizeData();
     this.exportService = new ExportTenants();
@@ -417,6 +420,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.shippingSettings,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="secondary"
@@ -428,6 +433,8 @@ export default class Tenant extends Component {
               Shipping Settings
             </Button>
           </div>
+          }
+          </>
         )
       },
       {
@@ -435,6 +442,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.warehouseChannels,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="info"
@@ -445,13 +454,17 @@ export default class Tenant extends Component {
               Warehouse Channels
             </Button>
           </div>
-        )
+            }
+          </>
+          )
       },
       {
         Header: "Is Real",
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isReal}
@@ -459,6 +472,8 @@ export default class Tenant extends Component {
               this.editIsReal(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {
@@ -466,6 +481,8 @@ export default class Tenant extends Component {
         accessor: "isActive",
         show: tableFilter.status,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isActive}
@@ -473,6 +490,8 @@ export default class Tenant extends Component {
               this.editIsActive(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {

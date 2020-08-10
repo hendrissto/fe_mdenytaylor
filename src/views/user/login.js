@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import React, { Component } from "react";
 import { Row, Card, CardTitle, Form, Label, Input, Button } from "reactstrap";
 import { NavLink } from "react-router-dom";
@@ -10,9 +11,12 @@ import AuthRestService from "../../api/authRestService";
 import Loading from '../../containers/pages/Spinner'
 import { Formik } from "formik";
 import validate from "./login-validation";
+import menuItems from "../../constants/menu";
+
 
 import BaseAlert from '../base/baseAlert'
 import * as css from "../base/baseCss"
+import { AclService } from "../../services/auth/AclService";
 
 class Login extends Component {
   data = {
@@ -24,10 +28,12 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.authRest = new AuthRestService();
+    this.acl = new AclService();
 
     this.state = {
       loading: false,
       error: false,
+      errorMessage: '',
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -39,9 +45,16 @@ class Login extends Component {
       this.setState({ loading: true })
       this.authRest.login(values).subscribe(response => {
         this.props.loginUser(response, this.props.history);
+
+        const { history } = this.props;
+        this.acl.redirectAllowedMenu(history);
+
         this.setState({ loading: false })
+
       }, err => {
-        this.setState({ loading: false, error: true })
+        this.setState({ error: false, errorMessage: ''});
+        const errorMessage = _.get(err, 'data.error_description', '');
+        this.setState({ errorMessage ,loading: false, error: true })
       });
     }
   }
@@ -88,7 +101,7 @@ class Login extends Component {
                   onClick={() => {
                     this.setState({error: false});
                   }}
-                  text={'Username & password salah, silahkan periksa kembali..'}
+                  text={this.state.errorMessage}
                 />
               )}
               </CardTitle>

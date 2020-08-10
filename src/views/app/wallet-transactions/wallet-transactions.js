@@ -36,6 +36,7 @@ import { Paginator } from 'primereact/paginator';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { ColumnFormat } from "../../../services/Format/ColumnFormat";
+import { AclService } from "../../../services/auth/AclService";
 import { Checkbox } from 'primereact/checkbox';
 
 const MySwal = withReactContent(Swal);
@@ -93,6 +94,7 @@ class WalletTransactions extends Component {
     this.walletTransactionsRestService = new WalletTransactionsRestService();
     this.relatedDataRestService = new RelatedDataRestService();
     this.pictureRestService = new PictureRestService();
+    this.acl = new AclService();
     this.moneyFormat = new MoneyFormat();
     this.columnFormat = new ColumnFormat();
     this.fileHandler = this.fileHandler.bind(this);
@@ -181,7 +183,6 @@ class WalletTransactions extends Component {
   suggestTenants(event) {
     const params = {
       keyword: event.query || null,
-      isWalletTransaction: true,
       "options.take": 30,
       "options.skip": 0
     };
@@ -570,6 +571,7 @@ class WalletTransactions extends Component {
                 </Button>
               </InputGroup>
             </div>
+            { this.acl.can(['wallet.tenant_wallet.create']) &&
             <div>
               <Button
                 className="default"
@@ -598,7 +600,8 @@ class WalletTransactions extends Component {
                 Tambah Wallet Transaction
               </Button>
             </div>
-          </div>
+            }
+         </div>
 
             {/*<Column style={{width:'250px'}} field="deliveryDate" header="Seller Name" frozen={true}/>*/}
             <DataTable value={this.state.table.data} className="noheader" lazy={true} loading={this.state.table.loading} responsive={true} resizableColumns={true} columnResizeMode="fit" scrollable={true} scrollHeight="500px">
@@ -986,7 +989,9 @@ class WalletTransactions extends Component {
                 <Column style={{width:'200px'}} field="amount" header="Amount" body={this.moneyFormat.currencyFormat}  />
                 <Column style={{width:'200px'}} field="feeTransfer" header="Fee Transfer" body={this.moneyFormat.currencyFormat}  />
                 <Column style={{width:'200px'}} field="note" header="Note" body={this.columnFormat.emptyColumn}/>
-                <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
+                { this.acl.can(['wallet.tenant_wallet.edit']) &&
+                  <Column style={{width:'250px'}} header="Action" body={this.actionTemplateForEditAttachment}/>
+                }
               </DataTable>
               <Paginator
                 first={this.state.tableDetail.pagination.skipSize}

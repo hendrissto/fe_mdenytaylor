@@ -1,4 +1,4 @@
-/* 
+/*
 Menu Types:
 "menu-default", "menu-sub-hidden", "menu-hidden"
 */
@@ -20,11 +20,16 @@ export const firebaseConfig = {
   storageBucket: "gogo-react-login.appspot.com",
   messagingSenderId: "216495999563"
 };
+export const oneSignalConfig = {
+  appID: "406c1e40-5093-4464-9f31-6805bd1bf5c5",
+
+  // appID: "d7d25033-4fbb-42c8-90e0-314799a9309c",
+};
 
 export const searchPath = "/app/pages/search";
 export const servicePath = "https://api.coloredstrategies.com";
 
-/* 
+/*
 Color Options:
 "light.purple", "light.blue", "light.green", "light.orange", "light.red", "dark.purple", "dark.blue", "dark.green", "dark.orange", "dark.red"
 */

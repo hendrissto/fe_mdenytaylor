@@ -1,4 +1,4 @@
-/* Gogo Main Style 
+/* Gogo Main Style
 
 Table of Contents
 
@@ -1647,9 +1647,12 @@ button {
   @include depth(1);
 
   #notificationDropdown {
-    width: 260px;
+    .scrollbar-container {
+      max-height: 250px!important;
+    }
+    width: 430px;
     padding: 1.5rem !important;
-    height: 280px;
+    max-height: 400px;
     right: 15px;
   }
 
@@ -6366,7 +6369,7 @@ input:-webkit-autofill {
   padding: 0.5rem 1.5rem;
   background: $input-background;
   color: $primary-color;
-  
+
   cursor: pointer;
 
   span {
@@ -6866,7 +6869,7 @@ input:-webkit-autofill {
     }
   }
 
-  
+
 .react-contextmenu-item {
   span {
     margin-left: initial;
@@ -7733,4 +7736,17 @@ input:-webkit-autofill {
       transform: translate(0, -50%);
     }
   }
+}
+
+.router-link {
+  color: #7575FF;
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+.unread-message {
+  background: #EDF2FA;
+  padding: 15px 5px;
+  border-radius: 5px;
 }
