@@ -64,6 +64,7 @@ module.exports = {
   "menu.request-withdraw-funds": "Request Withdraw Funds",
   "menu.receipt-of-funds": "COD Credit Transfer",
   "menu.withdraw-of-tenant-funds": "Withdraw of tenat funds",
+  "menu.monitoring-pickup": "Monitoring Pickup",
   "menu.tenants": "Tenants",
   "menu.default": "Default",
   "menu.analytics": "Analytics",
@@ -72,12 +73,16 @@ module.exports = {
   "menu.pages": "Pages",
   "menu.billing": "Subscription",
   "menu.list-transactions": "List Transactions",
+  "menu.users": "Users",
+  "menu.roles": "Roles",
+  "menu.permissions": "List Permissions",
   "menu.data-list": "Data List",
   "menu.thumb-list": "Thumb List",
   "menu.image-list": "Image List",
   "menu.details": "Details",
   "menu.search": "Search",
   "menu.login": "Login",
+  "menu.notifications": "Notifications",
   "menu.register": "Register",
   "menu.forgot-password": "Forgot Password",
   "menu.error": "Error",
@@ -110,7 +115,7 @@ module.exports = {
   "menu.subhidden": "Subhidden",
   "menu.hidden": "Hidden",
   "menu.visible": "Visible",
-  "menu.maps":"Maps",
+  "menu.maps": "Maps",
 
   "menu.landingpage": "Landing Page",
   "menu.multipage-home": "Multipage Home",
@@ -227,10 +232,10 @@ module.exports = {
   "pages.error-title": "Ooops... looks like an error occurred!",
   "pages.error-code": "Error code",
   "pages.go-back-home": "GO BACK HOME",
-  "pages.mailing-info":"Mailing templates use inline styling and table layout to be displayed well at various service providers. To provide better usability we include it as regular html with dangerouslySetInnerHTML.",
-  "pages.invoice-info":"Invoice template has an inline styled version for usage outside of the project as well as React version.",
-  "pages.react-version":"React Version",
-  "pages.inline-version":"Inline Styled Html Version",
+  "pages.mailing-info": "Mailing templates use inline styling and table layout to be displayed well at various service providers. To provide better usability we include it as regular html with dangerouslySetInnerHTML.",
+  "pages.invoice-info": "Invoice template has an inline styled version for usage outside of the project as well as React version.",
+  "pages.react-version": "React Version",
+  "pages.inline-version": "Inline Styled Html Version",
 
   /* 06.Applications */
 
@@ -610,12 +615,12 @@ module.exports = {
 
   // expenditure
 
-  "expenditure.title"               : "Riwayat Pengeluaran Dana",
-  "expenditure.totalbalace"         : "Saldo Total",
-  "expenditure.table.header.seller"             : "Penjual",
-  "expenditure.table.header.amountBalanceSent" : "Jumlah Saldo Dikirim",
-  "expenditure.table.header.sentToAccount" : "Dikirim ke Rekening",
-  "expenditure.table.header.status" : "Status",
-  "expenditure.table.header.proof"  : "Bukti"
+  "expenditure.title": "Riwayat Pengeluaran Dana",
+  "expenditure.totalbalace": "Saldo Total",
+  "expenditure.table.header.seller": "Penjual",
+  "expenditure.table.header.amountBalanceSent": "Jumlah Saldo Dikirim",
+  "expenditure.table.header.sentToAccount": "Dikirim ke Rekening",
+  "expenditure.table.header.status": "Status",
+  "expenditure.table.header.proof": "Bukti"
 
 };

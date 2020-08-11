@@ -24,7 +24,7 @@ const NotificationItem = ({ img, title, date }) => {
   );
 };
 
-const TopnavNotifications = () => {
+const Notifications = () => {
   return (
     <div className="position-relative d-inline-block">
       <UncontrolledDropdown className="dropdown-menu-right">
@@ -53,4 +53,4 @@ const TopnavNotifications = () => {
   );
 };
 
-export default TopnavNotifications;
+export default Notifications;

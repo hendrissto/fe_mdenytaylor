@@ -2,7 +2,9 @@
 import Axios from 'axios';
 import * as _ from "lodash";
 import { HttpClientAxiosService } from './HttpClientAxiosService';
+import { OneSignalNotificationService } from './notification/OneSignalNotificationService';
 const qs = require('querystring');
+const oneSignalService = new OneSignalNotificationService();
 
 export class HttpClientAxiosInterceptedService extends HttpClientAxiosService {
   constructor(baseURL, headers) {
@@ -23,7 +25,7 @@ export class HttpClientAxiosInterceptedService extends HttpClientAxiosService {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         }
-        
+
         const tokenUrl = process.env.REACT_APP_API_AUTH_URL + '/token';
         const refreshToken = JSON.parse(localStorage.getItem('user')).refresh_token;
         const payload = this.requestNewToken(refreshToken);
@@ -36,6 +38,7 @@ export class HttpClientAxiosInterceptedService extends HttpClientAxiosService {
             // return axios.request(response.config);
           }
         }, error => {
+          oneSignalService.unsubscribe();
           window.location.href = "/user/login"
           throw error;
         })

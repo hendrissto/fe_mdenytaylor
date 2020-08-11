@@ -1,6 +1,7 @@
 
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
 import { auth } from '../../helpers/Firebase';
+
 import {
     LOGIN_USER,
     REGISTER_USER,
@@ -11,6 +12,8 @@ import {
     loginUserSuccess,
     registerUserSuccess
 } from './actions';
+
+
 
 // const loginWithEmailPasswordAsync = async (email, password) =>
 //     await auth.signInWithEmailAndPassword(email, password)
@@ -38,11 +41,10 @@ import {
 
 function* loginWithEmailPassword({payload}) {
     const { user } = payload;
-    const { history } = payload;
     try {
         localStorage.setItem('user', JSON.stringify(user));
         yield put(loginUserSuccess(user));
-        history.push('/app');
+
     } catch (error) {
         console.log('login error : ', error)
     }

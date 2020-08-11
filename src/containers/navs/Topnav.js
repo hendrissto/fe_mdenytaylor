@@ -1,16 +1,30 @@
 import React, { Component } from "react";
 import { injectIntl } from "react-intl";
-
+import { Formik } from "formik";
 import {
   UncontrolledDropdown,
   DropdownItem,
   DropdownToggle,
   DropdownMenu,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Table,
   // Input
 } from "reactstrap";
+import Swal from "sweetalert2";
+import Loading from "../../containers/pages/Spinner";
+import { InputText } from 'primereact/inputtext';
+
+
+
 
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
+import randomstring from "randomstring";
+
 
 // import IntlMessages from "../../helpers/IntlMessages";
 import {
@@ -26,20 +40,34 @@ import {
 } from "../../constants/defaultValues";
 
 import { MobileMenuIcon, MenuIcon } from "../../components/svg";
+import Notifications from "../applications/Notifications";
 // import TopnavEasyAccess from "./Topnav.EasyAccess";
-// import TopnavNotifications from "./Topnav.Notifications";
 // import TopnavDarkSwitch from "./Topnav.DarkSwitch";
 
 import { getDirection, setDirection } from "../../helpers/Utils";
+import UsersRestService from "../../api/usersRestService";
+import withReactContent from "sweetalert2-react-content";
+import { MessageParserService } from '../../api/common/messageParserService';
+
+
+const MySwal = withReactContent(Swal);
+
 class TopNav extends Component {
   constructor(props) {
     super(props);
+    this.userRestService = new UsersRestService();
+    this.messageParserService = new MessageParserService();
 
+    this.submitResetPassword = this.submitResetPassword.bind(this);
     this.state = {
       isInFullScreen: false,
       searchKeyword: "",
       user: JSON.parse(localStorage.getItem("user")),
       redirect: true,
+      oldPassword: '',
+      newPassword: '',
+      loading: false,
+      isChangePassword: false,
     };
   }
 
@@ -196,6 +224,118 @@ class TopNav extends Component {
     this.props.clickOnMobileMenu(containerClassnames);
   };
 
+  submitResetPassword(formValue) {
+    this.setState({ loading: true });
+    
+    this.userRestService.changePassword(formValue).subscribe(res => {
+      MySwal.fire({
+        type: "success",
+        title: "Berhasil Ubah Password.",
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.handleLogout();
+    }, err => {
+      const message = this.messageParserService.parse(err.data) || 'Gagal Ubah password.';
+      MySwal.fire({
+        type: "error",
+        title: message[0],
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+    });
+    this.setState({
+      loading: false,
+      isChangePassword: false
+    })
+  }
+
+  isChangePasswordComp() {
+
+    return <>
+      <Modal isOpen={this.state.isChangePassword}>
+        <ModalHeader>Reset Password</ModalHeader>
+        <Formik
+          initialValues={{
+            oldPassword: this.state.oldPassword,
+            newPassword: this.state.newPassword
+          }}
+          onSubmit={this.submitResetPassword}
+        >
+          {props => (
+            <form onSubmit={props.handleSubmit}>
+              <ModalBody>
+                <Table>
+                  <tbody>
+                    <tr>
+                      <td colSpan={2} style={{ verticalAlign: 'middle' }}>Password Lama</td>
+                      <td style={{ verticalAlign: 'middle' }}>:</td>
+                      <td colSpan={2} style={{ verticalAlign: 'middle' }}>
+                        <InputText
+                          name="oldPassword"
+                          type="password"
+                          value={props.values.oldPassword}
+                          onChange={props.handleChange}
+                          onBlur={props.handleBlur}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={2} style={{ verticalAlign: 'middle' }}>Password Baru</td>
+                      <td style={{ verticalAlign: 'middle' }}>:</td>
+                      <td colSpan={2} style={{ verticalAlign: 'middle' }}>
+                        <InputText
+                          name="newPassword"
+                          type="password"
+                          value={props.values.newPassword}
+                          onChange={props.handleChange}
+                          onBlur={props.handleBlur}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  color="primary"
+                  type="submit"
+                  style={{
+                    borderRadius: 6
+                  }}
+                >
+                  Simpan
+                  </Button>
+                <Button
+                  color="primary"
+                  outline
+                  onClick={() => {
+                    this.setState({
+                      isChangePassword: false,
+                      oldPassword: '',
+                      newPassword: ''
+                    });
+                  }}
+                  style={{
+                    borderRadius: 6
+                  }}
+                >
+                  Close
+                </Button>
+              </ModalFooter>
+            </form>
+          )}
+        </Formik>
+      </Modal>
+    </>
+  }
+
   render() {
     const { containerClassnames, menuClickCount } = this.props;
     // if (this.state.redirect === true) {
@@ -204,29 +344,30 @@ class TopNav extends Component {
     // }
     // const { messages } = this.props.intl;
     return (
-      <nav className="navbar fixed-top" style={{
-        height: 55,
-        padding: 6,
-      }}>
-        <div className="d-flex align-items-center navbar-left">
-          <NavLink
-            to="#"
-            className="menu-button d-none d-md-block"
-            onClick={e =>
-              this.menuButtonClick(e, menuClickCount, containerClassnames)
-            }
-          >
-            <MenuIcon />
-          </NavLink>
-          <NavLink
-            to="#"
-            className="menu-button-mobile d-xs-block d-sm-block d-md-none"
-            onClick={e => this.mobileMenuButtonClick(e, containerClassnames)}
-          >
-            <MobileMenuIcon />
-          </NavLink>
+      <>
+        <nav className="navbar fixed-top" style={{
+          height: 55,
+          padding: 6,
+        }}>
+          <div className="d-flex align-items-center navbar-left">
+            <NavLink
+              to="#"
+              className="menu-button d-none d-md-block"
+              onClick={e =>
+                this.menuButtonClick(e, menuClickCount, containerClassnames)
+              }
+            >
+              <MenuIcon />
+            </NavLink>
+            <NavLink
+              to="#"
+              className="menu-button-mobile d-xs-block d-sm-block d-md-none"
+              onClick={e => this.mobileMenuButtonClick(e, containerClassnames)}
+            >
+              <MobileMenuIcon />
+            </NavLink>
 
-          {/* <div className="search" data-search-path="/app/pages/search">
+            {/* <div className="search" data-search-path="/app/pages/search">
             <Input
               name="searchKeyword"
               id="searchKeyword"
@@ -242,7 +383,7 @@ class TopNav extends Component {
               <i className="simple-icon-magnifier" />
             </span>
           </div> */}
-          {/*
+            {/*
           <div className="d-inline-block">
             <UncontrolledDropdown className="ml-2">
               <DropdownToggle
@@ -268,7 +409,7 @@ class TopNav extends Component {
             </UncontrolledDropdown>
           </div>
            */}
-          {/* <div className="position-relative d-none d-none d-lg-inline-block">
+            {/* <div className="position-relative d-none d-none d-lg-inline-block">
             <a
               className="btn btn-outline-primary btn-sm ml-2"
               target="_top"
@@ -284,10 +425,11 @@ class TopNav extends Component {
         </a>
 
         <div className="navbar-right">
+          <Notifications type="summary"/>
+
           {/* {isDarkSwitchActive && <TopnavDarkSwitch/>} */}
           {/* <div className="header-icons d-inline-block align-middle">
             <TopnavEasyAccess />
-            <TopnavNotifications />
             <button
               className="header-icon btn btn-empty d-none d-sm-inline-block"
               type="button"
@@ -301,28 +443,42 @@ class TopNav extends Component {
               )}
             </button>
           </div> */}
-          <div className="user d-inline-block">
-            <UncontrolledDropdown className="dropdown-menu-right">
-              <DropdownToggle className="p-0" color="empty">
-                <span className="name mr-1">Admin</span>
-                <span>
-                  <img alt="Profile" src="/assets/img/profile.jpg" />
-                </span>
-              </DropdownToggle>
-              <DropdownMenu className="mt-3" right>
-                {/* <DropdownItem>Account</DropdownItem> */}
-                {/* <DropdownItem>Features</DropdownItem> */}
-                {/* <DropdownItem>History</DropdownItem> */}
-                {/* <DropdownItem>Support</DropdownItem> */}
-                {/* <DropdownItem divider /> */}
-                <DropdownItem onClick={() => this.handleLogout()}>
-                  Sign out
+            <div className="user d-inline-block">
+              <UncontrolledDropdown className="dropdown-menu-right">
+                <DropdownToggle className="p-0" color="empty">
+                  <span className="name mr-1">Admin</span>
+                  <span>
+                    <img alt="Profile" src="/assets/img/profile.jpg" />
+                  </span>
+                </DropdownToggle>
+                <DropdownMenu className="mt-3" right>
+                  {/* <DropdownItem>Account</DropdownItem> */}
+                  {/* <DropdownItem>Features</DropdownItem> */}
+                  {/* <DropdownItem>History</DropdownItem> */}
+                  {/* <DropdownItem>Support</DropdownItem> */}
+                  {/* <DropdownItem divider /> */}
+                  <DropdownItem style={{
+                    cursor: 'pointer'
+                  }} onClick={() => this.setState({
+                    isChangePassword: true,
+                  })}>
+                    Ganti Password
                 </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+                  <DropdownItem style={{
+                    cursor: 'pointer'
+                  }} onClick={() => this.handleLogout()}>
+                    Sign out
+                </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+        {this.state.isChangePassword && (
+          this.isChangePasswordComp()
+        )}
+        {this.state.loading && <Loading />}
+      </>
     );
   }
 }
@@ -337,6 +493,8 @@ const mapStateToProps = ({ menu, settings }) => {
     locale
   };
 };
+
+
 export default injectIntl(
   connect(
     mapStateToProps,

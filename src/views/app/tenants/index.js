@@ -1,13 +1,20 @@
+import * as _ from "lodash";
+import { useState } from 'react';
+import { forkJoin, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+
 import moment from "moment";
 import "moment/locale/id";
 import { Redirect } from "react-router-dom";
 import React, { Component, Fragment } from "react";
-import { Card, CardBody } from "reactstrap";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import withFixedColumns from "react-table-hoc-fixed-columns";
 import "react-table-hoc-fixed-columns/lib/styles.css";
 import { Paginator } from "primereact/paginator";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from 'primereact/inputtext';
+
 import ExportTenants from "../../../core/export/ExportTenants";
 import NormalizeData from "../../../core/export/NormalizeData";
 import Loader from "react-loader-spinner";
@@ -24,6 +31,8 @@ import {
   ModalFooter,
   Row,
   Col,
+  Card,
+  CardBody,
   UncontrolledPopover,
   PopoverBody,
   CustomInput,
@@ -31,11 +40,15 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-  UncontrolledTooltip
+  UncontrolledTooltip,
+  Tooltip
 } from "reactstrap";
 import TenantRestService from "../../../api/tenantRestService";
+import BillingRestService from "../../../api/billingRestService";
 import Spinner from "../../../containers/pages/Spinner";
 import IconCard from "../../../components/cards/IconCard";
+import { AclService } from "../../../services/auth/AclService";
+
 import "./tenants.css";
 
 import Switch from "rc-switch";
@@ -50,9 +63,12 @@ const ReactTableFixedColumn = withFixedColumns(ReactTable);
 export default class Tenant extends Component {
   constructor(props) {
     super(props);
+    this.acl = new AclService();
+    this.billingRest = new BillingRestService();
     this.tenantRest = new TenantRestService();
     this.normalize = new NormalizeData();
     this.exportService = new ExportTenants();
+    this.onChangeFormShipping = this.onChangeFormShipping.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.loadTenantsSummmary = this.loadTenantsSummmary.bind(this);
     this.togglePopOver = this.togglePopOver.bind(this);
@@ -136,6 +152,7 @@ export default class Tenant extends Component {
       warehouseChannelsData: [],
       loadingShippings: false,
       loadingWarehouses: false,
+      formShippingSetting: null
     };
   }
 
@@ -180,7 +197,7 @@ export default class Tenant extends Component {
     table.pagination.currentPage = paginationEvent.page + 1;
 
     this.setState({ table }, () => {
-      this.loadData();
+      this.loadData().subscribe();
     });
   };
 
@@ -189,7 +206,7 @@ export default class Tenant extends Component {
     table.loading = true;
     table.pagination.pageSize = newPageSize;
     this.setState({ table });
-    this.loadData();
+    this.loadData().subscribe();
   }
 
   handleSortedChange(newSorted, column, additive) {
@@ -216,8 +233,8 @@ export default class Tenant extends Component {
       "options.includeTotalCount": true
     };
 
-    this.tenantRest.getTenants({ params }).subscribe(
-      response => {
+    return this.tenantRest.getTenants({ params }).pipe(
+      tap((response) => {
         const table = { ...this.state.table };
         table.data = response.data;
         table.pagination.totalPages = Math.ceil(response.total / response.take);
@@ -229,8 +246,8 @@ export default class Tenant extends Component {
         }
         this.setState({ totalTenants: response.total });
         this.setState({ table });
-      },
-      error => {
+      }),
+      catchError((error) => {
         if (error.response.status === 401) {
           MySwal.fire({
             type: "error",
@@ -252,8 +269,22 @@ export default class Tenant extends Component {
             customClass: "swal-height"
           });
         }
-      }
+      })
     );
+  }
+
+  loadRelatedData() {
+    return this.billingRest.getRelatedData().pipe(tap(response => {
+      const relatedData = response;
+      const validshippingServices = [];
+      const shippingServices = response.shippingServices;
+      for (let index = 0; index < shippingServices.length; index++) {
+        shippingServices[index].shippingServiceStr = _.startCase(shippingServices[index].shippingServiceStr);
+        validshippingServices[index] = shippingServices[index];
+      }
+      relatedData.shippingServices = validshippingServices;
+      this.setState({ relatedData: relatedData });
+    }));
   }
 
   loadOneData(id) {
@@ -265,14 +296,37 @@ export default class Tenant extends Component {
   }
 
   componentDidMount() {
-    this.loadData();
-    this.loadTenantsSummmary();
+    this.setState({ loading: true });
+    forkJoin(
+      this.loadData(),
+      this.loadRelatedData(),
+      this.loadTenantsSummmary()
+    ).pipe(
+      catchError((error)=>{
+        this.setState({
+          loading: false
+        });
+        MySwal.fire({
+          type: "error",
+          title:  error.response.data[0] ? error.response.data[0].errorMessage : 'Tidak diketahui',
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: "swal-height"
+        });
+        return throwError(error);
+      })
+    ).subscribe((() => {
+      this.setState({loading: false});
+    }));
+
   }
 
   loadTenantsSummmary() {
-    this.tenantRest.getTenantsSummary().subscribe(response => {
+    return this.tenantRest.getTenantsSummary().pipe(tap(response => {
       this.setState({ tenantsSummary: response });
-    });
+    }));
   }
 
   toggle() {
@@ -282,7 +336,10 @@ export default class Tenant extends Component {
   }
 
   toggleShippingSettingsModal() {
-    this.setState({ shippingSettingsModal: false });
+    this.setState({
+      shippingSettingsModal: false,
+      formShippingSetting: null
+    });
   }
 
   toggleWarehouseChannelsModal() {
@@ -314,7 +371,22 @@ export default class Tenant extends Component {
         accessor: "companyInfo.name",
         fixed: "left",
         width: 150,
-        show: tableFilter.companyInfo
+        show: tableFilter.companyInfo,
+        Cell: props =>  (
+          <div>
+            <span style={{
+                display: 'flex',
+                flexDirection: 'row',
+                }}>
+              <p style={{
+                color: 'blue',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                marginRight: '3px'
+                }}>{props.value}</p><span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
+            </span>
+          </div>
+        )
       },
       {
         Header: "Email Tenant",
@@ -417,6 +489,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.shippingSettings,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="secondary"
@@ -428,6 +502,8 @@ export default class Tenant extends Component {
               Shipping Settings
             </Button>
           </div>
+          }
+          </>
         )
       },
       {
@@ -435,6 +511,8 @@ export default class Tenant extends Component {
         width: 200,
         show: tableFilter.warehouseChannels,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <div>
             <Button
               color="info"
@@ -445,13 +523,17 @@ export default class Tenant extends Component {
               Warehouse Channels
             </Button>
           </div>
-        )
+            }
+          </>
+          )
       },
       {
         Header: "Is Real",
         accessor: "isReal",
         show: tableFilter.isRealColumn,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isReal}
@@ -459,6 +541,8 @@ export default class Tenant extends Component {
               this.editIsReal(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {
@@ -466,6 +550,8 @@ export default class Tenant extends Component {
         accessor: "isActive",
         show: tableFilter.status,
         Cell: props => (
+          <>
+          { this.acl.can(['tenant.tenant_list.edit']) &&
           <Switch
             className="custom-switch custom-switch-secondary"
             checked={props.original.isActive}
@@ -473,6 +559,8 @@ export default class Tenant extends Component {
               this.editIsActive(props.original);
             }}
           />
+          }
+          </>
         )
       },
       {
@@ -505,8 +593,8 @@ export default class Tenant extends Component {
     this.setState({ table }, () => {
       this.tenantRest.activeCOD(data.id, !data.siCepatCOD).subscribe(
         response => {
-          this.loadData();
-          this.loadTenantsSummmary();
+          this.loadData().subscribe();
+          this.loadTenantsSummmary().subscribe();
           if (!data.siCepatCOD) {
             MySwal.fire({
               type: "success",
@@ -550,8 +638,8 @@ export default class Tenant extends Component {
     this.setState({ table }, () => {
       this.tenantRest.activeSapCOD(data.id, payload).subscribe(
         response => {
-          this.loadData();
-          this.loadTenantsSummmary();
+          this.loadData().subscribe();
+          this.loadTenantsSummmary().subscribe();
           if (!data.isCOD) {
             MySwal.fire({
               type: "success",
@@ -591,8 +679,8 @@ export default class Tenant extends Component {
     this.setState({ table }, () => {
       this.tenantRest.isRealUser(data.id, !data.isReal).subscribe(
         response => {
-          this.loadData();
-          this.loadTenantsSummmary();
+          this.loadData().subscribe();
+          this.loadTenantsSummmary().subscribe();
           MySwal.fire({
             type: "success",
             title: "Berhasil.",
@@ -634,8 +722,8 @@ export default class Tenant extends Component {
         this.setState({ table }, () => {
           this.tenantRest.isActiveUser(data.id, !data.isActive, payload).subscribe(
             response => {
-              this.loadData();
-              this.loadTenantsSummmary();
+              this.loadData().subscribe();
+              this.loadTenantsSummmary().subscribe();
               MySwal.fire({
                 type: "success",
                 title: "Berhasil.",
@@ -689,56 +777,104 @@ export default class Tenant extends Component {
 
   shippingSettingsModal() {
     let temp = [];
-    const listShippingSettings = this.state.oneData.shippingSettings;
+    const couriresNotCOD = ['anteraja', 'gosend'];
+    const listShippingSettings = this.state.relatedData.integratedShippings;
     const data = this.state.oneData;
 
     for (let i = 0; i < listShippingSettings.length; i++) {
+      const courier = _.find(data.shippingSettings, ['courierChannelId', listShippingSettings[i].id]);
+      let services = this.state.relatedData.shippingServices;
+      if(_.includes(couriresNotCOD,listShippingSettings[i].id)) {
+        services = _.reject(services, ['shippingServiceStr', 'Cod']);
+      }
       temp.push(
         <tr>
-          <td> {listShippingSettings[i].courierChannelId} </td>
-          <td> {listShippingSettings[i].memberId || '-'} </td>
           <td>
-            <Switch
-              className="custom-switch custom-switch-secondary"
-              checked={listShippingSettings[i].isCOD || listShippingSettings[i].isPickupRequest}
-              onChange={(event) => {
-                this.setState({ loadingShippings: true })
-                const params = {
-                  "isPickup": !listShippingSettings[i].isPickupRequest,
-                  "isCOD": !listShippingSettings[i].isCOD,
-                  "courierId": listShippingSettings[i].courierChannelId
-                }
-                this.tenantRest.updateShippingSettings(data.id, params).subscribe(() => {
-                  this.loadOneData(data.id);
-                  this.loadData()
-                  if (listShippingSettings[i].isCOD) {
-                    MySwal.fire({
-                      type: "success",
-                      title: `COD ${listShippingSettings[i].courierChannelId} telah dinonaktifkan.`,
-                      toast: true,
-                      position: "top-end",
-                      timer: 2000,
-                      showConfirmButton: false,
-                      customClass: "swal-height"
-                    });
-                  } else {
-                    MySwal.fire({
-                      type: "success",
-                      title: `COD ${listShippingSettings[i].courierChannelId} telah diaktifkan.`,
-                      toast: true,
-                      position: "top-end",
-                      timer: 2000,
-                      showConfirmButton: false,
-                      customClass: "swal-height"
-                    });
-                  }
-                  this.setState({ loadingShippings: false })
-                }, err => {
-                  console.log(err)
-                  this.setState({ loadingShippings: false })
-                })
-              }}
-            />
+            {listShippingSettings[i].name}
+            { _.includes(couriresNotCOD,listShippingSettings[i].id) &&
+              <div className="tooltip-cstm"><i className="pi pi-info-circle"></i>
+                <span className="tooltiptext">Kurir ini belum menyediakan layanan COD</span>
+              </div>
+            }
+          </td>
+          <td>
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
+            <div>
+              <Input
+                type="text"
+                id="memberId"
+                name="memberId"
+                value={this.state.formShippingSetting.memberId}
+                onChange={event => {
+                  this.onChangeFormShipping(event, 'memberId');
+                }}
+              />
+
+            </div>
+            }
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
+              {_.get(courier, 'memberId') || '-'}
+            </label>
+            }
+          </td>
+          <td>
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
+              <Switch
+                className="custom-switch custom-switch-secondary"
+                checked={this.state.formShippingSetting.isAlreadyMember}
+                onChange={event => {
+                  this.onChangeFormShipping(event, 'isAlreadyMember');
+                }}
+              />
+            }
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
+                {_.get(courier, 'isAlreadyMember') ? 'Ya' : 'Tidak' || '-'}
+              </label>
+            }
+          </td>
+          <td>
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
+              (<Dropdown
+                value={this.state.formShippingSetting.shippingService}
+                options={services}
+                onChange={this.onChangeFormShipping.bind(this, 'shippingService')}
+                placeholder="Pilih Layanan"
+                name="shippingService"
+                optionLabel="shippingServiceStr"
+                style={{
+                  width: 204
+                }}
+              />)
+            }
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) && <label>
+              {_.startCase(_.get(courier, 'shippingServiceStr')) || '-'}
+            </label>
+            }
+          </td>
+          <td>
+            { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
+              <Input
+                type="textarea"
+                id="registrationInfo"
+                name="registrationInfo"
+                defaultValue={this.state.formShippingSetting.registrationInfo}
+                rows="5"
+                onChange={event => {
+                  this.onChangeFormShipping(event, 'registrationInfo');
+                }}
+              />
+            }
+            { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== listShippingSettings[i].id) &&
+            <label style={{
+              width: 250,
+              wordBreak: 'break-word'
+            }}>
+              {_.get(courier, 'registrationInfo') || '-'}
+            </label>
+            }
+          </td>
+          <td>
+            {this.renderButtonShippingSettings(data, courier, listShippingSettings[i].id)}
           </td>
         </tr>
       )
@@ -746,6 +882,125 @@ export default class Tenant extends Component {
 
     return temp;
   }
+
+  onChangeFormShipping (event, extraEvent) {
+    let value;
+    let field = extraEvent;
+
+    // condition for dropdown
+    if(_.get(extraEvent, 'value')) {
+      value = extraEvent.value;
+      field = event
+
+      // condition for switch input
+    } else if(_.isBoolean(event)) {
+      value = event;
+
+    } else {
+      const target = event.target;
+      value = target.value;
+    }
+    const formValue = {
+      ...this.state.formShippingSetting
+    }
+    formValue[field] = value;
+    this.setState({formShippingSetting: formValue});
+  }
+
+  renderButtonShippingSettings(rowData, courierData, courierChannelId) {
+    return  (
+      <>
+      { (!this.state.formShippingSetting || this.state.formShippingSetting.courierId !== courierChannelId)  &&
+        <Button
+          type="button"
+          icon="pi pi-search"
+          onClick={() => {
+            this.setState({isEdit: true})
+            this.editShippingSetting(rowData, courierData, courierChannelId)
+          }}
+          className="p-button-info"
+        >
+          Edit
+        </Button>
+      }
+      { this.state.formShippingSetting && this.state.formShippingSetting.courierId === courierChannelId &&
+        <>
+        <Button
+            type="button"
+            icon="pi pi-search"
+            onClick={() => this.setState({formShippingSetting: null})}
+            className="p-button-danger"
+            style={{
+              marginRight: 5,
+              background: '#F22556',
+              borderColor: '#F22556'
+            }}
+          >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          icon="pi pi-search"
+          onClick={() => this.updateShippingSettings()}
+          className="p-button-success"
+        >
+          Simpan
+        </Button>
+        </>
+      }
+      </>
+    )
+  }
+
+  updateShippingSettings(event, courierChannelId) {
+    this.setState({ loadingShippings: true });
+    const payload = {...this.state.formShippingSetting};
+    payload.shippingService = _.get(payload.shippingService, 'shippingService') || 0;
+    this.tenantRest.updateShippingSettings(this.state.oneData.id, [payload]).subscribe(() => {
+      this.loadOneData(this.state.oneData.id);
+      this.loadData().subscribe()
+      MySwal.fire({
+        type: "success",
+        title: `Berhasil merubah pengaturan pengiriman.`,
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({ loadingShippings: false, formShippingSetting: null })
+    }, error => {
+      MySwal.fire({
+        type: "error",
+        title:  _.get(error.response) ? error.response.data[0].errorMessage : _.isArray(error.data) ? error.data[0].errorMessage : 'Tidak diketahui',
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: "swal-height"
+      });
+      this.setState({ loadingShippings: false })
+    });
+  }
+
+  editShippingSetting(doc, courierData, courierChannelId) {
+    const defaultValue = {
+      shippingService: null,
+      courierId: courierChannelId,
+      registrationInfo: '',
+      isAlreadyMember: false,
+      memberId: ''
+    }
+
+    if(courierData) {
+      defaultValue.shippingService = _.find(this.state.relatedData.shippingServices, ['shippingService', courierData.shippingService]);
+      defaultValue.registrationInfo = courierData.registrationInfo;
+      defaultValue.isAlreadyMember = courierData.isAlreadyMember;
+      defaultValue.memberId = courierData.memberId;
+    }
+    this.setState({formShippingSetting: defaultValue});
+  }
+
   warehouseChannelsModal() {
     let temp = [];
     const listWarehouseChannels = this.state.oneData.warehouseChannels;
@@ -769,7 +1024,7 @@ export default class Tenant extends Component {
                 }
                 this.tenantRest.updateWarehouses(params.tenantId, params.warehouseId, params.active).subscribe(() => {
                   this.loadOneData(data.id);
-                  this.loadData()
+                  this.loadData().subscribe()
                   if (listWarehouseChannels[i].isAlreadyMember) {
                     MySwal.fire({
                       type: "success",
@@ -893,7 +1148,7 @@ export default class Tenant extends Component {
 
                       table.pagination.skipSize = 0;
                       this.setState({ isCod: "", isReal: this.state.isReal, table }, () => {
-                        this.loadData();
+                        this.loadData().subscribe();
                       });
                     }}
                   >
@@ -910,7 +1165,7 @@ export default class Tenant extends Component {
 
                       table.pagination.skipSize = 0;
                       this.setState({ isCod: true, isReal: this.state.isReal, table }, () => {
-                        this.loadData();
+                        this.loadData().subscribe();
                       });
                     }}
                   >
@@ -944,7 +1199,7 @@ export default class Tenant extends Component {
                         onChange={this.handleInputChange}
                         onKeyPress={event => {
                           if (event.key === "Enter") {
-                            this.loadData();
+                            this.loadData().subscribe();
                           }
                         }}
                         style={{
@@ -954,7 +1209,7 @@ export default class Tenant extends Component {
                       <Button
                         className="default"
                         color="primary"
-                        onClick={() => this.loadData()}
+                        onClick={() => this.loadData().subscribe()}
                         style={{
                           borderRadius: "0px 6px 6px 0px"
                         }}
@@ -985,7 +1240,7 @@ export default class Tenant extends Component {
                                 isReal: isReal
                               },
                               () => {
-                                this.loadData();
+                                this.loadData().subscribe();
                               }
                             );
                           }}
@@ -1159,8 +1414,8 @@ export default class Tenant extends Component {
                             table
                           },
                           () => {
-                            this.loadData();
-                            this.loadTenantsSummmary();
+                            this.loadData().subscribe();
+                            this.loadTenantsSummmary().subscribe();
                           }
                         );
                         this.setState({ collapse: false });
@@ -1222,7 +1477,7 @@ export default class Tenant extends Component {
                     newState.pagination.pageSize = state.pageSize;
                     newState.pagination.skipSize = state.pageSize * state.page;
                     this.setState({ newState });
-                    this.loadData();
+                    this.loadData().subscribe();
                   }}
                 />
                 <Paginator
@@ -1299,10 +1554,10 @@ export default class Tenant extends Component {
         {this.state.shippingSettingsModal && (
           <div
             style={{
-              maxHeight: 580
+              maxHeight: 580,
             }}
           >
-            <Modal isOpen={this.state.shippingSettingsModal} toggle={this.toggleShippingSettingsModal}>
+            <Modal isOpen={this.state.shippingSettingsModal} toggle={this.toggleShippingSettingsModal} className="modal-large" contentClassName="content-large">
               <ModalHeader toggle={this.toggleShippingSettingsModal}>Detail User</ModalHeader>
               <ModalBody
                 style={{
@@ -1316,7 +1571,10 @@ export default class Tenant extends Component {
                       <tr>
                         <th scope="col">Kurir</th>
                         <th scope="col">Member ID</th>
-                        <th scope="col">COD</th>
+                        <th scope="col">Status Member</th>
+                        <th scope="col">Layanan</th>
+                        <th scope="col" width="250px">Info Registrasi</th>
+                        <th width="200px"></th>
                       </tr>
                     </thead>
                     <tbody>
