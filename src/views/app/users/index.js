@@ -156,7 +156,7 @@ export default class Users extends Component {
 
     const params = {
       keyword: this.state.search || null,
-      "options.take": this.state.table.pagination.pageSize,
+      // "options.take": this.state.table.pagination.pageSize,
       "options.skip": this.state.table.pagination.skipSize,
       "options.includeTotalCount": true
     };
@@ -223,31 +223,42 @@ export default class Users extends Component {
   }
 
   markActive(id, active) {
-    this.setState({
-      loading: true
+    MySwal.fire({
+      type: 'info',
+      title:  `${active ? 'Aktifkan' : 'Nonaktifkan'} user?`,
+      showCancelButton: true,
+      allowOutsideClick: false,
+      showConfirmButton: true
+    }).then((res) => {
+      if (!res.dismiss) {
+        this.setState({
+          loading: true
+        });
+        this.userRestService.markActive(id, active).pipe(
+          catchError((error) => {
+            this.setState({
+              loading: false
+            });
+            MySwal.fire({
+              type: "error",
+              title: active ? "Gagal Mengaktifkan" : "Gagal Menonaktifkan",
+              toast: true,
+              position: "top-end",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: "swal-height"
+            });
+            return throwError(error);
+          }), tap(() => {
+            this.loadData().subscribe();
+            this.setState({
+              loading: false
+            });
+          })
+        ).subscribe()
+
+     }
     });
-    this.userRestService.markActive(id, active).pipe(
-      catchError((error) => {
-        this.setState({
-          loading: false
-        });
-        MySwal.fire({
-          type: "error",
-          title: active ? "Gagal Mengaktifkan" : "Gagal Menonaktifkan",
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: "swal-height"
-        });
-        return throwError(error);
-      }), tap(() => {
-        this.loadData().subscribe();
-        this.setState({
-          loading: false
-        });
-      })
-    ).subscribe()
   }
 
 
@@ -763,7 +774,7 @@ export default class Users extends Component {
                           <td colSpan={2}>Roles</td>
                           <td>:</td>
                           <td colSpan={6}>
-                            <DataTable value={this.state.roles} className="user-table"
+                            <DataTable value={this.state.roles} className="user-table" scrollable={true} scrollHeight="350px"
                               selection={this.state.selectedRoles} onSelectionChange={e => this.setState({ selectedRoles: e.value })}>
                               <Column selectionMode="multiple" style={{ width: '3em' }} />
                               <Column field="name" header="Nama" />

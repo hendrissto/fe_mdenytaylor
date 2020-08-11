@@ -235,10 +235,10 @@ export default class UserRoles extends Component {
           .subscribe(response => {
               if (response.accessPermissions) {
                 const ignorePermissions = [
-                  'cod.cod_list.view',
-                  'cod.cod_list.create',
-                  'cod.cod_list.edit',
-                  'cod.cod_list.delete',
+                  // 'cod.cod_list.view',
+                  // 'cod.cod_list.create',
+                  // 'cod.cod_list.edit',
+                  // 'cod.cod_list.delete',
 
                   // transfer_credit
                   'cod.transfer_credit.update',
