@@ -230,11 +230,11 @@ export default class Notifications extends Component {
             <Card>
               <CardBody>
               <div className="col-md-12 text-right mb-3">
-                <span className="router-link pull-right ml-3 p0" onClick={() => this.loadData()}>
-                 Refresh
-                </span>
                 <span className="router-link pull-right p0" onClick={() => this.markAllAsRead(this.state.table.data)}>
                  Tandai semua sudah dibaca
+                </span>
+                <span className="router-link pull-right ml-3 p0" onClick={() => this.loadData()}>
+                 Refresh
                 </span>
               </div>
                 {this.state.table.data.map((data, index) => {
@@ -291,11 +291,11 @@ export default class Notifications extends Component {
               id="notificationDropdown"
             >
               <div className="col-md-12 text-right mb-3">
-                <span className="router-link pull-right ml-3 p0" onClick={() => this.loadData()}>
-                 Refresh
-                </span>
                 <span className="router-link pull-right p0" onClick={() => this.markAllAsRead(this.state.table.data)}>
                  Tandai semua sudah dibaca
+                </span>
+                <span className="router-link pull-right ml-3 p0" onClick={() => this.loadData()}>
+                 Refresh
                 </span>
               </div>
               <div className="container-content">
