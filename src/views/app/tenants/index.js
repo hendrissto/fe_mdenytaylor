@@ -851,7 +851,7 @@ export default class Tenant extends Component {
             </label>
             }
           </td>
-          <td>
+          {/* <td>
             { this.state.formShippingSetting && this.state.formShippingSetting.courierId === listShippingSettings[i].id &&
               <Input
                 type="textarea"
@@ -872,7 +872,7 @@ export default class Tenant extends Component {
               {_.get(courier, 'registrationInfo') || '-'}
             </label>
             }
-          </td>
+          </td> */}
           <td>
             {this.renderButtonShippingSettings(data, courier, listShippingSettings[i].id)}
           </td>
@@ -1573,7 +1573,7 @@ export default class Tenant extends Component {
                         <th scope="col">Member ID</th>
                         <th scope="col">Status Member</th>
                         <th scope="col">Layanan</th>
-                        <th scope="col" width="250px">Info Registrasi</th>
+                        {/* <th scope="col" width="250px">Info Registrasi</th> */}
                         <th width="200px"></th>
                       </tr>
                     </thead>
