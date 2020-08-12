@@ -374,17 +374,21 @@ export default class Tenant extends Component {
         show: tableFilter.companyInfo,
         Cell: props =>  (
           <div>
-            <span style={{
-                display: 'flex',
-                flexDirection: 'row',
-                }}>
-              <p style={{
-                color: 'blue',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                marginRight: '3px'
-                }}>{props.value}</p><span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
-            </span>
+            <span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
+            <p id={`UncontrolledTooltipExample${props.index}`} style={{
+              color: 'blue',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              marginRight: '3px'
+            }}>
+              {props.value || '-'}</p>
+            {props.value &&
+              <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
+                maxWidth: 1000,
+              }}>
+                <div style={{ width: '200px', wordBreak: "break-word", textAlign: 'left' }}>{props.value || '-'}</div>
+              </UncontrolledTooltip>
+            }
           </div>
         )
       },
@@ -570,12 +574,12 @@ export default class Tenant extends Component {
         width: 200,
         Cell: props =>
           <div>
-            <p id={`UncontrolledTooltipExample${props.index}`} style={{
+            <p id={`UncontrolledTooltipExample${props.index}Desc`} style={{
               color: 'blue',
               cursor: 'pointer',
             }}>{props.value || '-'}</p>
             {props.value &&
-              <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
+              <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}Desc`} style={{
                 maxWidth: 1000,
               }}>
                 <div style={{ width: '200px', wordBreak: "break-word", textAlign: 'left' }}>{props.value || '-'}</div>

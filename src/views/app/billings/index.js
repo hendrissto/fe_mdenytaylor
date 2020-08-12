@@ -358,12 +358,13 @@ export default class Billing extends Component {
                 display: 'flex',
                 flexDirection: 'row',
                 }}>
+              <span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
               <p style={{
                 color: 'blue',
                 textDecoration: 'underline',
                 cursor: 'pointer',
                 marginRight: '3px'
-                }}>{props.value}</p><span>{props.original.clientAppId !== 'clodeo-main-web' ? '[LITE]' : ''}</span>
+                }}>{props.value}</p>
             </span>
             <UncontrolledTooltip placement="right" target={`UncontrolledTooltipExample${props.index}`} style={{
               maxWidth: 1000,
