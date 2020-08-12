@@ -237,29 +237,35 @@ export default class Notifications extends Component {
                  Refresh
                 </span>
               </div>
-                {this.state.table.data.map((data, index) => {
-                 return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" } style={{width: '100%'}}>
-                  {/* <a href="/app/pages/details">
-                    <img
-                      src={img}
-                      alt={data.title}
-                      className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
-                    />
-                  </a> */}
-                  <div className="pl-3 pr-2 col-12">
-                    {this.props.type !== 'summary' &&
-                    <div className="row d-flex justify-content-between align-items-center mx-0">
-                      <span className="row pl-3">
-                        <h5 className="font-weight-bold mb-1 mr-1">{data.title}</h5>{!data.isReadByUser && <span className="router-link pull-right ml2 p0" onClick={() => this.markOneAsRead(data, index)}>Tandai sudah dibaca</span>}
-                      </span>
-                      <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                  {this.state.table.data.map((data, index) => {
+                    return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" } style={{width: '100%'}}>
+                      {/* <a href="/app/pages/details">
+                        <img
+                          src={img}
+                          alt={data.title}
+                          className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
+                        />
+                      </a> */}
+                      <div className="pl-3 pr-2 col-12">
+                        {this.props.type !== 'summary' &&
+                        <div className="row d-flex justify-content-between align-items-center mx-0">
+                          <span className="row pl-3">
+                            <h5 className="font-weight-bold mb-1 mr-1">{data.title}</h5>{!data.isReadByUser && <span className="router-link pull-right ml2 p0" onClick={() => this.markOneAsRead(data, index)}>Tandai sudah dibaca</span>}
+                          </span>
+                          <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                        </div>
+                        }
+                        <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
+                      </div>
                     </div>
-                    }
-                    <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
+                  // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
+                  })}
+
+                { (!this.state.table.loading && !this.state.table.data.length) &&
+                  <div className="col-md-12 text-center mt-2">
+                      Belum ada Data
                   </div>
-                </div>
-               // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
-              })}
+                }
               <Paginator
                 first={this.state.table.pagination.skipSize}
                 rows={this.state.table.pagination.pageSize}
@@ -275,6 +281,7 @@ export default class Notifications extends Component {
         </Row>
       </Fragment>
       }
+      {this.state.table.loading && this.props.type !== 'summary' && <Loading />}
 
       { this.props.type === 'summary' &&
         <UncontrolledDropdown className="dropdown-menu-right">
@@ -298,32 +305,46 @@ export default class Notifications extends Component {
                  Refresh
                 </span>
               </div>
+
+
               <div className="container-content">
-                <PerfectScrollbar
-                  style={{width: '100%', paddingTop:'10px'}}
-                  options={{ suppressScrollX: true, wheelPropagation: false }}
-                >
-                  {this.state.table.data.map((data, index) => {
-                    return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" } style={{ width: "100%" }}>
-                      {/* <a href="/app/pages/details">
-                        <img
-                          src={img}
-                          alt={data.title}
-                          className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
-                        />
-                      </a> */}
-                      <div className="pl-3 pr-2 col-12">
-                        <div className="row d-flex justify-content-between align-items-center mx-0">
-                          <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{data.title}</p>
-                          <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                { this.state.table.loading &&
+                  <div class="loader-cstm"></div>
+                }
+
+                { !this.state.table.loading &&
+                  <PerfectScrollbar
+                    style={{width: '100%', paddingTop:'10px'}}
+                    options={{ suppressScrollX: true, wheelPropagation: false }}
+                  >
+                    {this.state.table.data.map((data, index) => {
+                      return <div key={index} index={index} className={!data.isReadByUser ? "unread-message d-flex flex-row mb-3 pb-3 border-bottom" : "d-flex flex-row mb-3 pb-3 border-bottom" } style={{ width: "100%" }}>
+                        {/* <a href="/app/pages/details">
+                          <img
+                            src={img}
+                            alt={data.title}
+                            className="img-thumbnail list-thumbnail xsmall border-0 rounded-circle"
+                          />
+                        </a> */}
+                        <div className="pl-3 pr-2 col-12">
+                          <div className="row d-flex justify-content-between align-items-center mx-0">
+                            <p className="font-weight-bold mb-1" style={{fontSize: "20px!important"}}>{data.title}</p>
+                            <p className="row mr-2 text-muted mb-1 text-small">{data.notificationDateTime}</p>
+                          </div>
+                          <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
                         </div>
-                        <p className="row pl-3 text-muted mb-0 text-small">{data.description}</p>
                       </div>
-                    </div>
-                    // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
-                  })}
-                </PerfectScrollbar>
+                      // return <NotificationItem key={index} {...data}  isSummary={true} index={index}/>;
+                    })}
+                  </PerfectScrollbar>
+                }
               </div>
+                { (!this.state.table.loading && !this.state.table.data.length) &&
+                  <div className="col-md-12 text-center mt-2">
+                      Belum ada Data
+                  </div>
+                }
+
               <div className="col-md-12 text-center mt-2">
                 <NavLink to="/app/notifications">
                   Lihat semua
@@ -332,7 +353,6 @@ export default class Notifications extends Component {
             </DropdownMenu>
         </UncontrolledDropdown>
       }
-      {this.state.table.loading && <Loading />}
     </div>
     )
   }
