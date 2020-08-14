@@ -22,7 +22,7 @@ class SalesCODCount extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.sales-cod-count' icon="iconsminds-basket-coins" value={this.state.value} className="mb-4" />
+        <IconCard title='dashboards.cards.sales-cod-count' icon="iconsminds-basket-coins" value={this.state.value} className="mb-4" isLoading={this.props.isLoading}/>
       </div>
     )
   }

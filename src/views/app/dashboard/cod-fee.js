@@ -22,7 +22,7 @@ class CODFee extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.cod-fee' icon="iconsminds-handshake" value={'Rp. ' + this.state.value.toLocaleString('id-ID')} className="mb-4" />
+        <IconCard title='dashboards.cards.cod-fee' icon="iconsminds-handshake" value={'Rp. ' + this.state.value.toLocaleString('id-ID')} className="mb-4" isLoading={this.props.isLoading}/>
       </div>
     )
   }

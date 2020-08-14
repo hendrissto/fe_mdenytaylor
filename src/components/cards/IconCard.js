@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardBody, Row, Col } from "reactstrap";
 import IntlMessages from "../../helpers/IntlMessages";
 
-const IconCard = ({ className = "mb-4", icon, title, value }) => {
+const IconCard = ({ className = "mb-4", icon, title, value, isLoading }) => {
   return (
     <div className={`icon-row-item ${className}`}>
       <Card
@@ -37,7 +37,16 @@ const IconCard = ({ className = "mb-4", icon, title, value }) => {
               </h6>
             </Col>
             <Col>
-              <h2 className="text-right">{value}</h2>
+              {isLoading && (
+                <>
+                  <div class="loader-cstm" style={{ width: "80px", height: "80px", border: "6px solid #f3f3f3", borderTop: "6px solid #3498db"}}></div>
+                </>
+              )}
+              {!isLoading && (
+                <>
+                  <h2 className="text-right">{value}</h2>
+                </>
+              )}
             </Col>
           </Row>
         </CardBody>
