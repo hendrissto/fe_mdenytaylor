@@ -1,22 +1,21 @@
+import moment from "moment";
 import React, { Component, Fragment } from "react";
 import { Row } from "reactstrap";
 import { forkJoin, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import BalanceCredit from "./credit-balance";
-import CreditIssued from "./credit-issued";
-import SalesCODCount from "./sales-cod-count";
-import SalesCODTotalAmount from "./sales-cod-total-amount";
-import CODFee from "./cod-fee";
-import FundReimbursement from "./fund-reimbursement";
-import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
-import Breadcrumb from "../../../containers/navs/Breadcrumb";
-import DashboardRestService from "../../../api/dashboardRestService";
-
-import Loading from "../../../containers/pages/Spinner";
-import { MoneyFormat } from "../../../services/Format/MoneyFormat";
-import moment from "moment";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import DashboardRestService from "../../../api/dashboardRestService";
+import { Colxx, Separator } from "../../../components/common/CustomBootstrap";
+import Breadcrumb from "../../../containers/navs/Breadcrumb";
+import { MoneyFormat } from "../../../services/Format/MoneyFormat";
+import CODFee from "./cod-fee";
+import BalanceCredit from "./credit-balance";
+import CreditIssued from "./credit-issued";
+import FundReimbursement from "./fund-reimbursement";
+import SalesCODCount from "./sales-cod-count";
+import SalesCODTotalAmount from "./sales-cod-total-amount";
+
 const MySwal = withReactContent(Swal);
 
 export default class Dashboard extends Component {
@@ -96,7 +95,6 @@ export default class Dashboard extends Component {
   render() {
     return (
       <Fragment>
-        {this.state.loading && <Loading />}
           <div>
             <Row>
               <Colxx xxs="12">
@@ -109,14 +107,14 @@ export default class Dashboard extends Component {
             </Row>
             <Row>
               <Colxx lg="12" xl="6">
-                <CreditIssued value={this.state.data.summary} />
-                <BalanceCredit value={this.state.data.summary} />
-                <SalesCODCount value={this.state.data.salesCODCount} />
+                <CreditIssued value={this.state.data.summary} isLoading={this.state.loading}/>
+                <BalanceCredit value={this.state.data.summary} isLoading={this.state.loading}/>
+                <SalesCODCount value={this.state.data.salesCODCount} isLoading={this.state.loading}/>
               </Colxx>
               <Colxx lg="12" xl="6">
-                <CODFee value={this.state.data.summary} />
-                <FundReimbursement value={this.state.data.summary} />
-                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} />
+                <CODFee value={this.state.data.summary} isLoading={this.state.loading}/>
+                <FundReimbursement value={this.state.data.summary} isLoading={this.state.loading}/>
+                <SalesCODTotalAmount value={this.state.data.salesCODTotalAmount} isLoading={this.state.loading}/>
 
               </Colxx>
             </Row>

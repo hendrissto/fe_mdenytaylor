@@ -22,7 +22,7 @@ class CreditBalance extends Component {
   render() {
     return (
       <div>
-        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag"  value={'Rp. ' + this.state.value.toLocaleString('id-ID')} className="mb-4" />
+        <IconCard title='dashboards.cards.credit-balance' icon="iconsminds-money-bag"  value={'Rp. ' + this.state.value.toLocaleString('id-ID')} className="mb-4" isLoading={this.props.isLoading}/>
       </div>
     )
   }
