@@ -413,7 +413,7 @@ class WalletTransactions extends Component {
     this.setState({table});
 
     const params = {
-      keyword: this.state.search || null,
+      // keyword: this.state.search || null,
       "options.take": this.state.tableDetail.pagination.pageSize,
       "options.skip": this.state.tableDetail.pagination.skipSize,
       "options.includeTotalCount": true
