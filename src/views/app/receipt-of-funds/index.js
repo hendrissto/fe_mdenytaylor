@@ -765,6 +765,8 @@ class ReceiptOfFunds extends Component {
       data.lines[j].discountShippingChargePercentage *= 100;
       Math.round(data.lines[j].codFeeRp);
       Math.round(data.lines[j].totAmountCodFee);
+      data.lines[j].dateTime = moment(this.excelDateToJSDate(data.lines[j].dateTime)).format('DD/MM/YYYY');
+      data.lines[j].createdDate = moment(this.excelDateToJSDate(data.lines[j].createdDate)).format('DD/MM/YYYY');
       if(data.lines[j].nilaiAsuransi) {
         data.lines[j].insurance = data.lines[j].nilaiAsuransi;
       }
@@ -1039,7 +1041,8 @@ class ReceiptOfFunds extends Component {
         discountShippingChargePercentage: array[i].discountShippingChargePercentage * 100 || 0,
         totalShippingCharge: Math.round(array[i].totalShippingCharge) || 0,
         insuranceAmount: (Math.round(array[i].insurance) || Math.round(array[i].nilaiAsuransi)) || 0,
-        lastUpdateDate: this.checkDate(array[i].dateTime),
+        lastUpdateDate: this.checkDate(this.excelDateToJSDate(array[i].dateTime)),
+        createDate: this.checkDate(this.excelDateToJSDate(array[i].createdDate)),
         taxInclusive: this.checkTaxInclusive(array[i].taxInclusive),
         arBalanceDue: Math.round(array[i].arBalanceDue) || 0,
         arAmountPaid: Math.round(array[i].arAmountPaid) || 0,
@@ -1054,6 +1057,28 @@ class ReceiptOfFunds extends Component {
     };
     this.setState({ dataExcel: data, selectedCourier: [] });
   }
+
+  excelDateToJSDate(serial) {
+    // if (!dateTime) {
+    //   return new Date(Math.round((serial - 25569)*86400*1000));
+    // }
+    var utc_days  = Math.floor(serial - 25569);
+    var utc_value = utc_days * 86400;
+    var date_info = new Date(utc_value * 1000);
+
+    var fractional_day = serial - Math.floor(serial) + 0.0000001;
+
+    var total_seconds = Math.floor(86400 * fractional_day);
+
+    var seconds = total_seconds % 60;
+
+    total_seconds -= seconds;
+
+    var hours = Math.floor(total_seconds / (60 * 60));
+    var minutes = Math.floor(total_seconds / 60) % 60;
+
+   return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+ }
 
   checkTaxInclusive(taxInclusive) {
     if(taxInclusive) {
@@ -1442,14 +1467,14 @@ class ReceiptOfFunds extends Component {
   colTaxInclusive(rowData, column) {
     if (rowData.taxInclusive) {
       if(typeof rowData.taxInclusive === 'number') {
-        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+        return rowData.taxInclusive ? 'Yes' : 'No';
       } else if (typeof rowData.taxInclusive === 'boolean') {
-        return rowData.taxInclusive ? 'TRUE' : 'FALSE';
+        return rowData.taxInclusive ? 'Yes' : 'No';
       } else {
-        return rowData.taxInclusive.toLowerCase() === 'true' ? 'TRUE' : 'FALSE';
+        return rowData.taxInclusive.toLowerCase() === 'true' ? 'Yes' : 'No';
       }
     } else {
-      return 'FALSE';
+      return 'No';
     }
   }
 
@@ -1872,8 +1897,9 @@ class ReceiptOfFunds extends Component {
                   <Column style={{ width: '250px' }} field="arBalanceDue" header="AR Balance Due" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totalShippingCharge" header="Total Ongkir" body={this.moneyFormat.currencyFormat} />
                   <Column style={{ width: '250px' }} field="totAmountCodFee" header="Total Diterima" body={this.moneyFormat.currencyFormat} />
-                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date"  />
+                  <Column style={{ width: '250px' }} field="dateTime" header="Last Update Date" />
                   <Column style={{ width: '250px' }} field="taxInclusive" header="Tax Inclusive" body={this.colTaxInclusive}   />
+                  <Column style={{ width: '250px' }} field="createdDate" header="Create Date" />
                 </DataTable>
               </ModalBody>
 
