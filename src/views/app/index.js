@@ -24,6 +24,7 @@ import WithdrawOfTenantFunds from './withdraw-of-tenant-funds'
 // import ui from "../gogo/ui";
 // import menu from "../gogo/menu";
 import ListTransactions from "./list-transactions";
+import VerificationRequest from "./verification-request";
 import TenantsBank from "./tenants-bank";
 import WalletTransactions from "./wallet-transactions/wallet-transactions";
 import DetailWalletTransactions from "./wallet-transactions/detail-page";
@@ -66,6 +67,7 @@ class App extends Component {
           <GuardedRoute path={`${match.url}/withdraw-of-tenant-funds`} component={WithdrawOfTenantFunds} meta={{permissions: ['wallet.withdrawal_history.view']}} />
           <GuardedRoute path={`${match.url}/receipt-of-funds`} component={ReceiptOfFunds} meta={{permissions: ['cod.transfer_credit.view']}} />
           <GuardedRoute path={`${match.url}/list-transactions`} component={ListTransactions} meta={{permissions: ['tenant.general.view']}} />
+          <GuardedRoute path={`${match.url}/verification-request`} component={VerificationRequest} meta={{permissions: ['tenant.general.view']}} />
           <GuardedRoute path={`${match.url}/wallet-transactions`} component={WalletTransactions} meta={{permissions: ['wallet.tenant_wallet.view']}} />
           <GuardedRoute path={`${match.url}/detail-transactions/:walletId`} component={DetailWalletTransactions} meta={{permissions: ['wallet.tenant_wallet.view']}} />
           <GuardedRoute path={`${match.url}/users`} component={Users} meta={{permissions: ['admin.user_admin.view']}} />

@@ -137,6 +137,12 @@ const data = [
         label: "menu.list-transactions",
         to: "/app/list-transactions",
       },
+      {
+        id: "verification-request",
+        icon: "iconsminds-receipt-4",
+        label: "menu.verification-request",
+        to: "/app/verification-request",
+      },
     ]
   },
   {

@@ -5,8 +5,15 @@ class ModalComponent extends Component {
   render() {
     return (
       <Fragment>
-        <Modal isOpen={true} size="lg">
-          <ModalHeader>{this.props.header}</ModalHeader>
+        <Modal isOpen={true} size={this.props.modalSize || 'lg'}>
+          {this.props.toggle &&
+          (
+            <ModalHeader toggle={() => this.props.close()}>{this.props.header}</ModalHeader>
+          )}
+          {!this.props.toggle &&
+          (
+            <ModalHeader>{this.props.header}</ModalHeader>
+          )}
           <ModalBody
             style={{
               maxHeight: 400,
