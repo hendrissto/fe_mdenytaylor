@@ -111,7 +111,7 @@ export default class VerificationRequest extends Component {
 
         this.VerificationRequestRest.getDataVerificationRequest({ params }).subscribe(response => {
             const table = { ...this.state.table };
-            table.data = response.datas;
+            table.data = response.data;
             table.pagination.totalPages = Math.ceil(response.total / response.take);
             table.loading = false;
             this.setState({ table });
