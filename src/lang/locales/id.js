@@ -77,6 +77,7 @@ module.exports = {
     "menu.tenants-bank": "Tenants Bank",
     "menu.wallet-transactions": "Tenants Wallet",
     "menu.list-transactions": "List Transaksi",
+    "menu.verification-request": "Verification Request",
     "menu.users": "Users",
     "menu.roles": "Roles",
     "menu.permissions": "List Permissions",

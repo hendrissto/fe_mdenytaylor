@@ -73,6 +73,7 @@ module.exports = {
   "menu.pages": "Pages",
   "menu.billing": "Subscription",
   "menu.list-transactions": "List Transactions",
+  "menu.verification-request": "Verification Request",
   "menu.users": "Users",
   "menu.roles": "Roles",
   "menu.permissions": "List Permissions",

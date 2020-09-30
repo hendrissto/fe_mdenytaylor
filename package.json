@@ -36,6 +36,7 @@
     "react-dropzone-component": "3.2.0",
     "react-excel-renderer": "1.1.0",
     "react-google-maps": "9.4.5",
+    "react-inner-image-zoom": "^1.1.1",
     "react-intl": "2.4.0",
     "react-loader-spinner": "3.1.4",
     "react-modal": "3.10.1",
