@@ -48,7 +48,7 @@ export default class VerificationRequest extends Component {
             table: {
                 loading: true,
                 data: [],
-                sort: "RegistrationDate%20desc",
+                sort: [{"field": "registrationDate", "dir" : "desc"}],
                 pagination: {
                     currentPage: 0,
                     totalPages: 0,
@@ -103,13 +103,13 @@ export default class VerificationRequest extends Component {
 
         const params = {
             "keyword": this.state.search || null,
-            "options.sort": this.state.table.sort,
-            "options.take": this.state.table.pagination.pageSize,
-            "options.skip": this.state.table.pagination.skipSize,
-            "options.includeTotalCount": true
+            "sort": this.state.table.sort,
+            "take": this.state.table.pagination.pageSize,
+            "skip": this.state.table.pagination.skipSize,
+            "includeTotalCount": true
         };
 
-        this.VerificationRequestRest.getDataVerificationRequest({ params }).subscribe(response => {
+        this.VerificationRequestRest.getDataVerificationRequest(params).subscribe(response => {
             const table = { ...this.state.table };
             table.data = response.data;
             table.pagination.totalPages = Math.ceil(response.total / response.take);
