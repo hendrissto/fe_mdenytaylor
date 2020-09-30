@@ -9,7 +9,7 @@ export default class VerificationRequestRestService extends React.Component {
     }
 
     getDataVerificationRequest(qParams) {
-        return this.request.get('/admin/shipping-integration/requests', qParams);
+        return this.request.post('/admin/shipping-integration/requests/q', qParams);
     }
 
     verificationRequest(id, payload) {
