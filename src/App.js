@@ -7,20 +7,15 @@ import {
   Redirect,
 } from "react-router-dom";
 import { IntlProvider } from "react-intl";
-import "./helpers/Firebase";
-import AppLocale from "./lang";
-import ColorSwitcher from "./components/common/ColorSwitcher";
-import NotificationContainer from "./components/common/react-notifications/NotificationContainer";
-import { isMultiColorActive } from "./constants/defaultValues";
-import main from "./views";
-import app from "./views/app";
-import user from "./views/user";
-import error from "./views/error";
-import BlankPage from "./views/app/blank-page";
-import { getDirection } from "./helpers/Utils";
-import "primereact/resources/themes/nova-light/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
+import AppLocale from "./assets/lang";
+// import main from "./components";
+import app from "./components/app";
+import main from "./components";
+import LoginComponent from "./components/login/login";
+import UserComponent from "./components/app/user/user";
+import { ErrorComponent } from "./components/error-component";
+
+// import BlankPage from "./components/app/blank-page";
 
 const AuthRoute = ({ component: Component, authUser, ...rest }) => (
   <Route
@@ -31,7 +26,7 @@ const AuthRoute = ({ component: Component, authUser, ...rest }) => (
       ) : (
         <Redirect
           to={{
-            pathname: "/user/login",
+            to: "/login",
             state: { from: props.location }
           }}
         />
@@ -41,17 +36,6 @@ const AuthRoute = ({ component: Component, authUser, ...rest }) => (
 );
 
 class App extends Component {
-  componentDidMount() {
-
-    // const direction = getDirection();
-    // if (direction.isRtl) {
-    //   document.body.classList.add("rtl");
-    //   document.body.classList.remove("ltr");
-    // } else {
-    //   document.body.classList.add("ltr");
-    //   document.body.classList.remove("rtl");
-    // }
-  }
 
   render() {
     const { locale, loginUser } = this.props;
@@ -64,15 +48,14 @@ class App extends Component {
           messages={currentAppLocale.messages}
         >
           <React.Fragment>
-            <NotificationContainer />
-            {isMultiColorActive && <ColorSwitcher />}
             <Router>
               <Switch>
-                <AuthRoute path="/app" authUser={loginUser} component={app} />
-                <Route path="/user" component={user} />
-                <Route path="/error" exact component={error} />
+                {/* <AuthRoute path="/" authUser={loginUser} component={app} /> */}
+                <Route path="/login" component={LoginComponent} />
+                <Route path="/user" exact component={UserComponent} />
+                <Route path="/error" exact component={ErrorComponent} />
                 <Route path="/" exact component={main} />
-                <Route path={"/blank-page"} component={BlankPage} />\
+                {/* <Route path={"/blank-page"} component={BlankPage} />\ */}
                 <Redirect to="/error" />
               </Switch>
             </Router>
@@ -84,7 +67,9 @@ class App extends Component {
 }
 
 const mapStateToProps = ({ authUser, settings }) => {
-  const { user: loginUser } = authUser;
+  const { user } = authUser;
+  const loginUser = user;
+  console.log('mapStateToProps -> loginUser', loginUser)
   const { locale } = settings;
   return { loginUser, locale };
 };

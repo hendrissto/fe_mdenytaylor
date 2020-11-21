@@ -1,5 +1,5 @@
-# Clodeo Admin COD Web
-Description of clodeo admin cod
+# React Admin
+Description of admin
 
 ### Requirement
 - Node Version : 10.7.4
@@ -7,8 +7,8 @@ Description of clodeo admin cod
 
 ### Installation
 ```sh
-$ git clone https://gitlab.com/clodeo/clodeo-admin-cod.git
-$ cd clodeo-admin-cod
+$ git clone https://github.com/hendrissto/fe_mdenytaylor.git
+$ cd fe_mdenytaylor
 $ npm install
 $ yarn install
 ```
@@ -29,20 +29,3 @@ $ npm run build-prod (build mode production)
 ```sh
 $ -
 ```
-
-## Libraries:
-#### Admin Template
-| Name| Link |
-| ------ | ------ |
-| Gogo-react | [https://gogo-react-docs.coloredstrategies.com/docs/gettingstarted/introduction](https://gogo-react-docs.coloredstrategies.com/docs/gettingstarted/introduction) |
-
-#### Ui Template
-| Plugin | Link |
-| ------ | ------ |
-| -| - |
-
-#### Ui Components
-| Plugin | Link |
-| ------ | ------ |
-| -| - |
- 

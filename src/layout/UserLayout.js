@@ -11,7 +11,6 @@ class UserLayout extends Component {
   render() {
     return (
       <Fragment>
-        <div className="fixed-background" />
         <main>
           <div className="container">{this.props.children}</div>
         </main>
